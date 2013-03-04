@@ -14,11 +14,13 @@
 #import "RecentContactsViewController.h"
 #import "NewUserDetailsViewController.h"
 #import "NotificationViewController.h"
+#import "MFSideMenu.h"
 
 @interface NewSidebarViewController : UITableViewController <UITableViewDataSource, UITableViewDelegate>{
     NSMutableArray *_sections;
     NSMutableArray *_sectionItems;
 }
+@property(nonatomic, strong) MFSideMenu* sideMenu;
 @property(nonatomic, weak) id delegate;
 @property(nonatomic, strong) MealListViewController* mealListViewController;
 @property(nonatomic, readonly) MyMealsViewController* myMealsViewController;

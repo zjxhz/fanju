@@ -165,6 +165,7 @@
         UIGraphicsEndImageContext();
         if ([self mealInfo] == currentMealInfo) { //same object means current cell has not been reused yet and still visible
             _backgroundView.image = [self mealInfo].fullPhoto;
+            [self setNeedsDisplay];
         }
     });
 }

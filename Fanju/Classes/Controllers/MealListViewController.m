@@ -14,22 +14,18 @@
 #import "NetworkHandler.h"
 #import "Const.h"
 #import "AppDelegate.h"
-#import "WEPopoverController.h"
-#import "WEPopoverContentViewController.h"
 #import "NSDictionary+ParseHelper.h"
 #import "MealDetailViewController.h"
 #import "MealListDataSource.h"
-#import "UIViewController+MFSideMenu.h"
 #import "Authentication.h"
-#import "ActivationViewController.h"
 #import "UserRegistrationViewController.h"
 #import "SVProgressHUD.h"
 #import "OverlayViewController.h"
 #import "ImageDownloader.h"
+#import "MFSideMenu.h"
+#import "UIViewController+MFSideMenu.h"
 
-@interface MealListViewController() <WEPopoverControllerDelegate>
-
-@property (nonatomic, strong) WEPopoverController *popover;
+@interface MealListViewController()
 @property (nonatomic, strong) IBOutlet UIView* loginView;
 @property (nonatomic, strong) IBOutlet UIButton* loginButton;
 @property (nonatomic, strong) IBOutlet UIButton* registerButton;
@@ -39,8 +35,6 @@
 @end
 
 @implementation MealListViewController
-
-@synthesize popover = _popover;
 
 - (id) init{
     self = [super initWithStyle:UITableViewStylePlain];
@@ -129,10 +123,10 @@
     imageDownloadsInProgress = [NSMutableDictionary dictionary];
     self.autoresizesForKeyboard = YES;
     self.variableHeightRows = YES;
-    [self requestDataFromServer];
     self.loginWithWeibo.userInteractionEnabled = YES;
     UITapGestureRecognizer *tapGestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(loginWithWeibo:)];
     [self.loginWithWeibo addGestureRecognizer:tapGestureRecognizer];
+    [self requestDataFromServer];
     
 }
 
@@ -176,20 +170,6 @@
     }
 }
 
-
-#pragma mark -
-#pragma mark WEPopoverControllerDelegate implementation
-
-- (void)popoverControllerDidDismissPopover:(WEPopoverController *)thePopoverController {
-	//Safe to release the popover here
-	self.popover = nil;
-}
-
-- (BOOL)popoverControllerShouldDismissPopover:(WEPopoverController *)thePopoverController {
-	//The popover is automatically dismissed if you click outside it, unless you return NO here
-	return YES;
-}
-
 -(void)reload{
     [self requestDataFromServer];
 }
@@ -229,16 +209,6 @@
 -(IBAction)register:(id)sender{
     UIViewController* controller = [[UserRegistrationViewController alloc] initWithStyle:UITableViewStyleGrouped];
     [self.navigationController pushViewController:controller animated:YES];
-}
--(IBAction)loginWithEmail:(id)sender{
-    ActivationViewController* avc = [[ActivationViewController alloc] init];
-    UINavigationController *controller = [[UINavigationController alloc] initWithRootViewController:avc];
-//    self.modalPresentationStyle = UIModalPresentationCurrentContext;
-    [[OverlayViewController sharedOverlayViewController] presentModalViewController:controller animated:YES];
-    
-//    UIViewController* rootViewController = [TTNavigator navigator].window.rootViewController;
-//    rootViewController.modalPresentationStyle = UIModalPresentationCurrentContext;
-//    [rootViewController presentModalViewController:controller animated:YES];
 }
 
 -(IBAction)loginWithWeibo:(id)sender{

@@ -7,15 +7,14 @@
 //
 
 #import "NotificationViewController.h"
-#import "XMPPHandler.h"
-#import "SBJsonParser.h"
+#import "JSONKit.h"
 #import "NetworkHandler.h"
 #import "NSDictionary+ParseHelper.h"
 #import "NINetworkImageView.h"
+#import "XMPPHandler.h"
 
 @interface NotificationViewController (){
     NSMutableArray* _notifications;
-    SBJsonParser* _parser;
 }
 
 @end
@@ -27,7 +26,6 @@
     self = [super initWithStyle:style];
     if (self) {
         _notifications = [NSMutableArray array];
-        _parser = [SBJsonParser new];
         self.title = @"消息";
     }
     return self;
@@ -56,7 +54,7 @@
     NSMutableSet* idSet = [NSMutableSet set];
     
     for (EOMessage* message in objects) {
-        NSDictionary* data = [_parser objectWithString:message.payload];
+        NSDictionary* data = [message.payload objectFromJSONString];
         [idSet addObject:[data valueForKey:@"follower"]];
     }
     for (NSString* uid in idSet) {
@@ -95,7 +93,7 @@
 
 -(void)notificationDidSave:(NSNotification*)notif{
     EOMessage* message = notif.object;
-    NSDictionary* data = [_parser objectWithString:message.payload];
+    NSDictionary* data = [message.payload objectFromJSONString];
     NSString* uid = [data valueForKey:@"follower"];
     BOOL userExist = NO;
     for (UserProfile* user in _notifications) {

@@ -1,0 +1,103 @@
+/* 
+  Localizable.strings
+  Fanju
+
+  Created by Xu Huanze on 3/4/13.
+  Copyright (c) 2013 Wayne. All rights reserved.
+*/
+
+/* Navigations */
+"NavBarTitle" = "饭局";
+"Back" = "返回";
+"MapMode" = "地图模式";
+"ListMode" = "列表模式";
+"Map" = "地图";
+
+/* Launcher items */
+"StartOrder" = "点菜";
+"Search" = "搜索";
+"Near" = "附近";
+"Favorites" = "收藏";
+"Recent" = "最近访问";
+"MyOrders" = "我的订餐";
+"Account" = "账户";
+
+/* Sort */
+"SortByDistance" = "按距离";
+"SortByRating" = "按评价";
+"SortByPrice" = "按价格";
+
+"Detail" = "餐厅详情";
+"Direction" = "查看路线";
+"CurrentLocation" = "当前位置";
+
+/* Menu left side */
+"OpenLeftSide" = "外婆家";
+"MyFavorites" = "我的最爱";
+"RecentOrders" = "最近点单";
+
+/* Menu activities*/
+"UpdateMenu" = "正在更新菜单";
+
+/* Order list */
+"FinishOrder" = "完成点菜";
+"NumberOfPPL" = "人数";
+"TotalPrice" = "价格";
+"Table" = "桌号";
+
+/* Login */
+"LoginUser" = "用户名";
+"LoginPass" = "密码";
+"Login" = "登陆";
+"Logout" = "注销";
+"UserPlaceholder" = "请输入用户名";
+"PassPlaceholder" = "请输入密码";
+"LoginFillAlert" = "请输入用户名和密码";
+
+/* Social */
+"Following" = "关注";
+"Timeline" = "动态";
+"Addfollowing" = "加关注";
+"SinaWeibo"="新浪微博";
+
+/* Meal */
+"ThisWeek"="本周";
+"AfterThisWeek"="一周以后";
+
+"Meals" = "饭局";
+"MealDetail"="饭局详情";
+"JoinMeal"="参加饭局";
+"Joined"="已参加";
+"MealsCreated"="发起：";
+"MealsJoined"="参与：";
+"NumberOfFollowing" = "关注：";
+"MyMeals" = "我的饭局";
+"MyInvitations" = "饭局邀请";
+"DatingInvitation" = "%@邀请您参加这次约会(%@)";
+"GatheringInvitation" = "%@邀请您参加这次聚会(%@)";
+"SecondsAgo" = "秒前";
+"MinutesAgo" = "分钟前";
+"HoursAgo" = "小时前";
+"DaysAgo" = "天前";
+"YearsAgo" = "年前";
+"LongTimeAgo" = "很久以前";
+"Accept" = "接受";
+"Reject" = "拒绝";
+"AverageCost" = "人均：%.0f元，人数：%d / %d";
+"Time" = "时间：%@";
+"Menu"= "菜式";
+"MealType" = "类别：%@";
+"TimeAndCost"="时间：%@  人均：¥%.0f";
+"Restaurant"="餐厅：%@ %@";//address+restaurant name
+"Introduction"="介绍：%@";
+"NumberOfPersons"="人数：%d/%d";
+"NoComments"="暂时还没有评论";
+//MISC
+"PullToRefresh"="下拉可以刷新⋯";
+"ReleaseToRefresh"="松开即可刷新⋯";
+"Loading"="加载中⋯";
+"CurrentLocation"="当前位置";
+
+
+//  Messages
+"You're the host."="您是活动发起人，无需再次加入";

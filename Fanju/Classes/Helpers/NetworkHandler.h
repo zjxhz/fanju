@@ -42,7 +42,7 @@ http_method_t;
 
 - (void)sendJSonRequest:(NSString *)url 
                  method:(http_method_t)method 
-             jsonObject:(NSObject *)jsonObject
+             jsonObject:(id)jsonObject
                 success:(retrieved_t)success 
                 failure:(retrieve_failed_t)failure ;
 

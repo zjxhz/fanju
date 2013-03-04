@@ -1,0 +1,72 @@
+/* 
+  Localizable.strings
+  Fanju
+
+  Created by Xu Huanze on 3/4/13.
+  Copyright (c) 2013 Wayne. All rights reserved.
+*/
+
+/* Navigations */
+"NavBarTitle" = "EasyOrder";
+"Back" = "Back";
+"MapMode" = "Show Map";
+"ListMode" = "Show List";
+"Map" = "Map";
+
+/* Launcher items */
+"StartOrder" = "Start Order";
+"Search" = "Search";
+"Near" = "Near";
+"Favorites" = "Favorites";
+"Recent" = "Recents";
+"MyOrders" = "My Orders";
+"Account" = "Account";
+
+/* Sort */
+"SortByDistance" = "By Distance";
+"SortByRating" = "By Rating";
+"SortByPrice" = "By Price";
+
+"Detail" = "Detail";
+"Direction" = "Get Direction";
+"CurrentLocation" = "Current Location";
+
+/* Menu left side */
+"OpenLeftSide" = "Utils";
+"MyFavorites" = "My Favorites";
+"RecentOrders" = "Recent Orders";
+
+/* Menu activities*/
+"UpdateMenu" = "Updating Menu";
+
+/* Order list */
+"FinishOrder" = "Finish Order";
+"NumberOfPPL" = "Number";
+"TotalPrice" = "Total Price";
+"Table" = "Table";
+
+/* Login */
+"LoginUser" = "Username";
+"LoginPass" = "Password";
+"Login" = "Login";
+"Logout" = "Logout";
+"UserPlaceholder" = "Enter username";
+"PassPlaceholder" = "Enter password";
+"LoginFillAlert" = "Please enter username and password";
+
+/* Meal */
+"Meals" = "Meals";
+"MyMeals" = "Meal";
+"MyInvitations" = "Invitation";
+"DatingInvitation" = "%@ invited you to join this dating(%@)";
+"GatheringInvitation" = "%@ invited you to this gathering(%@)";
+"SecondsAgo" = "seconds ago";
+"MinutesAgo" = "minutes ago";
+"HoursAgo" = "hours ago";
+"DaysAgo" = "days ago";
+"YearsAgo" = "years ago";
+"LongTimeAgo" = "long time ago";
+"Accept" = "Accept";
+"Reject" = "Reject";
+"AverageCost" = "$%.0f - %d/%d seats left";
+"Time" = "Time: %@";

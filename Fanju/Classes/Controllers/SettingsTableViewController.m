@@ -10,8 +10,6 @@
 #import "TextFormCell.h"
 #import "Const.h"
 #import "Authentication.h"
-#import "MFSideMenuManager.h"
-#import "UIViewController+MFSideMenu.h"
 #import "NewSidebarViewController.h"
 @interface SettingsTableViewController ()
 
@@ -136,7 +134,7 @@
         [[NSUserDefaults standardUserDefaults] setObject:[self valueForCellAtRow:0] forKey:@"HOST"];
         [[NSUserDefaults standardUserDefaults] synchronize];
         [[Authentication sharedInstance] logout];
-        [MFSideMenuManager sharedManager].navigationController.menuState = MFSideMenuStateHidden;
+//        [MFSideMenuManager sharedManager].navigationController.menuState = MFSideMenuStateHidden; TODO what to do?
         [[NewSidebarViewController sideBar] showMealList];
         [[NewSidebarViewController sideBar].mealListViewController reload];
     }

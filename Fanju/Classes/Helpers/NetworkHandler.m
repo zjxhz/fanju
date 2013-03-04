@@ -8,11 +8,10 @@
 
 #import "NetworkHandler.h"
 #import "SVProgressHUD.h"
-#import "SBJson.h"
-#import "NSObject+SBJSON.h"
 #import "ErrorInfoViewController.h"
 #import "Authentication.h"
 #import "AppDelegate.h"
+#import "JSONKit.h"
 
 
 static NSMutableArray *pool;
@@ -166,7 +165,7 @@ static int t = 0;
 
 - (void)sendJSonRequest:(NSString *)url 
                 method:(http_method_t)method 
-              jsonObject:(NSObject *)jsonObject
+              jsonObject:(id)jsonObject
                success:(retrieved_t)success 
                failure:(retrieve_failed_t)failure {
     self.success = [success copy];
@@ -176,7 +175,7 @@ static int t = 0;
                                                 delegate:self];
     request.cachePolicy= TTURLRequestCachePolicyNone;
     request.response = [[TTURLDataResponse alloc] init];
-    request.httpBody = [[jsonObject JSONRepresentation] dataUsingEncoding:NSUTF8StringEncoding];
+    request.httpBody = [jsonObject JSONData];//[[jsonObject JSONRepresentation] dataUsingEncoding:NSUTF8StringEncoding];
     if (method == POST){
         request.httpMethod = @"POST";
     } else if (method == DELETE){
@@ -195,8 +194,7 @@ static int t = 0;
 #pragma mark TTURLRequestDelegate
 - (void)requestDidFinishLoad:(TTURLRequest*)request {
     NSData *data = [(TTURLDataResponse*)request.response data];
-    SBJsonParser *parser = [SBJsonParser new];
-    id obj = [parser objectWithData:data];
+    id obj = [data objectFromJSONData];//[parser objectWithData:data];
     if (data.length >0 && !obj) {
         NSString* html = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
         NSLog(@"no json data found, probably error occured, html: %@", html);

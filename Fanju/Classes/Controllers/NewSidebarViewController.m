@@ -9,16 +9,14 @@
 #import "NewSidebarViewController.h"
 #import "Three20/Three20.h"
 #import "AppDelegate.h"
-#import "UIViewController+JTRevealSidebarV2.h"
 #import "Authentication.h"
 #import "UserMessagesViewController.h"
-#import "MFSideMenuManager.h"
-#import "UIViewController+MFSideMenu.h"
 #import "SVProgressHUD.h"
 #import "NameAndGenderViewController.h"
 #import "EmailViewController.h"
 #import "SettingsTableViewController.h"
 #import "MKNumberBadgeView.h"
+#import "UIViewController+MFSideMenu.h"
 
 #define SIDEBAR_WIDTH 270
 #define SIDEBAR_HEADER_HEIGHT 30
@@ -62,7 +60,7 @@
         _sectionItems = [NSMutableArray arrayWithObjects:sectionItems0, sectionItems1, sectionItems2, sectionItems3, sectionItems4, nil];
         self.tableView.dataSource = self;
         self.tableView.delegate = self;
-        self.tableView.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"sidebar_bg"]];
+        self.tableView.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"sidebar_bg.png"]];
         self.tableView.separatorColor = [UIColor blackColor];
          _numberBadge = [[MKNumberBadgeView alloc] initWithFrame:CGRectMake(180, 10, 40, 25)];
         _unreadMessageCount =  [[NSUserDefaults standardUserDefaults] integerForKey:UNREAD_MESSAGE_COUNT];
@@ -126,6 +124,12 @@
     }
     return _notificationViewController;
 }
+
+-(void)viewDidAppear:(BOOL)animated{
+    [super viewDidAppear:animated];
+    self.view.frame = CGRectMake(0, 0, 260, 460);
+}
+
 #pragma mark - Table view data source
 - (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section{
     return SIDEBAR_HEADER_HEIGHT;
@@ -189,8 +193,8 @@
         vc = [[EmailViewController alloc] initWithStyle:UITableViewStyleGrouped];
     }
     vc.navigationItem.hidesBackButton = YES;// no way back
-    [MFSideMenuManager sharedManager].navigationController.viewControllers = [NSArray arrayWithObjects:self.mealListViewController, vc, nil];
-    [MFSideMenuManager sharedManager].navigationController.menuState = MFSideMenuStateHidden;
+    self.sideMenu.navigationController.viewControllers = [NSArray arrayWithObjects:self.mealListViewController, vc, nil];
+    [self.sideMenu setMenuState:MFSideMenuStateClosed];
     UIAlertView* a = [[UIAlertView alloc] initWithTitle:@"完善个人信息" message:@"请花1分钟时间提供所需信息以完成注册。" delegate:nil cancelButtonTitle:@"确定" otherButtonTitles: nil];
     [a show];
     return;
@@ -200,7 +204,7 @@
 {
     if ([self requireLogin:indexPath]) {
         if (![[Authentication sharedInstance] isLoggedIn]) {
-            [MFSideMenuManager sharedManager].navigationController.menuState = MFSideMenuStateHidden;
+            [self.sideMenu setMenuState:MFSideMenuStateClosed];
             AppDelegate *appDelegate = (AppDelegate*)[UIApplication sharedApplication].delegate;
             dispatch_async(dispatch_get_main_queue(), ^{
                 [appDelegate showLogin];
@@ -276,7 +280,7 @@
         case 4:
             switch (indexPath.row) {
                 case 0:
-                    [MFSideMenuManager sharedManager].navigationController.menuState = MFSideMenuStateHidden;
+                    [self.sideMenu setMenuState:MFSideMenuStateClosed];
                     [[Authentication sharedInstance] logout];
                     [SVProgressHUD dismissWithSuccess:@"成功登出"];
                     controller = self.mealListViewController;
@@ -289,9 +293,10 @@
             [[[UIAlertView alloc] initWithTitle:@"Warning" message:@"Not implemented" delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil] show];
             return;
     }
-   [MFSideMenuManager sharedManager].navigationController.viewControllers = [NSArray arrayWithObject:controller];
-    [[MFSideMenuManager sharedManager].navigationController setToolbarHidden:YES];
-    [MFSideMenuManager sharedManager].navigationController.menuState = MFSideMenuStateHidden;
+    self.sideMenu.navigationController.viewControllers = [NSArray arrayWithObject:controller];
+    [self.sideMenu.navigationController setToolbarHidden:YES];
+    [self.sideMenu setMenuState:MFSideMenuStateClosed];
+    [controller setupSideMenuBarButtonItem];
 }
 
 -(BOOL)requireLogin:(NSIndexPath*)indexPath{

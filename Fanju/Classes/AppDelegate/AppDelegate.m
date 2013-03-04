@@ -8,31 +8,23 @@
 #import <Three20/Three20.h>
 #import "AppDelegate.h"
 
-#import "LauncherViewController.h"
 #import "MyCustomStylesheet.h"
-#import "OrderViewController.h"
-#import "RestaurantSearchViewController.h"
-#import "RestaurantListViewController.h"
-#import "RestaurantDetailViewController.h"
 #import "MapViewController.h"
-#import "MenuViewController.h"
 #import "MyOrdersViewController.h"
 #import "OrderDetailViewController.h"
 #import "Const.h"
 #import "LocationProvider.h"
 #import "RestaurantInfo.h"
-#import "TabBarController.h"
 #import "MealListViewController.h"
 #import "MyMealsViewController.h"
 #import "SocialNetworkViewController.h"
 #import "AccountViewController.h"
-#import "MFSideMenuManager.h"
-#import "UIViewController+MFSideMenu.h"
+#import "MFSideMenu.h"
 #import "Authentication.h"
-#import "ActivationViewController.h"
 #import "OverlayViewController.h"
 #import "CrittercismSDK/Crittercism.h"
 #import "Const.h"
+#import "NewSidebarViewController.h"
 
 @interface AppDelegate() 
 @end
@@ -61,32 +53,21 @@
         extern CFAbsoluteTime StartTime;
         NSLog(@"App finished launching in %f seconds", CFAbsoluteTimeGetCurrent() - StartTime);
     });
+    self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
+    
     [TTStyleSheet setGlobalStyleSheet:[[MyCustomStylesheet alloc] init]]; 
-    
-    TTNavigator* navigator = [TTNavigator navigator];
-    navigator.supportsShakeToReload = YES;
-    navigator.persistenceMode = TTNavigationModeNone;
-    navigator.window = [[UIWindow alloc] initWithFrame:TTScreenBounds()];
-    
-    TTURLMap* map = navigator.URLMap;
     MealListViewController *meal = [[MealListViewController alloc] initWithNibName:@"MealListViewController" bundle:nil];
     UINavigationController *navigationController = [[UINavigationController alloc] initWithRootViewController:meal];
     NewSidebarViewController *sideMenuViewController = [NewSidebarViewController sideBar];
     sideMenuViewController.mealListViewController = meal;
     
-    [map from:@"eo://meal" toViewController:navigationController];
-    if (![navigator restoreViewControllers]) {
-        // This is the first launch, so we just start with the tab bar
-        [navigator openURLAction:[TTURLAction actionWithURLPath:@"eo://meal"]];
-    }
     [[LocationProvider sharedProvider] obtainCurrentLocation:[Authentication sharedInstance]];
 #warning check if below line is really needed
     [[TTURLRequestQueue mainQueue] setMaxContentLength:0];
     
     // make sure to display the navigation controller before calling this
-    [MFSideMenuManager configureWithNavigationController:navigationController 
-                                      sideMenuController:sideMenuViewController];
-    [navigator.window addSubview:[OverlayViewController sharedOverlayViewController].view];
+    MFSideMenu* sideMenu = [MFSideMenu menuWithNavigationController:navigationController leftSideMenuController:sideMenuViewController rightSideMenuController:nil];
+    sideMenuViewController.sideMenu = sideMenu;
     
     UIRemoteNotificationType allowedNotifications = UIRemoteNotificationTypeAlert |  UIRemoteNotificationTypeBadge | UIRemoteNotificationTypeSound;
     [[UIApplication sharedApplication] registerForRemoteNotificationTypes:allowedNotifications];
@@ -95,6 +76,11 @@
     
     [self initSinaweibo];
     [[Authentication sharedInstance] relogin];
+    
+    [self.window addSubview:[OverlayViewController sharedOverlayViewController].view];
+    self.window.rootViewController = navigationController;
+    [self.window makeKeyAndVisible];
+    [meal viewDidAppear:NO]; 
     return YES;
 }
 

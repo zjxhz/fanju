@@ -285,6 +285,8 @@
 		B04C2C4816E44DF100E86C7A /* MessageUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B04C2C4716E44DF100E86C7A /* MessageUI.framework */; };
 		B04C2C5016E4541F00E86C7A /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = B04C2C5216E4541F00E86C7A /* Localizable.strings */; };
 		B0C7B31616E49D0F007A6BBA /* UIViewController+MFSideMenu.m in Sources */ = {isa = PBXBuildFile; fileRef = B0C7B31516E49D0F007A6BBA /* UIViewController+MFSideMenu.m */; };
+		B0C7B31D16E5C64E007A6BBA /* FollowerEvent.m in Sources */ = {isa = PBXBuildFile; fileRef = B0C7B31C16E5C64E007A6BBA /* FollowerEvent.m */; };
+		B0C7B32016E5CB62007A6BBA /* EventBase.m in Sources */ = {isa = PBXBuildFile; fileRef = B0C7B31F16E5CB62007A6BBA /* EventBase.m */; };
 		DD97C0ADDEC4427DAC3C7BE5 /* libPods.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 917F16ABACD74E9B9B9EA523 /* libPods.a */; };
 /* End PBXBuildFile section */
 
@@ -785,6 +787,10 @@
 		B04C2C5416E4547400E86C7A /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
 		B0C7B31416E49D0F007A6BBA /* UIViewController+MFSideMenu.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIViewController+MFSideMenu.h"; sourceTree = "<group>"; };
 		B0C7B31516E49D0F007A6BBA /* UIViewController+MFSideMenu.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIViewController+MFSideMenu.m"; sourceTree = "<group>"; };
+		B0C7B31B16E5C64E007A6BBA /* FollowerEvent.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FollowerEvent.h; sourceTree = "<group>"; };
+		B0C7B31C16E5C64E007A6BBA /* FollowerEvent.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FollowerEvent.m; sourceTree = "<group>"; };
+		B0C7B31E16E5CB62007A6BBA /* EventBase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EventBase.h; sourceTree = "<group>"; };
+		B0C7B31F16E5CB62007A6BBA /* EventBase.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EventBase.m; sourceTree = "<group>"; };
 		DE1C6AFC71E24F3EA4C025BE /* Pods.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.xcconfig; path = Pods/Pods.xcconfig; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
@@ -1088,6 +1094,7 @@
 		B04C292816E2078100E86C7A /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				B0C7B31716E5C53B007A6BBA /* Event */,
 				B04C2C3216E43F0A00E86C7A /* CategoryItem.h */,
 				B04C2C3316E43F0A00E86C7A /* CategoryItem.m */,
 				B04C292916E2078100E86C7A /* ChatHistory.xcdatamodeld */,
@@ -1742,6 +1749,17 @@
 			path = libidn;
 			sourceTree = "<group>";
 		};
+		B0C7B31716E5C53B007A6BBA /* Event */ = {
+			isa = PBXGroup;
+			children = (
+				B0C7B31B16E5C64E007A6BBA /* FollowerEvent.h */,
+				B0C7B31C16E5C64E007A6BBA /* FollowerEvent.m */,
+				B0C7B31E16E5CB62007A6BBA /* EventBase.h */,
+				B0C7B31F16E5CB62007A6BBA /* EventBase.m */,
+			);
+			name = Event;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -2091,6 +2109,8 @@
 				B04C2C3416E43F0A00E86C7A /* CategoryItem.m in Sources */,
 				B04C2C3816E43F5E00E86C7A /* DishItem.m in Sources */,
 				B0C7B31616E49D0F007A6BBA /* UIViewController+MFSideMenu.m in Sources */,
+				B0C7B31D16E5C64E007A6BBA /* FollowerEvent.m in Sources */,
+				B0C7B32016E5CB62007A6BBA /* EventBase.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

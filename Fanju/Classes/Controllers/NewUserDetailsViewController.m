@@ -100,6 +100,11 @@
     [self.tableView reloadData];
 }
 
+-(void)viewDidAppear:(BOOL)animated{
+    [super viewDidAppear:animated];
+    [self reload:YES];
+}
+
 // what we have is just a username here, so query the user info from network first
 -(void)setUsername:(NSString*)username{
     NSString* url = [NSString stringWithFormat:@"http://%@/api/v1/user/?format=json&user__username=%@", EOHOST, username];
@@ -740,10 +745,15 @@
 #pragma mark -
 #pragma mark PullRefreshTableViewController
 - (void)pullToRefresh {
+    [self reload:NO];
+}
+
+-(void)reload:(BOOL)useCache{
+    TTURLRequestCachePolicy policy = useCache ? TTURLRequestCachePolicyDefault : TTURLRequestCachePolicyNone;
     NSString* url = [NSString stringWithFormat:@"http://%@/api/v1/user/%d/?format=json", EOHOST, _user.uID];
     [[NetworkHandler getHandler] requestFromURL:url
                                          method:GET
-                                    cachePolicy:TTURLRequestCachePolicyNone
+                                    cachePolicy:policy
                                         success:^(id obj) {
                                             UserProfile *user = [UserProfile profileWithData:obj];
                                             [self setUser:user];
@@ -753,7 +763,6 @@
                                             [SVProgressHUD dismissWithError:@"更新数据失败"];
                                             [self stopLoading];
                                         }];
-
 }
 
 #pragma mark -

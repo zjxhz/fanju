@@ -12,6 +12,8 @@
 @implementation DateUtil
 static NSDateFormatter* DATE_FORMAT = nil;
 static NSDateFormatter* SHORT_DATE_FORMAT = nil;
+static NSDateFormatter *timeOnlyFormat;
+static NSDateFormatter *dateOnlyFormat;
 
 +(void)initialize{
     if (!DATE_FORMAT) {
@@ -21,6 +23,14 @@ static NSDateFormatter* SHORT_DATE_FORMAT = nil;
     if (!SHORT_DATE_FORMAT) {
         SHORT_DATE_FORMAT = [[NSDateFormatter alloc] init];
         [SHORT_DATE_FORMAT setDateFormat:@"yyyy-MM-dd"];
+    }
+    if(!timeOnlyFormat){
+        timeOnlyFormat = [[NSDateFormatter alloc] init];
+        [timeOnlyFormat setDateFormat:@"HH:mm"];
+    }
+    if(!dateOnlyFormat){
+        dateOnlyFormat = [[NSDateFormatter alloc] init];
+        [dateOnlyFormat setDateFormat:@"MM-dd"];
     }
     
 }
@@ -68,13 +78,9 @@ static NSDateFormatter* SHORT_DATE_FORMAT = nil;
 
 +(NSString*) userFriendlyStringFromDate:(NSDate*)date{
     if ([DateUtil isToday:date] ) {
-        NSDateFormatter *df = [[NSDateFormatter alloc] init];
-        [df setDateFormat:@"HH:mm"];
-        return [df stringFromDate:date];
+        return [timeOnlyFormat stringFromDate:date];
     } else {
-        NSDateFormatter *df = [[NSDateFormatter alloc] init];
-        [df setDateFormat:@"MM-dd"];
-        return [df stringFromDate:date];
+        return [dateOnlyFormat stringFromDate:date];
     }
 }
 

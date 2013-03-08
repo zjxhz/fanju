@@ -99,8 +99,10 @@ NSString * const EODidLogoutNotification = @"EODidLogoutNotification";
 //should be deleted by logging out
 -(void)relogin{
     if (_currentUser && _currentUser.password) {
+        NSLog(@"logging in with username and password");
         [[Authentication sharedInstance] loginWithUserName:_currentUser.username password:_currentUser.password];
     } else if([[self sinaweibo] isLoggedIn]) {
+        NSLog(@"weibo logged in, continue to log in as an app user");
         [self logInToApp];
     } else{
         //not logged in either as an app user or weibo user, logout to clear data
@@ -124,6 +126,7 @@ NSString * const EODidLogoutNotification = @"EODidLogoutNotification";
 
 -(void)registerToken{
     AppDelegate *appDelegate = (AppDelegate*)[UIApplication sharedApplication].delegate;
+    NSLog(@"updating token to server...");
     if (appDelegate.apnsToken) {
         NSDictionary *dict = @{@"apns_token":appDelegate.apnsToken};
         [[NetworkHandler getHandler] sendJSonRequest:[NSString stringWithFormat:@"%@://%@/api/v1/user/%d/", HTTPS, EOHOST, _currentUser.uID]

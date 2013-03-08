@@ -77,8 +77,8 @@
     [self initSinaweibo];
     [[Authentication sharedInstance] relogin];
     
-    [self.window addSubview:[OverlayViewController sharedOverlayViewController].view];
     self.window.rootViewController = navigationController;
+    [navigationController.view addSubview:[OverlayViewController sharedOverlayViewController].view];
     [self.window makeKeyAndVisible];
     [meal viewDidAppear:NO]; 
     return YES;

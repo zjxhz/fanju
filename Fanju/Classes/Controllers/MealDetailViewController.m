@@ -447,7 +447,7 @@
 
     
     [imgView setContentMode:UIViewContentModeScaleAspectFill];
-    [imgView setUrlPath:[NSString stringWithFormat:@"http://%@%@", EOHOST, self.mealInfo.photoURL]];
+    [imgView setUrlPath:self.mealInfo.photoFullUrl];
     
     UIView *hostView = [[UIView alloc] initWithFrame:CGRectMake(0, 320-HOST_VIEW_HEIGHT, 320, HOST_VIEW_HEIGHT)];
     hostView.backgroundColor = [UIColor colorWithRed:0 green:0 blue:0 alpha:0.5];

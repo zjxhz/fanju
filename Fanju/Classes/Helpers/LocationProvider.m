@@ -9,6 +9,7 @@
 #import "LocationProvider.h"
 #import "GCDSingleton.h"
 
+#define TIME_INTERVAL 10*60
 @interface LocationProvider ()
 @property (nonatomic, strong) id<LocationProviderDelegate> locationDelegate;
 @property (nonatomic, strong) CLLocationManager *lm;
@@ -35,7 +36,7 @@
     self.lm.delegate = self;
     self.lm.desiredAccuracy = kCLLocationAccuracyNearestTenMeters;
     [self updateLocation];
-    [NSTimer scheduledTimerWithTimeInterval:10*60 target:self selector:@selector(updateLocation) userInfo:nil repeats:YES];
+    [NSTimer scheduledTimerWithTimeInterval:TIME_INTERVAL target:self selector:@selector(updateLocation) userInfo:nil repeats:YES];
 }
 
 -(void)updateLocation{
@@ -48,10 +49,12 @@
 		   fromLocation: (CLLocation *) oldLocation{
 	
     self.lastLocation = newLocation;
+    if ([[NSDate date] timeIntervalSinceDate:_lastLocationUpdatedTime] < 60) {
+        NSLog(@"updating too often, just ignore");
+    } else {
+        [self.locationDelegate finishObtainingLocation:newLocation];
+    }
     _lastLocationUpdatedTime = [[NSDate alloc] init];
-    
-	[self.locationDelegate finishObtainingLocation:self.lastLocation];
-	
     [self.lm stopUpdatingLocation]; 
 }
 

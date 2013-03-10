@@ -55,6 +55,12 @@
     return item.mealInfo;
 }
 
+-(void)prepareForReuse{
+    MealTableItem *item = (MealTableItem *)_item;
+    item.mealInfo.fullPhoto = _backgroundView.image;
+    [super prepareForReuse];
+}
+
 - (void)setObject:(id)object {
 	if (_item != object) {
         [super setObject:object];
@@ -145,29 +151,21 @@
 }
 
 -(void)mergeImageToBackgroundView:(UIImage*)image forRect:(CGRect)rect background:(BOOL)background{
-    id currentMealInfo = [self mealInfo];
-    dispatch_async(dispatch_get_main_queue(), ^{
-        CGRect bounds = self.backgroundView.bounds;
-        UIGraphicsBeginImageContextWithOptions(bounds.size, NO, 0);
-        CGContextRef context = UIGraphicsGetCurrentContext();
-        if ([self mealInfo].fullPhoto) {
-            [[self mealInfo].fullPhoto drawInRect:CELL_RECT];
-        }
-        
-        [image drawInRect:rect];
-        if (background) {
-            [self drawInfoInContext:context];
-        }
-        
-        [self mealInfo].fullPhoto = UIGraphicsGetImageFromCurrentImageContext();
+    CGRect bounds = self.backgroundView.bounds;
+    UIGraphicsBeginImageContextWithOptions(bounds.size, NO, 0);
+    CGContextRef context = UIGraphicsGetCurrentContext();
+    CGContextSetBlendMode(context, kCGBlendModeCopy);
+    [self.backgroundView.layer renderInContext:context];
+    CGContextClipToRect(context, rect);
+    CGContextSetBlendMode(context, kCGBlendModeNormal);
+    [image drawInRect:rect];
+    if (background) {
+        [self drawInfoInContext:context];
+    }
+    _backgroundView.image = UIGraphicsGetImageFromCurrentImageContext();
 
-        
-        UIGraphicsEndImageContext();
-        if ([self mealInfo] == currentMealInfo) { //same object means current cell has not been reused yet and still visible
-            _backgroundView.image = [self mealInfo].fullPhoto;
-            [self setNeedsDisplay];
-        }
-    });
+    
+    UIGraphicsEndImageContext();
 }
 
 -(UIImage*)cropImage:(UIImage*)image{
@@ -175,24 +173,6 @@
         return [image croppedImage:CGRectMake((image.size.width - image.size.height)/2, 0, image.size.height, image.size.height)];
     } else {
         return [image croppedImage:CGRectMake((image.size.height - image.size.width)/2, 0, image.size.width, image.size.width)];
-    }
-}
-
-#define PROFILE_MEAL_CELL 1
--(void)drawRect:(CGRect)rect{
-#if PROFILE_MEAL_CELL
-     NSDate* startTime = [NSDate date];
-#endif
-    if ([self mealInfo].finishLoadingAllImages) {
-        [[self mealInfo].fullPhoto drawAtPoint:CGPointMake(0, 0)];
-#if PROFILE_MEAL_CELL
-        NSLog(@"%.3f ms for drawing full photo of meal: %@", [[NSDate date] timeIntervalSinceDate:startTime] * 1000, [self mealInfo].topic);
-#endif
-    } else {
-        [super drawRect:rect];
-#if PROFILE_MEAL_CELL
-        NSLog(@"%.3f ms for calling super drawRect of meal: %@", [[NSDate date] timeIntervalSinceDate:startTime] *1000, [self mealInfo].topic);
-#endif
     }
 }
 @end

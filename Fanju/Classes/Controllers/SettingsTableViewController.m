@@ -29,7 +29,7 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"保存" style:UIBarButtonItemStyleBordered target:self action:@selector(save:)];
+//    self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"保存" style:UIBarButtonItemStyleBordered target:self action:@selector(save:)];
     self.title = @"设置";
 }
 
@@ -63,18 +63,32 @@
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     static NSString *CellIdentifier = @"Cell";
-    TextFormCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
-    if (cell == nil) {
-        cell = [[TextFormCell alloc] initWithStyle:UITableViewCellStyleValue1 reuseIdentifier:CellIdentifier];
+    UITableViewCell* cell = nil;
+//    if (indexPath.row == 0) {
+//        TextFormCell *textCell = [[TextFormCell alloc] initWithStyle:UITableViewCellStyleValue1 reuseIdentifier:CellIdentifier];
+//        cell = textCell;
+//        textCell.selectionStyle = UITableViewCellSelectionStyleNone;
+//        textCell.textLabel.text = @"服务器";
+//        textCell.textField.placeholder = @"例如：192.168.38.2:8000";
+//        textCell.textField.text = EOHOST;
+//        textCell.textField.keyboardType = UIKeyboardTypeURL;
+//    } else {
+        cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleValue1 reuseIdentifier:CellIdentifier];
+        cell.textLabel.text = @"登录时删除已有信息" ;
+        UISwitch* sw = [[UISwitch alloc] initWithFrame:CGRectZero];
+        [sw addTarget:self action:@selector(deleteOldData:) forControlEvents:UIControlEventValueChanged];
+        sw.on = [[NSUserDefaults standardUserDefaults] boolForKey:@"DELETE_OLD_DATA"];
+        cell.accessoryView = sw;
         cell.selectionStyle = UITableViewCellSelectionStyleNone;
-        cell.textLabel.text = @"服务器";
-        cell.textField.placeholder = @"例如：192.168.38.2:8000";
-        cell.textField.text = EOHOST;
-        cell.textField.keyboardType = UIKeyboardTypeURL;
-    }
+//    }
+    
     return cell;
 }
 
+-(void)deleteOldData:(UISwitch*)sw{
+    [[NSUserDefaults standardUserDefaults] setBool:sw.on forKey:@"DELETE_OLD_DATA"];
+    [[NSUserDefaults standardUserDefaults] synchronize];
+}
 /*
 // Override to support conditional editing of the table view.
 - (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath

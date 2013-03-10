@@ -185,7 +185,7 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
     req.entity = [NSEntityDescription entityForName:@"EOMessage" inManagedObjectContext:context];
     
     UserProfile* me = [Authentication sharedInstance].currentUser;
-    req.predicate = [NSPredicate predicateWithFormat:@"(type == chat) AND \
+    req.predicate = [NSPredicate predicateWithFormat:@"(type == 'chat') AND \
                      ( (receiver BEGINSWITH %@ AND sender BEGINSWITH %@) \
                         OR (receiver BEGINSWITH %@ AND sender BEGINSWITH %@) )", _contactJIDStr, me.jabberID, me.jabberID, _contactJIDStr];
     NSError* error;

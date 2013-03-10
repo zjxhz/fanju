@@ -8,6 +8,6 @@
 
 #import <UIKit/UIKit.h>
 
-@interface NotificationViewController : UITableViewController
+@interface NotificationViewController : UITableViewController<UIGestureRecognizerDelegate>
 
 @end

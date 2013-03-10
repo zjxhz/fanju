@@ -287,6 +287,7 @@
 		B0C7B31616E49D0F007A6BBA /* UIViewController+MFSideMenu.m in Sources */ = {isa = PBXBuildFile; fileRef = B0C7B31516E49D0F007A6BBA /* UIViewController+MFSideMenu.m */; };
 		B0C7B31D16E5C64E007A6BBA /* FollowerEvent.m in Sources */ = {isa = PBXBuildFile; fileRef = B0C7B31C16E5C64E007A6BBA /* FollowerEvent.m */; };
 		B0C7B32016E5CB62007A6BBA /* EventBase.m in Sources */ = {isa = PBXBuildFile; fileRef = B0C7B31F16E5CB62007A6BBA /* EventBase.m */; };
+		B0E8420D16E8B5E2008BB729 /* JoinMealEvent.m in Sources */ = {isa = PBXBuildFile; fileRef = B0E8420C16E8B5E2008BB729 /* JoinMealEvent.m */; };
 		DD97C0ADDEC4427DAC3C7BE5 /* libPods.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 917F16ABACD74E9B9B9EA523 /* libPods.a */; };
 /* End PBXBuildFile section */
 
@@ -791,6 +792,8 @@
 		B0C7B31C16E5C64E007A6BBA /* FollowerEvent.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FollowerEvent.m; sourceTree = "<group>"; };
 		B0C7B31E16E5CB62007A6BBA /* EventBase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EventBase.h; sourceTree = "<group>"; };
 		B0C7B31F16E5CB62007A6BBA /* EventBase.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EventBase.m; sourceTree = "<group>"; };
+		B0E8420B16E8B5E2008BB729 /* JoinMealEvent.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JoinMealEvent.h; sourceTree = "<group>"; };
+		B0E8420C16E8B5E2008BB729 /* JoinMealEvent.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JoinMealEvent.m; sourceTree = "<group>"; };
 		DE1C6AFC71E24F3EA4C025BE /* Pods.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.xcconfig; path = Pods/Pods.xcconfig; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
@@ -1752,10 +1755,12 @@
 		B0C7B31716E5C53B007A6BBA /* Event */ = {
 			isa = PBXGroup;
 			children = (
-				B0C7B31B16E5C64E007A6BBA /* FollowerEvent.h */,
-				B0C7B31C16E5C64E007A6BBA /* FollowerEvent.m */,
 				B0C7B31E16E5CB62007A6BBA /* EventBase.h */,
 				B0C7B31F16E5CB62007A6BBA /* EventBase.m */,
+				B0C7B31B16E5C64E007A6BBA /* FollowerEvent.h */,
+				B0C7B31C16E5C64E007A6BBA /* FollowerEvent.m */,
+				B0E8420B16E8B5E2008BB729 /* JoinMealEvent.h */,
+				B0E8420C16E8B5E2008BB729 /* JoinMealEvent.m */,
 			);
 			name = Event;
 			sourceTree = "<group>";
@@ -2111,6 +2116,7 @@
 				B0C7B31616E49D0F007A6BBA /* UIViewController+MFSideMenu.m in Sources */,
 				B0C7B31D16E5C64E007A6BBA /* FollowerEvent.m in Sources */,
 				B0C7B32016E5CB62007A6BBA /* EventBase.m in Sources */,
+				B0E8420D16E8B5E2008BB729 /* JoinMealEvent.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

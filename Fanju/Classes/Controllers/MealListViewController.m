@@ -270,6 +270,7 @@
     ImageDownloader *iconDownloader = [imageDownloadsInProgress objectForKey:indexPath];
     if (iconDownloader == nil && !mealInfo.finishLoadingAllImages)
     {
+        NSLog(@"start downloading images for index path: (%d,%d)", indexPath.section, indexPath.row);
         iconDownloader = [[ImageDownloader alloc] init];
         iconDownloader.meal = mealInfo;
         iconDownloader.indexPathInTableView = indexPath;
@@ -292,6 +293,41 @@
             [self startIconDownload:item.mealInfo forIndexPath:indexPath];
         }
     }
+    NSMutableArray* preloadedPaths = [NSMutableArray array];
+    NSIndexPath* lastIndexPath = [visiblePaths lastObject];
+    [preloadedPaths addObjectsFromArray:[self indexPathsUnder:lastIndexPath count:2]];
+    [self preloadImages:preloadedPaths];
+}
+
+-(void)preloadImages:(NSArray*)indexPaths{
+    for (NSIndexPath* indexPath in indexPaths) {
+        MealTableItem* item = [self.dataSource tableView:self.tableView objectForRowAtIndexPath:indexPath];
+        [self preDownload:item.mealInfo.photoFullUrl];
+        for (UserProfile* participant in item.mealInfo.participants) {
+            [self preDownload:participant.smallAvatarFullUrl];
+        }
+    }
+}
+
+-(void)preDownload:(NSString*)url{
+    TTURLRequest* request = [TTURLRequest requestWithURL:url delegate:self];
+    request.response = [[TTURLImageResponse alloc] init];
+    [request send];
+}
+-(NSArray*)indexPathsUnder:(NSIndexPath*)indexPath count:(NSInteger)count{
+    NSMutableArray* indexPaths = [NSMutableArray array];
+    NSIndexPath* current = indexPath;
+    for(int i = 0; i < count; ++i){
+        if (current.row + 1 < [self.dataSource tableView:self.tableView numberOfRowsInSection:current.section]) {
+            current = [NSIndexPath indexPathForRow:current.row + 1 inSection:current.section];
+        } else if (current.section < [self.dataSource numberOfSectionsInTableView:self.tableView]){
+            current = [NSIndexPath indexPathForRow:0 inSection:current.section + 1];
+        } else{
+            break;
+        }
+        [indexPaths addObject:current];
+    }
+    return indexPaths;
 }
 
 - (void)mealImageDidLoad:(NSIndexPath*) indexPath withImage:(UIImage*)image{
@@ -322,8 +358,7 @@
 
 #pragma mark -
 #pragma mark Deferred image loading (UIScrollViewDelegate)
-
--(void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView{
+-(void)scrollViewDidScroll:(UIScrollView *)scrollView{
     [self loadImagesForOnscreenRows];
 }
 @end

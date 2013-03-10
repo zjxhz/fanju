@@ -15,6 +15,8 @@
 #import "FollowerEvent.h"
 #import "DateUtil.h"
 #import "NewUserDetailsViewController.h"
+#import "JoinMealEvent.h"
+#import "MealDetailViewController.h"
 
 @interface NotificationViewController (){
     NSMutableArray* _notifications;
@@ -44,6 +46,7 @@
     NSFetchRequest *req = [[NSFetchRequest alloc] init];
     NSManagedObjectContext* context = [XMPPHandler sharedInstance].messageManagedObjectContext;
     req.entity = [NSEntityDescription entityForName:@"EOMessage" inManagedObjectContext:context];
+//    req.predicate = [NSPredicate predicateWithFormat:@"node.length > 0"]; //TODO notification filtering
     NSSortDescriptor *sortByTime = [[NSSortDescriptor alloc] initWithKey:@"time" ascending:NO];
     req.sortDescriptors = @[sortByTime];
     
@@ -65,45 +68,90 @@
 }
 
 -(void)createAndInsertEvent:(EOMessage*)message append:(BOOL)append{
+    NSDictionary* data = [message.payload objectFromJSONString];
+    EventBase* event = nil;
     if ([EventBase eventType:message] == [FollowerEvent class]) {
-        NSDictionary* data = [message.payload objectFromJSONString];
         FollowerEvent* fe = [[FollowerEvent alloc] init];
-        if (append) {
-            [_notifications addObject:fe];
-        } else {
-            [_notifications insertObject:fe atIndex:0];
-        }
-        fe.time = message.time;
+        event = fe;
         NSString* followerID = [data valueForKey:@"follower"];
         fe.followerID = followerID;
-        UserProfile* follower = [self loadUserFromCache:followerID];
-
-        if (follower) {
-            fe.follower = follower;
-            [self loadUserAvatar:follower];
+        [self setOrFetchUser:fe propertyName:@"follower" userID:followerID];
+    } else if([EventBase eventType:message] == [JoinMealEvent class]){
+        JoinMealEvent* je = [[JoinMealEvent alloc] init];
+        event = je;
+        NSString* participantID = [data valueForKey:@"participant"];
+        je.participantID = participantID;
+        [self setOrFetchUser:je propertyName:@"participant" userID:participantID];
+        
+        NSString* mealID = [data valueForKey:@"meal"];
+        je.mealID = mealID;
+        MealInfo* meal = [self loadMealFromCache:mealID];
+        
+        if (meal) {
+            je.meal = meal;
             [self.tableView reloadData];
         } else {//user info not found in cache, touch the network and save it to cache for later use
-            [[NetworkHandler getHandler] requestFromURL:[self userURL:followerID] method:GET cachePolicy:TTURLRequestCachePolicyDefault success:^(id obj){
+            [[NetworkHandler getHandler] requestFromURL:[self mealURL:mealID] method:GET cachePolicy:TTURLRequestCachePolicyDefault success:^(id obj){
                 [self.tableView reloadData];
             } failure:^{
-                NSLog(@"failed to load users in notifications");
+                NSLog(@"failed to load meal in notifications");
             }];
         }
+        
+    }
+    if (event) {
+        event.time = message.time;
+        if (append) {
+            [_notifications addObject:event];
+        } else {
+            [_notifications insertObject:event atIndex:0];
+        }
+        [self.tableView reloadData];
+    }
+}
+
+-(void)setOrFetchUser:(id)target propertyName:(NSString*)propertyName userID:(NSString*)userID{
+    UserProfile* user = [self loadUserFromCache:userID];
+    
+    if (user) {
+        [target setValue:user forKey:propertyName];
+        [self loadUserAvatar:user];
+        [self.tableView reloadData];
+    } else {//user info not found in cache, touch the network and save it to cache for later use
+        [[NetworkHandler getHandler] requestFromURL:[self userURL:userID] method:GET cachePolicy:TTURLRequestCachePolicyDefault success:^(id obj){
+            [self.tableView reloadData];
+        } failure:^{
+            NSLog(@"failed to load users in notifications");
+        }];
     }
 }
 
 -(UserProfile*)loadUserFromCache:(NSString*)userID{
-    NSString* url = [NSString stringWithFormat:@"http://%@/api/v1/simple_user/%@/?format=json", EOHOST, userID];
+    NSString* url = [self userURL:userID];
     NSData* cachedData = [[TTURLCache sharedCache] dataForURL:url];
-    NSDictionary* userData = [cachedData objectFromJSONData];
-    if (userData) {
-        return [UserProfile profileWithData:userData];
+    NSDictionary* dict = [cachedData objectFromJSONData];
+    if (dict) {
+        return [UserProfile profileWithData:dict];
+    }
+    return nil;
+}
+
+-(MealInfo*)loadMealFromCache:(NSString*)mealID{
+    NSString* url = [NSString stringWithFormat:@"http://%@/api/v1/meal/%@/?format=json", EOHOST, mealID];
+    NSData* cachedData = [[TTURLCache sharedCache] dataForURL:url];
+    NSDictionary* dict = [cachedData objectFromJSONData];
+    if (dict) {
+        return [MealInfo mealInfoWithData:dict];
     }
     return nil;
 }
 
 -(NSString*)userURL:(NSString*)userID{
    return [NSString stringWithFormat:@"http://%@/api/v1/simple_user/%@/?format=json", EOHOST, userID];
+}
+
+-(NSString*)mealURL:(NSString*)mealID{
+    return [NSString stringWithFormat:@"http://%@/api/v1/meal/%@/?format=json", EOHOST, mealID];
 }
 
 -(void)loadUserAvatar:(UserProfile*)user{
@@ -137,10 +185,14 @@
     
     if (!cell) {
         cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:CellIdentifier];
-        
         UILabel* timeLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, 60, 25)];
         timeLabel.backgroundColor = [UIColor clearColor];
         cell.accessoryView = timeLabel;
+        cell.selectionStyle = UITableViewCellSelectionStyleNone;
+        cell.imageView.userInteractionEnabled = YES;
+        UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(avatarTapped:)];
+        tap.delegate = self;
+        [cell.imageView addGestureRecognizer:tap];
     }
     
     UILabel* timeLabel = (UILabel* )cell.accessoryView;
@@ -148,21 +200,48 @@
     
     if ([event isKindOfClass:[FollowerEvent class]]) {
         FollowerEvent* fe = (FollowerEvent*)event;
+        if (!fe.follower) {
+            fe.follower = [self loadUserFromCache:fe.followerID];
+        }
+        
         if (fe.follower) {
-            cell.textLabel.text = fe.follower.name;
+            [self configureCell:cell withUser:fe.follower];
             cell.detailTextLabel.text = @"关注了你";
-            NSData* data =  [[TTURLCache sharedCache] dataForURL:[fe.follower smallAvatarFullUrl]];
-            UIImage* image = [UIImage imageWithData:data];
-            if (image) {
-                cell.imageView.image = image;
-            }
         } else {
-            cell.textLabel.text = @"加在中……";
-            cell.detailTextLabel.text = @"";
-            cell.imageView.image = [UIImage imageNamed:@"anno"];
+            [self configureLoadingCell:cell];
+        }
+    } else if ([event isKindOfClass:[JoinMealEvent class]]) {
+        JoinMealEvent* je = (JoinMealEvent*)event;
+        if (!je.participant) {
+            je.participant = [self loadUserFromCache:je.participantID];
+        }
+        if (!je.meal) {
+            je.meal = [self loadMealFromCache:je.mealID];
+        }
+        
+        if (je.participant && je.meal) {
+            [self configureCell:cell withUser:je.participant];
+            cell.detailTextLabel.text = [NSString stringWithFormat:@"参加了饭局：%@", je.meal.topic];
+        } else {
+            [self configureLoadingCell:cell];
         }
     }
     return cell;
+}
+
+-(void)configureCell:(UITableViewCell*)cell withUser:(UserProfile*)user{
+    cell.textLabel.text = user.name;
+    NSData* data =  [[TTURLCache sharedCache] dataForURL:[user smallAvatarFullUrl]];
+    UIImage* image = [UIImage imageWithData:data];
+    if (image) {
+        cell.imageView.image = image;
+    }
+}
+
+-(void)configureLoadingCell:(UITableViewCell*)cell{
+    cell.textLabel.text = @"正在加载……";
+    cell.detailTextLabel.text = @"";
+    cell.imageView.image = [UIImage imageNamed:@"anno"];
 }
 
 /*
@@ -196,14 +275,41 @@
     EventBase* event = [_notifications objectAtIndex:indexPath.row];
     if ([event isKindOfClass:[FollowerEvent class]]) {
         FollowerEvent* fe = (FollowerEvent*)event;
-        UserProfile* user = fe.follower;
-        if (user) {
-            NewUserDetailsViewController* detailViewController = [[NewUserDetailsViewController alloc] initWithStyle:UITableViewStylePlain];
-            detailViewController.user = user;
-            [self.navigationController pushViewController:detailViewController animated:YES];
+        [self pushUserDetails:fe.follower];
+    } else if([event isKindOfClass:[JoinMealEvent class]]){
+        JoinMealEvent* je = (JoinMealEvent*)event;
+        if (je.meal) {
+            MealDetailViewController *mealDetail = [[MealDetailViewController alloc] init];
+            mealDetail.mealInfo = je.meal;
+            [self.navigationController pushViewController:mealDetail animated:YES];
         }
     }
-
+}
+#pragma mark - UIGestureRecognizerDelegate
+- (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldReceiveTouch:(UITouch *)touch{
+    return [touch.view isKindOfClass:[UIImageView class]];
 }
 
+-(void)avatarTapped:(UITapGestureRecognizer *)tap {
+    if (UIGestureRecognizerStateEnded == tap.state) {
+        CGPoint p = [tap locationInView:tap.view];
+        NSIndexPath* indexPath = [self.tableView indexPathForRowAtPoint:p];
+        EventBase* event = [_notifications objectAtIndex:indexPath.row];
+        if ([event isKindOfClass:[FollowerEvent class]]) {
+            FollowerEvent* fe = (FollowerEvent*)event;
+            [self pushUserDetails:fe.follower];
+        } else if([event isKindOfClass:[JoinMealEvent class]]){
+            JoinMealEvent* je = (JoinMealEvent*)event;
+            [self pushUserDetails:je.participant];
+        }
+    }
+}
+
+-(void)pushUserDetails:(UserProfile*)user{
+    if (user) {
+        NewUserDetailsViewController* detailViewController = [[NewUserDetailsViewController alloc] initWithStyle:UITableViewStylePlain];
+        detailViewController.user = user;
+        [self.navigationController pushViewController:detailViewController animated:YES];
+    }
+}
 @end

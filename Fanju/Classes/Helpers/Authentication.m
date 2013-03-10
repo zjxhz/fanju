@@ -150,9 +150,9 @@ NSString * const EODidLogoutNotification = @"EODidLogoutNotification";
     [[NetworkHandler getHandler] requestFromURL:[NSString stringWithFormat:@"http://%@/api/v1/logout/", EOHOST]
                                          method:POST
                                         success:^(id obj) {
-                                            
+                                            NSLog(@"logged out from fanjoin.com");
                                         } failure:^{
-                                            
+                                            NSLog(@"failed to logout from server");
                                         }];
     //remove cookie
     for (NSHTTPCookie *cookie in [[NSHTTPCookieStorage sharedHTTPCookieStorage] cookies]) {

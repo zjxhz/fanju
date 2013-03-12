@@ -26,6 +26,7 @@
 #import "SVWebViewController.h"
 #import "UserTagsViewController.h"
 #import "NINetworkImageView.h"
+#import "DictHelper.h"
 
 #define TAG_MSG @"发消息"
 #define TAG_COMMENT @"发评论"
@@ -103,6 +104,29 @@
 -(void)viewDidAppear:(BOOL)animated{
     [super viewDidAppear:animated];
     [self reload:YES];
+    [self sendVisited];
+}
+
+
+-(void)sendVisited{
+    if (![self isViewForMyself]) {
+        int myID = [Authentication sharedInstance].currentUser.uID;
+        NSString* url = [NSString stringWithFormat:@"%@://%@/api/v1/user/%d/visitors/", HTTPS, EOHOST, _user.uID];
+        NSArray* params = @[[DictHelper dictWithKey:@"visitor_id" andValue:[NSString stringWithFormat:@"%d", myID]]];
+        [[NetworkHandler getHandler] requestFromURL:url
+                                             method:POST
+                                         parameters:params
+                                        cachePolicy:TTURLRequestCachePolicyNone
+                                            success:^(id obj) {
+                                                if ([[obj objectForKey:@"status"] isEqualToString:@"OK"]) {
+                                                    NSLog(@"you visited %@ and s/he now knows it", _user);
+                                                } else {
+                                                    NSLog(@"failed to tell %@ that you visited her/him", _user);
+                                                }
+                                            } failure:^{
+                                                NSLog(@"failed to tell %@ that you visited her/him", _user);
+                                            }];
+    }
 }
 
 // what we have is just a username here, so query the user info from network first
@@ -282,6 +306,9 @@
 }
 
 -(BOOL)isViewForMyself{
+    if (!_user) {
+        return NO;
+    }
     return [[Authentication sharedInstance].currentUser isEqual:_user];
 }
 -(void) requestNextMeal{

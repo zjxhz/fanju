@@ -14,7 +14,7 @@
 #import "LocationProvider.h"
 #import "XMPPHandler.h"
 
-@protocol AuthenticationDelegate <NSObject, LocationProviderDelegate>
+@protocol AuthenticationDelegate <NSObject>
 @optional
 -(void)userDidLogIn:(UserProfile*) user;
 -(void)userFailedToLogInWithError:(NSString*)error;
@@ -22,7 +22,7 @@
 -(void)sinaweiboDidLogin:(SinaWeibo*)sinaweibo;
 @end
 
-@interface Authentication : NSObject<SinaWeiboDelegate, SinaWeiboRequestDelegate, LocationProviderDelegate>{
+@interface Authentication : NSObject<SinaWeiboDelegate, SinaWeiboRequestDelegate>{
     BOOL isLoggedIn;
 }
 @property(nonatomic, weak) id<AuthenticationDelegate> delegate;

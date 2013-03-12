@@ -12,8 +12,12 @@
 @protocol LocationProviderDelegate <NSObject>
 @optional
 -(void)finishObtainingLocation:(CLLocation*)location;
+-(void)locationStoredToServer:(CLLocation*)location;
 -(void)failedObtainingLocation;
 @end
+
+typedef void(^location_updated)(CLLocation*);
+typedef void(^location_update_failed)(void);
 
 @interface LocationProvider : NSObject <CLLocationManagerDelegate> 
 
@@ -21,6 +25,8 @@
 @property (nonatomic, readonly) NSDate *lastLocationUpdatedTime;
 + (LocationProvider *) sharedProvider;
 - (void)obtainCurrentLocation:(id<LocationProviderDelegate>)aDelegate;
+-(void)updateLocation;
+-(void)updateLocationWithSuccess:(location_updated)success_block orFailed:(location_update_failed)failed;
 
 @end
 

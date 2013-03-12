@@ -14,7 +14,7 @@
 - (UserPhoto *)initWithData:(NSDictionary *)data {
     if (self = [super init]) {
         self.pID = [[data objectForKey:@"id"] intValue];
-        self.url = [ModelHelper stringValueForKey:@"photo" inDictionary:data];
+        self.url = [ModelHelper stringValueForKey:@"large" inDictionary:data];
         self.thumbnailUrl = [ModelHelper stringValueForKey:@"thumbnail" inDictionary:data];
     }
     

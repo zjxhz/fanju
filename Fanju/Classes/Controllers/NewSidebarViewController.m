@@ -24,7 +24,9 @@
 @interface NewSidebarViewController (){
     BOOL _showLoginAfterLeftBarHides;
     NSInteger _unreadMessageCount;
-    MKNumberBadgeView* _numberBadge;
+    NSInteger _unreadNotificationCount;
+    MKNumberBadgeView* _unreadMsgBadge;
+    MKNumberBadgeView* _unreadNotifBadge;
 }
 
 @end
@@ -62,16 +64,21 @@
         self.tableView.delegate = self;
         self.tableView.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"sidebar_bg.png"]];
         self.tableView.separatorColor = [UIColor blackColor];
-         _numberBadge = [[MKNumberBadgeView alloc] initWithFrame:CGRectMake(180, 10, 40, 25)];
+         _unreadMsgBadge = [[MKNumberBadgeView alloc] initWithFrame:CGRectMake(180, 10, 40, 25)];
+        _unreadNotifBadge = [[MKNumberBadgeView alloc] initWithFrame:CGRectMake(180, 10, 40, 25)];
         _unreadMessageCount =  [[NSUserDefaults standardUserDefaults] integerForKey:UNREAD_MESSAGE_COUNT];
+        _unreadNotificationCount = [[NSUserDefaults standardUserDefaults] integerForKey:UNREAD_NOTIFICATION_COUNT];
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(didLogout:)
                                                      name:EODidLogoutNotification
                                                    object:nil];
         [[NSNotificationCenter defaultCenter] addObserver:self
-                                                 selector:@selector(unreadMessageUpdated:)
+                                                 selector:@selector(unreadMsgUpdated:)
                                                      name:EOUnreadMessageCount
                                                    object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(unreadNotifUpdated:)
+                                                     name:EOUnreadNotificationCount object:nil];
         
     }
     return self;
@@ -93,6 +100,7 @@
 -(UserListViewController*) userListViewController{
     if (!_userListViewController) {
         _userListViewController = [[UserListViewController alloc] initWithStyle:UITableViewStylePlain];
+        [_userListViewController viewDidLoad];
     }
     return _userListViewController;
 }
@@ -159,12 +167,19 @@
     cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
     if (indexPath.section == 2 && indexPath.row == 2) {
         if (_unreadMessageCount > 0) {
-            _numberBadge.value = _unreadMessageCount ;
-            [cell.contentView addSubview:_numberBadge];
+            _unreadMsgBadge.value = _unreadMessageCount ;
+            [cell.contentView addSubview:_unreadMsgBadge];
         } else {
-            [_numberBadge removeFromSuperview];
+            [_unreadMsgBadge removeFromSuperview];
         }
-    } 
+    } else if(indexPath.section == 3 && indexPath.row == 0){
+        if (_unreadNotificationCount > 0) {
+            _unreadNotifBadge.value = _unreadNotificationCount ;
+            [cell.contentView addSubview:_unreadNotifBadge];
+        } else {
+            [_unreadNotifBadge removeFromSuperview];
+        }
+    }
     return cell;
 }
 
@@ -271,6 +286,9 @@
             switch (indexPath.row) {
                 case 0:
                     controller = self.notificationViewController;
+                    [[NSNotificationCenter defaultCenter] postNotificationName:EOUnreadNotificationCount
+                                                                        object:[NSNumber numberWithInteger:_unreadNotificationCount]
+                                                                      userInfo:nil];
                     break;
                 case 1:
                     controller = [[SettingsTableViewController alloc] initWithStyle:UITableViewStyleGrouped];
@@ -335,10 +353,17 @@
     _recentContactsViewController = nil;
 }
 
-- (void)unreadMessageUpdated:(NSNotification*)notif {
+- (void)unreadMsgUpdated:(NSNotification*)notif {
     _unreadMessageCount = [notif.object integerValue];
     [self.tableView reloadData];
-    [[NSUserDefaults standardUserDefaults] setInteger:_unreadMessageCount forKey:UNREAD_MESSAGE_COUNT];
+    [[NSUserDefaults standardUserDefaults] setInteger:_unreadNotificationCount forKey:UNREAD_NOTIFICATION_COUNT];
+    [[NSUserDefaults standardUserDefaults] synchronize];
+}
+
+- (void)unreadNotifUpdated:(NSNotification*)notif {
+    _unreadNotificationCount = [notif.object integerValue];
+    [self.tableView reloadData];
+    [[NSUserDefaults standardUserDefaults] setInteger:_unreadNotificationCount forKey:UNREAD_NOTIFICATION_COUNT];
     [[NSUserDefaults standardUserDefaults] synchronize];
 }
 

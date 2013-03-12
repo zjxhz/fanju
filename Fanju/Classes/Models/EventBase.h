@@ -11,5 +11,4 @@
 
 @interface EventBase : NSObject
 @property(nonatomic, strong) NSDate* time;
-+(Class)eventType:(EOMessage*)message;
 @end

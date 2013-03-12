@@ -20,6 +20,7 @@
     NSMutableDictionary* _recentContactsDict;
     NSString* _currentContact;
     NSMutableArray* _cachedMessages;//received messages which the sender is not in my roster,  these messages should be fired only when the roster is ready
+    NSInteger _unreadNotifCount;
 }
 @property(nonatomic, strong) XMPPStream* xmppStream;
 @property(nonatomic, strong) NSManagedObjectContext* messageManagedObjectContext;
@@ -43,3 +44,4 @@ extern NSString* const EONotificationDidSaveNotification;
 extern NSString * const EOMessageDidDeleteNotification;
 extern NSString* const EOCurrentContact;
 extern NSString* const EOUnreadMessageCount;
+extern NSString* const EOUnreadNotificationCount;

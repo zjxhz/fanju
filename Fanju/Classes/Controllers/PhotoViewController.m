@@ -178,6 +178,8 @@
 }
 
 - (void)request:(TTURLRequest*)request didFailLoadWithError:(NSError*)error{
+    _hud.labelText = @"下载失败，请稍后再试";
+    [_hud hide:YES afterDelay:2];
     NSLog(@"failed to load image from %@", request.urlPath);
 }
 

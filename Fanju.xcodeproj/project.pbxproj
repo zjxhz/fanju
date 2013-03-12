@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B039BC6716EF4B6B00B4F3F3 /* VisitorEvent.m in Sources */ = {isa = PBXBuildFile; fileRef = B039BC6616EF4B6B00B4F3F3 /* VisitorEvent.m */; };
+		B039BC6A16EF4C0600B4F3F3 /* SimpleUserEvent.m in Sources */ = {isa = PBXBuildFile; fileRef = B039BC6916EF4C0600B4F3F3 /* SimpleUserEvent.m */; };
+		B039BC6D16EF4E8D00B4F3F3 /* EventFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = B039BC6C16EF4E8D00B4F3F3 /* EventFactory.m */; };
 		B04C266616E2070000E86C7A /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B04C266516E2070000E86C7A /* UIKit.framework */; };
 		B04C266816E2070000E86C7A /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B04C266716E2070000E86C7A /* Foundation.framework */; };
 		B04C266A16E2070000E86C7A /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B04C266916E2070000E86C7A /* CoreGraphics.framework */; };
@@ -293,6 +296,12 @@
 
 /* Begin PBXFileReference section */
 		917F16ABACD74E9B9B9EA523 /* libPods.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libPods.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		B039BC6516EF4B6B00B4F3F3 /* VisitorEvent.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VisitorEvent.h; sourceTree = "<group>"; };
+		B039BC6616EF4B6B00B4F3F3 /* VisitorEvent.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VisitorEvent.m; sourceTree = "<group>"; };
+		B039BC6816EF4C0500B4F3F3 /* SimpleUserEvent.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SimpleUserEvent.h; sourceTree = "<group>"; };
+		B039BC6916EF4C0600B4F3F3 /* SimpleUserEvent.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SimpleUserEvent.m; sourceTree = "<group>"; };
+		B039BC6B16EF4E8C00B4F3F3 /* EventFactory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EventFactory.h; sourceTree = "<group>"; };
+		B039BC6C16EF4E8D00B4F3F3 /* EventFactory.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EventFactory.m; sourceTree = "<group>"; };
 		B04C266216E2070000E86C7A /* Fanju.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Fanju.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B04C266516E2070000E86C7A /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		B04C266716E2070000E86C7A /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -1761,6 +1770,12 @@
 				B0C7B31C16E5C64E007A6BBA /* FollowerEvent.m */,
 				B0E8420B16E8B5E2008BB729 /* JoinMealEvent.h */,
 				B0E8420C16E8B5E2008BB729 /* JoinMealEvent.m */,
+				B039BC6516EF4B6B00B4F3F3 /* VisitorEvent.h */,
+				B039BC6616EF4B6B00B4F3F3 /* VisitorEvent.m */,
+				B039BC6816EF4C0500B4F3F3 /* SimpleUserEvent.h */,
+				B039BC6916EF4C0600B4F3F3 /* SimpleUserEvent.m */,
+				B039BC6B16EF4E8C00B4F3F3 /* EventFactory.h */,
+				B039BC6C16EF4E8D00B4F3F3 /* EventFactory.m */,
 			);
 			name = Event;
 			sourceTree = "<group>";
@@ -2117,6 +2132,9 @@
 				B0C7B31D16E5C64E007A6BBA /* FollowerEvent.m in Sources */,
 				B0C7B32016E5CB62007A6BBA /* EventBase.m in Sources */,
 				B0E8420D16E8B5E2008BB729 /* JoinMealEvent.m in Sources */,
+				B039BC6716EF4B6B00B4F3F3 /* VisitorEvent.m in Sources */,
+				B039BC6A16EF4C0600B4F3F3 /* SimpleUserEvent.m in Sources */,
+				B039BC6D16EF4E8D00B4F3F3 /* EventFactory.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

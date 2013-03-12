@@ -20,6 +20,13 @@
 #import "UserProfile.h"
 #import "UserTableItem.h"
 #import "UserTableItemCell.h"
+#import "LocationProvider.h"
+@interface UserListViewController(){
+    BOOL _upadateLocationBeforeLoadUsers;
+}
+
+@end
+
 
 @implementation UserListViewController
 @synthesize baseURL = _baseURL;
@@ -45,7 +52,6 @@
 - (void)loadView {
     [super loadView];
     
-    
     AppDelegate *delegate = (AppDelegate*)[UIApplication sharedApplication].delegate;
     self.tableView.backgroundColor = [UIColor colorWithPatternImage:delegate.bgImage]; 
     self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"自定义" style:UIBarButtonItemStyleBordered target:self action:@selector(filter:)];
@@ -62,11 +68,11 @@
 
 
 -(void)loadUsers{
-    _loading = YES;
     NSString* urlWithFilter = _baseURL;
     if (_filter) {
         urlWithFilter = [NSString stringWithFormat:@"%@&%@", self.baseURL, _filter];
     }
+    NSLog(@"loading users from url: %@", urlWithFilter);
     [[NetworkHandler getHandler] requestFromURL:urlWithFilter
                                          method:GET
                                     cachePolicy:TTURLRequestCachePolicyNone 
@@ -88,17 +94,16 @@
                                             }
                                             
                                             self.dataSource = ds;
-                                            [self.tableView reloadData];
                                             if (isLoading) {
                                                 [self stopLoading];
                                             }
-                                            _loading = NO;
+                                            _upadateLocationBeforeLoadUsers = YES;
                                         } failure:^{
                                             if (isLoading) {
                                                 [self stopLoading];
                                             }
-                                            _loading = NO;
                                             [SVProgressHUD dismissWithError:@"获取数据失败"];
+                                            _upadateLocationBeforeLoadUsers = YES;
                                         }];
 
 }
@@ -143,24 +148,15 @@
 }
 
 -(void)setFilter:(NSString*)newFilter{
-    //not both nil and not equals
-    if (newFilter != _filter && ![newFilter isEqual:_filter]) {
-        _filter = newFilter;
-    }
-    
-    if (!_loading) {
-        [self loadUsers];
-    }
+    _upadateLocationBeforeLoadUsers = NO;
+    _filter = newFilter;
+    [self startLoading];
 }
 
 -(void)setBaseURL:(NSString *)baseURL{
-    if (baseURL != _baseURL && ![baseURL isEqualToString:_baseURL]){
-        _baseURL = baseURL;
-    }
-    
-    if (!_loading) {
-        [self loadUsers];
-    }
+    _upadateLocationBeforeLoadUsers = NO;
+    _baseURL = baseURL;
+    [self startLoading];
 }
 
 - (id<UITableViewDelegate>)createDelegate {
@@ -221,6 +217,8 @@
         default:
             break;
     }
+    
+    [self performSelector:@selector(startLoading) withObject:nil afterDelay:0.1];
     [self setFilter:newFilter];
 }
 
@@ -232,7 +230,28 @@
 #pragma mark -
 #pragma mark PullRefreshTableViewController
 - (void)pullToRefresh {
-    [self loadUsers];
+    if (_upadateLocationBeforeLoadUsers) {
+        [[LocationProvider sharedProvider] updateLocationWithSuccess:^(CLLocation *location) {
+            NSLog(@"load users for lat and lng: %f, %f", location.coordinate.latitude,  location.coordinate.longitude );
+            NSString* newFilter = [NSString stringWithFormat:@"lat=%f&lng=%f", location.coordinate.latitude,
+                                   location.coordinate.longitude];
+            if (_filter) {
+                NSUInteger latFilterLoc = [_filter rangeOfString:@"lat="].location;
+                if (latFilterLoc != NSNotFound) {
+                    _filter = [_filter substringFromIndex:latFilterLoc];
+                }
+                _filter = [NSString stringWithFormat:@"%@&%@", _filter, newFilter];
+            } else {
+                _filter = newFilter;
+            }
+            NSLog(@"load users with filter %@", _filter);
+            [self loadUsers];
+        } orFailed:^{
+            NSLog(@"failed to update location, just load users for current location");
+            [self loadUsers];
+        }];
+    } else {
+        [self loadUsers];
+    }
 }
-
 @end

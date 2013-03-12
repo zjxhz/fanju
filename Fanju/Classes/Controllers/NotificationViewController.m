@@ -17,6 +17,8 @@
 #import "NewUserDetailsViewController.h"
 #import "JoinMealEvent.h"
 #import "MealDetailViewController.h"
+#import "VisitorEvent.h"
+#import "EventFactory.h"
 
 @interface NotificationViewController (){
     NSMutableArray* _notifications;
@@ -69,16 +71,13 @@
 
 -(void)createAndInsertEvent:(EOMessage*)message append:(BOOL)append{
     NSDictionary* data = [message.payload objectFromJSONString];
-    EventBase* event = nil;
-    if ([EventBase eventType:message] == [FollowerEvent class]) {
-        FollowerEvent* fe = [[FollowerEvent alloc] init];
-        event = fe;
-        NSString* followerID = [data valueForKey:@"follower"];
-        fe.followerID = followerID;
-        [self setOrFetchUser:fe propertyName:@"follower" userID:followerID];
-    } else if([EventBase eventType:message] == [JoinMealEvent class]){
-        JoinMealEvent* je = [[JoinMealEvent alloc] init];
-        event = je;
+    id event = [[EventFactory sharedFactory] createEvent:message];
+    if ([event isKindOfClass:[SimpleUserEvent class]]) {
+        SimpleUserEvent* sue = event;
+        sue.userID = [data valueForKey:sue.userFieldName];
+        [self setOrFetchUser:sue propertyName:@"user" userID:sue.userID];
+    } else if([event isKindOfClass:[JoinMealEvent class]]){
+        JoinMealEvent* je = event;
         NSString* participantID = [data valueForKey:@"participant"];
         je.participantID = participantID;
         [self setOrFetchUser:je propertyName:@"participant" userID:participantID];
@@ -100,7 +99,8 @@
         
     }
     if (event) {
-        event.time = message.time;
+        EventBase* eb = event;
+        eb.time = message.time;
         if (append) {
             [_notifications addObject:event];
         } else {
@@ -198,15 +198,15 @@
     UILabel* timeLabel = (UILabel* )cell.accessoryView;
     timeLabel.text = [DateUtil userFriendlyStringFromDate:event.time];
     
-    if ([event isKindOfClass:[FollowerEvent class]]) {
-        FollowerEvent* fe = (FollowerEvent*)event;
-        if (!fe.follower) {
-            fe.follower = [self loadUserFromCache:fe.followerID];
+    if ([event isKindOfClass:[SimpleUserEvent class]]) {
+        SimpleUserEvent* se = (FollowerEvent*)event;
+        if (!se.user) {
+            se.user = [self loadUserFromCache:se.userID];
         }
         
-        if (fe.follower) {
-            [self configureCell:cell withUser:fe.follower];
-            cell.detailTextLabel.text = @"关注了你";
+        if (se.user) {
+            [self configureCell:cell withUser:se.user];
+            cell.detailTextLabel.text = se.eventDescription;
         } else {
             [self configureLoadingCell:cell];
         }
@@ -272,10 +272,10 @@
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    EventBase* event = [_notifications objectAtIndex:indexPath.row];
-    if ([event isKindOfClass:[FollowerEvent class]]) {
-        FollowerEvent* fe = (FollowerEvent*)event;
-        [self pushUserDetails:fe.follower];
+    id event = [_notifications objectAtIndex:indexPath.row];
+    if ([event isKindOfClass:[SimpleUserEvent class]]) {
+        SimpleUserEvent* se = event;
+        [self pushUserDetails:se.user];
     } else if([event isKindOfClass:[JoinMealEvent class]]){
         JoinMealEvent* je = (JoinMealEvent*)event;
         if (je.meal) {
@@ -294,10 +294,10 @@
     if (UIGestureRecognizerStateEnded == tap.state) {
         CGPoint p = [tap locationInView:tap.view];
         NSIndexPath* indexPath = [self.tableView indexPathForRowAtPoint:p];
-        EventBase* event = [_notifications objectAtIndex:indexPath.row];
-        if ([event isKindOfClass:[FollowerEvent class]]) {
-            FollowerEvent* fe = (FollowerEvent*)event;
-            [self pushUserDetails:fe.follower];
+        id event = [_notifications objectAtIndex:indexPath.row];
+        if ([event isKindOfClass:[SimpleUserEvent class]]) {
+            SimpleUserEvent* se = event;
+            [self pushUserDetails:se.user];
         } else if([event isKindOfClass:[JoinMealEvent class]]){
             JoinMealEvent* je = (JoinMealEvent*)event;
             [self pushUserDetails:je.participant];

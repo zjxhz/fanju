@@ -24,5 +24,6 @@
 #define BLAME_NETWORK_ERROR_MESSAGE @"出错了，网络问题？"
 #define PAGE_LIMIT 5 //number of items to be shown in one page
 #define UNREAD_MESSAGE_COUNT @"UNREAD_MESSAGE_COUNT"
+#define UNREAD_NOTIFICATION_COUNT @"UNREAD_NOTIFICATION_COUNT"
 
 #endif

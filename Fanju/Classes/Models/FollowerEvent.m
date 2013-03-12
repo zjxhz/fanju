@@ -9,7 +9,12 @@
 #import "FollowerEvent.h"
 
 @implementation FollowerEvent
-@dynamic time;
-
+-(id)init{
+    if (self = [super init]) {
+        self.eventDescription = @"关注了你";
+        self.userFieldName = @"follower";
+    }
+    return self;
+}
 
 @end

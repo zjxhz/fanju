@@ -8,10 +8,8 @@
 
 #import <Foundation/Foundation.h>
 #import "EOMessage.h"
-#import "EventBase.h"
+#import "SimpleUserEvent.h"
 #import "UserProfile.h"
 
-@interface FollowerEvent : EventBase
-@property(nonatomic, strong) NSString* followerID;//in CoreData only ID is saved, which will be used to retrive user info from either cache or network
-@property(nonatomic, strong) UserProfile* follower;
+@interface FollowerEvent : SimpleUserEvent
 @end

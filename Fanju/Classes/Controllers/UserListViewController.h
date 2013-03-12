@@ -11,9 +11,9 @@
 #import "LoadMoreTableItem.h"
 #import "CustomUserFilterViewController.h"
 #import "PullRefreshTableViewController.h"
+#import "LocationProvider.h"
 
 @interface UserListViewController : PullRefreshTableViewController<UIActionSheetDelegate, CustomUserFilterViewControllerDelegate, UIScrollViewDelegate, UITableViewDelegate>{
-    BOOL _loading;
     LoadMoreTableItem *_loadMore;
     NSString* _filter;
     CustomUserFilterViewController* _customUserFilterViewController;

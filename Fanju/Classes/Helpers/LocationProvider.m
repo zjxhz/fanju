@@ -10,7 +10,10 @@
 #import "GCDSingleton.h"
 
 #define TIME_INTERVAL 10*60
-@interface LocationProvider ()
+@interface LocationProvider (){
+    location_updated updated_blocked;
+    location_update_failed update_failed_block;
+}
 @property (nonatomic, strong) id<LocationProviderDelegate> locationDelegate;
 @property (nonatomic, strong) CLLocationManager *lm;
 @end
@@ -43,24 +46,39 @@
     [self.lm startUpdatingLocation];
 }
 
+-(void)updateLocationWithSuccess:(location_updated)success_block orFailed:(location_update_failed)failed{
+    updated_blocked = success_block;
+    update_failed_block = failed;
+    [self updateLocation];
+}
+
 #pragma mark CLLocationManagerDelegate
 - (void)locationManager: (CLLocationManager *) manager 
 	didUpdateToLocation: (CLLocation *) newLocation 
 		   fromLocation: (CLLocation *) oldLocation{
 	
     self.lastLocation = newLocation;
-    if ([[NSDate date] timeIntervalSinceDate:_lastLocationUpdatedTime] < 60) {
+    if ([[NSDate date] timeIntervalSinceDate:_lastLocationUpdatedTime] < 5) {
         NSLog(@"updating too often, just ignore");
     } else {
         [self.locationDelegate finishObtainingLocation:newLocation];
     }
-    _lastLocationUpdatedTime = [[NSDate alloc] init];
-    [self.lm stopUpdatingLocation]; 
+    _lastLocationUpdatedTime = [NSDate date];
+    [self.lm stopUpdatingLocation];
+    if (updated_blocked) {
+        updated_blocked(newLocation);
+        updated_blocked = nil;
+    }
 }
 
 - (void)locationManager:(CLLocationManager *)manager didFailWithError:(NSError *)error {
 	[self.locationDelegate failedObtainingLocation];
     NSLog(@"failed to obtain location with error: %@", error);
     [self.lm stopUpdatingLocation];
+    if (update_failed_block) {
+        update_failed_block();
+        update_failed_block = nil;
+    }
+
 }
 @end

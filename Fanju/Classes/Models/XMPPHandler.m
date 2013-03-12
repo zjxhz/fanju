@@ -17,6 +17,7 @@ NSString * const EONotificationDidSaveNotification = @"EONotificationDidSaveNoti
 NSString * const EOMessageDidDeleteNotification = @"EOMessageDidDeleteNotification";
 NSString * const EOCurrentContact = @"EOCurrentContact";
 NSString * const EOUnreadMessageCount = @"EOUnreadMessageCount";
+NSString * const EOUnreadNotificationCount = @"EOUnreadNotificationCount";
 
 @implementation XMPPHandler
 
@@ -59,7 +60,7 @@ NSString * const EOUnreadMessageCount = @"EOUnreadMessageCount";
         [_xmppvCardTempModule addDelegate:self delegateQueue:dispatch_get_main_queue()];
         [_xmppvCardAvatarModule activate:_xmppStream];
         _cachedMessages = [NSMutableArray array];
-        
+        _unreadNotifCount = [[NSUserDefaults standardUserDefaults] integerForKey:UNREAD_MESSAGE_COUNT];
     }
     _xmppStream.myJID = [XMPPJID jidWithString:_currentUser.jabberID];
     _xmppStream.hostName = EOHOST;
@@ -236,6 +237,10 @@ NSString * const EOUnreadMessageCount = @"EOUnreadMessageCount";
     } else {
         [[NSNotificationCenter defaultCenter] postNotificationName:EONotificationDidSaveNotification
                                                             object:message
+                                                          userInfo:nil];
+        _unreadNotifCount++;
+        [[NSNotificationCenter defaultCenter] postNotificationName:EOUnreadNotificationCount
+                                                            object:[NSNumber numberWithInteger:_unreadNotifCount]
                                                           userInfo:nil];
     }
 

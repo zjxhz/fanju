@@ -8,12 +8,10 @@
 
 #import "MapViewController.h"
 #import "AppDelegate.h"
-#import "RestaurantInfo.h"
-
+#import "Location.h"
+#import "UIViewController+CustomNavigationBar.h"
 @interface MapViewController () 
 @property (nonatomic, strong) MKMapView* myMapView;
-@property (nonatomic, strong) RestaurantInfo* info;
-
 -(void)displayMap;
 -(void)launchRoute;
 @end
@@ -46,24 +44,10 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    TTButton *btn = [TTButton buttonWithStyle:@"embossedBackButton:" title:NSLocalizedString(@"Back", nil)];
-    [btn addTarget:self.navigationController 
-            action:@selector(popViewControllerAnimated:) 
-  forControlEvents:UIControlEventTouchDown];
-    btn.font = [UIFont systemFontOfSize:13];
-    [btn sizeToFit];
-    UIBarButtonItem *temporaryBarButtonItem = [[UIBarButtonItem alloc] initWithCustomView:btn];
-    self.navigationItem.leftBarButtonItem = temporaryBarButtonItem;
-    self.navigationItem.hidesBackButton = YES;
-    
-    btn = [TTButton buttonWithStyle:@"embossedButton:" title:NSLocalizedString(@"Direction", nil)];
-    [btn addTarget:self
-            action:@selector(launchRoute) 
-  forControlEvents:UIControlEventTouchDown];
-    btn.font = [UIFont systemFontOfSize:13];
-    [btn sizeToFit];
-    temporaryBarButtonItem = [[UIBarButtonItem alloc] initWithCustomView:btn];
-    self.navigationItem.rightBarButtonItem = temporaryBarButtonItem;
+    [self customNavigationBar:@"路线"];
+    UIBarButtonItem* item = self.navigationItem.rightBarButtonItem;
+    UIButton* rightButton = (UIButton*)item.customView;
+    [rightButton addTarget:self action:@selector(launchRoute) forControlEvents:UIControlEventTouchUpInside];
 }
 
 -(void)displayMap
@@ -71,7 +55,7 @@
     @autoreleasepool {
         MKCoordinateRegion region; 
         MKCoordinateSpan span; 
-        span.latitudeDelta=0.1; 
+        span.latitudeDelta=0.1;
         span.longitudeDelta=0.1; 
         
         CLLocationCoordinate2D location = self.info.coordinate;         
@@ -80,8 +64,9 @@
         region.center=location; 
         
         [self.myMapView setRegion:region animated:TRUE]; 
-        [self.myMapView regionThatFits:region]; 
-        [self.myMapView addAnnotation:self.info];
+        [self.myMapView regionThatFits:region];
+        Location* annotation = [[Location alloc] initWithName:self.info.name address:self.info.address coordinate:self.info.coordinate];
+        [self.myMapView addAnnotation:annotation];
     }
 }
 

@@ -22,7 +22,7 @@
 -(void)sinaweiboDidLogin:(SinaWeibo*)sinaweibo;
 @end
 
-@interface Authentication : NSObject<SinaWeiboDelegate, SinaWeiboRequestDelegate>{
+@interface Authentication : NSObject<SinaWeiboDelegate, SinaWeiboRequestDelegate, LocationProviderDelegate>{
     BOOL isLoggedIn;
 }
 @property(nonatomic, weak) id<AuthenticationDelegate> delegate;

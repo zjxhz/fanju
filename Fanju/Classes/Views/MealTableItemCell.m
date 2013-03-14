@@ -14,20 +14,19 @@
 #import "LabelWithInsets.h"
 #import "AvatarFactory.h"
 #import "UIImage+Utilities.h"
+#import "DateUtil.h"
 
 #define MAX_VISIBLE_PARTICIPANTS 5
 #define CELL_RECT CGRectMake(0, 0, 320, 340) 
 @interface MealTableItemCell (){
     UIImageView* _backgroundView;
-    NSDateFormatter *_dateFormatter;
 }
 @end
 
 @implementation MealTableItemCell
 
 + (CGFloat)tableView:(UITableView*)tableView rowHeightForObject:(id)item {  
-	// Set the height for the particular cell
-	return 340.0;
+	return 324;
 }
 
 - (id)initWithStyle:(UITableViewCellStyle)style
@@ -36,8 +35,6 @@
                     reuseIdentifier:identifier]) {
         _backgroundView = [[UIImageView alloc] initWithFrame:CELL_RECT];
         self.backgroundView = _backgroundView;
-        _dateFormatter = [[NSDateFormatter alloc] init];
-        [_dateFormatter setDateFormat:@"HH:mm - MM.dd"];
 	}
     
 	return self;
@@ -77,17 +74,10 @@
             CGContextRef context = UIGraphicsGetCurrentContext();
             
             //big frame BG
-            UIColor* backgroundColor = RGBCOLOR(0xBB, 0xBB, 0xBB);
-            [backgroundColor set];
-            CGRect bigFrame = CGRectMake(28, 0, 264, 326);
-            CGContextFillRect(context, bigFrame);
+            UIImage* meal_bg = [UIImage imageNamed:@"shouye_fj"];
+            [meal_bg drawAtPoint:CGPointMake(9, 3)];
             
             [self drawInfoInContext:context];
-            //participants BG
-            UIColor* participantsFrameBgColor = RGBCOLOR(0x33, 0x33, 0x33);
-            [participantsFrameBgColor set];
-            CGContextFillRect(context, CGRectMake(32, 264, 256, 58));
-            
             _backgroundView.image = UIGraphicsGetImageFromCurrentImageContext();
             [self mealInfo].fullPhoto = _backgroundView.image;
             UIGraphicsEndImageContext();
@@ -98,55 +88,66 @@
 
 -(void)drawInfoInContext:(CGContextRef)context{
     MealTableItem* item = (MealTableItem*)_item;
+    MealInfo* meal = item.mealInfo;
     CGFloat offset = 0;
     
     //Avarage and cost
-    UIColor* textBackgroundColor = RGBACOLOR(0, 0, 0, 0.5);
-    [textBackgroundColor set];
-    CGContextFillRect(context, CGRectMake(35 + offset, 5, 150, 20));
-    UIColor *textColor = RGBCOLOR(255, 0xF0, 0);
-    [textColor set];
-    NSString* costAndNumOfParticipants = [NSString stringWithFormat:NSLocalizedString(@"AverageCost", nil), item.mealInfo.price, item.mealInfo.actualPersons, item.mealInfo.maxPersons];
-    [costAndNumOfParticipants drawAtPoint:CGPointMake(37 + offset, 9) withFont:[UIFont boldSystemFontOfSize:12]];
+    UIImage* cost_bg = [UIImage imageNamed:@"jiage"];
+    [cost_bg drawAtPoint:CGPointMake(25 + offset, 8)];
     
-    //like
-    [textBackgroundColor set];
-    CGContextFillRect(context, CGRectMake(35 + offset, 28, 50, 20));
-    UIImage *likeImage = [UIImage imageNamed:@"like.png"];
-    [likeImage drawInRect:CGRectMake(40 + offset, 30, 15, 14)];
-    NSString* likeText =[NSString stringWithFormat:@"%d", item.mealInfo.likes.count];
+    UIColor *textColor = RGBCOLOR(200, 200, 200);
     [textColor set];
-    [likeText drawAtPoint:CGPointMake(65 + offset, 29) withFont:[UIFont boldSystemFontOfSize:12]];
+    NSString* costAndNumOfParticipants = [NSString stringWithFormat:NSLocalizedString(@"AverageCost", nil),
+                                          meal.price, (meal.maxPersons-meal.actualPersons)];
+    [costAndNumOfParticipants drawAtPoint:CGPointMake(37 + offset, 11) withFont:[UIFont systemFontOfSize:14]];
+    
+    //participants BG
+    UIColor* participantsFrameBgColor = RGBACOLOR(0, 0, 0, 0.5);
+    [participantsFrameBgColor set];
+    CGContextFillRect(context, CGRectMake(16, 200, 290, 83));
+    
+    textColor = [UIColor whiteColor];
+    [textColor set];
+    UIImage* loc = [UIImage imageNamed:@"loc"];
+    [loc drawAtPoint:CGPointMake(24, 210)];
+    [meal.restaurant.name drawAtPoint:CGPointMake(loc.size.width + 24 + 4, 210) withFont:[UIFont systemFontOfSize:11]];
+    
+
+    UIImage *photo_bg = [UIImage imageNamed:@"p_photo_bg"];
+    int max = meal.participants.count > 5 ? 5 : meal.participants.count;
+    for (int i = 0; i < max; ++i) {
+        int x = 24 + 55 * i;
+        [photo_bg drawAtPoint:CGPointMake(x, 227)];
+    }
     
     //topic
-    [textBackgroundColor set];
-    CGContextFillRect(context, CGRectMake(32 + offset, 211, 256, 25));
+    textColor = RGBCOLOR(50, 50, 50);
     [textColor set];
-    NSString* topicText = item.mealInfo.topic;
-    [topicText drawAtPoint:CGPointMake(37 + offset, 215) withFont:[UIFont boldSystemFontOfSize:15]];
+    NSString* topicText = meal.topic;
+    UIFont* topicFont = [UIFont systemFontOfSize:18];
+    CGFloat topicWidth = [topicText sizeWithFont:topicFont].width;
+    CGFloat topicX = (320 - topicWidth) / 2;
+    [topicText drawAtPoint:CGPointMake(topicX, 288) withFont:[UIFont systemFontOfSize:18]];
     
     //time
-    [textBackgroundColor set];
-    CGContextFillRect(context, CGRectMake(32 + offset, 236, 256, 20));
+    textColor = RGBCOLOR(150, 150, 150);
     [textColor set];
-    NSDateFormatter *df = [[NSDateFormatter alloc] init];
-    [df setDateFormat:@"HH:mm - MM.dd"];
-    NSString* timeText = [NSString stringWithFormat:NSLocalizedString(@"Time", nil),[df stringFromDate:item.mealInfo.time]];
-    [timeText drawAtPoint:CGPointMake(37 + offset, 240) withFont:[UIFont systemFontOfSize:12]];
+    NSString* timeText = [meal timeText];
+    [timeText drawAtPoint:CGPointMake(100, 311) withFont:[UIFont systemFontOfSize:10]];
 
 }
 
 -(void)setMealImage:(UIImage*)mealImage{
-    [self mergeImageToBackgroundView:[self cropImage:mealImage] forRect:CGRectMake(32, 4, 256, 256) background:YES];
+    [self mergeImageToBackgroundView:[self cropImage:mealImage] forRect:CGRectMake(16, 8, 290, 275) background:YES];
 }
 
 -(void)setAvatar:(UIImage*)image forUser:(UserProfile*)user{
     MealTableItem *item = (MealTableItem *)_item;
-    int index = [item.mealInfo.participants indexOfObject:user]; //[[self mealInfo].host isEqual:user] ? 0 : 
+    int index = [item.mealInfo.participants indexOfObject:user];
     if (index >= MAX_VISIBLE_PARTICIPANTS){
         return;
     }
-    CGRect rect = CGRectMake(40 + 50 * index, 272, 41, 41);
+    CGRect rect = CGRectMake(27.5 + 55 * index, 230, 46, 46);
     [self mergeImageToBackgroundView:image forRect:rect background:NO];
 }
 
@@ -169,10 +170,18 @@
 }
 
 -(UIImage*)cropImage:(UIImage*)image{
-    if (image.size.width >= image.size.height) {
-        return [image croppedImage:CGRectMake((image.size.width - image.size.height)/2, 0, image.size.height, image.size.height)];
+    CGSize size = image.size;
+    if (size.width >= size.height) {
+        CGFloat expectedWidth  = size.height*290.0/275.0;
+        CGFloat x = (size.width - expectedWidth) / 2;
+        CGRect newRect = CGRectMake(x, 0, expectedWidth, size.height);
+//        NSLog(@"cropped rect: %@", NSStringFromCGRect(newRect));
+        UIImage* cropped =  [image croppedImage:newRect];
+        return cropped;
+//        return [cropped resizedImage:CGSizeMake(290, 275) imageOrientation:UIImageOrientationUp];
     } else {
-        return [image croppedImage:CGRectMake((image.size.height - image.size.width)/2, 0, image.size.width, image.size.width)];
+        NSLog(@"unsupported image");
+        return nil;
     }
 }
 @end

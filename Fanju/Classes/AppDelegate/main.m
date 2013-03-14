@@ -9,21 +9,13 @@
 #import <UIKit/UIKit.h>
 
 #import "AppDelegate.h"
-#import "SCClassUtils.h"
 
 CFAbsoluteTime StartTime;
 
 int main(int argc, char *argv[])
 {
     StartTime = CFAbsoluteTimeGetCurrent();
-    @autoreleasepool {
-        [SCClassUtils swizzleSelector:@selector(insertSubview:atIndex:)
-                              ofClass:[UINavigationBar class]
-                         withSelector:@selector(scInsertSubview:atIndex:)];
-        [SCClassUtils swizzleSelector:@selector(sendSubviewToBack:)
-                              ofClass:[UINavigationBar class]
-                         withSelector:@selector(scSendSubviewToBack:)];
-        
+    @autoreleasepool {        
         return UIApplicationMain(argc, argv, nil, NSStringFromClass([AppDelegate class]));
     }
 }

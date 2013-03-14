@@ -28,10 +28,18 @@
 }
 
 - (UIBarButtonItem *)leftMenuBarButtonItem {
-    return [[UIBarButtonItem alloc]
-            initWithImage:[UIImage imageNamed:@"menu-icon.png"] style:UIBarButtonItemStyleBordered
-            target:self.navigationController.sideMenu
-            action:@selector(toggleLeftSideMenu)];
+    UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
+    
+    UIImage *buttonImage = [UIImage imageNamed:@"more_normal"];
+    UIImage *buttonPressedImage = [UIImage imageNamed:@"more_push"] ;
+    button.frame = CGRectMake(0, 0, buttonImage.size.width, buttonImage.size.height);
+    
+    [button setBackgroundImage:buttonImage forState:UIControlStateNormal];
+    [button setBackgroundImage:buttonPressedImage forState:UIControlStateHighlighted];
+    [button addTarget:self.navigationController.sideMenu action:@selector(toggleLeftSideMenu) forControlEvents:UIControlEventTouchUpInside];
+    
+    UIBarButtonItem *buttonItem = [[UIBarButtonItem alloc] initWithCustomView:button];
+    return buttonItem;
 }
 
 - (UIBarButtonItem *)backBarButtonItem {

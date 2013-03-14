@@ -16,6 +16,15 @@
 @synthesize type = _type;
 @synthesize topic = _topic, intro = _intro, restaurant = _restaurant, time = _time, maxPersons = _maxPersons, actualPersons=_actualPersons, participants = _participants, likes = _likes, host = _host, photoURL = _photoURL, price = _price;
 
+static NSDateFormatter *_dateFormatter;
+
++(void)initialize{
+    if (!_dateFormatter) {
+        _dateFormatter = [[NSDateFormatter alloc] init];
+        [_dateFormatter setDateFormat:@"YYYY年M月d日 HH:mm"];
+    }
+}
+
 - (MealInfo *)initWithData:(NSDictionary *)data {
     if (self = [super init]) {
         _mID = [[data objectForKey:@"id"] intValue];
@@ -115,6 +124,15 @@
     info.photo = _photo;
     info.fullPhoto = _fullPhoto;
     return info;
+}
+
+
+- (NSComparisonResult)compare:(MealInfo *)other{
+    return [self.time compare:other.time];
+}
+
+-(NSString*)timeText{
+    return [NSString stringWithFormat: @"%@ %@", [DateUtil weekday:_time], [_dateFormatter stringFromDate:_time]];
 }
 
 -(NSString*)description{

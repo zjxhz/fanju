@@ -11,7 +11,6 @@
 #import "NetworkHandler.h"
 #import "Const.h"
 #import "SVProgressHUD.h"
-#import "SCAppUtils.h"
 #import <MapKit/MapKit.h>
 #import "Location.h"
 #import "LocationProvider.h"
@@ -27,6 +26,8 @@
 #import "SpeechBubble.h"
 #import "ClosablePopoverViewController.h"
 #import "OverlayViewController.h"
+#import "NINetworkImageView.h"
+#import "MapViewController.h"
 
 
 
@@ -39,7 +40,12 @@
 @synthesize mealInfo = _mealInfo;
 @synthesize tabBar = _tabBar;
 
-
+-(id)init{
+    if (self = [super init]) {
+        _mealDetailsViewDelegate = [[MealDetailsViewDelegate alloc] init];
+    }
+    return self;
+}
 
 -(void) loadView{
     [super loadView];
@@ -53,59 +59,44 @@
     NSString *userID = currentUser ? [NSString stringWithFormat:@"%d", currentUser.uID] : nil;
     if (self.mealInfo.actualPersons >= self.mealInfo.maxPersons) {
         [_joinButton setTitle:@"卖光了" forState:UIControlStateNormal];
-        _joinButton.backgroundColor = RGBCOLOR(0xF2, 0x2A, 0x39);
+//        _joinButton.backgroundColor = RGBCOLOR(0xF2, 0x2A, 0x39);
         [_joinButton removeTarget:self action:@selector(joinMeal:) forControlEvents:UIControlEventTouchDown];
     } else if (userID && [self.mealInfo hasJoined:userID]) {
         [_joinButton setTitle:@"已参加" forState:UIControlStateNormal];
-        _joinButton.backgroundColor = RGBCOLOR(0xFF, 0xCC, 0);
+//        _joinButton.backgroundColor = RGBCOLOR(0xFF, 0xCC, 0);
         [_joinButton removeTarget:self action:@selector(joinMeal:) forControlEvents:UIControlEventTouchDown];
     } else {
         [_joinButton setTitle:@"参加饭局" forState:UIControlStateNormal];
-        _joinButton.backgroundColor = RGBCOLOR(0, 0x99, 0);
+//        _joinButton.backgroundColor = RGBCOLOR(0, 0x99, 0);
         [_joinButton addTarget:self action:@selector(joinMeal:) forControlEvents:UIControlEventTouchDown];
-    }
-}
-
-- (void) updateLikeButton{
-    UserProfile* currentUser = [[Authentication sharedInstance] currentUser];
-    NSString *userID = currentUser ? [NSString stringWithFormat:@"%d", currentUser.uID] : nil;
-    [_likeButton setTitle:[NSString stringWithFormat:@"%d", _numberOfLikedPerson] forState:UIControlStateNormal];
-    if (userID && [self.mealInfo hasLiked:userID]) {
-        [_likeButton setTitleColor:RGBCOLOR(0xFF, 0x66, 0) forState:UIControlStateNormal];
-        [_likeButton setImage:[UIImage imageNamed:@"like_big.png"] forState:UIControlStateNormal];
-    } else {
-        [_likeButton setTitleColor:[UIColor grayColor] forState:UIControlStateNormal];
-        [_likeButton setImage:[UIImage imageNamed:@"not_liked_big.png"] forState:UIControlStateNormal];
     }
 }
 
 - (void)initTabView {   
     _tabBar = [[UIView alloc] initWithFrame:CGRectMake(0, self.view.frame.size.height - TAB_BAR_HEIGHT, self.view.frame.size.width, TAB_BAR_HEIGHT)];
-    _tabBar.backgroundColor = [UIColor clearColor];
-    _joinButton = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, 230, TAB_BAR_HEIGHT)];
-    _joinButton.layer.borderColor = [UIColor grayColor].CGColor;
-    _joinButton.layer.borderWidth = 1;
+    _tabBar.backgroundColor = [UIColor grayColor];
+    UIImage* join_img = [UIImage imageNamed:@"toolbth1"];
+    UIImage* join_img_push = [UIImage imageNamed:@"toolbth1_push"];
+    CGFloat x = JOIN_BUTTON_X;
+    CGFloat y = (_tabBar.frame.size.height - join_img.size.height) / 2;
+    _joinButton = [[UIButton alloc] initWithFrame:CGRectMake(JOIN_BUTTON_X, y, join_img.size.width, join_img.size.height)];
+    [_joinButton setBackgroundImage:join_img forState:UIControlStateNormal];
+    [_joinButton setBackgroundImage:join_img_push forState:UIControlStateSelected | UIControlStateHighlighted ];
     _joinButton.titleLabel.textAlignment  = UITextAlignmentCenter;
     _joinButton.titleLabel.textColor = [UIColor whiteColor];
-    _joinButton.titleLabel.font = [UIFont boldSystemFontOfSize:25];
+    _joinButton.titleLabel.font = [UIFont boldSystemFontOfSize:19];
 
-    [self updateJoinButton];  
-    _likeButton = [[UIButton alloc] initWithFrame:CGRectMake(230, 0, 90, TAB_BAR_HEIGHT)];
-    _likeButton.backgroundColor = RGBCOLOR(0xEE, 0xEE, 0xEE);
-    _likeButton.layer.borderWidth = 1;
-    _likeButton.layer.borderColor = [UIColor grayColor].CGColor;
-    UserProfile* currentUser = [[Authentication sharedInstance] currentUser];
-    NSString *userID = currentUser ? [NSString stringWithFormat:@"%d", currentUser.uID] : nil;
-    _initiallyLiked = [self.mealInfo hasLiked:userID];
-    _like = _initiallyLiked;
-    _numberOfLikedPerson = self.mealInfo.likes.count;
-    [_likeButton addTarget:self action:@selector(likeButtonClicked:) forControlEvents:UIControlEventTouchDown];
-    [_likeButton setImageEdgeInsets:UIEdgeInsetsMake(0, -10, 0, 0)]; // place the image a bit to the left
-    [self updateLikeButton];
+    [self updateJoinButton];
+    
+    UIImage* comment_img = [UIImage imageNamed:@"toolbth2"];
+    UIImage* comment_img_push = [UIImage imageNamed:@"toolbth2_push"];
+    x = _joinButton.frame.origin.x + _joinButton.frame.size.width;
+    UIButton* commentButton = [[UIButton alloc] initWithFrame:CGRectMake(x, y, comment_img.size.width, comment_img.size.height)];
+    [commentButton setBackgroundImage:comment_img forState:UIControlStateNormal];
+    [commentButton setBackgroundImage:comment_img_push forState:UIControlStateSelected | UIControlStateHighlighted ];
     
     [_tabBar addSubview:_joinButton];
-    [_tabBar addSubview:_likeButton];
-    
+    [_tabBar addSubview:commentButton];
     [self.view addSubview:_tabBar];
 
 }
@@ -113,12 +104,24 @@
 -(void)viewDidLoad
 {
     [super viewDidLoad];
-    [SCAppUtils customizeNavigationController:self.navigationController];
-    self.title = NSLocalizedString(@"MealDetail", nil);
+    self.tableView.showsVerticalScrollIndicator = NO;
+    UILabel* titleLabel = [[UILabel alloc] initWithFrame:CGRectZero];
+    titleLabel.backgroundColor = [UIColor clearColor];
+    titleLabel.text = _mealInfo.topic;
+    titleLabel.font = [UIFont systemFontOfSize:21];
+    titleLabel.textColor = RGBCOLOR(220, 220, 220);
+    [titleLabel sizeToFit];
+    
+    self.navigationItem.titleView = titleLabel;
+    
     UIButton *back = [[UIButton alloc] init];
-    [back setImage:[UIImage imageNamed:@"back.png"] forState:UIControlStateNormal];
+    back.titleLabel.font = [UIFont systemFontOfSize:12];
+    back.titleLabel.textColor = RGBCOLOR(220, 220, 220);
+    [back setTitle:@"返回" forState:UIControlStateNormal];
+    [back setBackgroundImage:[UIImage imageNamed:@"toplf"] forState:UIControlStateNormal];
+    [back setBackgroundImage:[UIImage imageNamed:@"toplf_push"] forState:UIControlStateSelected | UIControlStateHighlighted];
     [back addTarget:self.navigationController 
-            action:@selector(popViewControllerAnimated:) 
+            action:@selector(popViewControllerAnimated:)
   forControlEvents:UIControlEventTouchDown];
     [back sizeToFit];
     UIBarButtonItem *temporaryBarButtonItem = [[UIBarButtonItem alloc] initWithCustomView:back];
@@ -126,13 +129,16 @@
     self.navigationItem.leftBarButtonItem = temporaryBarButtonItem;
     self.navigationItem.hidesBackButton = YES;
     
-    UIButton* share = [UIButton buttonWithType:UIButtonTypeCustom];
-    [share setImage:[UIImage imageNamed:@"share.png"] forState:UIControlStateNormal];
+    UIButton *share = [[UIButton alloc] init];
+    share.titleLabel.font = [UIFont systemFontOfSize:12];
+    share.titleLabel.textColor = RGBCOLOR(220, 220, 220);
+    [share setTitle:@"分享" forState:UIControlStateNormal];
+    [share setBackgroundImage:[UIImage imageNamed:@"toprt"] forState:UIControlStateNormal];
+    [share setBackgroundImage:[UIImage imageNamed:@"toprt_push"] forState:UIControlStateSelected | UIControlStateHighlighted];
     [share addTarget:self action:@selector(onShareClicked:) forControlEvents:UIControlEventTouchDown];
     [share sizeToFit];
     self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithCustomView:share];
     
-    [self.tableView setFrame:CGRectMake(0, 58-320, 320, 640)];
     self.tableView.separatorColor = [UIColor clearColor];
     NSMutableArray* items = [[NSMutableArray alloc] init];
     NSMutableArray* sections = [[NSMutableArray alloc] init];
@@ -148,18 +154,30 @@
     [itemsRow addObject:_detailsView];
     [items addObject:itemsRow];
     
-    itemsRow = [[NSMutableArray alloc] init];
-    [sections addObject:@"Comments"]; 
-    [self createLoadingView];
-    [itemsRow addObject:_loadingOrNoCommentsLabel];
-    [items addObject:itemsRow];
+//    itemsRow = [[NSMutableArray alloc] init];
+//    [sections addObject:@"Comments"]; 
+//    [self createLoadingView];
+//    [itemsRow addObject:_loadingOrNoCommentsLabel];
+//    [items addObject:itemsRow];
     
     
     TTSectionedDataSource* ds = [[TTSectionedDataSource alloc] initWithItems:items sections:sections];
     self.dataSource = ds;    
-    [self requestDataFromServer];
+//    [self requestDataFromServer];
 }
 
+-(void)viewWillAppear:(BOOL)animated{
+    _mealDetailsViewDelegate.detailsHeight = _detailsView.frame.size.height;
+    [super viewWillAppear:animated];
+}
+-(void)viewDidAppear:(BOOL)animated{
+    [super viewDidAppear:animated];
+    CGRect frame = self.tableView.frame;
+    frame.origin.x = 0;
+    frame.origin.y = 0;
+    frame.size.height = 480 - 20 - 44 - TAB_BAR_HEIGHT; //- status, nav, tab
+    self.tableView.frame = frame;
+}
 
 -(void)createLoadingView{
     _loadingOrNoCommentsLabel= [[UILabel alloc] initWithFrame:CGRectMake(0, 0, 320, 20)];
@@ -230,87 +248,114 @@
 }
 - (void) initDetailsView{
     _detailsView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, DETAILS_VIEW_HEIGHT)];
-    _detailsContentView = [[UIView alloc] initWithFrame:CGRectMake(H_GAP, V_GAP, DETAILS_CONTENT_VIEW_WIDTH, DETAILS_VIEW_HEIGHT)];
-    _detailsContentView.backgroundColor = [UIColor clearColor];
-    [_detailsView addSubview:_detailsContentView];
+    _detailsView.backgroundColor = [UIColor clearColor];
     _detailsView.backgroundColor = [UIColor clearColor];
     
-    NSInteger y = 0;
-    UILabel *topic = [[UILabel alloc] initWithFrame:CGRectMake(0, y, TOPIC_WIDTH, TOPIC_HEIGHT)];
-    topic.text = self.mealInfo.topic;
-    topic.font = [ UIFont boldSystemFontOfSize:18];
-    topic.backgroundColor = [UIColor clearColor];
-    [_detailsContentView addSubview:topic];
+    //introduction
+    NSInteger x = H_GAP;
+    NSInteger y = V_GAP;
+    UIImage* image_janjie = [UIImage imageNamed:@"icon_jianjie"];
+    UIImageView *icon_jianjie = [[UIImageView alloc] initWithImage:image_janjie];
+    icon_jianjie.frame = CGRectMake(x, y, image_janjie.size.width, image_janjie.size.height);
+    [_detailsView addSubview:icon_jianjie];
     
-    TTShape* shape = [TTRoundedRectangleShape shapeWithRadius:4.5];
-    UIColor* tintColor = RGBCOLOR(0xD9, 0xD9, 0xD9);
-    TTStyle *style = [TTSTYLESHEET toolbarButtonForState:UIControlStateNormal shape:shape tintColor:tintColor font:[UIFont systemFontOfSize:12]];
+    x = icon_jianjie.frame.size.width + icon_jianjie.frame.origin.x + 3;
+    UILabel* jianjie = [self createLeftLabel:CGPointMake(x, y) text:@"简介："];
+    [_detailsView addSubview:jianjie];
     
-    TTButton *menuButton = [[TTButton alloc] initWithFrame:CGRectMake(MENU_BUTTON_X, 0, MENU_BUTTON_WIDTH, MENU_BUTTON_HEIGH)];
-    [menuButton setStyle:style forState:UIControlStateNormal];
-    [menuButton setTitle:NSLocalizedString(@"Menu", nil)  forState:UIControlStateNormal];
-    [menuButton addTarget:self action:@selector(displayMenu:) forControlEvents:UIControlEventTouchUpInside];
-    [_detailsContentView addSubview:menuButton];
+    x = jianjie.frame.size.width + jianjie.frame.origin.x;
+    UILabel* topicLabel = [self createRightLabel:CGPointMake(x, y) width:INTRO_WIDTH maxHeight:INTRO_HEIGHT text:_mealInfo.intro lines:4];
     
-    y += TOPIC_HEIGHT;
-    UILabel *type = [[UILabel alloc] initWithFrame:CGRectMake(0, y, DETAILS_CONTENT_VIEW_WIDTH, SMALL_LABEL_HEIGHT)];
-    type.text = [NSString stringWithFormat:NSLocalizedString(@"MealType", nil), @"交友、烧烤、晚餐"];
-    type.font = [ UIFont systemFontOfSize:12];
-    type.backgroundColor = [UIColor clearColor];
-    [_detailsContentView addSubview:type];
+    [_detailsView addSubview:topicLabel];
     
-    y += SMALL_LABEL_HEIGHT;
-    UILabel *timeAndCost = [[UILabel alloc] initWithFrame:CGRectMake(0, y, DETAILS_CONTENT_VIEW_WIDTH, SMALL_LABEL_HEIGHT)];
-    timeAndCost.text = [NSString stringWithFormat:NSLocalizedString(@"TimeAndCost", nil),[DateUtil shortStringFromDate:self.mealInfo.time],self.mealInfo.price];
-    timeAndCost.font = [ UIFont systemFontOfSize:12];
-    timeAndCost.backgroundColor = [UIColor clearColor];
-    [_detailsContentView addSubview:timeAndCost];
-    
-    y += SMALL_LABEL_HEIGHT;
-    UILabel *restaurant = [[UILabel alloc] initWithFrame:CGRectMake(0, y, 45, SMALL_LABEL_HEIGHT)];
-    restaurant.text = @"餐厅："; //TODO city/area
-    restaurant.font = [ UIFont systemFontOfSize:12];
-    restaurant.backgroundColor = [UIColor clearColor];
-    [_detailsContentView addSubview:restaurant];
+    //time
+    y = topicLabel.frame.size.height + topicLabel.frame.origin.y + V_GAP;
+    x = H_GAP;
+    UIImage* image_time = [UIImage imageNamed:@"icon_time"];
+    UIImageView *icon_time = [[UIImageView alloc] initWithImage:image_time];
+    icon_time.frame = CGRectMake(x, y, image_time.size.width, image_time.size.height);
+    [_detailsView addSubview:icon_time];
 
-    NSInteger restaurantNameHeight = SMALL_LABEL_HEIGHT;
-    NSString *restaurantNameStr = [NSString stringWithFormat:@"%@ %@", self.mealInfo.restaurant.address, self.mealInfo.restaurant.name];
-    if (restaurantNameStr.length > 20) {
-        restaurantNameHeight *= 2;
-    }
-    UILabel *restaurantName = [[UILabel alloc] initWithFrame:CGRectMake(SECOND_COLUMN_X, y, MAP_BUTTON_X - SECOND_COLUMN_X, restaurantNameHeight)];
-    restaurantName.lineBreakMode = UILineBreakModeWordWrap;
-    restaurantName.numberOfLines = restaurantNameStr.length > NUMBER_OF_CHARS_IN_ONE_LINE ? 2 : 1;    
-    restaurantName.text = restaurantNameStr;//TODO city/area
-    restaurantName.font = [ UIFont systemFontOfSize:12];
-    restaurantName.backgroundColor = [UIColor clearColor];
-    [_detailsContentView addSubview:restaurantName];
-
-    _mapButton =  [[UIButton alloc] initWithFrame:CGRectMake(MAP_BUTTON_X, y, 40, 22)];
-    [_mapButton setImage:[UIImage imageNamed:@"map.png"] forState:UIControlStateNormal];
-    _mapButton.titleLabel.backgroundColor = RGBCOLOR(0xD9, 0xD9, 0xD9);
-    [_detailsContentView addSubview:_mapButton];
+    x = icon_time.frame.size.width + icon_time.frame.origin.x + 3;
+    UILabel* time = [self createLeftLabel:CGPointMake(x, y) text:@"时间："];
+    [_detailsView addSubview:time];
+    
+    x = time.frame.origin.x + time.frame.size.width;
+    UILabel* timeLabel = [self createRightLabel:CGPointMake(x, y) width:INTRO_WIDTH maxHeight:12 text:[_mealInfo timeText] lines:1];
+    [_detailsView addSubview:timeLabel];
+    
+    //address
+    y = timeLabel.frame.size.height + timeLabel.frame.origin.y + V_GAP;
+    x = H_GAP;
+    UIImage* image_address = [UIImage imageNamed:@"icon_add"];
+    UIImageView *icon_address = [[UIImageView alloc] initWithImage:image_address];
+    icon_address.frame = CGRectMake(x, y, image_address.size.width, image_address.size.height);
+    [_detailsView addSubview:icon_address];
+    
+    x = icon_address.frame.size.width + icon_address.frame.origin.x + 3;
+    UILabel* address = [self createLeftLabel:CGPointMake(x, y) text:@"地点："];
+    [_detailsView addSubview:address];
+    
+    x = address.frame.origin.x + address.frame.size.width;
+    NSString *addressStr = [NSString stringWithFormat:@"%@ %@", self.mealInfo.restaurant.address, self.mealInfo.restaurant.name];
+    UILabel* addressLabel = [self createRightLabel:CGPointMake(x, y) width:ADDRESS_WIDTH maxHeight:ADDRESS_HEIGHT text:addressStr lines:2];
+    [_detailsView addSubview:addressLabel];
+    
+    
+    UIImage* map = [UIImage imageNamed:@"map"];
+    UIImage* map_push = [UIImage imageNamed:@"map_push"];
+    x = 320 - map.size.width - 10;
+    _mapButton = [[UIButton alloc] initWithFrame:CGRectMake(x, y, map.size.width, map.size.height)];
+    [_mapButton setBackgroundImage:map forState:UIControlStateNormal];
+    [_mapButton setBackgroundImage:map_push forState:UIControlStateHighlighted | UIControlStateSelected];
     [_mapButton addTarget:self action:@selector(mapButtonClicked:) forControlEvents:UIControlEventTouchDown];
+    [_detailsView addSubview:_mapButton];
     
-    y += restaurantNameHeight;
-
-    _mapOriginY = y;
-    _introduction = [[UILabel alloc] initWithFrame:CGRectMake(0, y, DETAILS_CONTENT_VIEW_WIDTH, SMALL_LABEL_HEIGHT)];
-    [_introduction setNumberOfLines:0];
-    _introduction.lineBreakMode = UILineBreakModeWordWrap;
-    _introduction.text = [NSString stringWithFormat:NSLocalizedString(@"Introduction", nil), self.mealInfo.intro]; //TODO city/area
-    _introduction.font = [ UIFont systemFontOfSize:12];
-    _introduction.backgroundColor = [UIColor clearColor];
-    [_detailsContentView addSubview:_introduction];
+    //number of participants
+    y = addressLabel.frame.size.height + addressLabel.frame.origin.y + V_GAP;
+    x = H_GAP;
+    UIImage* image_person = [UIImage imageNamed:@"icon_pers"];
+    UIImageView *icon_person = [[UIImageView alloc] initWithImage:image_person];
+    icon_person.frame = CGRectMake(x, y, image_person.size.width, image_person.size.height);
+    [_detailsView addSubview:icon_person];
     
-    y += SMALL_LABEL_HEIGHT;
-    _numberOfPersons = [[UILabel alloc] initWithFrame:CGRectMake(0, y, DETAILS_CONTENT_VIEW_WIDTH, SMALL_LABEL_HEIGHT)];
+    x = icon_person.frame.size.width + icon_person.frame.origin.x + 3;
+    UILabel* persons = [self createLeftLabel:CGPointMake(x, y) text:@"人数："];
+    [_detailsView addSubview:persons];
+    
+    x = persons.frame.origin.x + persons.frame.size.width;
+    _numberOfPersons = [self createRightLabel:CGPointMake(x, y) width:NUM_OF_PERSONS_WIDTH maxHeight:NUM_OF_PERSONS_HEIGHT text:@"99/99" lines:1];
+    [_detailsView addSubview:_numberOfPersons];
     [self updateNumberOfParticipants];
-    _numberOfPersons.font = [ UIFont systemFontOfSize:12];
-    _numberOfPersons.backgroundColor = [UIColor clearColor];
-    [_detailsContentView addSubview:_numberOfPersons];
-        
-    [self rebuildParticipantsView];    
+    
+    //participants
+    [self rebuildParticipantsView];
+}
+
+-(UILabel*)createLeftLabel:(CGPoint)origin text:(NSString*)text{
+    UILabel* label = [[UILabel alloc] initWithFrame:CGRectMake(origin.x, origin.y, 0, 0)];
+    label.textColor = RGBCOLOR(120, 120, 120);
+    label.font = [UIFont systemFontOfSize:12];
+    label.backgroundColor = [UIColor clearColor];
+    label.text = text;
+    [label sizeToFit];
+    return label;
+}
+
+-(UILabel*)createRightLabel:(CGPoint)origin width:(CGFloat)width maxHeight:(CGFloat)maxHeight text:(NSString*)text lines:(NSInteger)lines{
+    UIFont* textFont = [UIFont systemFontOfSize:12];
+    UIColor* rightTextColor = RGBCOLOR(80, 80, 80);
+//    CGSize size = [_mealInfo.topic sizeWithFont:textFont constrainedToSize:CGSizeMake(width, maxHeight)];//sizeWithFont:textFont forWidth:width lineBreakMode:NSLineBreakByWordWrapping];
+//    CGFloat height = size.height > maxHeight ? maxHeight : size.height;
+//    UILabel* label = [[UILabel alloc] initWithFrame:CGRectMake(origin.x, origin.y, TOPIC_WIDTH, height)];
+    UILabel* label = [[UILabel alloc] initWithFrame:CGRectMake(origin.x, origin.y, width, 0)];
+    label.font = textFont;
+    label.textColor = rightTextColor;
+    label.text = text;
+    label.numberOfLines = 0;//lines;
+    [label sizeToFit];
+    label.backgroundColor = [UIColor clearColor];
+    return label;
 }
 
 -(void)displayMenu:(id)sender{
@@ -320,8 +365,6 @@
         [self fetchMenu:sender];
     } else {
         [_menuPopover dismissPopoverAnimated:YES];
-//        [_menuPopover presentPopoverFromRect:menuButton.frame inView:menuButton.superview permittedArrowDirections:UIPopoverArrowDirectionRight animated:YES];
-//        [_menuPopover presentPopoverFromBarButtonItem:self.navigationItem.rightBarButtonItem permittedArrowDirections:UIPopoverArrowDirectionUp animated:NO];
         [self.navigationController presentModalViewController:_cpc animated:NO];
     }
 }
@@ -349,9 +392,6 @@
                                             _mealMenu = [MealMenu mealMenuWithData:data];
                                             _menuContentViewController = [[MenuTableViewController alloc] initWithStyle:UITableViewStylePlain];
                                             _menuContentViewController.menu = _mealMenu;
-//                                            _menuPopover = [[WEPopoverController alloc] initWithContentViewController:_menuContentViewController];
-//                                            [_menuPopover presentPopoverFromRect:menuButton.frame inView:menuButton.superview permittedArrowDirections:UIPopoverArrowDirectionRight animated:YES];
-//                                            [_menuPopover presentPopoverFromBarButtonItem:self.navigationItem.rightBarButtonItem permittedArrowDirections:UIPopoverArrowDirectionUp animated:NO];
                                             _cpc = [[ClosablePopoverViewController alloc] initWithContentViewController:_menuContentViewController];
                                             
                                             [[OverlayViewController sharedOverlayViewController] presentModalViewController:_cpc animated:NO];
@@ -368,121 +408,121 @@
     if (_participants != nil) {
         [_participants removeFromSuperview];
     }
-    NSInteger y = _numberOfPersons.frame.origin.y + SMALL_LABEL_HEIGHT;
-    _participants = [[UIView alloc] initWithFrame:CGRectMake(0, y, DETAILS_CONTENT_VIEW_WIDTH, PARTICIPANTS_HEIGHT)];
+    NSInteger y = _numberOfPersons.frame.origin.y + V_GAP;
+    _participants = [[UIScrollView alloc] initWithFrame:CGRectMake(9, y, 320 - 9, 53)];
+    _participants.showsHorizontalScrollIndicator = NO;
     _participants.backgroundColor = [UIColor clearColor];
-    
-    for (int i = 0; i < self.mealInfo.participants.count; i++) {//TODO to handle too many participants
+    _participants.contentSize = CGSizeMake( (PARTICIPANTS_WIDTH + PARTICIPANTS_GAP ) * _mealInfo.participants.count, PARTICIPANTS_HEIGHT);
+    for (int i = 0; i < self.mealInfo.participants.count; i++) {
+        UIImage* photo_bg = [UIImage imageNamed:@"p_photo_bg"];
+        UIView* contentView = [[UIView alloc] initWithFrame:CGRectMake((photo_bg.size.width + PARTICIPANTS_GAP) * i , 0, PARTICIPANTS_WIDTH, photo_bg.size.height)];
+        UIImageView* photo_bg_view = [[UIImageView alloc] initWithImage:photo_bg];
+        [contentView addSubview:photo_bg_view];
         UserProfile *user = [self.mealInfo.participants objectAtIndex:i];
-        UIImageView *img = [AvatarFactory avatarForUser:user frame:CGRectMake(40 * i, 0, 30, 30) delegate:self];
-        [_participants addSubview:img];
+        UIImageView *avatarView = [AvatarFactory avatarForUser:user frame:CGRectMake(3.5, 3.5, 46, 46) delegate:self withCornerRadius:NO];
+        [contentView addSubview:avatarView];
+        [_participants addSubview:contentView];
     }
-    [_detailsContentView addSubview:_participants];
-    _mealDetailsViewDelegate.numberOfParticipantsExcludingHost = self.mealInfo.participants.count;
-    
+    [_detailsView addSubview:_participants];
+    CGRect frame = _detailsView.frame;
+    frame.size.height = _participants.frame.origin.y + _participants.frame.size.height;
+    _detailsView.frame = frame;
 }
 
 -(void) updateNumberOfParticipants{
-     _numberOfPersons.text = [NSString stringWithFormat:NSLocalizedString(@"NumberOfPersons", nil), self.mealInfo.actualPersons, self.mealInfo.maxPersons]; }
+     _numberOfPersons.text = [NSString stringWithFormat:@"%d/%d", _mealInfo.actualPersons, _mealInfo.maxPersons];
+    [_numberOfPersons sizeToFit];
+}
 
 - (void) mapButtonClicked:(id)sender{
-    if (!_map) {
-        _map = [[MKMapView alloc] initWithFrame:CGRectMake(0, _mapOriginY, MAP_WIDTH, MAP_HEIGHT - 5)];
-        [_detailsContentView addSubview:_map];
-        _map.layer.borderColor = [UIColor grayColor].CGColor;
-        _map.layer.borderWidth = 1;
-        _map.delegate = self;
-        _map.hidden = TRUE;
-        MKCoordinateRegion viewRegion = MKCoordinateRegionMakeWithDistance(self.mealInfo.restaurant.coordinate, 1000, 1000);
-        MKCoordinateRegion adjustedRegion = [_map regionThatFits:viewRegion];
-        [_map setRegion:adjustedRegion animated:YES];
-        _location = [[Location alloc] initWithName:self.mealInfo.restaurant.name address:self.mealInfo.restaurant.address coordinate:self.mealInfo.restaurant.coordinate];
-        [_map addAnnotation:_location];
-    }
+    MapViewController* map = [[MapViewController alloc] initWithTitle:_mealInfo.restaurant.name];
+    map.info = _mealInfo.restaurant;
+    [self.navigationController pushViewController:map animated:YES];
     
-    _map.hidden = !_map.hidden;
-    CGRect newRect;
-    if (_map.hidden) {
-        newRect = _introduction.frame;
-        newRect.origin.y -= MAP_HEIGHT;
-        _introduction.frame = newRect;
-        
-        newRect = _numberOfPersons.frame;
-        newRect.origin.y -= MAP_HEIGHT;
-        _numberOfPersons.frame = newRect;
-        
-        newRect = _participants.frame;
-        newRect.origin.y -= MAP_HEIGHT;
-        _participants.frame = newRect;
-        [_mapButton setImage:[UIImage imageNamed:@"map.png"] forState:UIControlStateNormal];
-        
-        
-    } else {
-        newRect = _introduction.frame;
-        newRect.origin.y += MAP_HEIGHT;
-        _introduction.frame = newRect;
-        
-        newRect = _numberOfPersons.frame;
-        newRect.origin.y += MAP_HEIGHT;
-        _numberOfPersons.frame = newRect;
-        
-        newRect = _participants.frame;
-        
-        newRect.origin.y += MAP_HEIGHT;
-        _participants.frame = newRect;
-        [_mapButton setImage:[UIImage imageNamed:@"collapse.png"] forState:UIControlStateNormal];
-    }
-    _mealDetailsViewDelegate.mapHidden = _map.hidden;
-    [self.tableView reloadData];
+//    if (!_map) {
+//        _map = [[MKMapView alloc] initWithFrame:CGRectMake(0, _mapOriginY, MAP_WIDTH, MAP_HEIGHT - 5)];
+//        [_detailsView addSubview:_map];
+//        _map.layer.borderColor = [UIColor grayColor].CGColor;
+//        _map.layer.borderWidth = 1;
+//        _map.delegate = self;
+//        _map.hidden = TRUE;
+//        MKCoordinateRegion viewRegion = MKCoordinateRegionMakeWithDistance(self.mealInfo.restaurant.coordinate, 1000, 1000);
+//        MKCoordinateRegion adjustedRegion = [_map regionThatFits:viewRegion];
+//        [_map setRegion:adjustedRegion animated:YES];
+//        _location = [[Location alloc] initWithName:self.mealInfo.restaurant.name address:self.mealInfo.restaurant.address coordinate:self.mealInfo.restaurant.coordinate];
+//        [_map addAnnotation:_location];
+//    }
+//    
+//    _map.hidden = !_map.hidden;
+//    CGRect newRect;
+//    if (_map.hidden) {
+//        newRect = _introduction.frame;
+//        newRect.origin.y -= MAP_HEIGHT;
+//        _introduction.frame = newRect;
+//        
+//        newRect = _numberOfPersons.frame;
+//        newRect.origin.y -= MAP_HEIGHT;
+//        _numberOfPersons.frame = newRect;
+//        
+//        newRect = _participants.frame;
+//        newRect.origin.y -= MAP_HEIGHT;
+//        _participants.frame = newRect;
+//        
+//        
+//    } else {
+//        newRect = _introduction.frame;
+//        newRect.origin.y += MAP_HEIGHT;
+//        _introduction.frame = newRect;
+//        
+//        newRect = _numberOfPersons.frame;
+//        newRect.origin.y += MAP_HEIGHT;
+//        _numberOfPersons.frame = newRect;
+//        
+//        newRect = _participants.frame;
+//        
+//        newRect.origin.y += MAP_HEIGHT;
+//        _participants.frame = newRect;
+//    }
+//    _mealDetailsViewDelegate.mapHidden = _map.hidden;
+//    [self.tableView reloadData];
 }
 
 - (UIView*) createHostView{
-    TTImageView *imgView = [[TTImageView alloc] initWithFrame:CGRectMake(0, 0, DISH_VIEW_WIDTH, DISH_VIEW_HEIGHT)];
-    imgView.style = [TTShapeStyle styleWithShape:[TTSpeechBubbleShape shapeWithRadius:5 
-                                                        pointLocation:314
-                                                           pointAngle:270
-                                                            pointSize:CGSizeMake(20,10)] next:
-     [TTSolidFillStyle styleWithColor:[UIColor whiteColor] next:
-     [TTSolidBorderStyle styleWithColor:[UIColor blackColor] width:1 next:nil]]];
+    UIView* hostView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, DISH_VIEW_WIDTH, DISH_VIEW_HEIGHT)];
+    NINetworkImageView *imgView = [[NINetworkImageView alloc] initWithFrame:CGRectMake(0, 0, DISH_VIEW_WIDTH, DISH_VIEW_HEIGHT)];
 
-    
     [imgView setContentMode:UIViewContentModeScaleAspectFill];
-    [imgView setUrlPath:self.mealInfo.photoFullUrl];
+    [imgView setPathToNetworkImage:self.mealInfo.photoFullUrl forDisplaySize:CGSizeMake(DISH_VIEW_WIDTH, DISH_VIEW_HEIGHT)];
+    UIImage* cost_bg = [UIImage imageNamed:@"renjun_mon"];
+    UIImageView* cost_view = [[UIImageView alloc] initWithImage:cost_bg];
+    cost_view.frame = CGRectMake(9, 0, cost_bg.size.width, cost_bg.size.height);
+    UILabel* cost_label = [[UILabel alloc] initWithFrame:CGRectMake(21, 3, 60, 20)];
+    cost_label.backgroundColor = [UIColor clearColor];
+    cost_label.textColor = RGBCOLOR(200, 200, 200);
+    cost_label.text = [NSString stringWithFormat:@"人均：¥%.0f", _mealInfo.price];
+    cost_label.font = [UIFont systemFontOfSize:12];
     
-    UIView *hostView = [[UIView alloc] initWithFrame:CGRectMake(0, 320-HOST_VIEW_HEIGHT, 320, HOST_VIEW_HEIGHT)];
-    hostView.backgroundColor = [UIColor colorWithRed:0 green:0 blue:0 alpha:0.5];
-    UserImageView *hostImg = [AvatarFactory avatarForUser:self.mealInfo.host frame:CGRectMake(8, 8, 41, 41)];
-    [hostView addSubview:hostImg];
+    UIImage* menu = [UIImage imageNamed:@"caishi_bth"];
+    UIImage* menu_push = [UIImage imageNamed:@"caishi_bth_push"];
+    UIButton* menuBtn = [[UIButton alloc] initWithFrame:CGRectMake(260, 99, menu.size.width, menu.size.height)];
+    [menuBtn setBackgroundImage:menu forState:UIControlStateNormal];
+    [menuBtn setBackgroundImage:menu_push forState:UIControlStateSelected | UIControlStateHighlighted ];
+    [menuBtn setTitle:@"菜式" forState:UIControlStateNormal];
+    menuBtn.titleLabel.textColor = RGBCOLOR(220, 220, 220);
+    menuBtn.titleLabel.font = [UIFont systemFontOfSize:14];
+    [menuBtn addTarget:self action:@selector(displayMenu:) forControlEvents:UIControlEventTouchUpInside];
     
-    UILabel *hostName = [[UILabel alloc] initWithFrame:CGRectMake(58, 8, 80, 20)];
-    hostName.backgroundColor = [UIColor clearColor];
-    hostName.text = self.mealInfo.host.name;
-    hostName.textColor = [UIColor whiteColor];
-    hostName.font = [UIFont boldSystemFontOfSize:14];
-    [hostView addSubview:hostName];
+    [hostView addSubview:imgView];
+    [hostView addSubview:cost_view];
+    [hostView addSubview:cost_label];
+    [hostView addSubview:menuBtn];
     
-    UILabel *statistic = [[UILabel alloc] initWithFrame:CGRectMake(58, 38, 200, 15)];
-    statistic.backgroundColor = [UIColor clearColor];
-    statistic.textColor = [UIColor whiteColor];
-    //TODO numbers are faked 
-    statistic.text = [NSString stringWithFormat:@"%@%d  %@%d  %@%d",NSLocalizedString(@"MealsCreated", nil), 9, NSLocalizedString(@"MealsJoined", nil), 30, NSLocalizedString(@"NumberOfFollowing", nil),78];
-    statistic.font = [UIFont systemFontOfSize:12];
-    [hostView addSubview:statistic];
-    
-    [imgView addSubview:hostView];
-    return imgView;
+    NSLog(@"frame of meal: %@", NSStringFromCGRect(imgView.frame));
+    return hostView;
 }
 
 - (id<UITableViewDelegate>)createDelegate {
-    _mealDetailsViewDelegate = [[MealDetailsViewDelegate alloc] init];
-    _mealDetailsViewDelegate.numberOfParticipantsExcludingHost = _mealInfo.participants.count;
-    _mealDetailsViewDelegate.mapHidden = YES;
     return _mealDetailsViewDelegate;
-}
-
-- (IBAction)likeButtonClicked:(id)sender{ 
-    [self sendLikeOrNotRequest];
-    [_likeButton setEnabled:NO];
 }
 
 - (IBAction)joinMeal:(id)sender {
@@ -555,46 +595,9 @@
     route = [route stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
     [[UIApplication sharedApplication] openURL:[NSURL URLWithString:route]];
 }
+
 -(void) mapViewDidFinishLoadingMap:(MKMapView *)mapView{
 //    [_map selectAnnotation:_location animated:YES]; // seems not needed here
-}
-
-- (void)sendLikeOrNotRequest{
-    if(![[Authentication sharedInstance] isLoggedIn]) {        
-        // not logged in
-        AppDelegate *delegate = (AppDelegate*)[UIApplication sharedApplication].delegate;
-        [delegate showLogin];
-    } else {
-        http_method_t method = _like ? DELETE : POST;//already liked? delete, or add
-        [[NetworkHandler getHandler] requestFromURL:[NSString stringWithFormat:@"http://%@/api/v1/meal/%d/likes/", EOHOST, self.mealInfo.mID]
-                                             method:method
-                                        cachePolicy:TTURLRequestCachePolicyNone
-                                            success:^(id obj) {
-                                                if ([[obj objectForKey:@"status"] isEqualToString:@"OK"]) { 
-                                                    NSLog(@"successfully set user like: %d, with info: %@", _like, [obj objectForKey:@"info"]);
-                                                    _like = !_like;
-                                                    _numberOfLikedPerson += _like ? 1 : -1;
-                                                    UserProfile *me = [Authentication sharedInstance].currentUser;
-                                                    if (_like) {
-                                                        [self.mealInfo like:me];
-                                                    } else {
-                                                        [self.mealInfo dontLike:me];
-                                                    }
-                                                    
-                                                    [_likeButton setEnabled:YES];
-                                                    [self updateLikeButton];  
-                                                    
-                                                } else {
-                                                    NSLog(@"failed to set user like:: %d, with error: %@", _like, [obj objectForKey:@"info"]);
-                                                    [InfoUtil showError:obj];
-                                                    [_likeButton setEnabled:YES];
-                                                }
-                                            } failure:^{
-                                                NSLog(@"failed to set user like:: %d, reason unknown, probably network errors", _like);
-                                                [InfoUtil showErrorWithString:@"操作失败，请稍后重试"];
-                                                [_likeButton setEnabled:YES];
-                                            }]; 
-    }
 }
 
 - (SinaWeibo *)sinaweibo{

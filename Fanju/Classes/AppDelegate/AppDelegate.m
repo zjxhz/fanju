@@ -9,7 +9,6 @@
 #import "AppDelegate.h"
 
 #import "MyCustomStylesheet.h"
-#import "MapViewController.h"
 #import "MyOrdersViewController.h"
 #import "OrderDetailViewController.h"
 #import "Const.h"
@@ -32,7 +31,6 @@
 @implementation AppDelegate
 
 @synthesize window = _window;
-@synthesize viewController = _viewController;
 @synthesize bgImage;
 @synthesize managedObjectContext = __managedObjectContext;
 @synthesize managedObjectModel = __managedObjectModel;
@@ -41,7 +39,7 @@
 
 - (UIImage*)bgImage {
     if (!bgImage) {
-        bgImage = TTIMAGE(@"bundle://background.png");
+        bgImage = TTIMAGE(@"bundle://bg.png");
     }
     
     return bgImage;
@@ -58,6 +56,7 @@
     [TTStyleSheet setGlobalStyleSheet:[[MyCustomStylesheet alloc] init]]; 
     MealListViewController *meal = [[MealListViewController alloc] initWithNibName:@"MealListViewController" bundle:nil];
     UINavigationController *navigationController = [[UINavigationController alloc] initWithRootViewController:meal];
+    [navigationController.navigationBar setBackgroundImage:[UIImage imageNamed:@"topbar_bg"] forBarMetrics:UIBarMetricsDefault];
     NewSidebarViewController *sideMenuViewController = [NewSidebarViewController sideBar];
     sideMenuViewController.mealListViewController = meal;
     

@@ -7,7 +7,6 @@
 //
 
 #import "MealListViewController.h"
-#import "SCAppUtils.h"
 #import "MealInfo.h"
 #import "MealTableItem.h"
 #import "MealTableItemCell.h"
@@ -43,10 +42,8 @@
 
 - (void)loadView {
     [super loadView];
-    self.title = @"饭局";
-    self.tabBarItem = [[UITabBarItem alloc] initWithTitle:self.title image:[UIImage imageNamed:@"fanju_icon.png"] tag:0];    
-    //nav bar
-    [SCAppUtils customizeNavigationController:self.navigationController];
+    self.title = @"饭聚";
+    self.tabBarItem = [[UITabBarItem alloc] initWithTitle:self.title image:[UIImage imageNamed:@"fanju_icon.png"] tag:0];
     if ([[Authentication sharedInstance] isLoggedIn]) {
         [self setupSideMenuBarButtonItem];
     }
@@ -61,38 +58,30 @@
                                                object:nil];
 
     
-    _thisWeek = [[UIView alloc] init];
-    _thisWeek.backgroundColor = [UIColor colorWithRed:0 green:0 blue:0 alpha:0.5];
-    UIImageView *calendarImageView = [[UIImageView alloc] initWithFrame:CGRectMake(10, 0, 14, 20)];//
-    calendarImageView.contentMode = UIViewContentModeCenter;
-    calendarImageView.image = [UIImage imageNamed:@"calendar"];
-    UILabel *thisWeekLabel = [[UILabel alloc] initWithFrame:CGRectMake(35, 0, 60, 20)];
-    thisWeekLabel.text = NSLocalizedString(@"ThisWeek", nil);
-    thisWeekLabel.textColor = [UIColor whiteColor];
-    thisWeekLabel.font = [UIFont boldSystemFontOfSize:12];
-    thisWeekLabel.backgroundColor = [UIColor clearColor];
-    [_thisWeek addSubview:calendarImageView];
-    [_thisWeek addSubview:thisWeekLabel];
-    
-    _afterThisWeek = [[UIView alloc] init];
-    _afterThisWeek.backgroundColor = [UIColor colorWithRed:0 green:0 blue:0 alpha:0.5];
-    UIImageView *calendarImageView2 = [[UIImageView alloc] initWithFrame:CGRectMake(10, 0, 14, 20)];
-    calendarImageView2.contentMode = UIViewContentModeCenter;
-    calendarImageView2.image = [UIImage imageNamed:@"calendar"];
-    UILabel *afterThisWeekLabel = [[UILabel alloc] initWithFrame:CGRectMake(35, 0, 60, 20)];
-    afterThisWeekLabel.text = NSLocalizedString(@"AfterThisWeek", nil);
-    afterThisWeekLabel.textColor = [UIColor whiteColor];
-    afterThisWeekLabel.font = [UIFont boldSystemFontOfSize:12];
-    afterThisWeekLabel.backgroundColor = [UIColor clearColor];
-    [_afterThisWeek addSubview:calendarImageView2];
-    [_afterThisWeek addSubview:afterThisWeekLabel];
-    
-    
+    _thisWeek = [self createHeader:@"ThisWeek"];
+    _afterThisWeek = [self createHeader:@"AfterThisWeek"];   
     AppDelegate *delegate = (AppDelegate*)[UIApplication sharedApplication].delegate;
     self.tableView.backgroundColor = [UIColor colorWithPatternImage:delegate.bgImage];
     self.tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
 }
 
+
+-(UIView*)createHeader:(NSString*)text{
+    UIView* view = [[UIView alloc] init];
+    view.backgroundColor = [UIColor colorWithRed:0 green:0 blue:0 alpha:0.5];
+    UIImage* clockImage = [UIImage imageNamed:@"title_time"];
+    UIImageView *clockImageView = [[UIImageView alloc] initWithImage:clockImage];
+    clockImageView.frame = CGRectMake(9, 4, clockImage.size.width, clockImage.size.height);
+    CGFloat x = clockImageView.frame.origin.x + clockImageView.frame.size.width + 6;
+    UILabel *thisWeekLabel = [[UILabel alloc] initWithFrame:CGRectMake(x, 2, 120, 20)];
+    thisWeekLabel.text = NSLocalizedString(text, nil);
+    thisWeekLabel.textColor = RGBCOLOR(245, 245, 245);
+    thisWeekLabel.font = [UIFont systemFontOfSize:14];
+    thisWeekLabel.backgroundColor = [UIColor clearColor];
+    [view addSubview:clockImageView];
+    [view addSubview:thisWeekLabel];
+    return view;
+}
 
 - (void)didReceiveMemoryWarning
 {
@@ -154,7 +143,7 @@
     }
 }
 - (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section {
-    return 22;
+    return 23;
 }
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
@@ -201,7 +190,6 @@
 
 
 - (void) removeSideMenuBarButtonItem {
-//    self.navigationItem.leftBarButtonItem = nil;
     [self.navigationItem setLeftBarButtonItem:nil animated:NO];
 }
 

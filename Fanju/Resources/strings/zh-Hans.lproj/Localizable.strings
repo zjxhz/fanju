@@ -83,7 +83,7 @@
 "LongTimeAgo" = "很久以前";
 "Accept" = "接受";
 "Reject" = "拒绝";
-"AverageCost" = "人均：%.0f元，人数：%d / %d";
+"AverageCost" = "¥%.0f元 - 剩余%d位";
 "Time" = "时间：%@";
 "Menu"= "菜式";
 "MealType" = "类别：%@";

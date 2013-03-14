@@ -49,4 +49,9 @@
                        forKey:@"mealInfo"];
     }
 }
+
+- (NSComparisonResult)compare:(MealTableItem *)other{
+    return [self.mealInfo compare:other.mealInfo];
+}
+
 @end

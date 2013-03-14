@@ -7,13 +7,10 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "CustomTabBarViewController.h"
 #import "SinaWeibo.h"
 @class ViewController;
 
 @interface AppDelegate : UIResponder <UIApplicationDelegate>
-
-@property (nonatomic, strong) IBOutlet CustomTabBarViewController *viewController;
 
 @property (strong, nonatomic) IBOutlet UIWindow *window;
 @property (strong, nonatomic) UIImage *bgImage;

@@ -25,15 +25,18 @@
 #define MAP_HEIGHT 175
 #define TAB_BAR_HEIGHT 44
 #define HOST_VIEW_HEIGHT 58
-#define DISH_VIEW_HEIGHT 320
+#define DISH_VIEW_HEIGHT 140
 #define DISH_VIEW_WIDTH 320
-#define H_GAP 8
-#define V_GAP 8
-#define SMALL_LABEL_HEIGHT 18
+#define H_GAP 7
+#define V_GAP 15
 #define DETAILS_CONTENT_VIEW_WIDTH (320 - H_GAP*2)
 #define DETAILS_VIEW_HEIGHT 250
-#define TOPIC_WIDTH 250
-#define TOPIC_HEIGHT 25
+#define INTRO_WIDTH 250
+#define INTRO_HEIGHT 48
+#define ADDRESS_WIDTH 210
+#define ADDRESS_HEIGHT 24
+#define NUM_OF_PERSONS_WIDTH INTRO_WIDTH
+#define NUM_OF_PERSONS_HEIGHT 12
 #define MENU_BUTTON_X 255
 #define MENU_BUTTON_WIDTH 55
 #define MENU_BUTTON_HEIGH 22
@@ -41,25 +44,22 @@
 #define SECOND_COLUMN_X 35
 #define NUMBER_OF_CHARS_IN_ONE_LINE 20
 #define MAP_WIDTH 290
-#define PARTICIPANTS_HEIGHT 30
-
+#define PARTICIPANTS_WIDTH 53
+#define PARTICIPANTS_HEIGHT PARTICIPANTS_WIDTH
+#define PARTICIPANTS_GAP 2
+#define JOIN_BUTTON_X 36.5
 @interface MealDetailViewController : TTTableViewController <MKMapViewDelegate, ShareToDelegate, SinaWeiboDelegate, WBSendViewDelegate, CreateOrderDelegate, UserImageViewDelegate>{
     UIView *_detailsView;
-    UIView *_detailsContentView;
-    UIButton *_mapButton;
     MKMapView *_map;
+    UIButton* _mapButton;
     UILabel *_introduction;
     UILabel *_numberOfPersons;
-    UIView *_participants;
+    UIScrollView *_participants;
     Location *_location;
     UILabel* _loadingOrNoCommentsLabel;
     UIView* _normalTabBar;
-//    UIView* _tabView;
-//    UIButton *_shareButton;
     MealMenu* _mealMenu;
     UIButton *_joinButton;
-    UIButton *_likeButton;
-    NSInteger _numberOfLikedPerson;
     BOOL _initiallyLiked;
     BOOL _like;
     ShareTableViewController *_shareContentViewController;

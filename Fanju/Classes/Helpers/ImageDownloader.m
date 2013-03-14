@@ -20,9 +20,7 @@
 
 -(void)startDownload{
     [self download:[self.meal photoFullUrl]];
-    for (UserProfile* user in self.meal.participants) {
-        [self download:[user smallAvatarFullUrl]];
-    }
+    //participant img will be downloaded later when meal is firstly downloaded, this is for the sake of drawing priority
 }
 
 -(void)download:(NSString*)url{
@@ -37,6 +35,7 @@
     TTURLImageResponse* response = request.response;
     if ([url isEqualToString:[self.meal photoFullUrl]]) {
         [self.delegate mealImageDidLoad:self.indexPathInTableView withImage:response.image];
+        [self startDownloadAvatars];
     }  else {
         for (UserProfile* user in self.meal.participants) {
             if ([url isEqualToString:[user smallAvatarFullUrl]]){
@@ -65,6 +64,11 @@
     [self checkIfFinish];
 }
 
+-(void)startDownloadAvatars{
+    for (UserProfile* user in self.meal.participants) {
+        [self download:[user smallAvatarFullUrl]];
+    }
+}
 - (void) checkIfFinish{
     if (_finishedCounts == self.meal.participants.count + 1) { //participants + meal
         [self.delegate didFinishLoad:self.indexPathInTableView];

@@ -193,6 +193,7 @@
         UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(avatarTapped:)];
         tap.delegate = self;
         [cell.imageView addGestureRecognizer:tap];
+        cell.imageView.image = [UIImage imageNamed:@"anno"];
     }
     
     UILabel* timeLabel = (UILabel* )cell.accessoryView;

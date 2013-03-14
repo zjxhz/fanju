@@ -9,7 +9,6 @@
 #import "SocialNetworkViewController.h"
 #import "NetworkHandler.h"
 #import "Const.h"
-#import "SCAppUtils.h"
 #import "AppDelegate.h"
 #import "UserListViewController.h"
 #import "UserListDataSource.h"
@@ -58,8 +57,6 @@
 
 - (void)loadView {
     [super loadView];
-
-    [SCAppUtils customizeNavigationController:self.navigationController];
 
     TTButton *btn = [TTButton buttonWithStyle:@"embossedButton:" title:NSLocalizedString(@"Addfollowing", nil)];
     [btn addTarget:self 

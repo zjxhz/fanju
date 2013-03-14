@@ -29,16 +29,9 @@
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
     int section = indexPath.section;
     if(section == 0){
-        return 320;
+        return 140;
     } else if(section == 1){
-        int height = 135;  //TODO multiple lines of introduction
-        if (self.numberOfParticipantsExcludingHost >  0) {
-            height += PARTICIPANTS_HEIGHT;
-        }
-        if (!_mapHidden) {
-            height +=  MAP_HEIGHT;
-        }
-        return height;
+        return _detailsHeight;
     }
     else {
         return 110;

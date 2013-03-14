@@ -51,4 +51,6 @@ typedef enum{
 - (void) like:(UserProfile*) user;
 - (void) dontLike:(UserProfile*) user;
 - (NSString*) photoFullUrl;
+- (NSComparisonResult)compare:(MealInfo *)other;
+-(NSString*)timeText;
 @end

@@ -18,7 +18,6 @@
 #import "MealInvitation.h"
 #import "MealInvitationTableItem.h"
 #import "MealInvitationTableItemCell.h"
-#import "SCAppUtils.h"
 #import "OrderDetailsViewController.h"
 #import "Authentication.h"
 #import "LoadMoreTableItem.h"
@@ -185,7 +184,6 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    [SCAppUtils customizeNavigationController:self.navigationController];
     [self loadOrders];
 }
 

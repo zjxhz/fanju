@@ -141,4 +141,26 @@ static NSDateFormatter *dateOnlyFormat;
     result=[NSString stringWithFormat:@"%@",[astroString substringWithRange:NSMakeRange(m*2-(d < [[astroFormat substringWithRange:NSMakeRange((m-1), 1)] intValue] - (-19))*2,2)]];
     return [NSString stringWithFormat:@"%@座", result];
 }
+
++(NSString*)weekday:(NSDate*)date{
+    NSCalendar* cal = [NSCalendar currentCalendar];
+    NSDateComponents* comp = [cal components:NSWeekdayCalendarUnit fromDate:date];
+    switch ([comp weekday]) {
+        case 1:
+            return @"星期天";
+        case 2:
+            return @"星期一";
+        case 3:
+            return @"星期二";
+        case 4:
+            return @"星期三";
+        case 5:
+            return @"星期四";
+        case 6:
+            return @"星期五";
+        case 7:
+            return @"星期六";
+    }
+    return nil;
+}
 @end

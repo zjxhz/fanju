@@ -11,15 +11,21 @@
 
 @implementation AvatarFactory
 +(UserImageView*) avatarForUser:(UserProfile*)user frame:(CGRect)frame delegate:(id<UserImageViewDelegate>)delegate{
+    return [self avatarForUser:user frame:frame delegate:delegate withCornerRadius:YES];
+}
+
++(UserImageView*) avatarForUser:(UserProfile*)user frame:(CGRect)frame delegate:(id<UserImageViewDelegate>)delegate withCornerRadius:(BOOL)cornderRadius{
     UserImageView *userImgView = [[UserImageView alloc] initWithFrame:frame];
     userImgView.contentMode = UIViewContentModeScaleAspectFill;
     userImgView.clipsToBounds = YES;
     [userImgView setBackgroundColor:[UIColor clearColor]];
     userImgView.image = [UIImage imageNamed:@"anno.png"];
     [userImgView setContentMode:UIViewContentModeScaleAspectFill];
-    userImgView.layer.cornerRadius = 9;
-    userImgView.layer.masksToBounds = YES;
-
+    if (cornderRadius) {
+        userImgView.layer.cornerRadius = 9;
+        userImgView.layer.masksToBounds = YES;
+    }
+    
     if (user){
         [userImgView setPathToNetworkImage:[AvatarFactory bestAvatarUrlForUser:user withFrame:frame] forDisplaySize:frame.size];
         userImgView.user = user;
@@ -31,7 +37,6 @@
     
     return userImgView;
 }
-
 +(UserImageView*) avatarForUser:(UserProfile*)user frame:(CGRect)frame{
     return [AvatarFactory avatarForUser:user frame:frame delegate:nil];
 }

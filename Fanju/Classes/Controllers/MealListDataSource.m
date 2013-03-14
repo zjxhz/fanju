@@ -63,19 +63,19 @@
 }
 
 
-- (void) addMeal:(MealTableItem*)meal{
+- (void)addMeal:(MealTableItem*)meal{
     if([meal.mealInfo.time timeIntervalSinceNow] < 0 ){
 //        NSLog(@"ignore out of dated meal at: %@", meal.mealInfo.time);
         return;
     }
     if([self isWithinThisWeek:meal.mealInfo.time]){
         [_mealsForThisWeek addObject:meal];
+        [_mealsForThisWeek sortUsingSelector:@selector(compare:)];
     } else {
         [_mealsAfterThisWeek addObject:meal];
+        [_mealsAfterThisWeek sortUsingSelector:@selector(compare:)];
     }
 }
-
-
 
 #pragma mark -
 #pragma mark TTTableViewDataSource

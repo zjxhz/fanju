@@ -29,13 +29,9 @@
     [NSThread detachNewThreadSelector:@selector(displayMap) toTarget:self withObject:nil]; 
 }
 
--(id)initWithTitle:(NSString*)title {
-    AppDelegate *delegate = (AppDelegate*)[UIApplication sharedApplication].delegate;
-    RestaurantInfo* info = (RestaurantInfo*)delegate.sharedObject;
-    
+-(id)initWithTitle:(NSString*)title {   
     if (self = [super init]) {
-        self.title = info.title;
-        self.info = info;
+        self.title = title;
     }
     
     return self;
@@ -88,8 +84,26 @@
 }
 
 -(void)launchRoute {
-    NSString *route = [NSString stringWithFormat:@"http://maps.google.com/maps?saddr=%@&daddr=%g,%g", NSLocalizedString(@"CurrentLocation", nil), self.info.coordinate.latitude, self.info.coordinate.longitude];
-    route = [route stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
-    [[UIApplication sharedApplication] openURL:[NSURL URLWithString:route]];
+    Class mapItemClass = [MKMapItem class];
+    if (mapItemClass && [mapItemClass respondsToSelector:@selector(openMapsWithItems:launchOptions:)])
+    {
+        // Create an MKMapItem to pass to the Maps app
+        CLLocationCoordinate2D coordinate =
+        CLLocationCoordinate2DMake(self.info.coordinate.latitude, self.info.coordinate.longitude);
+        MKPlacemark *placemark = [[MKPlacemark alloc] initWithCoordinate:coordinate
+                                                       addressDictionary:nil];
+        MKMapItem *mapItem = [[MKMapItem alloc] initWithPlacemark:placemark];
+        [mapItem setName:self.info.name];
+        
+
+        NSDictionary *launchOptions = @{MKLaunchOptionsDirectionsModeKey : MKLaunchOptionsDirectionsModeDriving};
+        MKMapItem *currentLocationMapItem = [MKMapItem mapItemForCurrentLocation];
+        [MKMapItem openMapsWithItems:@[currentLocationMapItem, mapItem]
+                       launchOptions:launchOptions];
+    } else {
+        NSString *route = [NSString stringWithFormat:@"http://maps.google.com/maps?saddr=%@&daddr=%g,%g", NSLocalizedString(@"CurrentLocation", nil), self.info.coordinate.latitude, self.info.coordinate.longitude];
+        route = [route stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+        [[UIApplication sharedApplication] openURL:[NSURL URLWithString:route]];
+    }
 }
 @end

@@ -44,9 +44,9 @@
     [super loadView];
     self.title = @"饭聚";
     self.tabBarItem = [[UITabBarItem alloc] initWithTitle:self.title image:[UIImage imageNamed:@"fanju_icon.png"] tag:0];
-    if ([[Authentication sharedInstance] isLoggedIn]) {
-        [self setupSideMenuBarButtonItem];
-    }
+//    if ([[Authentication sharedInstance] isLoggedIn]) {
+//        [self setupSideMenuBarButtonItem];
+//    }
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(didLogin:)
                                                  name:EODidLoginNotification
@@ -73,13 +73,15 @@
     UIImageView *clockImageView = [[UIImageView alloc] initWithImage:clockImage];
     clockImageView.frame = CGRectMake(9, 4, clockImage.size.width, clockImage.size.height);
     CGFloat x = clockImageView.frame.origin.x + clockImageView.frame.size.width + 6;
-    UILabel *thisWeekLabel = [[UILabel alloc] initWithFrame:CGRectMake(x, 2, 120, 20)];
-    thisWeekLabel.text = NSLocalizedString(text, nil);
-    thisWeekLabel.textColor = RGBCOLOR(245, 245, 245);
-    thisWeekLabel.font = [UIFont systemFontOfSize:14];
-    thisWeekLabel.backgroundColor = [UIColor clearColor];
+    UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(x, 2, 120, 20)];
+    label.text = NSLocalizedString(text, nil);
+    label.textColor = RGBCOLOR(245, 245, 245);
+    label.font = [UIFont systemFontOfSize:14];
+    label.backgroundColor = [UIColor clearColor];
+    label.layer.shadowColor = RGBACOLOR(0, 0, 0, 0.5).CGColor;
+    label.layer.shadowOffset = CGSizeMake(0, 1);
     [view addSubview:clockImageView];
-    [view addSubview:thisWeekLabel];
+    [view addSubview:label];
     return view;
 }
 
@@ -147,7 +149,7 @@
 }
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
-    return 340.0;
+    return 329.0;
 }
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
@@ -190,7 +192,10 @@
 
 
 - (void) removeSideMenuBarButtonItem {
-    [self.navigationItem setLeftBarButtonItem:nil animated:NO];
+//    self.navigationController.navigationItem.leftBarButtonItem.customView.hidden = YES;
+//    [self.navigationController.navigationItem.leftBarButtonItem.customView removeFromSuperview];
+//    [self.navigationItem setLeftBarButtonItem:nil animated:NO];
+    self.navigationItem.leftBarButtonItem = nil;
 }
 
 

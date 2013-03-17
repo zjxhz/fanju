@@ -10,6 +10,8 @@
 #import "FollowerEvent.h"
 #import "JoinMealEvent.h"
 #import "VisitorEvent.h"
+#import "PhotoUploadedEvent.h"
+#import "JSONKit.h"
 
 @implementation EventFactory
 +(EventFactory*)sharedFactory {
@@ -22,16 +24,37 @@
 }
 
 -(id)createEvent:(EOMessage*)message{
+    NSDictionary* data = [message.payload objectFromJSONString];
+    id event = nil;
     if (message.node) {
         if ([message.node hasSuffix:@"/followers"]) {
-            return [[FollowerEvent alloc] init];
+            event = [[FollowerEvent alloc] init];
         } else if([message.node hasSuffix:@"/participants"] || [message.node hasSuffix:@"/meals"]){
-            return [[JoinMealEvent alloc] init];
+            event = [[JoinMealEvent alloc] init];
         } else if([message.node hasSuffix:@"/visitors"]){
-            return [[VisitorEvent alloc] init];;
+            event = [[VisitorEvent alloc] init];;
+        } else if([message.node hasSuffix:@"/photos"]){
+            event = [[PhotoUploadedEvent alloc] init];
         }
     }
-    return nil;
+    if ([event isKindOfClass:[SimpleUserEvent class]]) {
+        SimpleUserEvent* sue = event;
+        sue.userID = [data valueForKey:sue.userFieldName];
+    } else if([event isKindOfClass:[JoinMealEvent class]]){
+        JoinMealEvent* je = event;
+        NSString* participantID = [data valueForKey:@"participant"];
+        je.participantID = participantID;
+        NSString* mealID = [data valueForKey:@"meal"];
+        je.mealID = mealID;
+    }
+    
+    if (event) {
+        EventBase* eb = event;
+        eb.time = message.time;
+    }
+        
+        
+    return event;
 }
 
 @end

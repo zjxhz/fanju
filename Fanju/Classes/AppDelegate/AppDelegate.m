@@ -53,7 +53,7 @@
     });
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     
-    [TTStyleSheet setGlobalStyleSheet:[[MyCustomStylesheet alloc] init]]; 
+//    [TTStyleSheet setGlobalStyleSheet:[[MyCustomStylesheet alloc] init]]; 
     MealListViewController *meal = [[MealListViewController alloc] initWithNibName:@"MealListViewController" bundle:nil];
     UINavigationController *navigationController = [[UINavigationController alloc] initWithRootViewController:meal];
     [navigationController.navigationBar setBackgroundImage:[UIImage imageNamed:@"topbar_bg"] forBarMetrics:UIBarMetricsDefault];

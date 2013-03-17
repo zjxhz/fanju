@@ -28,7 +28,7 @@
 #define DISH_VIEW_HEIGHT 140
 #define DISH_VIEW_WIDTH 320
 #define H_GAP 7
-#define V_GAP 15
+#define V_GAP 13
 #define DETAILS_CONTENT_VIEW_WIDTH (320 - H_GAP*2)
 #define DETAILS_VIEW_HEIGHT 250
 #define INTRO_WIDTH 250
@@ -50,7 +50,6 @@
 #define JOIN_BUTTON_X 36.5
 @interface MealDetailViewController : TTTableViewController <MKMapViewDelegate, ShareToDelegate, SinaWeiboDelegate, WBSendViewDelegate, CreateOrderDelegate, UserImageViewDelegate>{
     UIView *_detailsView;
-    MKMapView *_map;
     UIButton* _mapButton;
     UILabel *_introduction;
     UILabel *_numberOfPersons;

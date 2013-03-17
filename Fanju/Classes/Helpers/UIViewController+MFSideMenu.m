@@ -7,9 +7,18 @@
 //
 #import "MFSideMenu.h"
 #import "UIViewController+MFSideMenu.h"
+#import "Const.h"
+#import <QuartzCore/QuartzCore.h>
+#import "Three20/Three20.h"
+
+extern NSInteger unreadCount;
 
 @implementation UIViewController (MFSideMenu)
+
 -(void)setupSideMenuBarButtonItem{
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:EOUnreadCount object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(unreadDidUpdate:) name:EOUnreadCount object:nil];
+    
     switch (self.navigationController.sideMenu.menuState) {
         case MFSideMenuStateClosed:
             if([[self.navigationController.viewControllers objectAtIndex:0] isEqual:self]) {
@@ -28,6 +37,7 @@
 }
 
 - (UIBarButtonItem *)leftMenuBarButtonItem {
+    UIView* customView = [[UIView alloc] initWithFrame:CGRectZero];
     UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
     
     UIImage *buttonImage = [UIImage imageNamed:@"more_normal"];
@@ -38,7 +48,29 @@
     [button setBackgroundImage:buttonPressedImage forState:UIControlStateHighlighted];
     [button addTarget:self.navigationController.sideMenu action:@selector(toggleLeftSideMenu) forControlEvents:UIControlEventTouchUpInside];
     
-    UIBarButtonItem *buttonItem = [[UIBarButtonItem alloc] initWithCustomView:button];
+
+    [customView addSubview:button];
+    CGFloat viewWidth = buttonImage.size.width;
+    unreadCount = [[NSUserDefaults standardUserDefaults] integerForKey:UNREAD_MESSAGE_COUNT] + [[NSUserDefaults standardUserDefaults] integerForKey:UNREAD_NOTIFICATION_COUNT];
+    if (unreadCount) {
+        UIImage* xiaoxi = [UIImage imageNamed:@"xiaoxi"];
+        CGFloat x = buttonImage.size.width;
+        CGFloat y = (buttonImage.size.height - xiaoxi.size.height) / 2;
+        UIButton* unreadButton = [UIButton buttonWithType:UIButtonTypeCustom];
+        [unreadButton setBackgroundImage:xiaoxi forState:UIControlStateNormal];
+        unreadButton.frame = CGRectMake(x, y, xiaoxi.size.width, xiaoxi.size.height);
+        [unreadButton setTitle:[NSString stringWithFormat:@"%d", unreadCount] forState:UIControlStateNormal];
+        unreadButton.titleLabel.textColor = [UIColor whiteColor];
+        unreadButton.titleLabel.font = [UIFont systemFontOfSize:12];
+        unreadButton.layer.shadowColor = RGBACOLOR(0, 0, 0, 0.5).CGColor;
+        unreadButton.layer.shadowOffset = CGSizeMake(0, 1);
+        unreadButton.userInteractionEnabled = NO;
+        
+        viewWidth += xiaoxi.size.width;
+        [customView addSubview:unreadButton];
+    }
+    customView.frame = CGRectMake(0, 0, viewWidth, buttonImage.size.height);
+    UIBarButtonItem *buttonItem = [[UIBarButtonItem alloc] initWithCustomView:customView];
     return buttonItem;
 }
 
@@ -49,5 +81,9 @@
                                            action:@selector(backButtonPressed:)];
 }
 
-
+-(void)unreadDidUpdate:(NSNotification*)notif{
+    unreadCount = [notif.object integerValue];
+    [self setupSideMenuBarButtonItem];
+    
+}
 @end

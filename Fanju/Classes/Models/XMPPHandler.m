@@ -19,6 +19,7 @@ NSString * const EOCurrentContact = @"EOCurrentContact";
 NSString * const EOUnreadMessageCount = @"EOUnreadMessageCount";
 NSString * const EOUnreadNotificationCount = @"EOUnreadNotificationCount";
 
+
 @implementation XMPPHandler
 
 +(XMPPHandler*)sharedInstance{
@@ -238,6 +239,7 @@ NSString * const EOUnreadNotificationCount = @"EOUnreadNotificationCount";
         [[NSNotificationCenter defaultCenter] postNotificationName:EONotificationDidSaveNotification
                                                             object:message
                                                           userInfo:nil];
+        _unreadNotifCount = [[NSUserDefaults standardUserDefaults] integerForKey:UNREAD_NOTIFICATION_COUNT];
         _unreadNotifCount++;
         [[NSNotificationCenter defaultCenter] postNotificationName:EOUnreadNotificationCount
                                                             object:[NSNumber numberWithInteger:_unreadNotifCount]

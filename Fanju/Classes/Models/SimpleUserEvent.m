@@ -9,5 +9,10 @@
 #import "SimpleUserEvent.h"
 
 @implementation SimpleUserEvent
-
+-(id)init{
+    if (self = [super init]) {
+        self.userFieldName = @"user";
+    }
+    return self;
+}
 @end

@@ -9,6 +9,7 @@
 #import <UIKit/UIKit.h>
 
 @interface UIViewController (MFSideMenu)
+
 -(void)setupSideMenuBarButtonItem;
 - (UIBarButtonItem *)leftMenuBarButtonItem ;
 - (UIBarButtonItem *)backBarButtonItem;

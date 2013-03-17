@@ -11,7 +11,6 @@
 #import "NetworkHandler.h"
 #import "Const.h"
 #import "SVProgressHUD.h"
-#import <MapKit/MapKit.h>
 #import "Location.h"
 #import "LocationProvider.h"
 #import "AvatarFactory.h"
@@ -29,11 +28,8 @@
 #import "NINetworkImageView.h"
 #import "MapViewController.h"
 
-
-
 @implementation MealDetailViewController{
     MealDetailsViewDelegate* _mealDetailsViewDelegate;
-    CGFloat _mapOriginY;
 
 }
 
@@ -109,17 +105,28 @@
     titleLabel.backgroundColor = [UIColor clearColor];
     titleLabel.text = _mealInfo.topic;
     titleLabel.font = [UIFont systemFontOfSize:21];
+    titleLabel.minimumFontSize = 14;
+    titleLabel.adjustsFontSizeToFitWidth = YES;
     titleLabel.textColor = RGBCOLOR(220, 220, 220);
+    titleLabel.layer.shadowColor = RGBACOLOR(0, 0, 0, 0.4).CGColor;
+    titleLabel.layer.shadowOffset = CGSizeMake(0, -2);
+    titleLabel.frame = CGRectMake(0, 0, 200, 44);
     [titleLabel sizeToFit];
     
     self.navigationItem.titleView = titleLabel;
     
-    UIButton *back = [[UIButton alloc] init];
+    UIImage* backImg = [UIImage imageNamed:@"toplf"];
+    UIImage* backImgPush = [UIImage imageNamed:@"toplf_push"];
+    UIButton *back = [UIButton buttonWithType:UIButtonTypeCustom];
     back.titleLabel.font = [UIFont systemFontOfSize:12];
     back.titleLabel.textColor = RGBCOLOR(220, 220, 220);
+//    back.layer.borderColor = [UIColor whiteColor].CGColor;
+//    back.layer.borderWidth = 1;
+    back.titleEdgeInsets = UIEdgeInsetsMake(2, 0, 0, 0);
+    back.contentVerticalAlignment = UIControlContentVerticalAlignmentCenter;
     [back setTitle:@"返回" forState:UIControlStateNormal];
-    [back setBackgroundImage:[UIImage imageNamed:@"toplf"] forState:UIControlStateNormal];
-    [back setBackgroundImage:[UIImage imageNamed:@"toplf_push"] forState:UIControlStateSelected | UIControlStateHighlighted];
+    [back setBackgroundImage:backImg forState:UIControlStateNormal];
+    [back setBackgroundImage:backImgPush forState:UIControlStateSelected | UIControlStateHighlighted];
     [back addTarget:self.navigationController 
             action:@selector(popViewControllerAnimated:)
   forControlEvents:UIControlEventTouchDown];
@@ -129,13 +136,15 @@
     self.navigationItem.leftBarButtonItem = temporaryBarButtonItem;
     self.navigationItem.hidesBackButton = YES;
     
-    UIButton *share = [[UIButton alloc] init];
+    UIButton *share = [UIButton buttonWithType:UIButtonTypeCustom];
     share.titleLabel.font = [UIFont systemFontOfSize:12];
     share.titleLabel.textColor = RGBCOLOR(220, 220, 220);
+    share.titleEdgeInsets = UIEdgeInsetsMake(2, 0, 0, 0);
     [share setTitle:@"分享" forState:UIControlStateNormal];
     [share setBackgroundImage:[UIImage imageNamed:@"toprt"] forState:UIControlStateNormal];
     [share setBackgroundImage:[UIImage imageNamed:@"toprt_push"] forState:UIControlStateSelected | UIControlStateHighlighted];
     [share addTarget:self action:@selector(onShareClicked:) forControlEvents:UIControlEventTouchDown];
+    share.contentVerticalAlignment = UIControlContentVerticalAlignmentCenter;
     [share sizeToFit];
     self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithCustomView:share];
     
@@ -374,7 +383,7 @@
         [menuButton setTitle:@"读取中" forState:UIControlStateNormal];
         menuButton.userInteractionEnabled = NO;
     } else {
-        [menuButton setTitle:@"菜式" forState:UIControlStateNormal];
+        [menuButton setTitle:@"菜 式" forState:UIControlStateNormal];
         menuButton.userInteractionEnabled = YES;
     }
 //    [menuButton sizeToFit];
@@ -408,7 +417,7 @@
     if (_participants != nil) {
         [_participants removeFromSuperview];
     }
-    NSInteger y = _numberOfPersons.frame.origin.y + V_GAP;
+    NSInteger y = _numberOfPersons.frame.origin.y + _numberOfPersons.frame.size.height + 8;
     _participants = [[UIScrollView alloc] initWithFrame:CGRectMake(9, y, 320 - 9, 53)];
     _participants.showsHorizontalScrollIndicator = NO;
     _participants.backgroundColor = [UIColor clearColor];
@@ -438,53 +447,6 @@
     MapViewController* map = [[MapViewController alloc] initWithTitle:_mealInfo.restaurant.name];
     map.info = _mealInfo.restaurant;
     [self.navigationController pushViewController:map animated:YES];
-    
-//    if (!_map) {
-//        _map = [[MKMapView alloc] initWithFrame:CGRectMake(0, _mapOriginY, MAP_WIDTH, MAP_HEIGHT - 5)];
-//        [_detailsView addSubview:_map];
-//        _map.layer.borderColor = [UIColor grayColor].CGColor;
-//        _map.layer.borderWidth = 1;
-//        _map.delegate = self;
-//        _map.hidden = TRUE;
-//        MKCoordinateRegion viewRegion = MKCoordinateRegionMakeWithDistance(self.mealInfo.restaurant.coordinate, 1000, 1000);
-//        MKCoordinateRegion adjustedRegion = [_map regionThatFits:viewRegion];
-//        [_map setRegion:adjustedRegion animated:YES];
-//        _location = [[Location alloc] initWithName:self.mealInfo.restaurant.name address:self.mealInfo.restaurant.address coordinate:self.mealInfo.restaurant.coordinate];
-//        [_map addAnnotation:_location];
-//    }
-//    
-//    _map.hidden = !_map.hidden;
-//    CGRect newRect;
-//    if (_map.hidden) {
-//        newRect = _introduction.frame;
-//        newRect.origin.y -= MAP_HEIGHT;
-//        _introduction.frame = newRect;
-//        
-//        newRect = _numberOfPersons.frame;
-//        newRect.origin.y -= MAP_HEIGHT;
-//        _numberOfPersons.frame = newRect;
-//        
-//        newRect = _participants.frame;
-//        newRect.origin.y -= MAP_HEIGHT;
-//        _participants.frame = newRect;
-//        
-//        
-//    } else {
-//        newRect = _introduction.frame;
-//        newRect.origin.y += MAP_HEIGHT;
-//        _introduction.frame = newRect;
-//        
-//        newRect = _numberOfPersons.frame;
-//        newRect.origin.y += MAP_HEIGHT;
-//        _numberOfPersons.frame = newRect;
-//        
-//        newRect = _participants.frame;
-//        
-//        newRect.origin.y += MAP_HEIGHT;
-//        _participants.frame = newRect;
-//    }
-//    _mealDetailsViewDelegate.mapHidden = _map.hidden;
-//    [self.tableView reloadData];
 }
 
 - (UIView*) createHostView{
@@ -507,7 +469,7 @@
     UIButton* menuBtn = [[UIButton alloc] initWithFrame:CGRectMake(260, 99, menu.size.width, menu.size.height)];
     [menuBtn setBackgroundImage:menu forState:UIControlStateNormal];
     [menuBtn setBackgroundImage:menu_push forState:UIControlStateSelected | UIControlStateHighlighted ];
-    [menuBtn setTitle:@"菜式" forState:UIControlStateNormal];
+    [menuBtn setTitle:@"菜 式" forState:UIControlStateNormal];
     menuBtn.titleLabel.textColor = RGBCOLOR(220, 220, 220);
     menuBtn.titleLabel.font = [UIFont systemFontOfSize:14];
     [menuBtn addTarget:self action:@selector(displayMenu:) forControlEvents:UIControlEventTouchUpInside];
@@ -562,42 +524,6 @@
         _sharePopOver = [[WEPopoverController alloc] initWithContentViewController:_shareContentViewController];
     }
     [_sharePopOver presentPopoverFromBarButtonItem:self.navigationItem.rightBarButtonItem permittedArrowDirections:UIPopoverArrowDirectionUp animated:YES];
-}
-
-#pragma mark -
-#pragma mark mapkit delegae
-- (MKAnnotationView *)mapView:(MKMapView *)mapView viewForAnnotation:(id <MKAnnotation>)annotation{
-    MKPinAnnotationView *annotationView = (MKPinAnnotationView *)[_map dequeueReusableAnnotationViewWithIdentifier:@"Restaurant"];
-    if (annotationView == nil) {
-        annotationView = [[MKPinAnnotationView alloc] initWithAnnotation:annotation reuseIdentifier:@"Restaurant"];
-        annotationView.canShowCallout = YES;
-        
-        UIButton *rightButton= [UIButton buttonWithType:UIButtonTypeDetailDisclosure];
-        annotationView.rightCalloutAccessoryView = rightButton;
-        [rightButton addTarget:self action:@selector(openMapAndShowRoute:) forControlEvents:UIControlEventTouchDown];
-    } else {
-        annotationView.annotation = annotation;
-    }
-    
-    annotationView.enabled = YES;
-    annotationView.canShowCallout = YES;
-    return annotationView;
-}
-
--(void) openMapAndShowRoute:(id)sender{
-//    CLLocationCoordinate2D user =  [[LocationProvider sharedProvider] lastLocation].coordinate;
-    CLLocationCoordinate2D dest = self.mealInfo.restaurant.coordinate;
-//    [[UIApplication sharedApplication] openURL:[NSURL URLWithString:[NSString stringWithFormat:@"http://maps.google.com/maps?daddr=%f,%f&saddr=%@", dest.latitude, dest.longitude, NSLocalizedString(@"CurrentLocation", nil)]]];
-//    [[UIApplication sharedApplication] openURL:[NSURL URLWithString:[NSString stringWithFormat:@"http://maps.google.com/maps?daddr=%f,%f&saddr=%f,%f", dest.latitude, dest.longitude, user.latitude,user.longitude]]];
-    
-    NSString *route = [NSString stringWithFormat:@"http://maps.google.com/maps?saddr=%@&daddr=%g,%g", NSLocalizedString(@"CurrentLocation", nil), dest.latitude, dest.longitude];
-//    NSString *route = [NSString stringWithFormat:@"http://maps.google.com/maps?saddr=%@&daddr=%@&ll=%g,%g&sll=%g,%g", NSLocalizedString(@"CurrentLocation", nil), self.mealInfo.restaurant.name, dest.latitude, dest.longitude,user.latitude,user.longitude];
-    route = [route stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
-    [[UIApplication sharedApplication] openURL:[NSURL URLWithString:route]];
-}
-
--(void) mapViewDidFinishLoadingMap:(MKMapView *)mapView{
-//    [_map selectAnnotation:_location animated:YES]; // seems not needed here
 }
 
 - (SinaWeibo *)sinaweibo{

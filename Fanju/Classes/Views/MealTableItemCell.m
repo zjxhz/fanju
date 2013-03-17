@@ -17,7 +17,7 @@
 #import "DateUtil.h"
 
 #define MAX_VISIBLE_PARTICIPANTS 5
-#define CELL_RECT CGRectMake(0, 0, 320, 340) 
+#define CELL_RECT CGRectMake(0, 0, 320, 329) 
 @interface MealTableItemCell (){
     UIImageView* _backgroundView;
 }
@@ -26,7 +26,7 @@
 @implementation MealTableItemCell
 
 + (CGFloat)tableView:(UITableView*)tableView rowHeightForObject:(id)item {  
-	return 324;
+	return 329;
 }
 
 - (id)initWithStyle:(UITableViewCellStyle)style
@@ -127,13 +127,13 @@
     UIFont* topicFont = [UIFont systemFontOfSize:18];
     CGFloat topicWidth = [topicText sizeWithFont:topicFont].width;
     CGFloat topicX = (320 - topicWidth) / 2;
-    [topicText drawAtPoint:CGPointMake(topicX, 288) withFont:[UIFont systemFontOfSize:18]];
+    [topicText drawAtPoint:CGPointMake(topicX, 285) withFont:[UIFont boldSystemFontOfSize:18]];
     
     //time
     textColor = RGBCOLOR(150, 150, 150);
     [textColor set];
     NSString* timeText = [meal timeText];
-    [timeText drawAtPoint:CGPointMake(100, 311) withFont:[UIFont systemFontOfSize:10]];
+    [timeText drawAtPoint:CGPointMake(100, 306) withFont:[UIFont systemFontOfSize:10]];
 
 }
 

@@ -70,37 +70,28 @@
 }
 
 -(void)createAndInsertEvent:(EOMessage*)message append:(BOOL)append{
-    NSDictionary* data = [message.payload objectFromJSONString];
     id event = [[EventFactory sharedFactory] createEvent:message];
     if ([event isKindOfClass:[SimpleUserEvent class]]) {
         SimpleUserEvent* sue = event;
-        sue.userID = [data valueForKey:sue.userFieldName];
         [self setOrFetchUser:sue propertyName:@"user" userID:sue.userID];
     } else if([event isKindOfClass:[JoinMealEvent class]]){
         JoinMealEvent* je = event;
-        NSString* participantID = [data valueForKey:@"participant"];
-        je.participantID = participantID;
-        [self setOrFetchUser:je propertyName:@"participant" userID:participantID];
-        
-        NSString* mealID = [data valueForKey:@"meal"];
-        je.mealID = mealID;
-        MealInfo* meal = [self loadMealFromCache:mealID];
+        [self setOrFetchUser:je propertyName:@"participant" userID:je.participantID];
+        MealInfo* meal = [self loadMealFromCache:je.mealID];
         
         if (meal) {
             je.meal = meal;
             [self.tableView reloadData];
         } else {//user info not found in cache, touch the network and save it to cache for later use
-            [[NetworkHandler getHandler] requestFromURL:[self mealURL:mealID] method:GET cachePolicy:TTURLRequestCachePolicyDefault success:^(id obj){
+            [[NetworkHandler getHandler] requestFromURL:[self mealURL:je.mealID] method:GET cachePolicy:TTURLRequestCachePolicyDefault success:^(id obj){
                 [self.tableView reloadData];
             } failure:^{
                 NSLog(@"failed to load meal in notifications");
             }];
         }
-        
     }
+    
     if (event) {
-        EventBase* eb = event;
-        eb.time = message.time;
         if (append) {
             [_notifications addObject:event];
         } else {

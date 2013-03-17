@@ -17,6 +17,8 @@
 #import "SettingsTableViewController.h"
 #import "MKNumberBadgeView.h"
 #import "UIViewController+MFSideMenu.h"
+#import "Const.h"
+#import "TDBadgedCell.h"
 
 #define SIDEBAR_WIDTH 270
 #define SIDEBAR_HEADER_HEIGHT 30
@@ -153,9 +155,9 @@
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     static NSString *CellIdentifier = @"Cell";
-    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
+    TDBadgedCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
     if (cell == nil) {
-        cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier];
+        cell = [[TDBadgedCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier];
     }
     
     NSArray* sec = [_sectionItems objectAtIndex:indexPath.section];
@@ -165,19 +167,14 @@
     cell.selectionStyle  = UITableViewCellSelectionStyleNone;
     cell.backgroundColor = [UIColor clearColor];
     cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+    cell.badgeString = nil;
     if (indexPath.section == 2 && indexPath.row == 2) {
         if (_unreadMessageCount > 0) {
-            _unreadMsgBadge.value = _unreadMessageCount ;
-            [cell.contentView addSubview:_unreadMsgBadge];
-        } else {
-            [_unreadMsgBadge removeFromSuperview];
+            cell.badgeString = [NSString stringWithFormat:@"%d", _unreadMessageCount];
         }
     } else if(indexPath.section == 3 && indexPath.row == 0){
         if (_unreadNotificationCount > 0) {
-            _unreadNotifBadge.value = _unreadNotificationCount ;
-            [cell.contentView addSubview:_unreadNotifBadge];
-        } else {
-            [_unreadNotifBadge removeFromSuperview];
+            cell.badgeString = [NSString stringWithFormat:@"%d", _unreadNotificationCount];
         }
     }
     return cell;
@@ -286,6 +283,7 @@
             switch (indexPath.row) {
                 case 0:
                     controller = self.notificationViewController;
+                    _unreadNotificationCount = 0;
                     [[NSNotificationCenter defaultCenter] postNotificationName:EOUnreadNotificationCount
                                                                         object:[NSNumber numberWithInteger:_unreadNotificationCount]
                                                                       userInfo:nil];
@@ -314,7 +312,9 @@
     self.sideMenu.navigationController.viewControllers = [NSArray arrayWithObject:controller];
     [self.sideMenu.navigationController setToolbarHidden:YES];
     [self.sideMenu setMenuState:MFSideMenuStateClosed];
-    [controller setupSideMenuBarButtonItem];
+    if ([[Authentication sharedInstance] isLoggedIn]) {
+        [controller setupSideMenuBarButtonItem];
+    }
 }
 
 -(BOOL)requireLogin:(NSIndexPath*)indexPath{
@@ -356,8 +356,9 @@
 - (void)unreadMsgUpdated:(NSNotification*)notif {
     _unreadMessageCount = [notif.object integerValue];
     [self.tableView reloadData];
-    [[NSUserDefaults standardUserDefaults] setInteger:_unreadNotificationCount forKey:UNREAD_NOTIFICATION_COUNT];
+    [[NSUserDefaults standardUserDefaults] setInteger:_unreadMessageCount forKey:UNREAD_MESSAGE_COUNT];
     [[NSUserDefaults standardUserDefaults] synchronize];
+    [self notifyUnreadCount];
 }
 
 - (void)unreadNotifUpdated:(NSNotification*)notif {
@@ -365,6 +366,13 @@
     [self.tableView reloadData];
     [[NSUserDefaults standardUserDefaults] setInteger:_unreadNotificationCount forKey:UNREAD_NOTIFICATION_COUNT];
     [[NSUserDefaults standardUserDefaults] synchronize];
+    [self notifyUnreadCount];
+}
+
+-(void)notifyUnreadCount{
+    [[NSNotificationCenter defaultCenter] postNotificationName:EOUnreadCount
+                                                        object:[NSNumber numberWithInteger:_unreadNotificationCount + _unreadMessageCount]
+                                                      userInfo:nil];
 }
 
 @end

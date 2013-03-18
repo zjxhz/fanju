@@ -70,7 +70,7 @@
 
 - (void)initTabView {   
     _tabBar = [[UIView alloc] initWithFrame:CGRectMake(0, self.view.frame.size.height - TAB_BAR_HEIGHT, self.view.frame.size.width, TAB_BAR_HEIGHT)];
-    _tabBar.backgroundColor = [UIColor grayColor];
+    _tabBar.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"toolbar_bg"]];
     UIImage* join_img = [UIImage imageNamed:@"toolbth1"];
     UIImage* join_img_push = [UIImage imageNamed:@"toolbth1_push"];
     CGFloat x = JOIN_BUTTON_X;

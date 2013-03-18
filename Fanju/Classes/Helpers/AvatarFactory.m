@@ -22,7 +22,7 @@
     userImgView.image = [UIImage imageNamed:@"anno.png"];
     [userImgView setContentMode:UIViewContentModeScaleAspectFill];
     if (cornderRadius) {
-        userImgView.layer.cornerRadius = 9;
+        userImgView.layer.cornerRadius = 5;
         userImgView.layer.masksToBounds = YES;
     }
     

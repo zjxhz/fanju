@@ -10,6 +10,7 @@ pod 'MFSideMenu', '~> 0.4.1'
 pod 'CrittercismSDK', '~> 3.4.9'
 pod 'WEPopover', '~> 0.0.1'
 pod 'TDBadgedCell', '~> 2.1'
+pod 'AKSegmentedControl'
 
 
 # Testing and Search are optional components

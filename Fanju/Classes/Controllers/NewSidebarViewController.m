@@ -38,7 +38,7 @@
 @synthesize mealListViewController = _mealListViewController;
 @synthesize myMealsViewController = _myMealsViewController;
 @synthesize userListViewController = _userListViewController;
-@synthesize socialViewController = _socialViewController;
+//@synthesize socialViewController = _socialViewController;
 @synthesize userDetailsViewController = _userDetailsViewController;
 @synthesize recentContactsViewController = _recentContactsViewController;
 @synthesize notificationViewController = _notificationViewController;
@@ -107,12 +107,12 @@
     return _userListViewController;
 }
 
--(SocialNetworkViewController*)socialViewController{
-    if (!_socialViewController) {
-        _socialViewController = [[SocialNetworkViewController alloc] init];
-    }
-    return _socialViewController;
-}
+//-(SocialNetworkViewController*)socialViewController{
+//    if (!_socialViewController) {
+//        _socialViewController = [[SocialNetworkViewController alloc] init];
+//    }
+//    return _socialViewController;
+//}
 
 -(RecentContactsViewController*)recentContactsViewController{
     if (!_recentContactsViewController) {
@@ -262,7 +262,8 @@
         case 2:
             switch (indexPath.row) {
                 case 0:
-                    controller = self.socialViewController;
+                    controller = self.userListViewController;
+                    ((UserListViewController*)controller).baseURL = [NSString stringWithFormat:@"%@://%@/api/v1/user/%d/following/?format=json", HTTPS, EOHOST, [Authentication sharedInstance].currentUser.uID];
                     controller.title = @"我的关注";
                     break;
                 case 1:
@@ -348,7 +349,7 @@
 - (void)didLogout:(NSNotification*)notif {
     _myMealsViewController = nil;;
     _userListViewController = nil;
-    _socialViewController = nil;
+//    _socialViewController = nil;
     _userDetailsViewController = nil;
     _recentContactsViewController = nil;
 }

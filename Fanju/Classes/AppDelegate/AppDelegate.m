@@ -24,7 +24,7 @@
 #import "CrittercismSDK/Crittercism.h"
 #import "Const.h"
 #import "NewSidebarViewController.h"
-
+#import "RKLog.h"
 @interface AppDelegate() 
 @end
 
@@ -79,7 +79,8 @@
     self.window.rootViewController = navigationController;
     [navigationController.view addSubview:[OverlayViewController sharedOverlayViewController].view];
     [self.window makeKeyAndVisible];
-    [meal viewDidAppear:NO]; 
+    [meal viewDidAppear:NO];
+    RKLogConfigureByName("*", RKLogLevelOff); //disable RK logs, for now, it's annoying 
     return YES;
 }
 

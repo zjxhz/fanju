@@ -45,17 +45,41 @@
 
 - (id)initWithStyle:(UITableViewStyle)style {
     self = [super initWithStyle:style];
+    self.tableView.separatorColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"separator"]];
+    self.tableView.separatorStyle = UITableViewCellSeparatorStyleSingleLine;
     return self;
 }
 
+-(void)setTitle:(NSString *)title{
+    UILabel* titleLabel = [[UILabel alloc] initWithFrame:CGRectZero];
+    titleLabel.backgroundColor = [UIColor clearColor];
+    titleLabel.text = title;
+    titleLabel.font = [UIFont systemFontOfSize:21];
+    titleLabel.textColor = RGBCOLOR(220, 220, 220);
+    titleLabel.layer.shadowColor = RGBACOLOR(0, 0, 0, 0.4).CGColor;
+    titleLabel.layer.shadowOffset = CGSizeMake(0, -2);
+    [titleLabel sizeToFit];
+    self.navigationItem.titleView = titleLabel;
+}
 
 - (void)loadView {
     [super loadView];
     
     AppDelegate *delegate = (AppDelegate*)[UIApplication sharedApplication].delegate;
-    self.tableView.backgroundColor = [UIColor colorWithPatternImage:delegate.bgImage]; 
-    self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"自定义" style:UIBarButtonItemStyleBordered target:self action:@selector(filter:)];
-    _customUserFilterViewController = [[CustomUserFilterViewController alloc] initWithNibName:@"CustomUserFilterViewController" bundle:nil];
+    self.tableView.backgroundColor = [UIColor colorWithPatternImage:delegate.bgImage];
+    
+    UIButton *filter = [UIButton buttonWithType:UIButtonTypeCustom];
+    filter.titleLabel.font = [UIFont systemFontOfSize:12];
+    filter.titleLabel.textColor = RGBCOLOR(220, 220, 220);
+    filter.titleEdgeInsets = UIEdgeInsetsMake(2, 0, 0, 0);
+    [filter setTitle:@"筛选" forState:UIControlStateNormal];
+    [filter setBackgroundImage:[UIImage imageNamed:@"toprt"] forState:UIControlStateNormal];
+    [filter setBackgroundImage:[UIImage imageNamed:@"toprt_push"] forState:UIControlStateSelected | UIControlStateHighlighted];
+    [filter addTarget:self action:@selector(filter:) forControlEvents:UIControlEventTouchDown];
+    [filter sizeToFit];
+
+    self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithCustomView:filter];
+    _customUserFilterViewController = [[CustomUserFilterViewController alloc] init];
     _customUserFilterViewController.delegate = self;
     self.autoresizesForKeyboard = YES;
     self.variableHeightRows = YES;    
@@ -66,6 +90,10 @@
     [actions showInView:self.view];    
 }
 
+-(void)viewDidAppear:(BOOL)animated{
+    [super viewDidAppear:animated];
+    [TTURLRequestQueue mainQueue].suspended = NO; //workaround, not really sure how it works
+}
 
 -(void)loadUsers{
     NSString* urlWithFilter = _baseURL;
@@ -165,7 +193,7 @@
 
 #pragma mark UITableViewDelegate
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
-    return 60.0;
+    return 90;
 }
 
 - (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath*)indexPath {
@@ -208,6 +236,7 @@
             break;
         case 3:
             nav = [[UINavigationController alloc] initWithRootViewController:_customUserFilterViewController];
+           [nav.navigationBar setBackgroundImage:[UIImage imageNamed:@"topbar_bg"] forBarMetrics:UIBarMetricsDefault];
             [self presentViewController:nav animated:YES completion:^(void){
                 
             }];
@@ -218,7 +247,7 @@
             break;
     }
     
-    [self performSelector:@selector(startLoading) withObject:nil afterDelay:0.1];
+//    [self performSelector:@selector(setFilter) withObject:newFilter afterDelay:0.1];
     [self setFilter:newFilter];
 }
 

@@ -7,6 +7,8 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "AKSegmentedControl.h"
+
 @protocol CustomUserFilterViewControllerDelegate
 @optional
 -(void)filterSelected:(NSString*)filter;
@@ -14,10 +16,6 @@
 
 
 @interface CustomUserFilterViewController : UIViewController{
-    IBOutlet UIButton* okbutton;
-    IBOutlet UISegmentedControl* gender;
-    IBOutlet UISegmentedControl* seen_within;
-    NSString* filter;
 }
 @property(nonatomic, weak) id<CustomUserFilterViewControllerDelegate> delegate;
 -(IBAction)confirm:(id)sender;

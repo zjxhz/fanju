@@ -18,24 +18,28 @@
 #import "Authentication.h"
 #import "NewUserDetailsViewController.h"
 
-#define LABEL_HEIGHT 18
-#define SMALL_FONT_SIZE 12
+
+#define INFO_FRAME_X 92
+#define CELL_HEIGHT 90
+#define GENDER_Y 36
+#define MOTTO_Y 61
+#define AVATAR_SIDE_LENGTH 75
+#define SHARED_INTERESTS_X 147
 
 @interface UserTableItemCell () {
 	UILabel *_username;
     UIButton *_gender;
+    UIButton *_sharedInterestsButton;
     UILabel *_distance;
     UILabel *_motto;
+    UIImage *_maleImg;
+    UIImage *_femaleImg;
+    UserProfile* _currentUser;
     
 }
 @end
 
 @implementation UserTableItemCell
-
-+ (CGFloat)tableView:(UITableView*)tableView rowHeightForObject:(id)item {  
-	// Set the height for the particular cell
-	return 60.0;
-}
 
 - (id)initWithStyle:(UITableViewCellStyle)style
     reuseIdentifier:(NSString*)identifier {
@@ -43,36 +47,46 @@
 	if (self = [super initWithStyle:UITableViewCellStyleValue2
                     reuseIdentifier:identifier]) {
 		_item = nil;
+        _currentUser = [Authentication sharedInstance].currentUser;
         
-        UIView *infoView = [[UIView alloc] initWithFrame:CGRectMake(55, 0, 250, 60)];
+        UIView *infoView = [[UIView alloc] initWithFrame:CGRectMake(INFO_FRAME_X, 0, 320 - INFO_FRAME_X, CELL_HEIGHT)];
         [self.contentView addSubview:infoView];
         
-        _username = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, 200, 20)];
+        _username = [[UILabel alloc] initWithFrame:CGRectMake(0, 11, 100, 20)];
         [_username setBackgroundColor:[UIColor clearColor]];
         _username.font = [UIFont boldSystemFontOfSize:16];
         [infoView addSubview:_username];
-              
-        _gender = [[UIButton alloc] initWithFrame:CGRectMake(0, 25, 30, 15)];
+        
+        UIImage* sharedInterestsBg = [UIImage imageNamed:@"shared_interests_bg"];
+        _sharedInterestsButton = [[UIButton alloc] initWithFrame:CGRectMake(SHARED_INTERESTS_X, 10, sharedInterestsBg.size.width, sharedInterestsBg.size.height)];
+        [_sharedInterestsButton setBackgroundImage:sharedInterestsBg forState:UIControlStateNormal];
+        _sharedInterestsButton.titleLabel.font = [UIFont systemFontOfSize:10];
+        _sharedInterestsButton.titleLabel.textColor = [UIColor whiteColor];
+        [infoView addSubview:_sharedInterestsButton];
+        
+        _maleImg = [UIImage imageNamed:@"male"];
+        _femaleImg = [UIImage imageNamed:@"female"];
+        _gender = [[UIButton alloc] initWithFrame:CGRectMake(0, GENDER_Y, _maleImg.size.width, _maleImg.size.height)];
         [_gender setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
-        _gender.titleLabel.font = [UIFont systemFontOfSize:SMALL_FONT_SIZE];
-        _gender.layer.cornerRadius = 5;
-        _gender.clipsToBounds = YES;
-        [_gender setImageEdgeInsets:UIEdgeInsetsMake(0, -5, 0, 0)]; // place the image to the right
+        _gender.titleLabel.font = [UIFont systemFontOfSize:8];
         [infoView addSubview:_gender];
         
-        _distance = [[UILabel alloc] initWithFrame:CGRectMake(50, 20, 150, LABEL_HEIGHT)];
+        CGFloat x = _maleImg.size.width + 5;
+        _distance = [[UILabel alloc] initWithFrame:CGRectMake(x, GENDER_Y, 150, 12)];
         _distance.textAlignment = UITextAlignmentRight;
+        _distance.textColor = RGBCOLOR(130, 130, 130);
         _distance.backgroundColor = [UIColor clearColor];
-        _distance.font = [UIFont systemFontOfSize:SMALL_FONT_SIZE];
+        _distance.font = [UIFont systemFontOfSize:12];
         [infoView addSubview:_distance];
         
         
-        _motto = [[UILabel alloc] initWithFrame:CGRectMake(0, 40, 200, LABEL_HEIGHT)];
+        _motto = [[UILabel alloc] initWithFrame:CGRectMake(0, MOTTO_Y, 320 - INFO_FRAME_X - 5, 20)];
         _motto.backgroundColor = [UIColor clearColor];
-        _motto.font = [UIFont systemFontOfSize:SMALL_FONT_SIZE];
+        _motto.font = [UIFont systemFontOfSize:14];
+        _motto.textColor = RGBCOLOR(130, 130, 130);
         [infoView addSubview:_motto];
         
-        _avatar = [AvatarFactory defaultAvatarWithFrame:CGRectMake(8, 8, 41, 41)];
+        _avatar = [AvatarFactory defaultAvatarWithFrame:CGRectMake(6, 5, AVATAR_SIDE_LENGTH, AVATAR_SIDE_LENGTH)];
         [self.contentView addSubview:_avatar];
 	}
     
@@ -131,17 +145,20 @@
         
 		// Set the data in various UI elements
 		[_username setText:item.profile.name];
-        [_avatar setPathToNetworkImage:[item.profile smallAvatarFullUrl] forDisplaySize:CGSizeMake(50, 50)];
+        [_avatar setPathToNetworkImage:[item.profile smallAvatarFullUrl] forDisplaySize:CGSizeMake(AVATAR_SIDE_LENGTH, AVATAR_SIDE_LENGTH)];
         _avatar.userInteractionEnabled = NO;
         
+        NSMutableSet *myTagSet = [NSMutableSet setWithArray:_currentUser.tags];
+        NSMutableSet *otherTagSet = [NSMutableSet setWithArray:item.profile.tags];
+        [myTagSet intersectSet:otherTagSet];
+        
+        [_sharedInterestsButton setTitle:[NSString stringWithFormat:@"%d个共同爱好", myTagSet.count] forState:UIControlStateNormal];
         [_gender setTitle:[NSString stringWithFormat:@"%d",[item.profile age]] forState:UIControlStateNormal];
+        _gender.contentEdgeInsets = UIEdgeInsetsMake(0, 7, 0, 0);
         if (item.profile.gender == 0) {
-            _gender.backgroundColor = RGBCOLOR(0x60, 0xC0, 0xF0) ;
-            [_gender setImage:[UIImage imageNamed:@"male.png"] forState:UIControlStateNormal];
+            [_gender setBackgroundImage:_maleImg forState:UIControlStateNormal];
         } else {
-            _gender.backgroundColor = RGBCOLOR(0xEE, 0x66, 0xEE);
-            [_gender setImage:[UIImage imageNamed:@"female.png"] forState:UIControlStateNormal];
-            
+            [_gender setBackgroundImage:_femaleImg forState:UIControlStateNormal];
         } //TODO user with no age and no gender set
         
         NSString* updated = @"未知时间";
@@ -150,6 +167,7 @@
             updated = [DateUtil humanReadableIntervals: interval];
         }
         _distance.text = [NSString stringWithFormat:@"%@ | %@", [DistanceUtil distanceToMe:item.profile], updated];
+        [_distance sizeToFit];
         _motto.text = item.profile.motto;
 	}
 }

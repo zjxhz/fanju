@@ -23,6 +23,7 @@
 #import "ImageDownloader.h"
 #import "MFSideMenu.h"
 #import "UIViewController+MFSideMenu.h"
+#import "WidgetFactory.h"
 
 @interface MealListViewController()
 @property (nonatomic, strong) IBOutlet UIView* loginView;
@@ -42,8 +43,8 @@
 
 - (void)loadView {
     [super loadView];
-    self.title = @"饭聚";
-    self.tabBarItem = [[UITabBarItem alloc] initWithTitle:self.title image:[UIImage imageNamed:@"fanju_icon.png"] tag:0];
+    self.navigationItem.titleView = [[WidgetFactory sharedFactory] titleViewWithTitle:@"饭聚"];
+//    self.tabBarItem = [[UITabBarItem alloc] initWithTitle:self.title image:[UIImage imageNamed:@"fanju_icon.png"] tag:0];
 //    if ([[Authentication sharedInstance] isLoggedIn]) {
 //        [self setupSideMenuBarButtonItem];
 //    }
@@ -67,13 +68,13 @@
 
 
 -(UIView*)createHeader:(NSString*)text{
-    UIView* view = [[UIView alloc] init];
+    UIView* view = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, 22)];
     view.backgroundColor = [UIColor colorWithRed:0 green:0 blue:0 alpha:0.5];
     UIImage* clockImage = [UIImage imageNamed:@"title_time"];
     UIImageView *clockImageView = [[UIImageView alloc] initWithImage:clockImage];
-    clockImageView.frame = CGRectMake(9, 4, clockImage.size.width, clockImage.size.height);
+    clockImageView.frame = CGRectMake(9, 3, clockImage.size.width, clockImage.size.height);
     CGFloat x = clockImageView.frame.origin.x + clockImageView.frame.size.width + 6;
-    UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(x, 2, 120, 20)];
+    UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(x, 3, 120, 20)];
     label.text = NSLocalizedString(text, nil);
     label.textColor = RGBCOLOR(245, 245, 245);
     label.font = [UIFont systemFontOfSize:14];

@@ -27,6 +27,7 @@
 #import "OverlayViewController.h"
 #import "NINetworkImageView.h"
 #import "MapViewController.h"
+#import "WidgetFactory.h"
 
 @implementation MealDetailViewController{
     MealDetailsViewDelegate* _mealDetailsViewDelegate;
@@ -100,53 +101,12 @@
 -(void)viewDidLoad
 {
     [super viewDidLoad];
-    self.tableView.showsVerticalScrollIndicator = NO;
-    UILabel* titleLabel = [[UILabel alloc] initWithFrame:CGRectZero];
-    titleLabel.backgroundColor = [UIColor clearColor];
-    titleLabel.text = _mealInfo.topic;
-    titleLabel.font = [UIFont systemFontOfSize:21];
-    titleLabel.minimumFontSize = 14;
-    titleLabel.adjustsFontSizeToFitWidth = YES;
-    titleLabel.textColor = RGBCOLOR(220, 220, 220);
-    titleLabel.layer.shadowColor = RGBACOLOR(0, 0, 0, 0.4).CGColor;
-    titleLabel.layer.shadowOffset = CGSizeMake(0, -2);
-    titleLabel.frame = CGRectMake(0, 0, 200, 44);
-    [titleLabel sizeToFit];
+    self.tableView.showsVerticalScrollIndicator = NO;  
+    self.navigationItem.titleView = [[WidgetFactory sharedFactory]titleViewWithTitle:_mealInfo.topic];
     
-    self.navigationItem.titleView = titleLabel;
-    
-    UIImage* backImg = [UIImage imageNamed:@"toplf"];
-    UIImage* backImgPush = [UIImage imageNamed:@"toplf_push"];
-    UIButton *back = [UIButton buttonWithType:UIButtonTypeCustom];
-    back.titleLabel.font = [UIFont systemFontOfSize:12];
-    back.titleLabel.textColor = RGBCOLOR(220, 220, 220);
-//    back.layer.borderColor = [UIColor whiteColor].CGColor;
-//    back.layer.borderWidth = 1;
-    back.titleEdgeInsets = UIEdgeInsetsMake(2, 0, 0, 0);
-    back.contentVerticalAlignment = UIControlContentVerticalAlignmentCenter;
-    [back setTitle:@"返回" forState:UIControlStateNormal];
-    [back setBackgroundImage:backImg forState:UIControlStateNormal];
-    [back setBackgroundImage:backImgPush forState:UIControlStateSelected | UIControlStateHighlighted];
-    [back addTarget:self.navigationController 
-            action:@selector(popViewControllerAnimated:)
-  forControlEvents:UIControlEventTouchDown];
-    [back sizeToFit];
-    UIBarButtonItem *temporaryBarButtonItem = [[UIBarButtonItem alloc] initWithCustomView:back];
-    
-    self.navigationItem.leftBarButtonItem = temporaryBarButtonItem;
+    self.navigationItem.leftBarButtonItem = [[WidgetFactory sharedFactory]backButtonWithTarget:self.navigationController action:@selector(popViewControllerAnimated:)];
     self.navigationItem.hidesBackButton = YES;
-    
-    UIButton *share = [UIButton buttonWithType:UIButtonTypeCustom];
-    share.titleLabel.font = [UIFont systemFontOfSize:12];
-    share.titleLabel.textColor = RGBCOLOR(220, 220, 220);
-    share.titleEdgeInsets = UIEdgeInsetsMake(2, 0, 0, 0);
-    [share setTitle:@"分享" forState:UIControlStateNormal];
-    [share setBackgroundImage:[UIImage imageNamed:@"toprt"] forState:UIControlStateNormal];
-    [share setBackgroundImage:[UIImage imageNamed:@"toprt_push"] forState:UIControlStateSelected | UIControlStateHighlighted];
-    [share addTarget:self action:@selector(onShareClicked:) forControlEvents:UIControlEventTouchDown];
-    share.contentVerticalAlignment = UIControlContentVerticalAlignmentCenter;
-    [share sizeToFit];
-    self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithCustomView:share];
+    self.navigationItem.rightBarButtonItem = [[WidgetFactory sharedFactory]normalBarButtonItemWithTitle:@"分享" target:self action:@selector(onShareClicked:)];
     
     self.tableView.separatorColor = [UIColor clearColor];
     NSMutableArray* items = [[NSMutableArray alloc] init];
@@ -418,7 +378,7 @@
         [_participants removeFromSuperview];
     }
     NSInteger y = _numberOfPersons.frame.origin.y + _numberOfPersons.frame.size.height + 8;
-    _participants = [[UIScrollView alloc] initWithFrame:CGRectMake(9, y, 320 - 9, 53)];
+    _participants = [[UIScrollView alloc] initWithFrame:CGRectMake(9, y, 320 - 9, 68)];
     _participants.showsHorizontalScrollIndicator = NO;
     _participants.backgroundColor = [UIColor clearColor];
     _participants.contentSize = CGSizeMake( (PARTICIPANTS_WIDTH + PARTICIPANTS_GAP ) * _mealInfo.participants.count, PARTICIPANTS_HEIGHT);
@@ -458,7 +418,7 @@
     UIImage* cost_bg = [UIImage imageNamed:@"renjun_mon"];
     UIImageView* cost_view = [[UIImageView alloc] initWithImage:cost_bg];
     cost_view.frame = CGRectMake(9, 0, cost_bg.size.width, cost_bg.size.height);
-    UILabel* cost_label = [[UILabel alloc] initWithFrame:CGRectMake(21, 3, 60, 20)];
+    UILabel* cost_label = [[UILabel alloc] initWithFrame:CGRectMake(21, 2, 60, 20)];
     cost_label.backgroundColor = [UIColor clearColor];
     cost_label.textColor = RGBCOLOR(200, 200, 200);
     cost_label.text = [NSString stringWithFormat:@"人均：¥%.0f", _mealInfo.price];

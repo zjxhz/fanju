@@ -27,7 +27,9 @@
 #import "UserTagsViewController.h"
 #import "NINetworkImageView.h"
 #import "DictHelper.h"
-
+#import "WidgetFactory.h"
+#import "UserDetailsCell.h"
+#import "PhotoTitleCell.h"
 #define TAG_MSG @"发消息"
 #define TAG_COMMENT @"发评论"
 
@@ -43,34 +45,22 @@
     UIActionSheet* _imagePickerActions;
     UIActionSheet* _imageDeleteOrViewActions;
     MBProgressHUD* _hud;
+    UserTagsCell* _tagCell;
     
 }
-@property(nonatomic, weak) IBOutlet UITableViewCell* userDetailsCell;
-@property(nonatomic, weak) IBOutlet UILabel* nextMealLabel;
-@property(nonatomic, weak) IBOutlet UILabel* mottoLabel;
-@property(weak, nonatomic) IBOutlet UILabel* nextMealTimeLabel;
-@property(nonatomic, weak) IBOutlet UILabel* age;
-@property(nonatomic, weak) IBOutlet UIImageView* gender;
-@property(nonatomic, weak) IBOutlet UILabel* constellation;
-@property(nonatomic, weak) IBOutlet UILabel* distanceAndUpdatedAt;
-@property(nonatomic, weak) IBOutlet NINetworkImageView* photoView;
-@property(nonatomic, weak) IBOutlet UIView* nextMealFrame;
-@property(nonatomic, weak) IBOutlet UIView* restFrame;//frame for the rest other than next meal
-@property(nonatomic, strong) IBOutlet UITabBar* tabBar;
+@property(nonatomic, strong) UserDetailsCell* userDetailsCell;
+
 @end
 
 @implementation NewUserDetailsViewController
-@synthesize userDetailsCell = _userDetailsCell;
-@synthesize nextMealLabel = _nextMealLabel;
-@synthesize mottoLabel = _mottoLabel;
-@synthesize nextMealTimeLabel = _nextMealTimeLabel, age = _age, gender = _gender, constellation = _constellation, distanceAndUpdatedAt = _distanceAndUpdatedAt, photoView = _photoView;
-@synthesize user = _user;
-
 - (id)initWithStyle:(UITableViewStyle)style{
     if (self = [super initWithStyle:style]) {
         self.tableView.delegate = self;
         self.tableView.dataSource = self;
+        self.tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
+        self.tableView.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"bg"]];
         _sections = @[@"", @"兴趣爱好（%d）", @"照片", @"资料", @"社交网络", @"饭友的评论"];
+        self.navigationItem.leftBarButtonItem = [[WidgetFactory sharedFactory] backButtonWithTarget:self.navigationController action:@selector(popViewControllerAnimated:)];
     }
     return self;
 }
@@ -86,17 +76,19 @@
     [super viewWillAppear:animated];
     [self.navigationController setToolbarHidden:NO];
     self.toolbarItems = [self createToolbarItems];
+//    [self.navigationController.toolbar setBackgroundColor:[UIColor colorWithPatternImage:[UIImage imageNamed:@"toolbar_bg"]]];
+    [self.navigationController.toolbar setBackgroundImage:[UIImage imageNamed:@"toolbar_bg"] forToolbarPosition:UIToolbarPositionAny barMetrics:UIBarMetricsDefault];
     [self updateFollowOrNotButton];
 //    [self loadComments];
     [self.tableView setFrame:CGRectMake(0, 0, 320, 200)];
-    self.tabBar.frame = CGRectMake(0, 300, 320, 49);
+//    self.tabBar.frame = CGRectMake(0, 300, 320, 49);
     [self.view sendSubviewToBack:self.tableView];
     [self updateNavigationBar];
 }
 
 -(void)setUser:(UserProfile *)user{
     _user = user;
-    self.title = _user.name;
+    self.navigationItem.titleView = [[WidgetFactory sharedFactory] titleViewWithTitle:_user.name];
     [self loadComments];
     [self.tableView reloadData];
 }
@@ -151,7 +143,7 @@
 
 -(void)updateNavigationBar{
     if ([self isViewForMyself]) {
-        self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemEdit target:self action:@selector(edit:)];
+        self.navigationItem.rightBarButtonItem = [[WidgetFactory sharedFactory] normalBarButtonItemWithTitle:@"编辑" target:self action:@selector(edit:)];
     } else {
         self.navigationItem.rightBarButtonItem = nil;
     }
@@ -164,20 +156,66 @@
 
 
 -(NSArray*) createToolbarItems{
-    NSMutableArray* items = [NSMutableArray array];
+    UIBarButtonItem* flexiSpace = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
     if ([self isViewForMyself]) {
-        [items addObject:[[UIBarButtonItem alloc] initWithTitle:@"修改资料" style:UIBarButtonItemStyleBordered target:self action:@selector(edit:)]];
-        [items addObject:[[UIBarButtonItem alloc] initWithTitle:@"修改头像" style:UIBarButtonItemStyleBordered target:self action:@selector(editAvatar:)]];
-        [items addObject:[[UIBarButtonItem alloc] initWithTitle:@"上传照片" style:UIBarButtonItemStyleBordered target:self action:@selector(addPhoto:)]];
-        [items addObject:[[UIBarButtonItem alloc] initWithTitle:@"修改签名" style:UIBarButtonItemStyleBordered target:self action:@selector(editMotto:)]];
+        UIBarButtonItem* profile = [self createToolbarButtonItemWithTitle:@"编辑资料" image:[UIImage imageNamed:@"tb_profile"] push_image:[UIImage imageNamed:@"tb_profile_push"] selector:@selector(edit:)];
+        UIBarButtonItem* photo = [self createToolbarButtonItemWithTitle:@"修改头像" image:[UIImage imageNamed:@"tb_photo"] push_image:[UIImage imageNamed:@"tb_photo_push"] selector:@selector(addPhoto:)];
+        UIBarButtonItem* avatar = [self createToolbarButtonItemWithTitle:@"上传照片" image:[UIImage imageNamed:@"tb_profile"] push_image:[UIImage imageNamed:@"tb_profile_push"] selector:@selector(editAvatar:)];
+        UIBarButtonItem* motto = [self createToolbarButtonItemWithTitle:@"修改签名" image:[UIImage imageNamed:@"tb_profile"] push_image:[UIImage imageNamed:@"tb_profile_push"] selector:@selector(editMotto:)];
+        return @[profile, flexiSpace, photo, flexiSpace, avatar, flexiSpace, motto];
     } else {
-        [items addObject:[[UIBarButtonItem alloc] initWithTitle:@"评论" style:UIBarButtonItemStyleBordered target:self action:@selector(comment:)]];
-        [items addObject:[[UIBarButtonItem alloc] initWithTitle:@"私聊" style:UIBarButtonItemStyleBordered target:self action:@selector(sendMsg:)]];
-        [items addObject:[[UIBarButtonItem alloc] initWithTitle:@"添加关注" style:UIBarButtonItemStyleBordered target:self action:@selector(followOrNot:)]];
-        [items addObject:[[UIBarButtonItem alloc] initWithTitle:@"拉黑举报" style:UIBarButtonItemStyleBordered target:self action:@selector(block:)]];
+        UIImage* chatBg = [UIImage imageNamed:@"toolbth1"];
+        UIImage* chatBgPush = [UIImage imageNamed:@"toolbth1_push"];
+        UIButton* chatButton = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, chatBg.size.width, chatBg.size.height)];
+        [chatButton setBackgroundImage:chatBg forState:UIControlStateNormal];
+        [chatButton setBackgroundImage:chatBgPush forState:UIControlStateSelected];
+        [chatButton setTitle:@"和Ta聊天" forState:UIControlStateNormal];
+        [chatButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+        chatButton.titleLabel.font = [UIFont systemFontOfSize:20];
+        [chatButton addTarget:self action:@selector(sendMsg:) forControlEvents:UIControlEventTouchUpInside];
+        UIBarButtonItem* chatItem = [[UIBarButtonItem alloc] initWithCustomView:chatButton];
+        
+        UIImage* followBg = [UIImage imageNamed:@"toolbth2"];
+        UIImage* followBgPush = [UIImage imageNamed:@"toolbth2_push"];
+        UIButton* followButton = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, followBg.size.width, followBg.size.height)];
+        [followButton setBackgroundImage:followBg forState:UIControlStateNormal];
+        [followButton setBackgroundImage:followBgPush forState:UIControlStateSelected];
+//        [followButton setTitle:@"关注" forState:UIControlStateNormal];
+//        [followButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+//        followButton.titleLabel.font = [UIFont systemFontOfSize:20];
+        [followButton addTarget:self action:@selector(follow:) forControlEvents:UIControlEventTouchUpInside];
+        UIBarButtonItem* followItem = [[UIBarButtonItem alloc] initWithCustomView:followButton];
+        UIBarButtonItem* noSpace = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFixedSpace target:nil action:nil];
+        noSpace.width = -10.0;
+        return @[flexiSpace, chatItem, noSpace, followItem,flexiSpace];
+        
+//        UIBarButtonItem* chat = [self createToolbarButtonItemWithTitle:@"" image:<#(UIImage *)#> push_image:<#(UIImage *)#> selector:<#(SEL)#>]
+//        [items addObject:[[UIBarButtonItem alloc] initWithTitle:@"评论" style:UIBarButtonItemStyleBordered target:self action:@selector(comment:)]];
+//        [items addObject:[[UIBarButtonItem alloc] initWithTitle:@"私聊" style:UIBarButtonItemStyleBordered target:self action:@selector(sendMsg:)]];
+//        [items addObject:[[UIBarButtonItem alloc] initWithTitle:@"添加关注" style:UIBarButtonItemStyleBordered target:self action:@selector(followOrNot:)]];
+//        [items addObject:[[UIBarButtonItem alloc] initWithTitle:@"拉黑举报" style:UIBarButtonItemStyleBordered target:self action:@selector(block:)]];
     }
-    return items;
+    return nil;
+}
+
+-(UIBarButtonItem*)createToolbarButtonItemWithTitle:(NSString*)title image:(UIImage*)image push_image:(UIImage*)pimage selector:(SEL)selector{
+
+    UIButton* button = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, 60, 47)];
+    button.titleLabel.font = [UIFont systemFontOfSize:12];
+    [button setTitleColor:RGBCOLOR(50, 50, 50) forState:UIControlStateNormal];
+    [button setTitle:title forState:UIControlStateNormal];
+    [button setImage:image forState:UIControlStateNormal];
+    [button setImage:pimage forState:UIControlStateSelected];
+    [button addTarget:self action:selector forControlEvents:UIControlEventTouchUpInside];
+    // the space between the image and text
+    CGFloat spacing = 0.0;
+    CGSize imageSize = button.imageView.frame.size;
+    CGSize titleSize = button.titleLabel.frame.size;
     
+    button.titleEdgeInsets = UIEdgeInsetsMake(0.0, - imageSize.width, - (imageSize.height + spacing), 0.0);
+    titleSize = button.titleLabel.frame.size;
+    button.imageEdgeInsets = UIEdgeInsetsMake(- (titleSize.height + spacing), 0.0, 0.0, - titleSize.width);
+    return [[UIBarButtonItem alloc] initWithCustomView:button];
 }
 
 -(void)comment:(id)sender{
@@ -311,23 +349,6 @@
     }
     return [[Authentication sharedInstance].currentUser isEqual:_user];
 }
--(void) requestNextMeal{
-    [[NetworkHandler getHandler] requestFromURL:[NSString stringWithFormat:@"http://%@/api/v1/user/%d/order/?format=json&order_by=meal__start_date", EOHOST, _user.uID] method:GET cachePolicy:TTURLRequestCachePolicyNetwork
-                                        success:^(id obj) {
-                                            NSArray *orders = [obj objectForKeyInObjects];
-                                            if (orders && [orders count] > 0) {
-                                                OrderInfo *order = [OrderInfo orderInfoWithData:[orders objectAtIndex:0]];
-                                                _nextMealLabel.text = order.meal.topic;
-                                                _nextMealTimeLabel.text = [DateUtil shortStringFromDate:order.meal.time];
-                                            } else {
-                                                _nextMealLabel.text = @"最近没有饭局";
-                                                _nextMealTimeLabel.text = @"";
-                                            }
-                                        } failure:^{
-                                            _nextMealLabel.text = @"获取饭局失败";
-                                            _nextMealTimeLabel.text = @"";
-                                        }];
-}
 
 -(void)loadComments{
     _loadingComments = YES;	
@@ -358,15 +379,18 @@
 -(CGFloat) tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath{
     switch (indexPath.section) {
         case 0:
-            if ([self isViewForMyself]) {
-                return 330;
+            if (_userDetailsCell) {
+                return _userDetailsCell.cellHeight;
             } else {
-                return 380;
+                return 215;
             }
         case 1:
-            return 40;
+            return indexPath.row == 0 ? 31 : 70;
         case 2:
-            return [self rowsForPhotoCell] == 1 ? 95 : 95 + 85;
+            if (_tagCell) {
+                return _tagCell.cellHeight;
+            }
+            return 36;
         case 3:
             return indexPath.row == 1 ? 75 : 50;
         case 4:
@@ -379,21 +403,6 @@
             }
         default:
             return 0;
-    }
-}
-
--(NSInteger)rowsForPhotoCell{
-    if (_photoCell) {
-        return [_photoCell numberOfRows];
-    }
-    int photoCount = _user.photos.count + 1 + ([self isViewForMyself] ? 1 : 0);
-    if (photoCount > 8) {
-        return 2; //maximal 2 rows
-    }
-    if (photoCount % 4 == 0) {
-        return photoCount / 4;
-    } else {
-        return photoCount / 4 + 1;
     }
 }
 
@@ -413,6 +422,8 @@
 //        }
 //        return count;
         return 3;
+    } else if (section == 1){
+        return 2;
     }
     return 1;
 }
@@ -421,71 +432,80 @@
     return _sections.count;
 }
 
-- (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section{
-    NSString *title = [_sections objectAtIndex:section];
-    if (section == 1) {
-        return [NSString stringWithFormat:title, _user.tags.count];
-    }
-    return title;
-}
+//- (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section{
+//    NSString *title = [_sections objectAtIndex:section];
+//    if (section == 1) {
+//        return [NSString stringWithFormat:title, _user.tags.count];
+//    }
+//    return title;
+//}
 
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     UITableViewCell *cell = nil;
     if (indexPath.section == 0) {
-        static NSString *CellIdentifier = @"UserDetailsCell";
-        cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
-        if (cell == nil) {
-            [[NSBundle mainBundle] loadNibNamed:@"UserDetailsCell" owner:self options:nil];//load the cell now
-            cell = _userDetailsCell;
-            _userDetailsCell = nil;
-            _nextMealLabel.text = @"";
-            _nextMealTimeLabel.text = @"";
-            _photoView.initialImage = [UIImage imageNamed:@"anno.png"];
-        }
-        if ([self isViewForMyself]) {
-            self.nextMealFrame.hidden = YES;
-            self.restFrame.frame = CGRectMake(self.restFrame.frame.origin.x, 15, self.restFrame.frame.size.width, self.restFrame.frame.size.height);
-        } else if (_user){
-            [self requestNextMeal];
-        }
-        [_photoView setPathToNetworkImage:_user.avatarFullUrl forDisplaySize:_photoView.frame.size];
-        _mottoLabel.text = _user.motto && _user.motto.length > 0 ? _user.motto : @"未设置签名";
-        _age.text = _user.age ? [NSString stringWithFormat:@"%d岁", _user.age] : @"20岁";
-        _gender.image = _user.genderImage;
-        _constellation.text = _user.constellation;
-        NSString* updated = @"未知时间";
-        if ([self isViewForMyself]) {
-            updated = @"0分钟前";
-        } else if (_user.locationUpdatedTime) {
-            NSTimeInterval interval = [_user.locationUpdatedTime timeIntervalSinceNow] > 0 ? 0 : -[_user.locationUpdatedTime timeIntervalSinceNow];
-            updated = [DateUtil humanReadableIntervals: interval];
-        }
+//        static NSString *CellIdentifier = @"UserDetailsCell";
+//        cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
+//        if (cell == nil) {
+        cell = [[UserDetailsCell alloc] initWithUser:_user];
+        _userDetailsCell = cell;
+//        }
+//        if (cell == nil) {
+//            [[NSBundle mainBundle] loadNibNamed:@"UserDetailsCell" owner:self options:nil];//load the cell now
+//            cell = _userDetailsCell;
+//            _userDetailsCell = nil;
+//            _nextMealLabel.text = @"";
+//            _nextMealTimeLabel.text = @"";
+//            _photoView.initialImage = [UIImage imageNamed:@"anno.png"];
+//        }
+//        if ([self isViewForMyself]) {
+//            self.nextMealFrame.hidden = YES;
+//            self.restFrame.frame = CGRectMake(self.restFrame.frame.origin.x, 15, self.restFrame.frame.size.width, self.restFrame.frame.size.height);
+//        } else if (_user){
+//            [self requestNextMeal];
+//        }
+//        [_photoView setPathToNetworkImage:_user.avatarFullUrl forDisplaySize:_photoView.frame.size];
+//        _mottoLabel.text = _user.motto && _user.motto.length > 0 ? _user.motto : @"未设置签名";
+//        _age.text = _user.age ? [NSString stringWithFormat:@"%d岁", _user.age] : @"20岁";
+//        _gender.image = _user.genderImage;
+//        _constellation.text = _user.constellation;
+//        NSString* updated = @"未知时间";
+//        if ([self isViewForMyself]) {
+//            updated = @"0分钟前";
+//        } else if (_user.locationUpdatedTime) {
+//            NSTimeInterval interval = [_user.locationUpdatedTime timeIntervalSinceNow] > 0 ? 0 : -[_user.locationUpdatedTime timeIntervalSinceNow];
+//            updated = [DateUtil humanReadableIntervals: interval];
+//        }
+//        
+//        NSString* distance = [self isViewForMyself] ? @"0.00公里" : [DistanceUtil distanceToMe:_user];
+//        NSString *distanceAndUpdatedAt = [NSString stringWithFormat:@"%@ | %@", distance, updated];
+//        _distanceAndUpdatedAt.text = distanceAndUpdatedAt;
         
-        NSString* distance = [self isViewForMyself] ? @"0.00公里" : [DistanceUtil distanceToMe:_user];
-        NSString *distanceAndUpdatedAt = [NSString stringWithFormat:@"%@ | %@", distance, updated];
-        _distanceAndUpdatedAt.text = distanceAndUpdatedAt;
-        
-    } else if (indexPath.section == 1){
+    } else if(indexPath.section == 1){
+        if (indexPath.row == 0) {
+            static NSString* CellIdentifier = @"PhotoTitleCell";
+            cell = [[PhotoTitleCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier];
+        } else {
+            static NSString* CellIdentifier = @"PhotoThumbnailCell";
+            cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
+            if (cell == nil) {
+                BOOL editable = [self isViewForMyself];
+                cell = [[PhotoThumbnailCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier withUser:_user editable:editable];
+                _photoCell = (PhotoThumbnailCell*)cell;
+                ((PhotoThumbnailCell*)cell).delegate = self;
+            }
+        }
+    } else if (indexPath.section == 2){
         static NSString* CellIdentifier = @"UserTagsCell";
         cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
         if (cell == nil) {
             cell = [[UserTagsCell alloc] initWithStyle:UITableViewCellStyleValue1 reuseIdentifier:CellIdentifier];
-        } 
-        UserTagsCell* tagCell = (UserTagsCell* )cell;
-        tagCell.tags = _user.tags;
-
-    } else if(indexPath.section == 2){
-        static NSString* CellIdentifier = @"PhotoThumbnailCell";
-        cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
-        if (cell == nil) {
-            BOOL editable = [self isViewForMyself];
-            cell = [[PhotoThumbnailCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier withUser:_user editable:editable];
-            _photoCell = (PhotoThumbnailCell*)cell;
-            ((PhotoThumbnailCell*)cell).delegate = self;
         }
-    } else if(indexPath.section == 3){
+        _tagCell = (UserTagsCell* )cell;
+        _tagCell.tags = _user.tags;
+        
+    }  else if(indexPath.section == 3){
         static NSString* CellIdentifier = @"UserInfoCell";
         cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
         if (cell == nil) {
@@ -554,12 +574,8 @@
     [self addPhoto:nil];
 }
 
--(void) didSelectAvatar:(UIImage*)avatarImage withAllPhotos:(NSArray*)allPhotos atIndex:(NSInteger)index{
-    [self showUsrPhotos:allPhotos atIndex:index];
-}
-
 -(void) showUsrPhotos:(NSArray*)photos atIndex:(NSInteger)index{
-    PhotoViewController *pvc = [[PhotoViewController alloc] initWithPhotos:photos atIndex:index withBigPhotoUrls:[_user avatarAndPhotosFullUrls]]; //TODO test adding photos
+    PhotoViewController *pvc = [[PhotoViewController alloc] initWithPhotos:photos atIndex:index withBigPhotoUrls:[_user photosFullUrls]]; //TODO test adding photos
     pvc.title = @"照片";
 //    pvc.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCancel target:self action:@selector(dismissTagViewController:)];
 //    UINavigationController *navigationController = [[UINavigationController alloc] initWithRootViewController:tagC];
@@ -583,25 +599,25 @@
 
 #pragma mark UIImagePickerControllerDelegate
 - (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info{
-    CGRect cropRect = [[info valueForKey:UIImagePickerControllerCropRect] CGRectValue];
+//    CGRect cropRect = [[info valueForKey:UIImagePickerControllerCropRect] CGRectValue];
     
     UIImage *originalImage = [info valueForKey:UIImagePickerControllerOriginalImage];
-    cropRect = [originalImage convertCropRect:cropRect];
-    UIImage *croppedImage = [originalImage croppedImage:cropRect];
-    CGFloat length = croppedImage.size.height > croppedImage.size.width ? croppedImage.size.height : croppedImage.size.width;
-    CGSize resizeSize = length > 640 ? CGSizeMake(640, 640) : croppedImage.size;
-    UIImage *resizedImage = [croppedImage resizedImage:resizeSize imageOrientation:originalImage.imageOrientation];
-    NSLog(@"crop and resizing - cropRect:%@ ==> %@ -> %@ -> %@",
-          NSStringFromCGRect(cropRect),
-          NSStringFromCGSize(originalImage.size),
-          NSStringFromCGSize(croppedImage.size),
-          NSStringFromCGSize(resizedImage.size) );
+//    cropRect = [originalImage convertCropRect:cropRect];
+//    UIImage *croppedImage = [originalImage croppedImage:cropRect];
+//    CGFloat length = croppedImage.size.height > croppedImage.size.width ? croppedImage.size.height : croppedImage.size.width;
+//    CGSize resizeSize = length > 640 ? CGSizeMake(640, 640) : croppedImage.size;
+//    UIImage *resizedImage = [croppedImage resizedImage:resizeSize imageOrientation:originalImage.imageOrientation];
+//    NSLog(@"crop and resizing - cropRect:%@ ==> %@ -> %@ -> %@",
+//          NSStringFromCGRect(cropRect),
+//          NSStringFromCGSize(originalImage.size),
+//          NSStringFromCGSize(croppedImage.size),
+//          NSStringFromCGSize(resizedImage.size) );
     _hud = [MBProgressHUD showHUDAddedTo:picker.view animated:YES];
 	_hud.mode = MBProgressHUDModeAnnularDeterminate;
     if (_operation == ChangeAvatar) {
-        [self doChangeAvatar:resizedImage];
+        [self doChangeAvatar:originalImage];
     } else {
-        [self doAddPhoto:resizedImage];
+        [self doAddPhoto:originalImage];
     }
 }
 
@@ -636,10 +652,9 @@
                                      success:^(id obj) {
                                          NSLog(@"avatar updated");
                                          _user.avatarURL  = [obj objectForKey:@"avatar"];
-                                         self.photoView.initialImage = resizedImage;
-                                         [self.photoView setPathToNetworkImage: [_user avatarFullUrl]];
+//                                         self.photoView.initialImage = resizedImage;
+//                                         [self.photoView setPathToNetworkImage: [_user avatarFullUrl]];
                                          [self.tableView reloadData];
-                                         [_photoCell changeAvatar:[_user avatarFullUrl] withLocalImage:resizedImage];
                                          [[Authentication sharedInstance] relogin];
                                          [_hud hide:YES];
                                          [self dismissModalViewControllerAnimated:YES];
@@ -658,7 +673,7 @@
 }
 
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath{
-    if (indexPath.section == 1){
+    if (indexPath.section == 2){
         [self showAllTags];
     }
 }
@@ -742,7 +757,7 @@
             return;
         }
         pickerController.delegate = self;
-        pickerController.allowsEditing = YES;
+//        pickerController.allowsEditing = YES;
         [self presentModalViewController:pickerController animated:YES];
     }
 }
@@ -755,6 +770,7 @@
                                         success:^(id obj) {
                                             [SVProgressHUD dismissWithSuccess:@"删除成功"];
                                             [_user.photos removeObject:photo];
+                                            [[Authentication sharedInstance] synchronize];
                                             [_photoCell deleteUserPhoto:photo atIndex:_selectedIndex];
                                             [self.tableView reloadData];
                                             NSLog(@"user photo %d delete.", photo.pID);

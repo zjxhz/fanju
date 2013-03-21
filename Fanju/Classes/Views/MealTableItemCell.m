@@ -95,11 +95,11 @@
     UIImage* cost_bg = [UIImage imageNamed:@"jiage"];
     [cost_bg drawAtPoint:CGPointMake(25 + offset, 8)];
     
-    UIColor *textColor = RGBCOLOR(200, 200, 200);
+    UIColor *textColor = RGBCOLOR(230, 230, 230);
     [textColor set];
     NSString* costAndNumOfParticipants = [NSString stringWithFormat:NSLocalizedString(@"AverageCost", nil),
                                           meal.price, (meal.maxPersons-meal.actualPersons)];
-    [costAndNumOfParticipants drawAtPoint:CGPointMake(37 + offset, 11) withFont:[UIFont systemFontOfSize:14]];
+    [costAndNumOfParticipants drawAtPoint:CGPointMake(41 + offset, 13) withFont:[UIFont systemFontOfSize:12]];
     
     //participants BG
     UIColor* participantsFrameBgColor = RGBACOLOR(0, 0, 0, 0.5);
@@ -109,8 +109,8 @@
     textColor = [UIColor whiteColor];
     [textColor set];
     UIImage* loc = [UIImage imageNamed:@"loc"];
-    [loc drawAtPoint:CGPointMake(24, 210)];
-    [meal.restaurant.name drawAtPoint:CGPointMake(loc.size.width + 24 + 4, 210) withFont:[UIFont systemFontOfSize:11]];
+    [loc drawAtPoint:CGPointMake(24, 208)];
+    [meal.restaurant.name drawAtPoint:CGPointMake(loc.size.width + 24 + 2, 208) withFont:[UIFont systemFontOfSize:12]];
     
 
     UIImage *photo_bg = [UIImage imageNamed:@"p_photo_bg"];
@@ -127,13 +127,13 @@
     UIFont* topicFont = [UIFont systemFontOfSize:18];
     CGFloat topicWidth = [topicText sizeWithFont:topicFont].width;
     CGFloat topicX = (320 - topicWidth) / 2;
-    [topicText drawAtPoint:CGPointMake(topicX, 285) withFont:[UIFont boldSystemFontOfSize:18]];
+    [topicText drawAtPoint:CGPointMake(topicX, 287) withFont:[UIFont boldSystemFontOfSize:18]];
     
     //time
     textColor = RGBCOLOR(150, 150, 150);
     [textColor set];
     NSString* timeText = [meal timeText];
-    [timeText drawAtPoint:CGPointMake(100, 306) withFont:[UIFont systemFontOfSize:10]];
+    [timeText drawAtPoint:CGPointMake(100, 308) withFont:[UIFont systemFontOfSize:10]];
 
 }
 

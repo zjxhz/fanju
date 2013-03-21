@@ -21,6 +21,8 @@
 #import "UserTableItem.h"
 #import "UserTableItemCell.h"
 #import "LocationProvider.h"
+#import "WidgetFactory.h"
+
 @interface UserListViewController(){
     BOOL _upadateLocationBeforeLoadUsers;
 }
@@ -45,21 +47,14 @@
 
 - (id)initWithStyle:(UITableViewStyle)style {
     self = [super initWithStyle:style];
-    self.tableView.separatorColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"separator"]];
-    self.tableView.separatorStyle = UITableViewCellSeparatorStyleSingleLine;
+//    self.tableView.separatorColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"separator"]];
+    self.tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
+    self.tableView.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"bg"]];
     return self;
 }
 
 -(void)setTitle:(NSString *)title{
-    UILabel* titleLabel = [[UILabel alloc] initWithFrame:CGRectZero];
-    titleLabel.backgroundColor = [UIColor clearColor];
-    titleLabel.text = title;
-    titleLabel.font = [UIFont systemFontOfSize:21];
-    titleLabel.textColor = RGBCOLOR(220, 220, 220);
-    titleLabel.layer.shadowColor = RGBACOLOR(0, 0, 0, 0.4).CGColor;
-    titleLabel.layer.shadowOffset = CGSizeMake(0, -2);
-    [titleLabel sizeToFit];
-    self.navigationItem.titleView = titleLabel;
+    self.navigationItem.titleView = [[WidgetFactory sharedFactory]titleViewWithTitle:title];
 }
 
 - (void)loadView {
@@ -67,18 +62,8 @@
     
     AppDelegate *delegate = (AppDelegate*)[UIApplication sharedApplication].delegate;
     self.tableView.backgroundColor = [UIColor colorWithPatternImage:delegate.bgImage];
-    
-    UIButton *filter = [UIButton buttonWithType:UIButtonTypeCustom];
-    filter.titleLabel.font = [UIFont systemFontOfSize:12];
-    filter.titleLabel.textColor = RGBCOLOR(220, 220, 220);
-    filter.titleEdgeInsets = UIEdgeInsetsMake(2, 0, 0, 0);
-    [filter setTitle:@"筛选" forState:UIControlStateNormal];
-    [filter setBackgroundImage:[UIImage imageNamed:@"toprt"] forState:UIControlStateNormal];
-    [filter setBackgroundImage:[UIImage imageNamed:@"toprt_push"] forState:UIControlStateSelected | UIControlStateHighlighted];
-    [filter addTarget:self action:@selector(filter:) forControlEvents:UIControlEventTouchDown];
-    [filter sizeToFit];
 
-    self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithCustomView:filter];
+    self.navigationItem.rightBarButtonItem = [[WidgetFactory sharedFactory]normalBarButtonItemWithTitle:@"筛选" target:self action:@selector(filter:)];
     _customUserFilterViewController = [[CustomUserFilterViewController alloc] init];
     _customUserFilterViewController.delegate = self;
     self.autoresizesForKeyboard = YES;
@@ -193,7 +178,7 @@
 
 #pragma mark UITableViewDelegate
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
-    return 90;
+    return 88;
 }
 
 - (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath*)indexPath {

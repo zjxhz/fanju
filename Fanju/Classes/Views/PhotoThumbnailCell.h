@@ -13,7 +13,6 @@
 @optional
 -(void) didSelectAddPhoto;
 -(void) didSelectUserPhotos:(NSArray*)allPhotos  withIndex:(NSInteger)index;
--(void) didSelectAvatar:(UIImage*)avatarImage withAllPhotos:(NSArray*)allPhotos atIndex:(NSInteger)index;
 -(void) didSelectUserPhoto:(UserPhoto*)userPhoto withAllPhotos:(NSArray*)allPhotos atIndex:(NSInteger)index;
 @end
 
@@ -24,6 +23,4 @@
 - (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier withUser:(UserProfile*)user editable:(BOOL)editable;
 -(void)addUploadedPhoto:(UserPhoto*)photo withLocalImage:(UIImage*)localImage;
 -(void)deleteUserPhoto:(UserPhoto*)photo atIndex:(NSInteger)index;
--(void)changeAvatar:(NSString*)avatarFullUrl withLocalImage:(UIImage*)localImage;
--(NSInteger)numberOfRows;
 @end

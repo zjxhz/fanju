@@ -20,11 +20,11 @@
 
 
 #define INFO_FRAME_X 92
-#define CELL_HEIGHT 90
+#define CELL_HEIGHT 88
 #define GENDER_Y 36
 #define MOTTO_Y 61
 #define AVATAR_SIDE_LENGTH 75
-#define SHARED_INTERESTS_X 147
+#define SHARED_INTERESTS_X 157
 
 @interface UserTableItemCell () {
 	UILabel *_username;
@@ -58,7 +58,8 @@
         [infoView addSubview:_username];
         
         UIImage* sharedInterestsBg = [UIImage imageNamed:@"shared_interests_bg"];
-        _sharedInterestsButton = [[UIButton alloc] initWithFrame:CGRectMake(SHARED_INTERESTS_X, 10, sharedInterestsBg.size.width, sharedInterestsBg.size.height)];
+        _sharedInterestsButton = [[UIButton alloc] initWithFrame:CGRectMake(SHARED_INTERESTS_X, 12, sharedInterestsBg.size.width, sharedInterestsBg.size.height)];
+        _sharedInterestsButton.userInteractionEnabled = NO;
         [_sharedInterestsButton setBackgroundImage:sharedInterestsBg forState:UIControlStateNormal];
         _sharedInterestsButton.titleLabel.font = [UIFont systemFontOfSize:10];
         _sharedInterestsButton.titleLabel.textColor = [UIColor whiteColor];
@@ -67,12 +68,13 @@
         _maleImg = [UIImage imageNamed:@"male"];
         _femaleImg = [UIImage imageNamed:@"female"];
         _gender = [[UIButton alloc] initWithFrame:CGRectMake(0, GENDER_Y, _maleImg.size.width, _maleImg.size.height)];
+        _gender.userInteractionEnabled = NO;
         [_gender setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
         _gender.titleLabel.font = [UIFont systemFontOfSize:8];
         [infoView addSubview:_gender];
         
         CGFloat x = _maleImg.size.width + 5;
-        _distance = [[UILabel alloc] initWithFrame:CGRectMake(x, GENDER_Y, 150, 12)];
+        _distance = [[UILabel alloc] initWithFrame:CGRectMake(x, GENDER_Y - 2, 150, 12)]; //2 pixes up to align top with gender icon
         _distance.textAlignment = UITextAlignmentRight;
         _distance.textColor = RGBCOLOR(130, 130, 130);
         _distance.backgroundColor = [UIColor clearColor];
@@ -86,8 +88,13 @@
         _motto.textColor = RGBCOLOR(130, 130, 130);
         [infoView addSubview:_motto];
         
-        _avatar = [AvatarFactory defaultAvatarWithFrame:CGRectMake(6, 5, AVATAR_SIDE_LENGTH, AVATAR_SIDE_LENGTH)];
+        _avatar = [AvatarFactory defaultAvatarWithFrame:CGRectMake(6, 6, AVATAR_SIDE_LENGTH, AVATAR_SIDE_LENGTH)];
         [self.contentView addSubview:_avatar];
+        
+        UIImage* separatorImg = [UIImage imageNamed:@"separator"];
+        UIImageView* separatorView = [[UIImageView alloc] initWithFrame:CGRectMake(0, CELL_HEIGHT - separatorImg.size.height, separatorImg.size.width, separatorImg.size.height)];
+        separatorView.image = separatorImg;
+        [self.contentView addSubview:separatorView];
 	}
     
 	return self;
@@ -154,7 +161,8 @@
         
         [_sharedInterestsButton setTitle:[NSString stringWithFormat:@"%d个共同爱好", myTagSet.count] forState:UIControlStateNormal];
         [_gender setTitle:[NSString stringWithFormat:@"%d",[item.profile age]] forState:UIControlStateNormal];
-        _gender.contentEdgeInsets = UIEdgeInsetsMake(0, 7, 0, 0);
+        NSInteger offset = [item.profile age] > 9 ? 9 : 7;
+        _gender.contentEdgeInsets = UIEdgeInsetsMake(0, offset, 0, 0);
         if (item.profile.gender == 0) {
             [_gender setBackgroundImage:_maleImg forState:UIControlStateNormal];
         } else {

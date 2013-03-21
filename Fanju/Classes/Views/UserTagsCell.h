@@ -14,4 +14,5 @@
 }
 @property(nonatomic, weak) NSArray* tags;
 @property(nonatomic, readonly) UIButton* showAllButton;
+@property(nonatomic, readonly) NSInteger cellHeight;
 @end

@@ -13,13 +13,11 @@
 #import "AppDelegate.h"
 #import "JSONKit.h"
 
-
 static NSMutableArray *pool;
 static int t = 0;
 
 @interface NetworkHandler (){
-    TTURLRequest *_previousRequest;
-    BOOL _resendPreviousRequest;
+    NSMutableArray* _callbacks;//dictionary whose key is the url, and the value is a pair of the success/fail block objects
 }
 @property (nonatomic, strong) retrieved_t success;
 @property (nonatomic, strong) retrieve_failed_t failure;
@@ -29,10 +27,9 @@ static int t = 0;
 @end
 
 @implementation NetworkHandler
-
-@synthesize success = _success, failure = _failure;
 @synthesize available = _available;
 @synthesize tag = _tag;
+
 
 + (NetworkHandler *)getHandler {
     if (!pool) {
@@ -47,21 +44,23 @@ static int t = 0;
             break;
         }
     }
-
+    
     if (!avail) {
         avail = [[NetworkHandler alloc] init];
         avail.tag = t++;
         avail.available = NO;
         [pool addObject:avail];
-        [[NSNotificationCenter defaultCenter] addObserver:avail
-                                                 selector:@selector(didLogin:) 
-                                                     name:EODidLoginNotification
-                                                   object:nil];
     }
-
+    
     return avail;
 }
 
+-(id)init{
+    if (self = [super init]) {
+        _callbacks = [NSMutableArray array];
+    }
+    return self;
+}
 - (void)requestFromURL:(NSString *)url 
                 method:(http_method_t)method 
                success:(retrieved_t)success 
@@ -94,6 +93,12 @@ static int t = 0;
            cachePolicy:(TTURLRequestCachePolicy)policy
                success:(retrieved_t)success 
                failure:(retrieve_failed_t)failure {
+
+//    CallbackBlocks* blocks = [[RequestBlockPair alloc] init];
+//    blocks.success = success;
+//    blocks.failed = failure;
+//    blocks.url = url;
+    
     self.success = [success copy];
     self.failure = [failure copy];
     
@@ -216,8 +221,6 @@ static int t = 0;
             if(error.code == 401){
                 AppDelegate *appDelegate = (AppDelegate*)[UIApplication sharedApplication].delegate;
                 [appDelegate showLogin];
-                _previousRequest = request;
-                _resendPreviousRequest = YES;
             } else {
                 [SVProgressHUD dismissWithError:@"Network Error" afterDelay:1];   
                 NSData * data = [error.userInfo objectForKey:@"responsedata"];
@@ -235,15 +238,6 @@ static int t = 0;
 //    }
     
     self.available = YES;
-}
-
-
-- (void)didLogin:(NSNotification*)notif{
-    if (_resendPreviousRequest) {
-        [_previousRequest send];
-        _resendPreviousRequest = NO;
-        _previousRequest = nil;
-    }
 }
 
 /**

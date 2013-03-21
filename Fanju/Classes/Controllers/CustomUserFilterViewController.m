@@ -8,6 +8,8 @@
 
 #import "CustomUserFilterViewController.h"
 #import <QuartzCore/QuartzCore.h>
+#import "WidgetFactory.h"
+
 #define X_GAP 10
 
 @interface CustomUserFilterViewController (){
@@ -28,29 +30,8 @@
 -(id) init{
     if (self = [super init]) {
         self.view.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"bg"]];
-        
-        UILabel* titleLabel = [[UILabel alloc] initWithFrame:CGRectZero];
-        titleLabel.backgroundColor = [UIColor clearColor];
-        titleLabel.text = @"筛选";
-        titleLabel.font = [UIFont systemFontOfSize:21];
-        titleLabel.adjustsFontSizeToFitWidth = YES;
-        titleLabel.textColor = RGBCOLOR(220, 220, 220);
-        titleLabel.layer.shadowColor = RGBACOLOR(0, 0, 0, 0.4).CGColor;
-        titleLabel.layer.shadowOffset = CGSizeMake(0, -2);
-        [titleLabel sizeToFit];
-        self.navigationItem.titleView = titleLabel;
-        
-        UIButton *leftItem = [UIButton buttonWithType:UIButtonTypeCustom];
-        leftItem.titleLabel.font = [UIFont systemFontOfSize:12];
-        leftItem.titleLabel.textColor = RGBCOLOR(220, 220, 220);
-        leftItem.titleEdgeInsets = UIEdgeInsetsMake(2, 0, 0, 0);
-        [leftItem setBackgroundImage:[UIImage imageNamed:@"toprt"] forState:UIControlStateNormal];
-        [leftItem setBackgroundImage:[UIImage imageNamed:@"toprt_push"] forState:UIControlStateSelected | UIControlStateHighlighted];
-        [leftItem addTarget:self action:@selector(dismiss:) forControlEvents:UIControlEventTouchDown];
-        [leftItem setTitle:@"取消" forState:UIControlStateNormal];
-        [leftItem sizeToFit];
-        
-        self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithCustomView:leftItem];
+        self.navigationItem.titleView = [[WidgetFactory sharedFactory] titleViewWithTitle:@"筛选"];
+        self.navigationItem.leftBarButtonItem = [[WidgetFactory sharedFactory] normalBarButtonItemWithTitle:@"取消" target:self action:@selector(dismiss:)];
         
         _genderLabel = [[UILabel alloc] initWithFrame:CGRectMake(10, 15, 200, 20)];
         _genderLabel.text = @"想看到的用户";

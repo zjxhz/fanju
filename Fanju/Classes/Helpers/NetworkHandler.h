@@ -18,6 +18,12 @@ typedef enum {
 }
 http_method_t;
 
+@interface CallbackBlocks : NSObject
+@property (nonatomic, copy) NSString* url;
+@property (nonatomic, strong) retrieved_t success;
+@property (nonatomic, strong) retrieve_failed_t failed;
+@end
+
 @interface NetworkHandler : NSObject
 
 + (NetworkHandler *)getHandler;

@@ -229,6 +229,14 @@
     return fullUrls;
 }
 
+-(NSArray*)photosFullUrls{
+    NSMutableArray* fullUrls = [NSMutableArray array];
+    for (UserPhoto* photo in _photos) {
+        [fullUrls addObject:[NSString stringWithFormat:@"http://%@%@", EOHOST, photo.url]];
+    }
+    return fullUrls;
+}
+
 -(NSArray*)avatarAndPhotoThumbnailFullUrls{
     NSMutableArray* fullUrls = [NSMutableArray array];
     if (self.avatarURL) {

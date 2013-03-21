@@ -58,9 +58,12 @@
 		   fromLocation: (CLLocation *) oldLocation{
 	
     self.lastLocation = newLocation;
-    if ([[NSDate date] timeIntervalSinceDate:_lastLocationUpdatedTime] < 5) {
+    NSDate* updatedTime = [NSDate date];
+    if ([updatedTime timeIntervalSinceDate:_lastLocationUpdatedTime] < 5) {
         NSLog(@"updating too often, just ignore");
+        return;
     } else {
+        NSLog(@"location updated at %@, previous updated at: %@", updatedTime, _lastLocationUpdatedTime );
         [self.locationDelegate finishObtainingLocation:newLocation];
     }
     _lastLocationUpdatedTime = [NSDate date];

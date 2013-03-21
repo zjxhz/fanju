@@ -54,24 +54,24 @@ static NSDateFormatter *dateOnlyFormat;
 +(NSString*) humanReadableIntervals:(NSTimeInterval)interval{
     int seconds = interval;
     if( seconds < 60){
-        return [NSString stringWithFormat:@"%d %@", seconds, NSLocalizedString(@"SecondsAgo", nil)];
+        return [NSString stringWithFormat:@"%d%@", seconds, NSLocalizedString(@"SecondsAgo", nil)];
     }
     int minutes = seconds / 60;
     if(minutes < 60) {
-        return [NSString stringWithFormat:@"%d %@", minutes, NSLocalizedString(@"MinutesAgo", nil)];
+        return [NSString stringWithFormat:@"%d%@", minutes, NSLocalizedString(@"MinutesAgo", nil)];
     }
     int hours = minutes / 60;
     if(hours < 24) {
-        return [NSString stringWithFormat:@"%d %@", hours, NSLocalizedString(@"HoursAgo", nil)];
+        return [NSString stringWithFormat:@"%d%@", hours, NSLocalizedString(@"HoursAgo", nil)];
     }
     int days = hours / 24;
     if(days < 365) {
-        return [NSString stringWithFormat:@"%d %@", days, NSLocalizedString(@"DaysAgo", nil)];
+        return [NSString stringWithFormat:@"%d%@", days, NSLocalizedString(@"DaysAgo", nil)];
     }
     //how about weeks and months?
     int years = days / 365;
     if(years < 5) {
-        return [NSString stringWithFormat:@"%d %@", years, NSLocalizedString(@"YearsAgo", nil)];
+        return [NSString stringWithFormat:@"%d%@", years, NSLocalizedString(@"YearsAgo", nil)];
     }
     return NSLocalizedString(@"LongTimeAgo", nil);
 }

@@ -18,7 +18,7 @@
 @property (nonatomic, copy) NSString *password;
 @property (nonatomic, copy) NSString *avatarURL;
 @property (nonatomic, copy) NSDate *birthday;
-@property (nonatomic) int gender;
+@property (nonatomic) int gender; //0 male 1 female
 @property (nonatomic) int uID;
 @property (nonatomic, copy) NSDate *locationUpdatedTime;
 @property (nonatomic) CLLocationCoordinate2D coordinate;   
@@ -53,4 +53,5 @@
 -(NSInteger)industryValue;
 +(NSInteger)industryValue:(NSString*)industry;
 +(NSArray*) industries;
+-(NSArray*)photosFullUrls;
 @end

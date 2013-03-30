@@ -20,6 +20,10 @@
 }
 
 @property(nonatomic, copy) NSString* baseURL;
+@property(nonatomic) BOOL hideNumberOfSameTags;
+@property(nonatomic) BOOL hideFilterButton;
+@property(nonatomic) BOOL showAddTagButton;
+@property(nonatomic, strong) UserTag* tag;
 
 +(UserListViewController*)recommendedUserListViewController;
 +(UserListViewController*)nearbyUserListViewController;

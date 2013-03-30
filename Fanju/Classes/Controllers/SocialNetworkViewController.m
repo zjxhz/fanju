@@ -231,6 +231,7 @@
         UserProfile *profile = ((UserTableItem *)[[(UserListDataSource*)self.dataSource items] objectAtIndex:indexPath.row]).profile;
         NewUserDetailsViewController *detailVC = [[NewUserDetailsViewController alloc] initWithStyle:UITableViewStylePlain];
         detailVC.user = profile;
+        detailVC.delegate = self;
         [self.navigationController pushViewController:detailVC
                                              animated:YES];
     } else if ([object isKindOfClass:[LoadMoreTableItem class]]){

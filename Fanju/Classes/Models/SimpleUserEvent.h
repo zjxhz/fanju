@@ -14,5 +14,6 @@
 @property(nonatomic, strong) UserProfile* user;
 @property(nonatomic, strong) NSString* userID;
 @property(nonatomic, strong) NSString* userFieldName; //user id field in the payload
-@property(nonatomic, strong) NSString* eventDescription;
+@property(nonatomic, strong) NSString* userName; //name of user, not username
+@property(nonatomic, strong) NSString* avatar;
 @end

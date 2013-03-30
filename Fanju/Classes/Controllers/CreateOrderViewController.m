@@ -95,16 +95,12 @@
                                      parameters:params
                                     cachePolicy:TTURLRequestCachePolicyNone
                                         success:^(id obj) {
-                                            if ([[obj objectForKey:@"status"] isEqualToString:@"OK"]) { 
-
-                                                NSString *code = [obj objectForKey:@"code"];  
-                                                OrderDetailsViewController *details = [[OrderDetailsViewController alloc] initWithNibName:@"OrderDetailsViewController" bundle:nil];
-                                                details.meal = self.mealInfo;
-                                                details.code = code;
-                                                details.numerOfPersons = _numberOfPersons;
-                                                [self.navigationController pushViewController:details
-                                                                                     animated:YES];
-                                                [_delegate orderCeatedWithUser:[Authentication sharedInstance].currentUser numberOfPersons:_numberOfPersons];
+                                            if ([[obj objectForKey:@"status"] isEqualToString:@"OK"]) {
+//                                                OrderDetailsViewController *details = [[OrderDetailsViewController alloc] initWithNibName:@"OrderDetailsViewController" bundle:nil];
+//                                                details.meal = self.mealInfo;
+//                                                [self.navigationController pushViewController:details
+//                                                                                     animated:YES];
+//                                                [_delegate orderCeatedWithUser:[Authentication sharedInstance].currentUser numberOfPersons:_numberOfPersons];
                                                 
                                             } else {
                                                 [InfoUtil showError:obj];

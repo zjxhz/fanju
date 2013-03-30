@@ -11,4 +11,5 @@
 
 @interface EventBase : NSObject
 @property(nonatomic, strong) NSDate* time;
+@property(nonatomic, strong) NSString* eventDescription;
 @end

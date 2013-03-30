@@ -15,6 +15,9 @@
 - (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString*)identifier {
     self = [super initWithStyle:style reuseIdentifier:identifier];
     if (self) {
+        self.textLabel.text = @"点击查看更多";
+        self.textLabel.font = [UIFont systemFontOfSize:16];
+        self.textLabel.textColor = RGBCOLOR(80, 80, 80);
         _activityIndicator = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
         _activityIndicator.hidesWhenStopped = YES;
         [self.contentView addSubview:_activityIndicator];
@@ -25,20 +28,23 @@
 
 -(void)layoutSubviews{
     [super layoutSubviews];
-    [_activityIndicator sizeToFit];
-    self.textLabel.textAlignment = UITextAlignmentCenter;
     self.selectionStyle = UITableViewCellSelectionStyleNone;
-    _activityIndicator.frame = CGRectMake(80, 13, _activityIndicator.frame.size.width, _activityIndicator.frame.size.height);
+    self.textLabel.textAlignment = UITextAlignmentCenter;
+//    self.textLabel.center = self.center;
+    [_activityIndicator sizeToFit];
+    _activityIndicator.center=self.contentView.center;
 }
 
 - (void)setObject:(id)object {
     [super setObject:object];
     LoadMoreTableItem *item = object;
-    self.textLabel.text = item.text;
     if (item.loading) {
         [_activityIndicator startAnimating];
-    } else {
+        self.textLabel.hidden = YES;
+    } else{
         [_activityIndicator stopAnimating];
+        self.textLabel.text = @"点击查看更多";
+        self.textLabel.hidden = NO;
     }
 }
 

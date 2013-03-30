@@ -24,6 +24,6 @@
 }
 
 +(NSString*)getUserFriendlyDistance:(double)meters{
-    return [NSString stringWithFormat:@"%.2f公里", meters/1000];
+    return [NSString stringWithFormat:@"%.2fkm", meters/1000];
 }
 @end

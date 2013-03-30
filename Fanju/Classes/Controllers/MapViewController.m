@@ -10,6 +10,8 @@
 #import "AppDelegate.h"
 #import "Location.h"
 #import "UIViewController+CustomNavigationBar.h"
+#import "MapHelper.h"
+
 @interface MapViewController () 
 @property (nonatomic, strong) MKMapView* myMapView;
 -(void)displayMap;
@@ -84,26 +86,8 @@
 }
 
 -(void)launchRoute {
-    Class mapItemClass = [MKMapItem class];
-    if (mapItemClass && [mapItemClass respondsToSelector:@selector(openMapsWithItems:launchOptions:)])
-    {
-        // Create an MKMapItem to pass to the Maps app
-        CLLocationCoordinate2D coordinate =
-        CLLocationCoordinate2DMake(self.info.coordinate.latitude, self.info.coordinate.longitude);
-        MKPlacemark *placemark = [[MKPlacemark alloc] initWithCoordinate:coordinate
-                                                       addressDictionary:nil];
-        MKMapItem *mapItem = [[MKMapItem alloc] initWithPlacemark:placemark];
-        [mapItem setName:self.info.name];
-        
-
-        NSDictionary *launchOptions = @{MKLaunchOptionsDirectionsModeKey : MKLaunchOptionsDirectionsModeDriving};
-        MKMapItem *currentLocationMapItem = [MKMapItem mapItemForCurrentLocation];
-        [MKMapItem openMapsWithItems:@[currentLocationMapItem, mapItem]
-                       launchOptions:launchOptions];
-    } else {
-        NSString *route = [NSString stringWithFormat:@"http://maps.google.com/maps?saddr=%@&daddr=%g,%g", NSLocalizedString(@"CurrentLocation", nil), self.info.coordinate.latitude, self.info.coordinate.longitude];
-        route = [route stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
-        [[UIApplication sharedApplication] openURL:[NSURL URLWithString:route]];
-    }
+    CLLocationCoordinate2D coordinate =
+    CLLocationCoordinate2DMake(self.info.coordinate.latitude, self.info.coordinate.longitude);
+    [MapHelper launchRouteTo:coordinate withName:self.info.name];
 }
 @end

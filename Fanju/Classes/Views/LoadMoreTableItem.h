@@ -8,7 +8,7 @@
 
 #import <Three20/Three20.h>
 
-@interface LoadMoreTableItem : TTTableMoreButton
+@interface LoadMoreTableItem : TTTableLinkedItem
 @property(nonatomic)  NSInteger offset;
 @property(nonatomic)  NSInteger amount;
 @property(nonatomic)  NSInteger limit;

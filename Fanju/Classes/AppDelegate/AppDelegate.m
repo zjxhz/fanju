@@ -10,7 +10,6 @@
 
 #import "MyCustomStylesheet.h"
 #import "MyOrdersViewController.h"
-#import "OrderDetailViewController.h"
 #import "Const.h"
 #import "LocationProvider.h"
 #import "RestaurantInfo.h"

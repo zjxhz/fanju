@@ -93,7 +93,7 @@
     
     //Avarage and cost
     UIImage* cost_bg = [UIImage imageNamed:@"jiage"];
-    [cost_bg drawAtPoint:CGPointMake(25 + offset, 8)];
+    [cost_bg drawAtPoint:CGPointMake(29 + offset, 8)];
     
     UIColor *textColor = RGBCOLOR(230, 230, 230);
     [textColor set];

@@ -12,12 +12,15 @@
 #import "NetworkHandler.h"
 #import "NSDictionary+ParseHelper.h"
 #import "OrderInfo.h"
+#import "Authentication.h"
+#import "DateUtil.h"
+#import "DistanceUtil.h"
 
 @interface UserDetailsCell(){
     UserProfile* _user;
     UIImageView* _nextMealView;
     UILabel* _nextMealLabel;
-    UILabel* _nextMealText;
+    UITextField* _nextMealText;
 }
 @end
 @implementation UserDetailsCell
@@ -37,7 +40,7 @@
         UIImage* maskBg = [UIImage imageNamed:@"u_detail_mask"];
         _nextMealView = [[UIImageView alloc] initWithFrame:CGRectMake(0, 109, maskBg.size.width, maskBg.size.height)];
         _nextMealView.image = maskBg;
-        _nextMealView.hidden = YES;
+        _nextMealView.alpha = 0;
         [self.contentView addSubview:_nextMealView];
         
         _nextMealLabel = [[UILabel alloc] initWithFrame:CGRectMake(76, 12, 0, 0)];
@@ -49,12 +52,16 @@
         _nextMealLabel.text = @"下一个饭局：";
         [_nextMealLabel sizeToFit];
         
-        _nextMealText = [[UILabel alloc] initWithFrame:CGRectMake(_nextMealLabel.frame.size.width + _nextMealLabel.frame.origin.x, 12, 0, 0)];
+        _nextMealText = [[UITextField alloc] initWithFrame:CGRectMake(_nextMealLabel.frame.size.width + _nextMealLabel.frame.origin.x, 9, 160, 18)];
+        _nextMealText.userInteractionEnabled = NO;
         _nextMealText.font = [UIFont systemFontOfSize:15];
+        _nextMealText.adjustsFontSizeToFitWidth = YES;
+        _nextMealText.minimumFontSize = 12;
         _nextMealText.textColor = RGBCOLOR(220, 220, 220);
         _nextMealText.backgroundColor = [UIColor clearColor];
         _nextMealText.layer.shadowColor = RGBACOLOR(0, 0, 0, 0.4).CGColor;
         _nextMealText.layer.shadowOffset = CGSizeMake(0, 2);
+        _nextMealText.contentVerticalAlignment = UIControlContentVerticalAlignmentBottom;
         
         [_nextMealView addSubview:_nextMealLabel];
         [_nextMealView addSubview:_nextMealText];
@@ -64,14 +71,14 @@
         avatarView.contentMode = UIViewContentModeScaleAspectFill;
         avatarView.image = avatarBgImg;
         
-        NINetworkImageView* avatar = [[NINetworkImageView alloc] initWithFrame:CGRectMake(4, 4, 62, 62)];
-        [avatar setPathToNetworkImage:[_user smallAvatarFullUrl] forDisplaySize:CGSizeMake(62, 62)];
-        [avatarView addSubview:avatar];
+        _avatar = [[NINetworkImageView alloc] initWithFrame:CGRectMake(4, 4, 62, 62)];
+        [_avatar setPathToNetworkImage:[_user smallAvatarFullUrl] forDisplaySize:CGSizeMake(62, 62)];
+        [avatarView addSubview:_avatar];
         [self.contentView addSubview:avatarView];
         
         UIImage* male = [UIImage imageNamed:@"male_details"];
         UIImage* female = [UIImage imageNamed:@"female_details"];
-        UIImageView* gender = [[UIImageView alloc] initWithFrame:CGRectMake(76, 156, male.size.width, male.size.height)];
+        UIImageView* gender = [[UIImageView alloc] initWithFrame:CGRectMake(81, 156, male.size.width, male.size.height)];
         if (_user.gender == 0) {
             gender.image = male;
         } else {
@@ -88,6 +95,34 @@
         [age sizeToFit];
         [gender addSubview:age];
         [self.contentView addSubview:gender];
+        
+        UserProfile* me = [Authentication sharedInstance].currentUser;
+        if (![me isEqual:_user]) {
+            UIImage* locIcon = [UIImage imageNamed:@"order_address"];
+            UIImageView* iconView = [[UIImageView alloc] initWithFrame:CGRectMake(200, 157, locIcon.size.width, locIcon.size.height)];
+            iconView.image = locIcon;
+            [self.contentView addSubview:iconView];
+            
+            NSString* updated  = nil;
+            if (_user.locationUpdatedTime) {
+                NSTimeInterval interval = [_user.locationUpdatedTime timeIntervalSinceNow] > 0 ? 0 : -[_user.locationUpdatedTime timeIntervalSinceNow];
+                updated = [DateUtil humanReadableIntervals: interval];
+            }
+            
+            UILabel* distanceLabel = [[UILabel alloc] initWithFrame:CGRectMake(213, 159, 60, 12)];
+            distanceLabel.font = [UIFont systemFontOfSize:12];
+            distanceLabel.textColor = RGBCOLOR(150, 150, 150);
+            distanceLabel.backgroundColor = [UIColor clearColor];
+            distanceLabel.text =  [DistanceUtil distanceToMe:_user];
+            [self.contentView addSubview:distanceLabel];
+
+            UILabel* updatedLabel = [[UILabel alloc] initWithFrame:CGRectMake(267, 159, 60, 12)];
+            updatedLabel.font = [UIFont systemFontOfSize:12];
+            updatedLabel.textColor = RGBCOLOR(150, 150, 150);
+            updatedLabel.backgroundColor = [UIColor clearColor];
+            updatedLabel.text =  updated;
+            [self.contentView addSubview:updatedLabel];
+        }
         
         UILabel* motto = [[UILabel alloc] initWithFrame:CGRectMake(15, 193, 295, 0)];
         motto.font = [UIFont systemFontOfSize:12];
@@ -118,12 +153,16 @@
                                         success:^(id obj) {
                                             NSArray *orders = [obj objectForKeyInObjects];
                                             if (orders && [orders count] > 0) {
-                                                _nextMealView.hidden = NO;
                                                 OrderInfo *order = [OrderInfo orderInfoWithData:[orders objectAtIndex:0]];
-                                                _nextMealText.text = order.meal.topic;
-                                                [_nextMealText sizeToFit];
+                                                [UIView animateWithDuration:0.9 animations:^{
+                                                    _nextMealText.text = order.meal.topic;
+                                                    _nextMealView.alpha = 1;
+                                                }];
+                                                
+                                                
+//                                                [_nextMealText sizeToFit];
                                             } else {
-                                                _nextMealView.hidden = YES;
+                                                _nextMealView.alpha = 0;
 //                                                _nextMealLabel.text = @"最近没有饭局";
 //                                                _nextMealTimeLabel.text = @"";
                                             }

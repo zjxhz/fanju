@@ -5,17 +5,21 @@
 //  Created by 浣泽 徐 on 7/5/12.
 //  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
 //
-
-#import "Three20/Three20.h"
 #import "MealInfo.h"
+#import "OrderInfo.h"
+#import "NINetworkImageView.h"
+#import <MapKit/MapKit.h>
 
-@interface OrderDetailsViewController : TTViewController
-
+@interface OrderDetailsViewController : UIViewController<UIGestureRecognizerDelegate, MKMapViewDelegate>
+@property (weak, nonatomic) IBOutlet UIScrollView* scrollView;
 @property (weak, nonatomic) IBOutlet UILabel *restaurant;
+@property (weak, nonatomic) IBOutlet UILabel *topic;
 @property (weak, nonatomic) IBOutlet UILabel *time;
-@property (strong, nonatomic) TTImageView *mealImage;
+@property (weak, nonatomic) IBOutlet UIImageView *mealBg;
+@property (strong, nonatomic) NINetworkImageView *mealImage;
 @property (weak, nonatomic) MealInfo* meal;
 @property (weak, nonatomic) IBOutlet UILabel* codeLabel;
-@property (copy, nonatomic) NSString* code;
-@property NSInteger numerOfPersons;
+@property (weak, nonatomic) IBOutlet UILabel* numerOfPersons;
+@property(nonatomic, nonatomic) IBOutlet MKMapView* mapView;
+@property (nonatomic, weak) OrderInfo* order;
 @end

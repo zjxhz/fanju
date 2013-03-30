@@ -29,7 +29,6 @@
 @interface UserTableItemCell () {
 	UILabel *_username;
     UIButton *_gender;
-    UIButton *_sharedInterestsButton;
     UILabel *_distance;
     UILabel *_motto;
     UIImage *_maleImg;
@@ -58,12 +57,12 @@
         [infoView addSubview:_username];
         
         UIImage* sharedInterestsBg = [UIImage imageNamed:@"shared_interests_bg"];
-        _sharedInterestsButton = [[UIButton alloc] initWithFrame:CGRectMake(SHARED_INTERESTS_X, 12, sharedInterestsBg.size.width, sharedInterestsBg.size.height)];
-        _sharedInterestsButton.userInteractionEnabled = NO;
-        [_sharedInterestsButton setBackgroundImage:sharedInterestsBg forState:UIControlStateNormal];
-        _sharedInterestsButton.titleLabel.font = [UIFont systemFontOfSize:10];
-        _sharedInterestsButton.titleLabel.textColor = [UIColor whiteColor];
-        [infoView addSubview:_sharedInterestsButton];
+        _numberOfSameTagsButton = [[UIButton alloc] initWithFrame:CGRectMake(SHARED_INTERESTS_X, 12, sharedInterestsBg.size.width, sharedInterestsBg.size.height)];
+        _numberOfSameTagsButton.userInteractionEnabled = NO;
+        [_numberOfSameTagsButton setBackgroundImage:sharedInterestsBg forState:UIControlStateNormal];
+        _numberOfSameTagsButton.titleLabel.font = [UIFont systemFontOfSize:10];
+        _numberOfSameTagsButton.titleLabel.textColor = [UIColor whiteColor];
+        [infoView addSubview:_numberOfSameTagsButton];
         
         _maleImg = [UIImage imageNamed:@"male"];
         _femaleImg = [UIImage imageNamed:@"female"];
@@ -159,7 +158,7 @@
         NSMutableSet *otherTagSet = [NSMutableSet setWithArray:item.profile.tags];
         [myTagSet intersectSet:otherTagSet];
         
-        [_sharedInterestsButton setTitle:[NSString stringWithFormat:@"%d个共同爱好", myTagSet.count] forState:UIControlStateNormal];
+        [_numberOfSameTagsButton setTitle:[NSString stringWithFormat:@"%d个共同爱好", myTagSet.count] forState:UIControlStateNormal];
         [_gender setTitle:[NSString stringWithFormat:@"%d",[item.profile age]] forState:UIControlStateNormal];
         NSInteger offset = [item.profile age] > 9 ? 9 : 7;
         _gender.contentEdgeInsets = UIEdgeInsetsMake(0, offset, 0, 0);

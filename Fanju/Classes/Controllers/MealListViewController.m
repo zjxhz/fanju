@@ -24,6 +24,7 @@
 #import "MFSideMenu.h"
 #import "UIViewController+MFSideMenu.h"
 #import "WidgetFactory.h"
+#import "RestKit/RestKit.h"
 
 @interface MealListViewController()
 @property (nonatomic, strong) IBOutlet UIView* loginView;
@@ -166,6 +167,7 @@
     [self requestDataFromServer];
 }
 - (void) requestDataFromServer{
+//    [self restRequest];
     [[NetworkHandler getHandler] requestFromURL:[NSString stringWithFormat:@"http://%@/api/v1/meal/?format=json&limit=0", EOHOST]
                                          method:GET
                                     cachePolicy:TTURLRequestCachePolicyNetwork
@@ -191,7 +193,56 @@
                                         }];
 }
 
-
+-(void)restRequest{
+    NSURL *modelURL = [[NSBundle mainBundle] URLForResource:@"Fanju" withExtension:@"momd"];
+    NSManagedObjectModel *managedObjectModel = [[NSManagedObjectModel alloc] initWithContentsOfURL:modelURL];
+    RKManagedObjectStore *managedObjectStore = [[RKManagedObjectStore alloc] initWithManagedObjectModel:managedObjectModel];
+    NSError *error = nil;
+    BOOL success = RKEnsureDirectoryExistsAtPath(RKApplicationDataDirectory(), &error);
+    if (! success) {
+        RKLogError(@"Failed to create Application Data Directory at path '%@': %@", RKApplicationDataDirectory(), error);
+    }
+    NSString *path = [RKApplicationDataDirectory() stringByAppendingPathComponent:@"Fanju.sqlite"];
+    NSPersistentStore *persistentStore = [managedObjectStore addSQLitePersistentStoreAtPath:path fromSeedDatabaseAtPath:nil withConfiguration:nil options:nil error:&error];
+    if (! persistentStore) {
+        RKLogError(@"Failed adding persistent store at path '%@': %@", path, error);
+    }
+    [managedObjectStore createManagedObjectContexts];
+    
+    RKEntityMapping *mealMapping = [RKEntityMapping mappingForEntityForName:@"MealInfo" inManagedObjectStore:managedObjectStore];
+    [mealMapping addAttributeMappingsFromDictionary:@{ @"id": @"mID", @"topic": @"topic" }];
+    
+    NSIndexSet *statusCodes = RKStatusCodeIndexSetForClass(RKStatusCodeClassSuccessful); // Anything in 2xx
+    RKResponseDescriptor *responseDescriptor = [RKResponseDescriptor responseDescriptorWithMapping:mealMapping pathPattern:nil keyPath:nil statusCodes:statusCodes];
+    
+    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"http://www.fanjoin.com/api/v1/meal/"]];
+    [request setValue:@"application/json" forHTTPHeaderField:@"content-type"];
+    
+    
+//    RKObjectManager *manager = [RKObjectManager managerWithBaseURL:[NSURL URLWithString:@"http://www.fanjoin.com/api/v1"]];
+//    manager.managedObjectStore = managedObjectStore;
+//    [manager getObjectsAtPath:@"/meal/"
+//                   parameters:@{@"format":@"json"}
+//                      success:^(RKObjectRequestOperation *operation, RKMappingResult *mappingResult) {
+//                          NSLog(@"fetched results from /meal/");
+//    }
+//                      failure:^(RKObjectRequestOperation *operation, NSError *error) {
+//                          NSLog(@"failed from /meal/");
+//    }];
+    
+    
+    RKManagedObjectRequestOperation *operation = [[RKManagedObjectRequestOperation alloc] initWithRequest:request responseDescriptors:@[responseDescriptor]];
+    operation.managedObjectContext = managedObjectStore.mainQueueManagedObjectContext;
+    operation.managedObjectCache = managedObjectStore.managedObjectCache;
+    [operation setCompletionBlockWithSuccess:^(RKObjectRequestOperation *operation, RKMappingResult *result) {
+        MealInfo *meal = [result firstObject];
+        NSLog(@"Mapped the meal: %@", meal);
+    } failure:^(RKObjectRequestOperation *operation, NSError *error) {
+        NSLog(@"Failed with error: %@", [error localizedDescription]);
+    }];
+    NSOperationQueue *operationQueue = [NSOperationQueue new];
+    [operationQueue addOperation:operation];
+}
 - (void) removeSideMenuBarButtonItem {
 //    self.navigationController.navigationItem.leftBarButtonItem.customView.hidden = YES;
 //    [self.navigationController.navigationItem.leftBarButtonItem.customView removeFromSuperview];

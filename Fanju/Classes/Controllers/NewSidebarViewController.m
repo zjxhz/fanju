@@ -19,16 +19,19 @@
 #import "UIViewController+MFSideMenu.h"
 #import "Const.h"
 #import "TDBadgedCell.h"
+#import "UserHeaderCell.h"
+#import "SideMealCell.h"
+#import "SideCell.h"
 
-#define SIDEBAR_WIDTH 270
-#define SIDEBAR_HEADER_HEIGHT 30
-
+#define SIDEBAR_HEADER_HEIGHT 22
+#define CELL_HEIGHT 44
 @interface NewSidebarViewController (){
     BOOL _showLoginAfterLeftBarHides;
     NSInteger _unreadMessageCount;
     NSInteger _unreadNotificationCount;
     MKNumberBadgeView* _unreadMsgBadge;
     MKNumberBadgeView* _unreadNotifBadge;
+    UIViewController* _lastViewController;
 }
 
 @end
@@ -46,7 +49,7 @@
 +(NewSidebarViewController*) sideBar{
     static NewSidebarViewController* instance;
     if (!instance) {
-        instance = [[NewSidebarViewController alloc]  initWithStyle:UITableViewStyleGrouped];
+        instance = [[NewSidebarViewController alloc]  initWithStyle:UITableViewStylePlain];
     }
     return instance;    
 }
@@ -55,13 +58,11 @@
 {
     self = [super initWithStyle:style];
     if (self) {
-        _sections = [NSMutableArray arrayWithObjects:@"饭局", @"找朋友", @"我", @"其它", @"", nil];
-        NSMutableArray *sectionItems0 = [NSMutableArray arrayWithObjects:@"当前饭局", @"我的饭局", @"发起饭局", nil];
-        NSMutableArray *sectionItems1 = [NSMutableArray arrayWithObjects:@"志趣相投", @"附近朋友", @"添加好友", nil];
-        NSMutableArray *sectionItems2 = [NSMutableArray arrayWithObjects:@"我的关注", @"我的粉丝", @"对话", @"我的资料", @"我的账户", nil];
-        NSMutableArray *sectionItems3 = [NSMutableArray arrayWithObjects:@"消息", @"设置", @"获取金币", @"饭局小贴士", nil];
-        NSMutableArray *sectionItems4 = [NSMutableArray arrayWithObjects:@"登出", nil];
-        _sectionItems = [NSMutableArray arrayWithObjects:sectionItems0, sectionItems1, sectionItems2, sectionItems3, sectionItems4, nil];
+        _sections = @[@"", @"找朋友", @"其它"];
+        NSArray *sectionItems0 = @[@"", @"", @"分享", @"关注"];
+        NSArray *sectionItems1 = @[@"志趣相投", @"附近朋友", @"添加好友"];
+        NSArray *sectionItems2 = @[ @"设置", @"饭局小贴士", @"登出"];
+        _sectionItems = @[sectionItems0, sectionItems1, sectionItems2];
         self.tableView.dataSource = self;
         self.tableView.delegate = self;
         self.tableView.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"sidebar_bg.png"]];
@@ -81,9 +82,31 @@
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(unreadNotifUpdated:)
                                                      name:EOUnreadNotificationCount object:nil];
+        self.tableView.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"side_bg"]];
+        
+        _header1 = [self createHeaderWithTitle:@"找朋友" image:[UIImage imageNamed:@"side_social"]];
+        _header2 = [self createHeaderWithTitle:@"其他" image:[UIImage imageNamed:@"side_other"]];
         
     }
     return self;
+}
+
+-(UIView*)createHeaderWithTitle:(NSString*)title image:(UIImage*)image{
+    UIImage* headerBg = [UIImage imageNamed:@"side_header_bg"];
+    UIImageView* view = [[UIImageView alloc] initWithImage:headerBg];
+    UIImageView* iconView = [[UIImageView alloc] initWithFrame:CGRectMake(8, (headerBg.size.height - image.size.height) / 2, image.size.width, image.size.height)];
+    iconView.image = image;
+    [view addSubview:iconView];
+    
+    UILabel* label = [[UILabel alloc] initWithFrame:CGRectMake(28, 0, 200, headerBg.size.height)];
+    label.text = title;
+    label.backgroundColor = [UIColor clearColor];
+    label.font = [UIFont systemFontOfSize:12];
+    label.layer.shadowColor = RGBACOLOR(0, 0, 0, 0.2).CGColor;
+    label.layer.shadowOffset = CGSizeMake(0, -2);
+    label.textColor = RGBCOLOR(80, 80, 80);
+    [view addSubview:label];
+    return view;
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
@@ -137,11 +160,14 @@
 
 -(void)viewDidAppear:(BOOL)animated{
     [super viewDidAppear:animated];
-    self.view.frame = CGRectMake(0, 0, 260, 460);
+    self.view.frame = CGRectMake(0, 0, 270, 460);
 }
 
 #pragma mark - Table view data source
 - (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section{
+    if (section == 0) {
+        return 0;
+    }
     return SIDEBAR_HEADER_HEIGHT;
 }
 
@@ -154,29 +180,94 @@
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    static NSString *CellIdentifier = @"Cell";
-    TDBadgedCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
+    UITableViewCell* cell;
+    UIViewController* temp;
+    NSString* CellIdentifier;
+    UserProfile* me = [Authentication sharedInstance].currentUser;
+    switch (indexPath.section) {
+        case 0:
+            if(indexPath.row == 0) {
+                CellIdentifier = @"UserHeaderCell";
+                NINetworkImageView* avatarView = nil;
+                if (cell == nil) {
+                    temp = [[UIViewController alloc] initWithNibName:CellIdentifier bundle:nil];
+                    cell = (UserHeaderCell*)temp.view;
+                    UserHeaderCell* headerCell = (UserHeaderCell*)cell;
+                    avatarView = [[NINetworkImageView alloc] initWithFrame:CGRectMake(0, 0, 40, 40)];
+                    [headerCell.avatarContainerView insertSubview:avatarView belowSubview:headerCell.avatarMaskView];
+                    UIGestureRecognizer *messageTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(showMessages)];
+                    messageTap.delegate  = self;
+                    headerCell.messageImageView.userInteractionEnabled = YES;
+                    [headerCell.messageImageView addGestureRecognizer:messageTap];
+
+                    UIGestureRecognizer *notificationTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(showNotifications)];
+                    notificationTap.delegate  = self;
+                    headerCell.notificationImageView.userInteractionEnabled = YES;
+                    [headerCell.notificationImageView addGestureRecognizer:notificationTap];
+                }
+                UserHeaderCell* headerCell = (UserHeaderCell*)cell;
+                headerCell.nameLabel.text = me.name;
+                UIImage* noNewMessageImageBg = [UIImage imageNamed:@"side_button"];
+                UIImage* newMessageAvailableBg = [UIImage imageNamed:@"side_button_new"];
+                UIColor* noNewMessageColor = RGBCOLOR(150, 150, 150);
+                UIColor* newMessageAvailableColor = [UIColor whiteColor];
+                
+                if (_unreadMessageCount == 0) {
+                    headerCell.messageImageView.image = noNewMessageImageBg;
+                    headerCell.messageLabel.textColor = noNewMessageColor;
+                    headerCell.unreadMessageCountLabel.textColor = noNewMessageColor;
+                } else {
+                    headerCell.messageImageView.image = newMessageAvailableBg;
+                    headerCell.messageLabel.textColor = newMessageAvailableColor;
+                    headerCell.unreadMessageCountLabel.textColor = newMessageAvailableColor;
+                }
+                if (_unreadNotificationCount == 0) {
+                    headerCell.notificationImageView.image = noNewMessageImageBg;
+                    headerCell.notificationLabel.textColor = noNewMessageColor;
+                    headerCell.unreadNotificationLabel.textColor = noNewMessageColor;
+                } else {
+                    headerCell.notificationImageView.image = newMessageAvailableBg;
+                    headerCell.notificationLabel.textColor = newMessageAvailableColor;
+                    headerCell.unreadNotificationLabel.textColor = newMessageAvailableColor;
+                }
+                headerCell.unreadMessageCountLabel.text = [NSString stringWithFormat:@"%d", _unreadMessageCount];
+                headerCell.unreadNotificationLabel.text = [NSString stringWithFormat:@"%d", _unreadNotificationCount];
+                [avatarView setPathToNetworkImage:[me avatarFullUrl] forDisplaySize:CGSizeMake(40, 40) contentMode:UIViewContentModeScaleAspectFill];
+                return cell;
+            } else  if(indexPath.row == 1){
+                CellIdentifier = @"SideMealCell";
+                SideMealCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
+                if (cell == nil) {
+                    cell = [[SideMealCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier];
+                    [cell.currentMealsButton addTarget:self action:@selector(showMealList) forControlEvents:UIControlEventTouchUpInside];
+                    [cell.myMealsButton addTarget:self action:@selector(showMyMeals) forControlEvents:UIControlEventTouchUpInside];
+                }
+                return cell;
+            }
+        default:
+            break;
+    }
+    CellIdentifier = @"SideCell";
     if (cell == nil) {
-        cell = [[TDBadgedCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier];
+        cell = [[SideCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier];        
+        UIImage* separatorImg = [UIImage imageNamed:@"side_separator"];
+        UIImageView* separatorView = [[UIImageView alloc] initWithFrame:CGRectMake(0, CELL_HEIGHT - separatorImg.size.height, separatorImg.size.width, separatorImg.size.height)];
+        separatorView.image = separatorImg;
+        [cell.contentView addSubview:separatorView];
+        cell.textLabel.textColor = RGBCOLOR(150, 150, 150);
+        cell.textLabel.font = [UIFont systemFontOfSize:16];
+        cell.textLabel.shadowColor = RGBACOLOR(0, 0, 0 , 0.4);
+        cell.textLabel.shadowOffset = CGSizeMake(0, -2);
+        UIImageView* disclosure = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"side_disclosure_gray"]];
+        cell.accessoryView = disclosure;
+        cell.textLabel.frame = CGRectMake(18, 0, 100, 44);
     }
     
     NSArray* sec = [_sectionItems objectAtIndex:indexPath.section];
     cell.textLabel.text = [sec objectAtIndex:indexPath.row];
-    cell.textLabel.font = [UIFont systemFontOfSize:16];
-    cell.textLabel.textColor = [UIColor whiteColor];
+
     cell.selectionStyle  = UITableViewCellSelectionStyleNone;
     cell.backgroundColor = [UIColor clearColor];
-    cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
-    cell.badgeString = nil;
-    if (indexPath.section == 2 && indexPath.row == 2) {
-        if (_unreadMessageCount > 0) {
-            cell.badgeString = [NSString stringWithFormat:@"%d", _unreadMessageCount];
-        }
-    } else if(indexPath.section == 3 && indexPath.row == 0){
-        if (_unreadNotificationCount > 0) {
-            cell.badgeString = [NSString stringWithFormat:@"%d", _unreadNotificationCount];
-        }
-    }
     return cell;
 }
 
@@ -186,12 +277,33 @@
     return _sections.count;
 }
 
-- (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section{
-    return [_sections objectAtIndex:section];
+-(UIView*)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section{
+    if (section == 1) {
+        return _header1;
+    } else if (section == 2) {
+        return _header2;
+    }
+    return nil;
+    
+}
+- (void)showMealList{
+    [self showViewController:self.mealListViewController];
 }
 
-- (void)showMealList{
-    [self tableView:self.tableView didSelectRowAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:0]];
+-(void)showMyMeals{
+    [self showViewController:self.myMealsViewController];
+}
+
+-(void)showMessages{
+    [self showViewController:self.recentContactsViewController];
+}
+
+-(void)showNotifications{
+    [self showViewController:self.notificationViewController];
+    _unreadNotificationCount = 0;
+    [[NSNotificationCenter defaultCenter] postNotificationName:EOUnreadNotificationCount
+                                                        object:[NSNumber numberWithInteger:_unreadNotificationCount]
+                                                      userInfo:nil];
 }
 
 - (void)showRegistrationWizard{
@@ -212,6 +324,7 @@
     return;
 }
 
+
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
     if ([self requireLogin:indexPath]) {
@@ -229,18 +342,18 @@
 //        }
     }
     
-    UIViewController *controller;
+    UIViewController *controller = self.mealListViewController;
     switch (indexPath.section) {
         case 0:
             switch (indexPath.row) {
                 case 0:
-                    controller = self.mealListViewController;
+                    controller = self.userDetailsViewController;
+                    self.userDetailsViewController.user = [Authentication sharedInstance].currentUser;
                     break;
-                case 1:                    
-                    controller = self.myMealsViewController;
-                    break;
-                case 2:
-                    break;
+                case 3:
+                    controller = self.userListViewController;
+                    ((UserListViewController*)controller).baseURL = [NSString stringWithFormat:@"%@://%@/api/v1/user/%d/following/?format=json", HTTPS, EOHOST, [Authentication sharedInstance].currentUser.uID];
+                    controller.title = @"我的关注";
                 default:
                     break;
             }
@@ -256,62 +369,37 @@
                     ((UserListViewController*)controller).baseURL = [NSString stringWithFormat:@"%@://%@/api/v1/user/%d/users_nearby/?format=json", HTTPS, EOHOST, [Authentication sharedInstance].currentUser.uID];
                     controller.title = @"附近朋友";
                     break;
+                case 2:
+                    break;
             }
             
             break;
         case 2:
             switch (indexPath.row) {
                 case 0:
-                    controller = self.userListViewController;
-                    ((UserListViewController*)controller).baseURL = [NSString stringWithFormat:@"%@://%@/api/v1/user/%d/following/?format=json", HTTPS, EOHOST, [Authentication sharedInstance].currentUser.uID];
-                    controller.title = @"我的关注";
-                    break;
-                case 1:
-                    controller = self.userListViewController;
-                    ((UserListViewController*)controller).baseURL = [NSString stringWithFormat:@"%@://%@/api/v1/user/%d/followers/?format=json", HTTPS, EOHOST, [Authentication sharedInstance].currentUser.uID];
-                    controller.title = @"我的粉丝";
-                    break;
-                case 2:                    
-                    controller = self.recentContactsViewController;
-                    break;
-                case 3:
-                    controller = self.userDetailsViewController;
-                    self.userDetailsViewController.user = [Authentication sharedInstance].currentUser;
-                    break;
-            }
-            break;
-        case 3:
-            switch (indexPath.row) {
-                case 0:
-                    controller = self.notificationViewController;
-                    _unreadNotificationCount = 0;
-                    [[NSNotificationCenter defaultCenter] postNotificationName:EOUnreadNotificationCount
-                                                                        object:[NSNumber numberWithInteger:_unreadNotificationCount]
-                                                                      userInfo:nil];
-                    break;
-                case 1:
                     controller = [[SettingsTableViewController alloc] initWithStyle:UITableViewStyleGrouped];
                     break;
-            }
-            break;
-        case 4:
-            switch (indexPath.row) {
-                case 0:
+                case 2:
                     [self.sideMenu setMenuState:MFSideMenuStateClosed];
                     [[Authentication sharedInstance] logout];
                     [SVProgressHUD dismissWithSuccess:@"成功登出"];
                     controller = self.mealListViewController;
                     break;
-                default:
-                    break;
             }
-            break; 
+            break;
         default:
             [[[UIAlertView alloc] initWithTitle:@"Warning" message:@"Not implemented" delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil] show];
-            return;
+            break;
     }
-    self.sideMenu.navigationController.viewControllers = [NSArray arrayWithObject:controller];
-    [self.sideMenu.navigationController setToolbarHidden:YES];
+    [self showViewController:controller];
+}
+
+-(void)showViewController:(UIViewController*)controller{
+    if (controller != _lastViewController) {
+        self.sideMenu.navigationController.viewControllers = [NSArray arrayWithObject:controller];
+        [self.sideMenu.navigationController setToolbarHidden:YES];
+    }
+    _lastViewController = controller;
     [self.sideMenu setMenuState:MFSideMenuStateClosed];
     if ([[Authentication sharedInstance] isLoggedIn]) {
         [controller setupSideMenuBarButtonItem];
@@ -337,7 +425,22 @@
 }
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath{
-    return 40;
+    switch (indexPath.section) {
+        case 0:
+            switch (indexPath.row) {
+                case 0:
+                    return 106;
+                case 1:
+                    return 75;
+                default:
+                    break;
+            }
+            break;
+            
+        default:
+            break;
+    }
+    return 44;
 }
 
 #pragma mark NSObject
@@ -374,6 +477,11 @@
     [[NSNotificationCenter defaultCenter] postNotificationName:EOUnreadCount
                                                         object:[NSNumber numberWithInteger:_unreadNotificationCount + _unreadMessageCount]
                                                       userInfo:nil];
+}
+
+#pragma mark UIGestureRecognizerDelegate
+- (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldReceiveTouch:(UITouch *)touch{
+    return YES;
 }
 
 @end

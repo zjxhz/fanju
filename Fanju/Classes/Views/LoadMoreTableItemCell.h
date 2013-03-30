@@ -8,6 +8,6 @@
 
 #import "Three20/Three20.h"
 
-@interface LoadMoreTableItemCell : TTTableTextItemCell
+@interface LoadMoreTableItemCell : TTTableViewCell
 @property(nonatomic, readonly) UIActivityIndicatorView* activityIndicator;
 @end

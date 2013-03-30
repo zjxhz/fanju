@@ -9,5 +9,5 @@
 #import "SimpleUserEvent.h"
 
 @interface PhotoUploadedEvent : SimpleUserEvent
-
+@property(nonatomic, strong) NSString* photo;
 @end

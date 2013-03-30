@@ -8,9 +8,9 @@
 
 #import <Foundation/Foundation.h>
 #import <Three20/Three20.h>
-#import "UserDetailViewController.h"
 #import "PullRefreshTableViewController.h"
+#import "NewUserDetailsViewController.h"
 
-@interface SocialNetworkViewController : PullRefreshTableViewController <UserDetailViewControllerDelegate, UIAlertViewDelegate>
+@interface SocialNetworkViewController : PullRefreshTableViewController <NewUserDetailsViewControllerDelegate, UIAlertViewDelegate>
 
 @end

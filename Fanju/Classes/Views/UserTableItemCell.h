@@ -12,4 +12,5 @@
 
 @interface UserTableItemCell : TTTableLinkedItemCell
 @property(nonatomic, readonly)   UserImageView *avatar;
+@property(nonatomic, strong) UIButton *numberOfSameTagsButton;
 @end

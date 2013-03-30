@@ -11,8 +11,10 @@
 
 @interface UserTagsCell : UITableViewCell{
     NSMutableArray* _tagLabels;
+    NSMutableDictionary* _frameTagDic;
 }
 @property(nonatomic, weak) NSArray* tags;
 @property(nonatomic, readonly) UIButton* showAllButton;
 @property(nonatomic, readonly) NSInteger cellHeight;
+@property(nonatomic, weak) UITableViewController* rootController;
 @end

@@ -8,9 +8,9 @@
 
 #import "OrderInfo.h"
 #import "ModelHelper.h"
+#import "ModelHelper.h"
 
 @implementation OrderInfo
-@synthesize oID = _oID, meal = _meal, numerOfPersons = _numerOfPersons, code = _code, customer = _customer, createdTime = _createdTime;
 
 +(OrderInfo*) orderInfoWithData:(NSDictionary*) data{
     return [[OrderInfo alloc] initWithData:data];
@@ -21,7 +21,7 @@
         _oID = [[data objectForKey:@"id"] intValue];
         _meal = [MealInfo mealInfoWithData:[data objectForKey:@"meal"]];
         _numerOfPersons =  [[data objectForKey:@"num_persons"] intValue];
-        _code = [data objectForKey:@"code"] ;     
+        _code = [ModelHelper stringValueForKey:@"code" inDictionary:data];
         _customer = [UserProfile profileWithData:[data objectForKey:@"customer"]];
         _createdTime = [ModelHelper dateValueForKey:@"created_time" inDictionary:data];
     }

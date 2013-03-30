@@ -37,21 +37,34 @@
             event = [[PhotoUploadedEvent alloc] init];
         }
     }
-    if ([event isKindOfClass:[SimpleUserEvent class]]) {
-        SimpleUserEvent* sue = event;
-        sue.userID = [data valueForKey:sue.userFieldName];
-    } else if([event isKindOfClass:[JoinMealEvent class]]){
-        JoinMealEvent* je = event;
-        NSString* participantID = [data valueForKey:@"participant"];
-        je.participantID = participantID;
-        NSString* mealID = [data valueForKey:@"meal"];
-        je.mealID = mealID;
-    }
     
     if (event) {
         EventBase* eb = event;
         eb.time = message.time;
     }
+    
+    if ([event isKindOfClass:[SimpleUserEvent class]]) {
+        SimpleUserEvent* sue = event;
+        sue.userID = [data valueForKey:sue.userFieldName];
+        sue.avatar = [NSString stringWithFormat:@"http://%@%@", EOHOST,[data valueForKey:@"avatar"]];
+        sue.userName = [data valueForKey:@"name"];
+        sue.eventDescription =  [data valueForKey:@"event"];
+    }
+    
+    if([event isKindOfClass:[JoinMealEvent class]]){
+        JoinMealEvent* je = event;
+        NSString* participantID = [data valueForKey:@"participant"];
+        je.participantID = participantID;
+        NSString* mealID = [data valueForKey:@"meal"];
+        je.mealID = mealID;
+        je.mealTopic = [data valueForKey:@"topic"];
+        je.eventDescription =  [data valueForKey:@"event"];
+        je.mealPhoto = [NSString stringWithFormat:@"http://%@%@", EOHOST,[data valueForKey:@"meal_photo"]];
+    } else if([event isKindOfClass:[PhotoUploadedEvent class]]){
+        PhotoUploadedEvent* pe = event;
+        pe.photo = [NSString stringWithFormat:@"http://%@%@", EOHOST,[data valueForKey:@"photo"]];
+    }  
+
         
         
     return event;

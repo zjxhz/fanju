@@ -13,12 +13,10 @@
 
 -(id)initWithResult:(NSDictionary*)result fromBaseURL:(NSString*)baseURL{
     if (self = [super init]) {
-        self.text = @"加载更多";
         _offset = [result offset];
         _amount = [result totalCount];
         _limit = [result limit];
         _baseURL = baseURL;
-
     }
     return self;
 
@@ -39,7 +37,7 @@
 
 -(void)setLoading:(BOOL)loading{
     _loading = loading;
-    _text = _loading ? @"加载中……" : @"加载更多";
 }
+
 
 @end

@@ -16,9 +16,11 @@
 #import "NotificationViewController.h"
 #import "MFSideMenu.h"
 
-@interface NewSidebarViewController : UITableViewController <UITableViewDataSource, UITableViewDelegate>{
-    NSMutableArray *_sections;
-    NSMutableArray *_sectionItems;
+@interface NewSidebarViewController : UITableViewController <UITableViewDataSource, UITableViewDelegate, UIGestureRecognizerDelegate>{
+    NSArray *_sections;
+    NSArray *_sectionItems;
+    UIView* _header1;
+    UIView* _header2;
 }
 @property(nonatomic, strong) MFSideMenu* sideMenu;
 @property(nonatomic, weak) id delegate;

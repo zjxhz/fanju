@@ -22,6 +22,7 @@
 #import "Authentication.h"
 #import "LoadMoreTableItem.h"
 #import "LoadMoreTableItemCell.h"
+#import "AKSegmentedControl.h"
 
 @interface OrderListDataSource : TTListDataSource
 
@@ -74,22 +75,48 @@
     [super loadView];
     AppDelegate *delegate = (AppDelegate*)[UIApplication sharedApplication].delegate;
     self.tableView.backgroundColor = [UIColor colorWithPatternImage:delegate.bgImage]; 
-    self.tableView.separatorStyle = UITableViewCellSeparatorStyleSingleLine;
+    self.tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
     self.variableHeightRows = YES;
-    UISegmentedControl *seg = [[UISegmentedControl alloc] initWithItems:[NSArray arrayWithObjects:@"我的饭局", @"饭局邀请", nil]];
-    seg.segmentedControlStyle = UISegmentedControlStyleBar;
-    [seg setSelectedSegmentIndex:0];
+    
+    UIImage* myMealsImg = [UIImage imageNamed:@"seg_meals"];
+    UIImage* mealInvitationImg = [UIImage imageNamed:@"seg_invitation"];
+    UIImage* myMealsPushImg = [UIImage imageNamed:@"seg_meals_push"];
+    UIImage* mealInvitationPushImg = [UIImage imageNamed:@"seg_invitation_push"];
+    
+    AKSegmentedControl *seg = [[AKSegmentedControl alloc] initWithFrame:CGRectMake(0, 0, myMealsImg.size.width + mealInvitationImg.size.width, myMealsImg.size.height)];
+    seg.segmentedControlMode = AKSegmentedControlModeSticky;
+    [seg setSelectedIndex:0];
+    UIButton* bl = [self createSegmentButton:@"我的饭局" withNormalImage:myMealsImg pushImage:myMealsPushImg];
+    UIButton* br = [self createSegmentButton:@"饭局邀请" withNormalImage:mealInvitationImg pushImage:mealInvitationPushImg];
+    [seg setButtonsArray:@[bl, br]];
     [seg addTarget:self action:@selector(selectionChanged:) forControlEvents:UIControlEventValueChanged];
     self.navigationItem.titleView = seg;
 }
 
+-(UIButton*)createSegmentButton:(NSString*)title withNormalImage:(UIImage*)push pushImage:(UIImage*)normal{
+    UIButton* b = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, normal.size.width, normal.size.height)];
+    b.titleLabel.font = [UIFont systemFontOfSize:12];
+    [b setTitleColor:RGBCOLOR(80, 80, 80) forState:UIControlStateNormal];
+    [b setTitleColor:RGBCOLOR(220, 220, 220) forState: UIControlStateSelected];
+    [b setTitleColor:RGBCOLOR(220, 220, 220) forState:UIControlStateHighlighted];
+    [b setTitleColor:RGBCOLOR(220, 220, 220) forState:UIControlStateHighlighted | UIControlStateSelected];
+    [b setTitleShadowColor:RGBACOLOR(0, 0, 0, 0.4) forState:UIControlStateHighlighted];
+    [b setTitleShadowColor:RGBACOLOR(0, 0, 0, 0.2) forState:UIControlStateNormal];
+    [b setBackgroundImage:normal forState:UIControlStateNormal];
+    [b setBackgroundImage:push forState:UIControlStateSelected];
+    [b setBackgroundImage:push forState:UIControlStateHighlighted];
+    [b setBackgroundImage:push forState:UIControlStateSelected | UIControlStateHighlighted];
+    [b setTitle:title forState:UIControlStateNormal];
+    return b;
+}
+
 -(void) selectionChanged:(id)sender{
-    UISegmentedControl *seg = sender;
-    if (seg.selectedSegmentIndex == 1) {
-        UIAlertView *a = [[UIAlertView alloc] initWithTitle:@"未实现" message:@"未实现功能" delegate:nil cancelButtonTitle:@"确定" otherButtonTitles:nil];
-        [a show];
-        seg.selectedSegmentIndex = 0;
-    }
+//    AKSegmentedControl *seg = sender;
+//    if (seg.selectedIndexes.firstIndex == 1) {
+//        UIAlertView *a = [[UIAlertView alloc] initWithTitle:@"未实现" message:@"未实现功能" delegate:nil cancelButtonTitle:@"确定" otherButtonTitles:nil];
+//        [a show];
+//        seg.selectedIndexes = [NSIndexSet indexSetWithIndex:0];
+//    }
 }
 -(void) loadOrders{
     int userID = [Authentication sharedInstance].currentUser.uID;
@@ -109,7 +136,7 @@
                                             NSInteger limit = [result limit];
                                             
                                             if (limit != 0 && totalCount > limit) {
-                                                _loadMore  = [LoadMoreTableItem itemWithText:@"加载更多"] ;
+                                                _loadMore  = [[LoadMoreTableItem alloc] init] ;
                                                 _loadMore.offset = offset;
                                                 _loadMore.amount = totalCount;
                                                 _loadMore.limit = limit;
@@ -153,8 +180,6 @@
                                                 [ds.items removeLastObject];
                                                 NSArray *rowToDelete = [NSArray arrayWithObject:[NSIndexPath indexPathForRow:(ds.items.count - 1) inSection:0]];
                                                 [self.tableView  deleteRowsAtIndexPaths:rowToDelete withRowAnimation:UITableViewRowAnimationAutomatic];
-                                            } else {
-                                                _loadMore.text = @"加载更多" ;
                                             }
                                             [self.tableView reloadData];
                                             
@@ -207,7 +232,7 @@
     if ([_loadMore hasMore] && indexPath.row == ds.items.count - 1) {
         return 50;
     }
-    return 125.0;
+    return 123.0;
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -223,16 +248,13 @@
         OrderTableItem *item = obj;
         OrderInfo* order = item.orderInfo;
         OrderDetailsViewController *details = [[OrderDetailsViewController alloc] initWithNibName:@"OrderDetailsViewController" bundle:nil];
-        details.meal = order.meal;
-        details.code = order.code;
-        details.numerOfPersons = order.numerOfPersons;
+        details.order = order;
         [self.navigationController pushViewController:details
                                              animated:YES];
     } else if ([obj isKindOfClass:[LoadMoreTableItem class]]){
         if (_loadMore.loading) {
             return;
         }
-        _loadMore.text = @"加载中……";
         _loadMore.loading = YES;
         [self reloadLastRow];
         [self loadMoreOrders];

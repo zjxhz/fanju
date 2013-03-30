@@ -13,4 +13,5 @@
 #import "VisitorEvent.h"
 
 @implementation EventBase
+
 @end

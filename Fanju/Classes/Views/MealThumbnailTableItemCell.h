@@ -9,9 +9,7 @@
 #import <Foundation/Foundation.h>
 #import <Three20/Three20.h>
 
-@interface MealThumbnailTableItemCell : TTTableLinkedItemCell {
-    bool viewInitialzed;
-}
+@interface MealThumbnailTableItemCell : TTTableLinkedItemCell
 
 
 @end

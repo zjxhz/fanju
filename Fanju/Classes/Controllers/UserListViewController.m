@@ -14,7 +14,6 @@
 #import "NetworkHandler.h"
 #import "NewUserDetailsViewController.h"
 #import "SVProgressHUD.h"
-#import "UserDetailViewController.h"
 #import "UserListDataSource.h"
 #import "UserListViewController.h"
 #import "UserProfile.h"
@@ -22,9 +21,12 @@
 #import "UserTableItemCell.h"
 #import "LocationProvider.h"
 #import "WidgetFactory.h"
+#import "DictHelper.h"
+#import "MBProgressHUD.h"
 
 @interface UserListViewController(){
     BOOL _upadateLocationBeforeLoadUsers;
+    MBProgressHUD* _hud;
 }
 
 @end
@@ -53,6 +55,72 @@
     return self;
 }
 
+-(void)viewWillAppear:(BOOL)animated{
+    [super viewWillAppear:animated];
+    if (!_hideFilterButton) {
+        self.navigationItem.rightBarButtonItem = [[WidgetFactory sharedFactory]normalBarButtonItemWithTitle:@"筛选" target:self action:@selector(filter:)];
+    }
+
+    if (_showAddTagButton && ![[Authentication sharedInstance].currentUser.tags containsObject:_tag]) {
+        self.toolbarItems = [self createToolbarItems];
+        [self.navigationController setToolbarHidden:NO];
+    }
+}
+
+-(NSArray*) createToolbarItems{
+    UIBarButtonItem* flexiSpace = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
+    UIImage* toolbarBg = [UIImage imageNamed:@"toolbar_bg"] ;
+    UIImage* buttonBG = [UIImage imageNamed:@"add_tag_bg"];
+    UIButton* button = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, buttonBG.size.width, buttonBG.size.height)];
+    [button addTarget:self action:@selector(addTagToMine:) forControlEvents:UIControlEventTouchUpInside];
+    [button setBackgroundImage:buttonBG forState:UIControlStateNormal];
+    [button setTitle:@"添加到我的兴趣" forState:UIControlStateNormal];
+    [button setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+    button.titleLabel.font = [UIFont systemFontOfSize:18];
+    [self.navigationController.toolbar setBackgroundImage:toolbarBg forToolbarPosition:UIToolbarPositionAny barMetrics:UIBarMetricsDefault];
+    UIBarButtonItem* item = [[UIBarButtonItem alloc] initWithCustomView:button];
+    return @[flexiSpace, item, flexiSpace];
+}
+
+-(void)addTagToMine:(id)sender{
+    UserProfile* user = [Authentication sharedInstance].currentUser;
+    NSArray* params = @[[DictHelper dictWithKey:@"tag" andValue:_tag.name]];
+    NSString *requestStr = [NSString stringWithFormat:@"%@://%@/api/v1/user/%d/tags/?format=json", HTTPS, EOHOST, user.uID];
+    [[NetworkHandler getHandler] requestFromURL:requestStr
+                                         method:POST
+                                     parameters:params
+                                    cachePolicy:TTURLRequestCachePolicyNone
+                                        success:^(id obj) {
+                                            if ([[obj objectForKey:@"status"] isEqualToString:@"OK"]) {
+                                                NSLog(@"tag added");
+                                                _hud = [MBProgressHUD showHUDAddedTo:self.view animated:NO];
+                                                _hud.mode = MBProgressHUDModeText;
+                                                _hud.labelText = @"已添加到我的兴趣";
+                                                [NSTimer scheduledTimerWithTimeInterval:1.5 target:self selector:@selector(dismissHUD) userInfo:nil repeats:NO];
+                                                [user.tags addObject:_tag];
+                                                [[Authentication sharedInstance] relogin];
+                                                [self.navigationController.toolbar setHidden:YES];
+                                                self.view.frame = CGRectMake(0, 0, 320, 416);
+                                                self.tableView.frame = self.view.frame;
+                                            } else {
+                                                [SVProgressHUD dismissWithSuccess:@"添加失败"];
+                                            }
+                                        } failure:^{
+                                            NSLog(@"failed to save settings");
+                                            [SVProgressHUD dismissWithError:@"添加失败"];
+                                        }];
+
+}
+
+-(void)dismissHUD{
+//    [SVProgressHUD dismiss];
+    [_hud hide:YES];
+}
+-(void)viewWillDisappear:(BOOL)animated{
+    [super viewDidDisappear:animated];
+    [self.navigationController setToolbarHidden:YES];
+}
+
 -(void)setTitle:(NSString *)title{
     self.navigationItem.titleView = [[WidgetFactory sharedFactory]titleViewWithTitle:title];
 }
@@ -63,9 +131,6 @@
     AppDelegate *delegate = (AppDelegate*)[UIApplication sharedApplication].delegate;
     self.tableView.backgroundColor = [UIColor colorWithPatternImage:delegate.bgImage];
 
-    self.navigationItem.rightBarButtonItem = [[WidgetFactory sharedFactory]normalBarButtonItemWithTitle:@"筛选" target:self action:@selector(filter:)];
-    _customUserFilterViewController = [[CustomUserFilterViewController alloc] init];
-    _customUserFilterViewController.delegate = self;
     self.autoresizesForKeyboard = YES;
     self.variableHeightRows = YES;    
 }
@@ -78,6 +143,7 @@
 -(void)viewDidAppear:(BOOL)animated{
     [super viewDidAppear:animated];
     [TTURLRequestQueue mainQueue].suspended = NO; //workaround, not really sure how it works
+    self.tableView.frame = self.view.frame;
 }
 
 -(void)loadUsers{
@@ -178,6 +244,11 @@
 
 #pragma mark UITableViewDelegate
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
+    id<TTTableViewDataSource> dataSource = (id<TTTableViewDataSource>)tableView.dataSource;
+    id object = [dataSource tableView:tableView objectForRowAtIndexPath:indexPath];
+    if ([object isKindOfClass:[LoadMoreTableItem class]]){
+        return 50;
+    }
     return 88;
 }
 
@@ -205,6 +276,14 @@
     [self.tableView reloadRowsAtIndexPaths:lastRow withRowAnimation:UITableViewRowAnimationAutomatic]; 
 }
 
+-(void)tableView:(UITableView *)tableView willDisplayCell:(UITableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath{
+    if (_hideNumberOfSameTags) {
+        if ([cell isKindOfClass:[UserTableItemCell class]]) {
+            UserTableItemCell* userCell = ( UserTableItemCell*)cell;
+            userCell.numberOfSameTagsButton.hidden = YES;
+        }
+    }
+}
 #pragma mark UIActionSheetDelegate
 - (void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex{
     NSString* newFilter =  nil;
@@ -220,6 +299,10 @@
             newFilter = @"gender=1";
             break;
         case 3:
+            if (!_customUserFilterViewController) {
+                _customUserFilterViewController = [[CustomUserFilterViewController alloc] init];
+                _customUserFilterViewController.delegate = self;
+            }
             nav = [[UINavigationController alloc] initWithRootViewController:_customUserFilterViewController];
            [nav.navigationBar setBackgroundImage:[UIImage imageNamed:@"topbar_bg"] forBarMetrics:UIBarMetricsDefault];
             [self presentViewController:nav animated:YES completion:^(void){

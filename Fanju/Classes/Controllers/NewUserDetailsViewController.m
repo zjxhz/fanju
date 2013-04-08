@@ -78,15 +78,37 @@
 
 -(void)viewWillAppear:(BOOL)animated{
     [super viewWillAppear:animated];
+    if (self.user) {
+        [self buildUI];
+    } else if(self.userID){
+        [self requestUserDetails];
+    }
+}
+
+-(void)requestUserDetails{
+    [[NetworkHandler getHandler] requestFromURL:[NSString stringWithFormat:@"http://%@/api/v1/user/%@/?format=json&limit=0", EOHOST, _userID]
+                                         method:GET
+                                    cachePolicy:TTURLRequestCachePolicyDefault
+                                        success:^(id obj) {
+                                            NSDictionary* dic = obj;
+                                            UserProfile* user = [UserProfile profileWithData:dic];
+                                            self.user = user;
+                                            [self buildUI];
+                                        } failure:^{
+                                            NSLog(@"failed to get user  for id %@", _userID);
+                                            [SVProgressHUD dismissWithError:@"获取饭局失败"];
+                                        }];
+}
+
+-(void)buildUI{
     UIImage* toolbarBg = [UIImage imageNamed:@"toolbar_bg"] ;
     [self updateFollowOrNotButton];
-//    [self loadComments];
+    //    [self loadComments];
     [self.view sendSubviewToBack:self.tableView];
     [self updateNavigationBar];
     self.toolbarItems  = [self createToolbarItems];
     [self.navigationController setToolbarHidden:NO];
     [self.navigationController.toolbar setBackgroundImage:toolbarBg forToolbarPosition:UIToolbarPositionAny barMetrics:UIBarMetricsDefault];
-
 }
 
 -(void)viewWillDisappear:(BOOL)animated{
@@ -184,7 +206,7 @@
         UIButton* followButton = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, followBg.size.width, followBg.size.height)];
         [followButton setBackgroundImage:followBg forState:UIControlStateNormal];
         [followButton setBackgroundImage:followBgPush forState:UIControlStateSelected];
-        [followButton addTarget:self action:@selector(follow:) forControlEvents:UIControlEventTouchUpInside];
+        [followButton addTarget:self action:@selector(follow) forControlEvents:UIControlEventTouchUpInside];
         UIBarButtonItem* followItem = [[UIBarButtonItem alloc] initWithCustomView:followButton];
         UIBarButtonItem* noSpace = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFixedSpace target:nil action:nil];
         noSpace.width = -10.0;
@@ -441,12 +463,10 @@
         } else {
             NSString* CellIdentifier = @"PhotoThumbnailCell";
             cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
-            if (cell == nil) {
-                BOOL editable = [self isViewForMyself];
-                cell = [[PhotoThumbnailCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier withUser:_user editable:editable];
-                _photoCell = (PhotoThumbnailCell*)cell;
-                ((PhotoThumbnailCell*)cell).delegate = self;
-            }
+            BOOL editable = [self isViewForMyself];
+            cell = [[PhotoThumbnailCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier withUser:_user editable:editable];
+            _photoCell = (PhotoThumbnailCell*)cell;
+            ((PhotoThumbnailCell*)cell).delegate = self;
         }
     } else if (indexPath.section == 2){
         NSString* CellIdentifier = @"UserTagsCell";

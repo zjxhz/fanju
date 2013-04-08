@@ -101,7 +101,30 @@
 -(void)viewDidLoad
 {
     [super viewDidLoad];
-    self.tableView.showsVerticalScrollIndicator = NO;  
+    if (self.mealInfo) {
+        [self buildUI];
+    } else if(self.mealID){
+        [self requetMealDetails];
+    }
+}
+
+-(void)requetMealDetails{
+    [[NetworkHandler getHandler] requestFromURL:[NSString stringWithFormat:@"http://%@/api/v1/meal/%@/?format=json&limit=0", EOHOST, _mealID]
+                                        method:GET
+                                cachePolicy:TTURLRequestCachePolicyDefault
+                                        success:^(id obj) {
+                                            NSDictionary* dic = obj;
+                                            MealInfo* meal = [MealInfo mealInfoWithData:dic];
+                                            self.mealInfo = meal;
+                                            [self buildUI];
+                                        } failure:^{
+                                            NSLog(@"failed to get meal for id %@", _mealID);
+                                            [SVProgressHUD dismissWithError:@"获取饭局失败"];
+                                        }];
+
+}
+-(void)buildUI{
+    self.tableView.showsVerticalScrollIndicator = NO;
     self.navigationItem.titleView = [[WidgetFactory sharedFactory]titleViewWithTitle:_mealInfo.topic];
     
     self.navigationItem.leftBarButtonItem = [[WidgetFactory sharedFactory]backButtonWithTarget:self.navigationController action:@selector(popViewControllerAnimated:)];
@@ -112,7 +135,7 @@
     NSMutableArray* items = [[NSMutableArray alloc] init];
     NSMutableArray* sections = [[NSMutableArray alloc] init];
     
-    [sections addObject:@"Host"];    
+    [sections addObject:@"Host"];
     NSMutableArray* itemsRow = [[NSMutableArray alloc] init];
     [itemsRow addObject:[self createHostView]];
     [items addObject:itemsRow];
@@ -123,16 +146,16 @@
     [itemsRow addObject:_detailsView];
     [items addObject:itemsRow];
     
-//    itemsRow = [[NSMutableArray alloc] init];
-//    [sections addObject:@"Comments"]; 
-//    [self createLoadingView];
-//    [itemsRow addObject:_loadingOrNoCommentsLabel];
-//    [items addObject:itemsRow];
+    //    itemsRow = [[NSMutableArray alloc] init];
+    //    [sections addObject:@"Comments"];
+    //    [self createLoadingView];
+    //    [itemsRow addObject:_loadingOrNoCommentsLabel];
+    //    [items addObject:itemsRow];
     
     
     TTSectionedDataSource* ds = [[TTSectionedDataSource alloc] initWithItems:items sections:sections];
-    self.dataSource = ds;    
-//    [self requestDataFromServer];
+    self.dataSource = ds;
+    //    [self requestDataFromServer];
 }
 
 -(void)viewWillAppear:(BOOL)animated{

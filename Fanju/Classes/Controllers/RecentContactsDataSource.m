@@ -8,16 +8,13 @@
 
 #import "RecentContactsDataSource.h"
 #import "UserMessageTableItem.h"
-#import "RecentContactCell.h"
 #import "XMPPRecentContactCell.h"
 #import "RecentContact.h"
 #import "XMPPHandler.h"
 
 @implementation RecentContactsDataSource
 - (Class)tableView:(UITableView*)tableView cellClassForObject:(id) object {
-	if ([object isKindOfClass:[UserMessageTableItem class]] ) {
-		return [RecentContactCell class];
-	} else if ([object isKindOfClass:[RecentContact class]]){
+	if ([object isKindOfClass:[RecentContact class]]){
         return [XMPPRecentContactCell class];
     }
     

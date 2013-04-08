@@ -30,6 +30,8 @@ PhotoUploadingOperation;
 @interface NewUserDetailsViewController : PullRefreshTableViewController2<UITableViewDelegate, UITableViewDataSource, PhotoThumbnailCellDelegate,UINavigationControllerDelegate, UIImagePickerControllerDelegate, UserDetailSaveDelegate,  CellTextEditorDelegate, TTPostControllerDelegate, UIActionSheetDelegate, UIGestureRecognizerDelegate, TagViewControllerDelegate>
 @property(nonatomic, strong) UserProfile* user;
 @property(nonatomic, weak) id<NewUserDetailsViewControllerDelegate> delegate;
+@property(nonatomic, strong) NSString* userID;
 -(void)setUsername:(NSString*)username;
+
 
 @end

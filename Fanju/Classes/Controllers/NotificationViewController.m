@@ -23,6 +23,8 @@
 #import "PhotoUploadedEvent.h"
 #import "UploadPhotoEventCell.h"
 #import "SimpleUserEventCell.h"
+#import "WidgetFactory.h"
+
 @interface NotificationViewController (){
     NSMutableArray* _notifications;
 }
@@ -36,7 +38,7 @@
     self = [super initWithStyle:style];
     if (self) {
         _notifications = [NSMutableArray array];
-        self.title = @"消息";
+        self.navigationItem.titleView = [[WidgetFactory sharedFactory] titleViewWithTitle:@"通知"];
         self.view.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"bg"]];
     }
     return self;
@@ -190,12 +192,11 @@
     if ([event isKindOfClass:[JoinMealEvent class]]) {
         NSString* CellIdentifier = @"MealEventCell";
         cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
-        MealEventCell* mealEventCell = nil;
         if (!cell) {
             UIViewController* temp = [[UIViewController alloc] initWithNibName:@"MealEventCell" bundle:nil];
             cell = (UITableViewCell*)temp.view;
-            mealEventCell = (MealEventCell*)cell;
         }
+        MealEventCell* mealEventCell = (MealEventCell*)cell;
         CGRect frame = mealEventCell.avatar.frame;
         JoinMealEvent* je = (JoinMealEvent*)event;
         [mealEventCell.avatar setPathToNetworkImage:je.avatar forDisplaySize:frame.size contentMode:UIViewContentModeScaleAspectFill];
@@ -222,18 +223,16 @@
         photoEventCell.name.text = pu.userName;
         photoEventCell.event.text = pu.eventDescription;
         photoEventCell.time.text = [DateUtil userFriendlyStringFromDate:pu.time];
-        [photoEventCell.photo setPathToNetworkImage:pu.photo forDisplaySize:photoEventCell.photo.frame.size contentMode:UIViewContentModeScaleAspectFill];
+        [photoEventCell.photo setPathToNetworkImage:pu.photo forDisplaySize:photoEventCell.photo.frame.size ];
         photoEventCell.clipsToBounds = YES;
         float degrees = 30; //the value in degrees
         photoEventCell.photo.transform = CGAffineTransformMakeRotation(degrees * M_PI/180.0);
     } else if([event isKindOfClass:[SimpleUserEvent class]]) {
         NSString* CellIdentifier = @"SimpleUserEventCell";
         cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
-        SimpleUserEventCell* userEventCell = nil;
         if (!cell) {
             UIViewController* temp = [[UIViewController alloc] initWithNibName:CellIdentifier bundle:nil];
             cell = (UITableViewCell*)temp.view;
-            userEventCell = (SimpleUserEventCell*)cell;
         }
     }
     
@@ -259,7 +258,8 @@
 //        } else {
 //            [self configureLoadingCell:cell];
 //        }
-//    } 
+//    }
+    cell.selectionStyle = UITableViewCellSelectionStyleNone;
     return cell;
 }
 
@@ -317,18 +317,21 @@
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-//    id event = [_notifications objectAtIndex:indexPath.row];
-//    if ([event isKindOfClass:[SimpleUserEvent class]]) {
-//        SimpleUserEvent* se = event;
-//        [self pushUserDetails:se.user];
-//    } else if([event isKindOfClass:[JoinMealEvent class]]){
-//        JoinMealEvent* je = (JoinMealEvent*)event;
-//        if (je.meal) {
-//            MealDetailViewController *mealDetail = [[MealDetailViewController alloc] init];
-//            mealDetail.mealInfo = je.meal;
-//            [self.navigationController pushViewController:mealDetail animated:YES];
-//        }
-//    }
+    id event = [_notifications objectAtIndex:indexPath.row];
+    if([event isKindOfClass:[JoinMealEvent class]]){
+        JoinMealEvent* je = (JoinMealEvent*)event;
+        if (je.mealID) {
+            MealDetailViewController *mealDetail = [[MealDetailViewController alloc] init];
+            mealDetail.mealID = je.mealID;
+            [self.navigationController pushViewController:mealDetail animated:YES];
+        }
+    } else if ([event isKindOfClass:[SimpleUserEvent class]]) {
+        SimpleUserEvent* se = event;
+        if (se.userID) {
+            [self pushUserDetails:se.userID];
+        }
+        
+    } 
 }
 #pragma mark - UIGestureRecognizerDelegate
 - (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldReceiveTouch:(UITouch *)touch{
@@ -342,19 +345,17 @@
         id event = [_notifications objectAtIndex:indexPath.row];
         if ([event isKindOfClass:[SimpleUserEvent class]]) {
             SimpleUserEvent* se = event;
-            [self pushUserDetails:se.user];
+            [self pushUserDetails:se.userID];
         } else if([event isKindOfClass:[JoinMealEvent class]]){
             JoinMealEvent* je = (JoinMealEvent*)event;
-            [self pushUserDetails:je.participant];
+            [self pushUserDetails:je.participantID];
         }
     }
 }
 
--(void)pushUserDetails:(UserProfile*)user{
-    if (user) {
-        NewUserDetailsViewController* detailViewController = [[NewUserDetailsViewController alloc] initWithStyle:UITableViewStylePlain];
-        detailViewController.user = user;
-        [self.navigationController pushViewController:detailViewController animated:YES];
-    }
+-(void)pushUserDetails:(NSString*)userID{
+    NewUserDetailsViewController* detailViewController = [[NewUserDetailsViewController alloc] initWithStyle:UITableViewStylePlain];
+    detailViewController.userID = userID;
+    [self.navigationController pushViewController:detailViewController animated:YES];
 }
 @end

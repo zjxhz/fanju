@@ -46,7 +46,8 @@
     if ([event isKindOfClass:[SimpleUserEvent class]]) {
         SimpleUserEvent* sue = event;
         sue.userID = [data valueForKey:sue.userFieldName];
-        sue.avatar = [NSString stringWithFormat:@"http://%@%@", EOHOST,[data valueForKey:@"avatar"]];
+        NSString* avatarURL = [data valueForKey:@"avatar"];
+        sue.avatar = [avatarURL hasPrefix:@"http"] ? avatarURL : [NSString stringWithFormat:@"http://%@%@", EOHOST, avatarURL];
         sue.userName = [data valueForKey:@"name"];
         sue.eventDescription =  [data valueForKey:@"event"];
     }
@@ -59,7 +60,8 @@
         je.mealID = mealID;
         je.mealTopic = [data valueForKey:@"topic"];
         je.eventDescription =  [data valueForKey:@"event"];
-        je.mealPhoto = [NSString stringWithFormat:@"http://%@%@", EOHOST,[data valueForKey:@"meal_photo"]];
+        NSString* mealPhoto = [data valueForKey:@"meal_photo"];
+        je.mealPhoto = [mealPhoto hasPrefix:@"http"] ? mealPhoto : [NSString stringWithFormat:@"http://%@%@", EOHOST,mealPhoto];
     } else if([event isKindOfClass:[PhotoUploadedEvent class]]){
         PhotoUploadedEvent* pe = event;
         pe.photo = [NSString stringWithFormat:@"http://%@%@", EOHOST,[data valueForKey:@"photo"]];

@@ -68,7 +68,7 @@
     SinaWeibo *_wb;
     ClosablePopoverViewController *_cpc;
 }
-
+@property(nonatomic, strong) NSString* mealID;
 @property (nonatomic, strong) MealInfo *mealInfo;
 @property (nonatomic, readonly)  UIView* tabBar;
 

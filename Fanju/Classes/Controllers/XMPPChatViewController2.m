@@ -238,7 +238,7 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
     NSString* message = _textView.text;
     _textView.text = nil;
     [self textViewDidChange:_textView];
-    [[XMPPHandler sharedInstance] saveMessage:[Authentication sharedInstance].currentUser.jabberID receiver:_contactJIDStr message:message];
+    [[XMPPHandler sharedInstance] saveMessage:[Authentication sharedInstance].currentUser.jabberID receiver:_contactJIDStr message:message time:[NSDate date] hasRead:NO];
     //message will be sent after it's saved, check messageDidSave:
 }
 

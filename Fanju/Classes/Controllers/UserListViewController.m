@@ -10,7 +10,6 @@
 #import "Authentication.h"
 #import "Const.h"
 #import "CustomUserFilterViewController.h"
-#import "NSDictionary+ParseHelper.h"
 #import "NetworkHandler.h"
 #import "NewUserDetailsViewController.h"
 #import "SVProgressHUD.h"

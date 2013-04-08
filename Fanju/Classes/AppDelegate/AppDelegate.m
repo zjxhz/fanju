@@ -70,7 +70,7 @@
     UIRemoteNotificationType allowedNotifications = UIRemoteNotificationTypeAlert |  UIRemoteNotificationTypeBadge | UIRemoteNotificationTypeSound;
     [[UIApplication sharedApplication] registerForRemoteNotificationTypes:allowedNotifications];
     
-    [Crittercism enableWithAppID:@"50ac205641ae503e5c000004"];
+//    [Crittercism enableWithAppID:@"50ac205641ae503e5c000004"];
     
     [self initSinaweibo];
     [[Authentication sharedInstance] relogin];

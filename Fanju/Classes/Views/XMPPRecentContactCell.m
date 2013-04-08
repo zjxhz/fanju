@@ -8,7 +8,6 @@
 
 #import "XMPPRecentContactCell.h"
 #import "XMPPHandler.h"
-#import "RecentContactCell.h"
 #import "RecentContact.h"
 #import "DateUtil.h"
 #import "MKNumberBadgeView.h"
@@ -71,7 +70,7 @@
 
 
         self.detailTextLabel.text = item.message;
-        _timeLabel.text = [DateUtil userFriendlyStringFromDate:item.time];
+        _timeLabel.text = item.time ? [DateUtil userFriendlyStringFromDate:item.time] : @"";
         if (!user) {
             self.imageView.image = [UIImage imageNamed:@"anno"];
             self.textLabel.text = nil;
@@ -100,8 +99,9 @@
             self.textLabel.text = @"";
         }
         
-        if (item.unread > 0) {
-            _numberBadge.value = [item.unread integerValue] ;
+        NSInteger unreadCount = [item.unread integerValue];
+        if (unreadCount> 0) {
+            _numberBadge.value = unreadCount;
             [self.contentView addSubview:_numberBadge];
         } else {
             [_numberBadge removeFromSuperview];

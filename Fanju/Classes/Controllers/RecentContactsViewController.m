@@ -68,13 +68,16 @@
         RecentContact *item = object;
         XMPPChatViewController2 *chat =[[XMPPChatViewController2 alloc] initWithUserChatTo:item.contact];
         item.unread = 0; //open the chat dialog mark all messages as read
+        [[XMPPHandler sharedInstance] markMessagesReadFrom:item.contact];
         [[XMPPHandler sharedInstance] updateUnreadCount];
+        [[XMPPHandler sharedInstance] retrieveMessagesWith:item.contact after:[item.time timeIntervalSince1970] retrievingFromList:NO];
         NSError *error = nil;
         [[XMPPHandler sharedInstance].messageManagedObjectContext save:&error];
         [self refresh];
         [self.navigationController pushViewController:chat animated:YES];
     }
 }
+
 
 -(void)messageDidSave:(NSNotification*)notif {
     [self reloadData];

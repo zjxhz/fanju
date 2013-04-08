@@ -8,6 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import <Three20/Three20.h>
+#import "NSDictionary+ParseHelper.h"
 
 typedef void(^retrieved_t)(id);
 typedef void(^retrieve_failed_t)(void);

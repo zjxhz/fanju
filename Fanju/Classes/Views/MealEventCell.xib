@@ -54,7 +54,7 @@
 							<object class="IBUILabel" id="434861179">
 								<reference key="NSNextResponder" ref="387873790"/>
 								<int key="NSvFlags">292</int>
-								<string key="NSFrame">{{59, 9}, {143, 17}}</string>
+								<string key="NSFrame">{{59, 8}, {143, 20}}</string>
 								<reference key="NSSuperview" ref="387873790"/>
 								<reference key="NSWindow"/>
 								<reference key="NSNextKeyView" ref="939489448"/>
@@ -172,23 +172,6 @@
 								</object>
 								<bool key="IBUIAdjustsFontSizeToFit">NO</bool>
 							</object>
-							<object class="IBUIImageView" id="1023662798">
-								<reference key="NSNextResponder" ref="387873790"/>
-								<int key="NSvFlags">256</int>
-								<string key="NSFrame">{{0, 73}, {320, 2}}</string>
-								<reference key="NSSuperview" ref="387873790"/>
-								<reference key="NSWindow"/>
-								<reference key="NSNextKeyView" ref="201161382"/>
-								<bool key="IBUIOpaque">NO</bool>
-								<bool key="IBUIClipsSubviews">YES</bool>
-								<int key="IBUIContentMode">4</int>
-								<bool key="IBUIMultipleTouchEnabled">YES</bool>
-								<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
-								<object class="NSCustomResource" key="IBUIImage">
-									<string key="NSClassName">NSImage</string>
-									<string key="NSResourceName">sep_details.png</string>
-								</object>
-							</object>
 							<object class="IBUIImageView" id="201161382">
 								<reference key="NSNextResponder" ref="387873790"/>
 								<int key="NSvFlags">256</int>
@@ -216,6 +199,23 @@
 								<string key="NSReuseIdentifierKey">_NS:9</string>
 								<bool key="IBUIUserInteractionEnabled">NO</bool>
 								<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
+							</object>
+							<object class="IBUIImageView" id="1023662798">
+								<reference key="NSNextResponder" ref="387873790"/>
+								<int key="NSvFlags">256</int>
+								<string key="NSFrame">{{0, 73}, {320, 2}}</string>
+								<reference key="NSSuperview" ref="387873790"/>
+								<reference key="NSWindow"/>
+								<reference key="NSNextKeyView" ref="201161382"/>
+								<bool key="IBUIOpaque">NO</bool>
+								<bool key="IBUIClipsSubviews">YES</bool>
+								<int key="IBUIContentMode">4</int>
+								<bool key="IBUIMultipleTouchEnabled">YES</bool>
+								<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
+								<object class="NSCustomResource" key="IBUIImage">
+									<string key="NSClassName">NSImage</string>
+									<string key="NSResourceName">separator.png</string>
+								</object>
 							</object>
 						</array>
 						<string key="NSFrameSize">{320, 74}</string>
@@ -339,8 +339,8 @@
 							<reference ref="625087267"/>
 							<reference ref="860712214"/>
 							<reference ref="939489448"/>
-							<reference ref="1023662798"/>
 							<reference ref="201161382"/>
+							<reference ref="1023662798"/>
 							<reference ref="1062979951"/>
 						</array>
 						<reference key="parent" ref="0"/>
@@ -415,25 +415,13 @@
 			<array class="NSMutableArray" key="referencedPartialClassDescriptions">
 				<object class="IBPartialClassDescription">
 					<string key="className">MealEventCell</string>
-					<string key="superclassName">UITableViewCell</string>
+					<string key="superclassName">SimpleUserEventCell</string>
 					<dictionary class="NSMutableDictionary" key="outlets">
-						<string key="avatar">NINetworkImageView</string>
-						<string key="event">UILabel</string>
 						<string key="mealImage">NINetworkImageView</string>
 						<string key="mealImgBg">UIImageView</string>
-						<string key="name">UILabel</string>
-						<string key="time">UILabel</string>
 						<string key="topic">UILabel</string>
 					</dictionary>
 					<dictionary class="NSMutableDictionary" key="toOneOutletInfosByName">
-						<object class="IBToOneOutletInfo" key="avatar">
-							<string key="name">avatar</string>
-							<string key="candidateClassName">NINetworkImageView</string>
-						</object>
-						<object class="IBToOneOutletInfo" key="event">
-							<string key="name">event</string>
-							<string key="candidateClassName">UILabel</string>
-						</object>
 						<object class="IBToOneOutletInfo" key="mealImage">
 							<string key="name">mealImage</string>
 							<string key="candidateClassName">NINetworkImageView</string>
@@ -441,14 +429,6 @@
 						<object class="IBToOneOutletInfo" key="mealImgBg">
 							<string key="name">mealImgBg</string>
 							<string key="candidateClassName">UIImageView</string>
-						</object>
-						<object class="IBToOneOutletInfo" key="name">
-							<string key="name">name</string>
-							<string key="candidateClassName">UILabel</string>
-						</object>
-						<object class="IBToOneOutletInfo" key="time">
-							<string key="name">time</string>
-							<string key="candidateClassName">UILabel</string>
 						</object>
 						<object class="IBToOneOutletInfo" key="topic">
 							<string key="name">topic</string>
@@ -468,6 +448,43 @@
 						<string key="minorKey">./Classes/NINetworkImageView.h</string>
 					</object>
 				</object>
+				<object class="IBPartialClassDescription">
+					<string key="className">SimpleUserEventCell</string>
+					<string key="superclassName">UITableViewCell</string>
+					<dictionary class="NSMutableDictionary" key="outlets">
+						<string key="avatar">NINetworkImageView</string>
+						<string key="event">UILabel</string>
+						<string key="name">UILabel</string>
+						<string key="time">UILabel</string>
+						<string key="topic">UILabel</string>
+					</dictionary>
+					<dictionary class="NSMutableDictionary" key="toOneOutletInfosByName">
+						<object class="IBToOneOutletInfo" key="avatar">
+							<string key="name">avatar</string>
+							<string key="candidateClassName">NINetworkImageView</string>
+						</object>
+						<object class="IBToOneOutletInfo" key="event">
+							<string key="name">event</string>
+							<string key="candidateClassName">UILabel</string>
+						</object>
+						<object class="IBToOneOutletInfo" key="name">
+							<string key="name">name</string>
+							<string key="candidateClassName">UILabel</string>
+						</object>
+						<object class="IBToOneOutletInfo" key="time">
+							<string key="name">time</string>
+							<string key="candidateClassName">UILabel</string>
+						</object>
+						<object class="IBToOneOutletInfo" key="topic">
+							<string key="name">topic</string>
+							<string key="candidateClassName">UILabel</string>
+						</object>
+					</dictionary>
+					<object class="IBClassDescriptionSource" key="sourceIdentifier">
+						<string key="majorKey">IBProjectSource</string>
+						<string key="minorKey">./Classes/SimpleUserEventCell.h</string>
+					</object>
+				</object>
 			</array>
 		</object>
 		<int key="IBDocument.localizationMode">0</int>
@@ -476,7 +493,7 @@
 		<int key="IBDocument.defaultPropertyAccessControl">3</int>
 		<dictionary class="NSMutableDictionary" key="IBDocument.LastKnownImageSizes">
 			<string key="meal_event_bg.png">{80, 46}</string>
-			<string key="sep_details.png">{320, 2}</string>
+			<string key="separator.png">{320, 2}</string>
 		</dictionary>
 		<string key="IBCocoaTouchPluginVersion">2083</string>
 	</data>

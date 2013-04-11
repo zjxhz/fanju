@@ -15,6 +15,9 @@
 #import "InfoUtil.h"
 #import "Authentication.h"
 #import "OrderDetailsViewController.h"
+#import "DictHelper.h"
+#import "AlixPayOrder.h"
+#import "AlixPay.h"
 
 #define TABLE_VIEW_WIDTH 260
 #define LABEL_HEIGHT 30
@@ -85,11 +88,9 @@
     NSString *mealID = [NSString stringWithFormat:@"%d", self.mealInfo.mID];
     NSString *num_persons = [NSString stringWithFormat:@"%d", _numberOfPersons];
     NSString *total_price = [NSString stringWithFormat:@"%.0f", _numberOfPersons * self.mealInfo.price];
-        NSArray *params = [NSArray arrayWithObjects:
-                           [NSDictionary dictionaryWithObjectsAndKeys:mealID, @"value", @"meal_id", @"key", nil], 
-                           [NSDictionary dictionaryWithObjectsAndKeys:num_persons, @"value", @"num_persons", @"key", nil],
-                           [NSDictionary dictionaryWithObjectsAndKeys:total_price, @"value", @"total_price", @"key", nil],
-                           nil];
+    NSArray *params = @[[DictHelper dictWithKey:@"meal_id" andValue:mealID],
+                        [DictHelper dictWithKey:num_persons andValue:num_persons],
+                        [DictHelper dictWithKey:total_price andValue:total_price]];
     [[NetworkHandler getHandler] requestFromURL:[NSString stringWithFormat:@"http://%@/api/v1/user/%d/order/", EOHOST, [Authentication sharedInstance].currentUser.uID]
                                          method:POST
                                      parameters:params
@@ -107,7 +108,69 @@
                                             }
                                         } failure:^{
                                             [InfoUtil showErrorWithString:@"加入失败，可能是网络问题"];
-                                        }]; 
+                                        }];
+    
+    
+}
+
+-(void)payFor:(OrderInfo*)orderInfo withSignedString:(NSString*)signedString{
+	NSString *partner = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"AlixPartner"];
+    NSString *seller = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"AlixSeller"];
+	if ([partner length] == 0 || [seller length] == 0)
+	{
+        NSLog(@"ERROR: Alix partner or Alix seller not defined");
+		return;
+	}
+	
+	/*
+	 *生成订单信息及签名
+	 *由于demo的局限性，本demo中的公私钥存放在AlixPayDemo-Info.plist中,外部商户可以存放在服务端或本地其他地方。
+	 */
+	//将商品信息赋予AlixPayOrder的成员变量
+//	AlixPayOrder *order = [[AlixPayOrder alloc] init];
+//	order.partner = partner;
+//	order.seller = seller;
+//	order.tradeNO = [NSString stringWithFormat:@"%d", orderInfo.oID];
+//	order.productName = [NSString stringWithFormat:@"饭局（%人）：%@", orderInfo.meal.topic; //商品标题
+//	order.productDescription = product.body; //商品描述
+//	order.amount = [NSString stringWithFormat:@"%.2f",0.01]; //商品价格
+//	order.notifyURL =  @"http://www.xxx.com"; //回调URL
+//	
+//	//应用注册scheme,在AlixPayDemo-Info.plist定义URL types,用于安全支付成功后重新唤起商户应用
+
+//	
+//	//将商品信息拼接成字符串
+//	NSString *orderSpec = [order description];
+//	NSLog(@"orderSpec = %@",orderSpec);
+//	
+//	//获取私钥并将商户信息签名,外部商户可以根据情况存放私钥和签名,只需要遵循RSA签名规范,并将签名字符串base64编码和UrlEncode
+//	id<DataSigner> signer = CreateRSADataSigner([[NSBundle mainBundle] objectForInfoDictionaryKey:@"RSA private key"]);
+//	NSString *signedString = [signer signString:orderSpec];
+	
+	//将签名成功字符串格式化为订单字符串,请严格按照该格式
+	NSString *orderString = nil;
+	if (signedString != nil) {
+//		orderString = [NSString stringWithFormat:@"%@&sign=\"%@\"&sign_type=\"%@\"",
+//                       orderSpec, signedString, @"RSA"];
+        
+        //获取安全支付单例并调用安全支付接口
+        AlixPay * alixpay = [AlixPay shared];
+        int ret = [alixpay pay:orderString applicationScheme:APP_SCHEME];
+        
+        if (ret == kSPErrorAlipayClientNotInstalled) {
+            UIAlertView * alertView = [[UIAlertView alloc] initWithTitle:@"提示"
+                                                                 message:@"您还没有安装支付宝快捷支付，请先安装。"
+                                                                delegate:self
+                                                       cancelButtonTitle:@"确定"
+                                                       otherButtonTitles:nil];
+            [alertView setTag:123];
+            [alertView show];
+        }
+        else if (ret == kSPErrorSignError) {
+            NSLog(@"签名错误！");
+        }
+        
+	}
 }
 
 -(void) viewWillAppear:(BOOL)animated{
@@ -126,7 +189,7 @@
     _confirmButton.titleLabel.textColor = [UIColor whiteColor];
     _confirmButton.titleLabel.font = [UIFont boldSystemFontOfSize:25];
     _confirmButton.backgroundColor = RGBCOLOR(0, 0x99, 0);
-    [_confirmButton setTitle:@"确定" forState:UIControlStateNormal];
+    [_confirmButton setTitle:@"去支付" forState:UIControlStateNormal];
     [_confirmButton addTarget:self action:@selector(confirmButtonClicked:) forControlEvents:UIControlEventTouchDown];
     [_tabBar addSubview:_confirmButton];   
     [self.view addSubview:_tabBar];

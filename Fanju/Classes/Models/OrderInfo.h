@@ -16,6 +16,7 @@
 @property(nonatomic, copy) NSString *code;
 @property(nonatomic, copy) UserProfile* customer;
 @property (nonatomic, copy) NSDate *createdTime;
+@property(nonatomic) NSInteger status;
 
 +(OrderInfo*) orderInfoWithData:(NSDictionary*) data;
 

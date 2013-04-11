@@ -180,7 +180,7 @@
                                                     [ds addMeal:[MealTableItem itemWithMealInfo:[MealInfo mealInfoWithData:dict]]];
                                                 }  
                                                 self.dataSource = ds;
-                                                [self loadImagesForOnscreenRows];
+//                                                [self loadImagesForOnscreenRows];
                                                 if (isLoading) {
                                                     [self stopLoading];
                                                 }
@@ -404,6 +404,6 @@
 #pragma mark -
 #pragma mark Deferred image loading (UIScrollViewDelegate)
 -(void)scrollViewDidScroll:(UIScrollView *)scrollView{
-    [self loadImagesForOnscreenRows];
+//    [self loadImagesForOnscreenRows];
 }
 @end

@@ -28,9 +28,12 @@
 #import "NINetworkImageView.h"
 #import "MapViewController.h"
 #import "WidgetFactory.h"
+#import "OrderInfo.h"
+#import "OrderDetailsViewController.h"
 
 @implementation MealDetailViewController{
     MealDetailsViewDelegate* _mealDetailsViewDelegate;
+    OrderInfo* _myOrder;
 
 }
 
@@ -52,30 +55,83 @@
 }
 
 - (void)updateJoinButton {
-    UserProfile* currentUser = [[Authentication sharedInstance] currentUser];
-    NSString *userID = currentUser ? [NSString stringWithFormat:@"%d", currentUser.uID] : nil;
-    if (self.mealInfo.actualPersons >= self.mealInfo.maxPersons) {
-        [_joinButton setTitle:@"卖光了" forState:UIControlStateNormal];
-//        _joinButton.backgroundColor = RGBCOLOR(0xF2, 0x2A, 0x39);
-        [_joinButton removeTarget:self action:@selector(joinMeal:) forControlEvents:UIControlEventTouchDown];
-    } else if (userID && [self.mealInfo hasJoined:userID]) {
-        [_joinButton setTitle:@"已参加" forState:UIControlStateNormal];
-//        _joinButton.backgroundColor = RGBCOLOR(0xFF, 0xCC, 0);
-        [_joinButton removeTarget:self action:@selector(joinMeal:) forControlEvents:UIControlEventTouchDown];
-    } else {
-        [_joinButton setTitle:@"参加饭局" forState:UIControlStateNormal];
-//        _joinButton.backgroundColor = RGBCOLOR(0, 0x99, 0);
-        [_joinButton addTarget:self action:@selector(joinMeal:) forControlEvents:UIControlEventTouchDown];
-    }
+    [self requestOrderStatus];
+//    UserProfile* currentUser = [[Authentication sharedInstance] currentUser];
+//    NSString *userID = currentUser ? [NSString stringWithFormat:@"%d", currentUser.uID] : nil;
+//    if (self.mealInfo.actualPersons >= self.mealInfo.maxPersons) {
+//        [_joinButton setTitle:@"卖光了" forState:UIControlStateNormal];
+////        _joinButton.backgroundColor = RGBCOLOR(0xF2, 0x2A, 0x39);
+//        [_joinButton removeTarget:self action:@selector(joinMeal:) forControlEvents:UIControlEventTouchDown];
+//    } else if (userID && [self.mealInfo hasJoined:userID]) {
+//        [_joinButton setTitle:@"已参加" forState:UIControlStateNormal];
+////        _joinButton.backgroundColor = RGBCOLOR(0xFF, 0xCC, 0);
+//        [_joinButton removeTarget:self action:@selector(joinMeal:) forControlEvents:UIControlEventTouchDown];
+//    } else {
+//        [_joinButton setTitle:@"参加饭局" forState:UIControlStateNormal];
+////        _joinButton.backgroundColor = RGBCOLOR(0, 0x99, 0);
+//        [_joinButton addTarget:self action:@selector(joinMeal:) forControlEvents:UIControlEventTouchDown];
+//    }
 }
 
-- (void)initTabView {   
+-(void)requestOrderStatus{
+    UserProfile* currentUser = [[Authentication sharedInstance] currentUser];
+    [[NetworkHandler getHandler] requestFromURL:[NSString stringWithFormat:@"http://%@/api/v1/order/?&meal__id=%d&customer__id=%d&format=json", EOHOST, self.mealInfo.mID, currentUser.uID]
+                                         method:GET
+                                    cachePolicy:TTURLRequestCachePolicyDefault
+                                        success:^(id obj) {
+                                            NSArray *orders = [obj objectForKeyInObjects];
+                                            if (orders && [orders count] > 0){
+                                                NSDictionary* data = orders[0];
+                                                _myOrder = [OrderInfo orderInfoWithData:data];
+                                                if (_myOrder.status == 1) {
+                                                    if (self.mealInfo.actualPersons >= self.mealInfo.maxPersons) {
+                                                        [_joinButton setTitle:@"卖光了" forState:UIControlStateNormal];
+                                                        [_joinButton removeTarget:self action:@selector(joinMeal:) forControlEvents:UIControlEventTouchDown];
+                                                    } else {
+                                                        [_joinButton setTitle:@"去支付" forState:UIControlStateNormal];
+                                                        [_joinButton addTarget:self action:@selector(payForOrder:) forControlEvents:UIControlEventTouchDown];
+                                                    }
+                                                } else if(_myOrder.status > 1){
+                                                    [_joinButton setTitle:@"已支付，查看订单" forState:UIControlStateNormal];
+                                                    [_joinButton addTarget:self action:@selector(viewOrder:) forControlEvents:UIControlEventTouchDown];
+                                                } else {
+                                                    NSLog(@"illegal order status: %d", _myOrder.status);
+                                                }
+                                            } else {
+                                                if (self.mealInfo.actualPersons >= self.mealInfo.maxPersons) {
+                                                    [_joinButton setTitle:@"卖光了" forState:UIControlStateNormal];
+                                                    [_joinButton removeTarget:self action:@selector(joinMeal:) forControlEvents:UIControlEventTouchDown];
+                                                } else {
+                                                    [_joinButton setTitle:@"参加饭局" forState:UIControlStateNormal];
+                                                    [_joinButton addTarget:self action:@selector(joinMeal:) forControlEvents:UIControlEventTouchDown];
+                                                }
+                                            }
+                                            [UIView animateWithDuration:0.9 animations:^{
+                                                _tabBar.hidden = NO;
+                                            }];
+                                        } failure:^{
+                                            NSLog(@"failed to get order status for id %@", _mealID);
+                                        }];
+}
+
+-(void)payForOrder:(id)sender{
+    NSLog(@"Not implemented yet");    
+}
+
+-(void)viewOrder:(id)sender{
+    OrderDetailsViewController *orderVC = [[OrderDetailsViewController alloc] init];
+    orderVC.order = _myOrder;
+    [self.navigationController pushViewController:orderVC animated:YES];
+}
+
+- (void)initTabView {
+    UIImage* toolbarShadow = [UIImage imageNamed:@"toolbar_shadow"];
     _tabBar = [[UIView alloc] initWithFrame:CGRectMake(0, self.view.frame.size.height - TAB_BAR_HEIGHT, self.view.frame.size.width, TAB_BAR_HEIGHT)];
     _tabBar.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"toolbar_bg"]];
     UIImage* join_img = [UIImage imageNamed:@"toolbth1"];
     UIImage* join_img_push = [UIImage imageNamed:@"toolbth1_push"];
     CGFloat x = JOIN_BUTTON_X;
-    CGFloat y = (_tabBar.frame.size.height - join_img.size.height) / 2;
+    CGFloat y = (_tabBar.frame.size.height - join_img.size.height + toolbarShadow.size.height) / 2;
     _joinButton = [[UIButton alloc] initWithFrame:CGRectMake(JOIN_BUTTON_X, y, join_img.size.width, join_img.size.height)];
     [_joinButton setBackgroundImage:join_img forState:UIControlStateNormal];
     [_joinButton setBackgroundImage:join_img_push forState:UIControlStateSelected | UIControlStateHighlighted ];
@@ -83,6 +139,7 @@
     _joinButton.titleLabel.textColor = [UIColor whiteColor];
     _joinButton.titleLabel.font = [UIFont boldSystemFontOfSize:19];
 
+    _tabBar.hidden = YES;
     [self updateJoinButton];
     
     UIImage* comment_img = [UIImage imageNamed:@"toolbth2"];
@@ -95,7 +152,10 @@
     [_tabBar addSubview:_joinButton];
     [_tabBar addSubview:commentButton];
     [self.view addSubview:_tabBar];
-
+    
+    UIImageView* shadowView = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, toolbarShadow.size.width, toolbarShadow.size.height)];
+    shadowView.image = toolbarShadow;
+    [_tabBar addSubview:shadowView];
 }
 
 -(void)viewDidLoad
@@ -449,10 +509,10 @@
     
     UIImage* menu = [UIImage imageNamed:@"caishi_bth"];
     UIImage* menu_push = [UIImage imageNamed:@"caishi_bth_push"];
-    UIButton* menuBtn = [[UIButton alloc] initWithFrame:CGRectMake(260, 99, menu.size.width, menu.size.height)];
+    UIButton* menuBtn = [[UIButton alloc] initWithFrame:CGRectMake(265, 99, menu.size.width, menu.size.height)];
     [menuBtn setBackgroundImage:menu forState:UIControlStateNormal];
     [menuBtn setBackgroundImage:menu_push forState:UIControlStateSelected | UIControlStateHighlighted ];
-    [menuBtn setTitle:@"菜 式" forState:UIControlStateNormal];
+    [menuBtn setTitle:@"菜式" forState:UIControlStateNormal];
     menuBtn.titleLabel.textColor = RGBCOLOR(220, 220, 220);
     menuBtn.titleLabel.font = [UIFont systemFontOfSize:14];
     [menuBtn addTarget:self action:@selector(displayMenu:) forControlEvents:UIControlEventTouchUpInside];

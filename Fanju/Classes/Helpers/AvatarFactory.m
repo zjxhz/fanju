@@ -37,6 +37,20 @@
     
     return userImgView;
 }
+
++(UserImageView*)avatarWithBg:(UserProfile*)user{
+    UIImage* bg = [UIImage imageNamed:@"p_photo_bg"];
+    UserImageView* view = [[UserImageView alloc] initWithImage:bg];
+    CGFloat inset = 3;
+    CGRect avatarFrame = CGRectMake(inset, inset, bg.size.width - inset * 2, bg.size.height - inset * 2);
+    NINetworkImageView* avatar = [[NINetworkImageView alloc] initWithFrame:avatarFrame];
+    avatar.contentMode = UIViewContentModeScaleAspectFill;
+    [avatar setPathToNetworkImage:user.avatarFullUrl];
+    [view addSubview:avatar];
+    return  view;
+}
+
+
 +(UserImageView*) avatarForUser:(UserProfile*)user frame:(CGRect)frame{
     return [AvatarFactory avatarForUser:user frame:frame delegate:nil];
 }

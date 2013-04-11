@@ -8,6 +8,8 @@
 
 #import "MealListDataSource.h"
 #import "MealTableItemCell.h"
+#import "MealCell.h"
+
 @implementation MealListDataSource
 
 - (id)init{
@@ -25,7 +27,7 @@
 - (Class)tableView:(UITableView*)tableView cellClassForObject:(id) object {
     
 	if ([object isKindOfClass:[MealTableItem class]]) {  
-		return [MealTableItemCell class];  
+		return [MealCell class];
 	}
     
 	return [super tableView:tableView

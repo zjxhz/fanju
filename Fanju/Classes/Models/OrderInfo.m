@@ -24,6 +24,7 @@
         _code = [ModelHelper stringValueForKey:@"code" inDictionary:data];
         _customer = [UserProfile profileWithData:[data objectForKey:@"customer"]];
         _createdTime = [ModelHelper dateValueForKey:@"created_time" inDictionary:data];
+        _status = [[data objectForKey:@"status"] intValue];
     }
     
     return self;

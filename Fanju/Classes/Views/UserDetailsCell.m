@@ -35,7 +35,6 @@
         bgImgView.contentMode = UIViewContentModeScaleAspectFill;
         bgImgView.image = bg;
         [self.contentView addSubview:bgImgView];
-        NSLog(@"bg view: %@", NSStringFromCGRect(bgImgView.frame));
         
         UIImage* maskBg = [UIImage imageNamed:@"u_detail_mask"];
         _nextMealView = [[UIImageView alloc] initWithFrame:CGRectMake(0, 109, maskBg.size.width, maskBg.size.height)];
@@ -43,7 +42,7 @@
         _nextMealView.alpha = 0;
         [self.contentView addSubview:_nextMealView];
         
-        _nextMealLabel = [[UILabel alloc] initWithFrame:CGRectMake(76, 12, 0, 0)];
+        _nextMealLabel = [[UILabel alloc] initWithFrame:CGRectMake(84, 5, 0, 0)];
         _nextMealLabel.font = [UIFont systemFontOfSize:12];
         _nextMealLabel.textColor = RGBCOLOR(220, 220, 220);
         _nextMealLabel.backgroundColor = [UIColor clearColor];
@@ -52,7 +51,7 @@
         _nextMealLabel.text = @"下一个饭局：";
         [_nextMealLabel sizeToFit];
         
-        _nextMealText = [[UITextField alloc] initWithFrame:CGRectMake(_nextMealLabel.frame.size.width + _nextMealLabel.frame.origin.x, 9, 160, 18)];
+        _nextMealText = [[UITextField alloc] initWithFrame:CGRectMake(84, 19, 200, 18)];
         _nextMealText.userInteractionEnabled = NO;
         _nextMealText.font = [UIFont systemFontOfSize:15];
         _nextMealText.adjustsFontSizeToFitWidth = YES;
@@ -63,8 +62,14 @@
         _nextMealText.layer.shadowOffset = CGSizeMake(0, 2);
         _nextMealText.contentVerticalAlignment = UIControlContentVerticalAlignmentBottom;
         
+        UIImage* nextMealArrowImg = [UIImage imageNamed:@"next_meal_arrow"];
+        UIImageView* arrowView = [[UIImageView alloc] initWithFrame:CGRectMake(320 - nextMealArrowImg.size.width - 10, (_nextMealView.frame.size.height - nextMealArrowImg.size.height) /2 , nextMealArrowImg.size.width, nextMealArrowImg.size.height)];
+        arrowView.image = nextMealArrowImg;
+        
+        
         [_nextMealView addSubview:_nextMealLabel];
         [_nextMealView addSubview:_nextMealText];
+        [_nextMealView addSubview:arrowView];
         
         UIImage* avatarBgImg = [UIImage imageNamed:@"avatar_bg_big"];
         UIImageView* avatarView = [[UIImageView alloc] initWithFrame:CGRectMake(3, 106, avatarBgImg.size.width, avatarBgImg.size.height)];

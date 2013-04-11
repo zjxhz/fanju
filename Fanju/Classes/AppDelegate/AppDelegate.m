@@ -24,6 +24,9 @@
 #import "Const.h"
 #import "NewSidebarViewController.h"
 #import "RKLog.h"
+#import "AlixPay.h"
+#import "DataVerifier.h"
+
 @interface AppDelegate() 
 @end
 
@@ -70,7 +73,7 @@
     UIRemoteNotificationType allowedNotifications = UIRemoteNotificationTypeAlert |  UIRemoteNotificationTypeBadge | UIRemoteNotificationTypeSound;
     [[UIApplication sharedApplication] registerForRemoteNotificationTypes:allowedNotifications];
     
-//    [Crittercism enableWithAppID:@"50ac205641ae503e5c000004"];
+    [Crittercism enableWithAppID:@"50ac205641ae503e5c000004"];
     
     [self initSinaweibo];
     [[Authentication sharedInstance] relogin];
@@ -84,7 +87,7 @@
 }
 
 -(void)initSinaweibo{
-    self.sinaweibo = [[SinaWeibo alloc] initWithAppKey:WEIBO_APP_KEY appSecret:WEIBO_APP_SECRET appRedirectURI:WEIBO_APP_REDIRECT_URI andDelegate:nil];
+    self.sinaweibo = [[SinaWeibo alloc] initWithAppKey:WEIBO_APP_KEY appSecret:WEIBO_APP_SECRET appRedirectURI:WEIBO_APP_REDIRECT_URI ssoCallbackScheme:APP_SCHEME andDelegate:nil];
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     NSDictionary *sinaweiboInfo = [defaults objectForKey:@"SinaWeiboAuthData"];
     if ([sinaweiboInfo objectForKey:@"AccessTokenKey"] && [sinaweiboInfo objectForKey:@"ExpirationDateKey"] && [sinaweiboInfo objectForKey:@"UserIDKey"])
@@ -101,8 +104,51 @@
 }
 
 - (BOOL)application:(UIApplication*)application handleOpenURL:(NSURL*)url {
-//    [[TTNavigator navigator] openURLAction:[TTURLAction actionWithURLPath:url.absoluteString]];
+    if ([[url host] isEqualToString:@"safepay"]) {
+        [self parseAlixPayUrl:url application:application];
+        return YES;
+    }
     return [self.sinaweibo handleOpenURL:url];
+}
+
+- (void)parseAlixPayUrl:(NSURL *)url application:(UIApplication *)application {
+	AlixPay *alixpay = [AlixPay shared];
+	AlixPayResult *result = [alixpay handleOpenURL:url];
+	if (result) {
+		//是否支付成功
+		if (9000 == result.statusCode) {
+			/*
+			 *用公钥验证签名
+			 */
+			id<DataVerifier> verifier = CreateRSADataVerifier([[NSBundle mainBundle] objectForInfoDictionaryKey:@"RSA public key"]);
+			if ([verifier verifyString:result.resultString withSign:result.signString]) {
+				UIAlertView * alertView = [[UIAlertView alloc] initWithTitle:@"提示"
+																	 message:result.statusMessage
+																	delegate:nil
+														   cancelButtonTitle:@"确定"
+														   otherButtonTitles:nil];
+				[alertView show];
+			}//验签错误
+			else {
+				UIAlertView * alertView = [[UIAlertView alloc] initWithTitle:@"提示"
+																	 message:@"签名错误"
+																	delegate:nil
+														   cancelButtonTitle:@"确定"
+														   otherButtonTitles:nil];
+				[alertView show];
+			}
+		}
+		//如果支付失败,可以通过result.statusCode查询错误码
+		else {
+			UIAlertView * alertView = [[UIAlertView alloc] initWithTitle:@"提示"
+																 message:result.statusMessage
+																delegate:nil
+													   cancelButtonTitle:@"确定"
+													   otherButtonTitles:nil];
+			[alertView show];
+		}
+		
+	}
 }
 
 - (BOOL)application:(UIApplication *)application openURL:(NSURL *)url sourceApplication:(NSString *)sourceApplication annotation:(id)annotation

@@ -40,6 +40,7 @@
         _notifications = [NSMutableArray array];
         self.navigationItem.titleView = [[WidgetFactory sharedFactory] titleViewWithTitle:@"通知"];
         self.view.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"bg"]];
+        self.tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
     }
     return self;
 }
@@ -260,6 +261,7 @@
 //        }
 //    }
     cell.selectionStyle = UITableViewCellSelectionStyleNone;
+    
     return cell;
 }
 

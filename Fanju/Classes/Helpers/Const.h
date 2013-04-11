@@ -16,7 +16,7 @@
 #define EOHOST @"www.fanjoin.com"
 //#define EOHOST @"localhost:8000"
 #define HTTPS @"http" // use http for https in development
-
+#define APP_SCHEME @"Fanju"
 #define WEIBO_APP_KEY @"4071331500"
 #define WEIBO_APP_SECRET @"5cf4910b217617cee72b2889a8e394eb"
 #define WEIBO_APP_REDIRECT_URI @"http://www.fanjoin.com/login/weibo/"

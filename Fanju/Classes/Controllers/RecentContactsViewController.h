@@ -8,7 +8,7 @@
 
 #import <Three20UI/Three20UI.h>
 #import "UserProfile.h"
-#import "ChatViewController.h"
-@interface RecentContactsViewController : TTTableViewController<UITableViewDelegate, ChatViewControllerDelegate>
+
+@interface RecentContactsViewController : TTTableViewController<UITableViewDelegate>
 @property(nonatomic, strong) UserProfile *profile;
 @end

@@ -37,12 +37,12 @@
 -(void)setup;
 -(void)tearDown;
 +(XMPPHandler*)sharedInstance;
--(void)sendMessage:(EOMessage*)message;
 -(void)updateUnreadCount;
 -(void)deleteRecentContact:(NSString*)jid;
 -(void)markMessagesReadFrom:(NSString*)contactJID;
 -(void)saveMessage:(NSString*)sender receiver:(NSString*)receiver message:(NSString*)message time:(NSDate*)time hasRead:(BOOL)read;
 -(void)retrieveMessagesWith:(NSString*)with after:(NSTimeInterval)interval retrievingFromList:(BOOL)retrievingFromList;
+-(BOOL)addUserToRosterIfNeeded:(XMPPJID*)jID;
 @end
 
 extern NSString* const EOMessageDidSaveNotification;

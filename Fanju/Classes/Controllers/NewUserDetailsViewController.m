@@ -49,6 +49,7 @@
     MBProgressHUD* _hud;
     UserTagsCell* _tagCell;
     UIToolbar* _toolbar;
+    UIImageView* _shadowView;
     
 }
 @property(nonatomic, strong) UserDetailsCell* userDetailsCell;
@@ -86,7 +87,7 @@
 }
 
 -(void)requestUserDetails{
-    [[NetworkHandler getHandler] requestFromURL:[NSString stringWithFormat:@"http://%@/api/v1/user/%@/?format=json&limit=0", EOHOST, _userID]
+    [[NetworkHandler getHandler] requestFromURL:[NSString stringWithFormat:@"http://%@/api/v1/user/%@/?format=json", EOHOST, _userID]
                                          method:GET
                                     cachePolicy:TTURLRequestCachePolicyDefault
                                         success:^(id obj) {
@@ -104,25 +105,32 @@
     UIImage* toolbarBg = [UIImage imageNamed:@"toolbar_bg"] ;
     [self updateFollowOrNotButton];
     //    [self loadComments];
-    [self.view sendSubviewToBack:self.tableView];
+//    [self.view sendSubviewToBack:self.tableView];
     [self updateNavigationBar];
     self.toolbarItems  = [self createToolbarItems];
     [self.navigationController setToolbarHidden:NO];
     [self.navigationController.toolbar setBackgroundImage:toolbarBg forToolbarPosition:UIToolbarPositionAny barMetrics:UIBarMetricsDefault];
+    
+    UIImage* toolbarShadow = [UIImage imageNamed:@"toolbar_shadow"];
+    _shadowView = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, toolbarShadow.size.width, toolbarShadow.size.height)];
+    _shadowView.image = toolbarShadow;
+    [self.navigationController.toolbar addSubview:_shadowView];
 }
 
 -(void)viewWillDisappear:(BOOL)animated{
     [super viewDidDisappear:animated];
     [self.navigationController setToolbarHidden:YES];
+    [_shadowView removeFromSuperview];
 }
 -(void)viewDidAppear:(BOOL)animated{
     [super viewDidAppear:animated];
-    [self reload:YES];
+//    [self reload:YES];
     [self sendVisited];
 }
 
 -(void)setUser:(UserProfile *)user{
     _user = user;
+//    self.title = _user.name;
     self.navigationItem.titleView = [[WidgetFactory sharedFactory] titleViewWithTitle:_user.name];
     [self loadComments];
     [self.tableView reloadData];

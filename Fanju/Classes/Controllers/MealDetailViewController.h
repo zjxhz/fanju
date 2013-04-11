@@ -23,7 +23,7 @@
 #import "MealDetailsViewDelegate.h"
 
 #define MAP_HEIGHT 175
-#define TAB_BAR_HEIGHT 44
+#define TAB_BAR_HEIGHT 49
 #define HOST_VIEW_HEIGHT 58
 #define DISH_VIEW_HEIGHT 140
 #define DISH_VIEW_WIDTH 320

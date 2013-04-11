@@ -8,8 +8,21 @@
 	<string>${PRODUCT_NAME}</string>
 	<key>CFBundleExecutable</key>
 	<string>${EXECUTABLE_NAME}</string>
+	<key>CFBundleIcons</key>
+	<dict>
+		<key>CFBundlePrimaryIcon</key>
+		<dict>
+			<key>CFBundleIconFiles</key>
+			<array>
+				<string>Icon.png</string>
+				<string>Icon@2x.png</string>
+			</array>
+			<key>UIPrerenderedIcon</key>
+			<true/>
+		</dict>
+	</dict>
 	<key>CFBundleIdentifier</key>
-	<string>com.fanjoin.${PRODUCT_NAME:rfc1034identifier}</string>
+	<string>com.fanjoin.Fanju</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
@@ -25,7 +38,7 @@
 		<dict>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>sinaweibosso.4071331500</string>
+				<string>Fanju</string>
 			</array>
 		</dict>
 	</array>
@@ -33,15 +46,25 @@
 	<string>1.0</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>UIPrerenderedIcon</key>
+	<true/>
 	<key>UIRequiredDeviceCapabilities</key>
 	<array>
 		<string>armv7</string>
 	</array>
-	<key>UIViewEdgeAntialiasing</key>
-	<true/>
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
 	</array>
+	<key>UIViewEdgeAntialiasing</key>
+	<true/>
+	<key>AlixPartner</key>
+	<string>2088901270565065</string>
+	<key>AlixSeller</key>
+	<string>2088901270565065</string>
+	<key>AlixRSAPrivateKey</key>
+	<string>MIICdwIBADANBgkqhkiG9w0BAQEFAASCAmEwggJdAgEAAoGBAOMvXk4RsphUMr6Mk2nEvd6MvEMhydR63ZSn1n0c4cxM5wXhqwAPVr/oizspptWg4SvjJwwCfYrhLLo41W0kX/eWrhr7KpABWlxJ68Vdvem6Ih4ekBoyEx4snlgxLFWgZO3PdBAQtqjanYzfQ2UcrjaOUar0tDzjgh9QRsvrxguRAgMBAAECgYBH6bGXUsDOuTBK4uKyw0U60h+xvFtP+Ah1yt75QZA0BE/Iq9NeNHzISIryElAuJTvBkajFg3BL6tUmqWDdqHr7orTthCVaFE5K295GgjksytQZDXT+eD4V7l6e5bq0MCSRpUPz3O6gHvh0me3wJQc0e6Y+VMZpH7RXSsK+XWMnVQJBAPRtfpMfmsKuPCD/NEu9A0/dM5hC2hTsS/vusKeHPnSU9+1U3TQMfMR+ixj1kCpvJRkvuX5dF+aKotNY9PbrT8MCQQDt8OPFBDR+QekSF8P3zxT8yYbVJ+WuWnaR68xCFpkK51kW1RTD7b9GQOxlfM9+BVigQMgr237l+JKAe43swLYbAkEAiEH5y55Usa5birF5v7bwf7b6KikqVXucqCbZh6qXIHpi84TZg0hqzUcV16Yc5errrWyzZUQULMqgFl2CwZtP7QJBAMIJI3VSzIv5q9t5TfIUCYVrwmypMIBSfUbaB6QNUZi2uMwJz/lHNChSYXURpxOZwIBO0+4P/RgE8VOdbkuXi+kCQFA4c0L+qG3znCq5/1gQFTtdOzjnQCFL1Se3pI4QgzkaNrdSEyCqLLxv4f0GtG2OU2xL+3GGEISRKbxRtgVILIo=</string>
+	<key>AlixRSAPublicKey</key>
+	<string>MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDjL15OEbKYVDK+jJNpxL3ejLxDIcnUet2Up9Z9HOHMTOcF4asAD1a/6Is7KabVoOEr4ycMAn2K4Sy6ONVtJF/3lq4a+yqQAVpcSevFXb3puiIeHpAaMhMeLJ5YMSxVoGTtz3QQELao2p2M30NlHK42jlGq9LQ844IfUEbL68YLkQIDAQAB</string>
 </dict>
 </plist>

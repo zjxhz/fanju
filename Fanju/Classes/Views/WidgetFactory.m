@@ -44,7 +44,6 @@
     titleLabel.textColor = RGBCOLOR(220, 220, 220);
     titleLabel.layer.shadowColor = RGBACOLOR(0, 0, 0, 0.4).CGColor;
     titleLabel.layer.shadowOffset = CGSizeMake(0, -2);
-    titleLabel.frame = CGRectMake(0, 0, 200, 44);
     [titleLabel sizeToFit];
     return  titleLabel;
 }

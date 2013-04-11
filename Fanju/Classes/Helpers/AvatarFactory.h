@@ -22,4 +22,5 @@ AvatarSize;
 +(UserImageView*) avatarForUser:(UserProfile*)user frame:(CGRect)frame delegate:(id<UserImageViewDelegate>)delegate;
 +(UserImageView*) avatarForUser:(UserProfile*)user frame:(CGRect)frame;
 +(UserImageView*) defaultAvatarWithFrame:(CGRect)frame;
++(UserImageView*)avatarWithBg:(UserProfile*)user;
 @end

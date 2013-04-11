@@ -11,6 +11,8 @@ pod 'CrittercismSDK', '~> 3.4.9'
 pod 'WEPopover', '~> 0.0.1'
 pod 'TDBadgedCell', '~> 2.1'
 pod 'AKSegmentedControl'
+pod 'ODRefreshControl', '~> 1.1.0'
+pod 'SBJson', '~> 3.2'
 
 
 # Testing and Search are optional components

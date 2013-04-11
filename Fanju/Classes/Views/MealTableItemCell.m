@@ -99,7 +99,7 @@
     [textColor set];
     NSString* costAndNumOfParticipants = [NSString stringWithFormat:NSLocalizedString(@"AverageCost", nil),
                                           meal.price, (meal.maxPersons-meal.actualPersons)];
-    [costAndNumOfParticipants drawAtPoint:CGPointMake(41 + offset, 13) withFont:[UIFont systemFontOfSize:12]];
+    [costAndNumOfParticipants drawAtPoint:CGPointMake(40 + offset, 13) withFont:[UIFont systemFontOfSize:12]];
     
     //participants BG
     UIColor* participantsFrameBgColor = RGBACOLOR(0, 0, 0, 0.5);

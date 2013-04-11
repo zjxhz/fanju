@@ -235,6 +235,10 @@ NSString * const EOUnreadNotificationCount = @"EOUnreadNotificationCount";
 
 - (void)xmppStream:(XMPPStream *)sender didSendMessage:(XMPPMessage *)message{
     NSLog(@"XMPP Message sent: %@", message);
+    if ([message isMessageWithBody]) {
+        NSString* strMessage = [[message elementForName:@"body"] stringValue];
+        [self saveMessage:message.fromStr receiver:message.toStr message:strMessage time:[NSDate date] hasRead:NO];
+    }
 }
 
 - (void)xmppStream:(XMPPStream *)sender didReceiveError:(NSXMLElement *)error{
@@ -373,33 +377,7 @@ NSString * const EOUnreadNotificationCount = @"EOUnreadNotificationCount";
     }
 }
 
--(void)sendMessage:(EOMessage*)message{
-    [self addReceiverBeforeSendingIfNeeded:[XMPPJID jidWithString:message.receiver] ];
-    NSLog(@"sending message: %@", message);
-    NSString* messageStr =message.message;
-    NSXMLElement *body = [NSXMLElement elementWithName:@"body"];
-    [body setStringValue:messageStr];
-    NSXMLElement *messageElement = [NSXMLElement elementWithName:@"message"];
-    [messageElement addAttributeWithName:@"to" stringValue:message.receiver];
-    [messageElement addAttributeWithName:@"type" stringValue:@"chat"];
-    [messageElement addChild:body];
-    [_xmppStream sendElement:messageElement];
-}
-
 -(void)addReceiverBeforeSendingIfNeeded:(XMPPJID*)jID{
-    XMPPUserCoreDataStorageObject *user = [_xmppRosterStorage userForJID:jID
-                                                             xmppStream:_xmppStream
-                                                   managedObjectContext:_rosterManagedObjectContext];
-    if (!user) {
-        
-        XMPPvCardTemp* vCard = [_xmppvCardTempModule fetchvCardTempForJID:jID];
-        [_xmppRoster addUser:jID withNickname:vCard.nickname];
-        NSLog(@"got a message with no roster item, adding sender %@ with nickname: %@", jID, vCard.nickname);
-    }
-}
-
--(BOOL)addSenderIfNeeded:(XMPPMessage*)message{
-    XMPPJID* jID = message.from;
     XMPPUserCoreDataStorageObject *user = [_xmppRosterStorage userForJID:jID
                                                               xmppStream:_xmppStream
                                                     managedObjectContext:_rosterManagedObjectContext];
@@ -408,7 +386,26 @@ NSString * const EOUnreadNotificationCount = @"EOUnreadNotificationCount";
         XMPPvCardTemp* vCard = [_xmppvCardTempModule fetchvCardTempForJID:jID];
         [_xmppRoster addUser:jID withNickname:vCard.nickname];
         NSLog(@"got a message with no roster item, adding sender %@ with nickname: %@", jID, vCard.nickname);
+    }
+}
+
+
+-(BOOL)addSenderIfNeeded:(XMPPMessage*)message{
+    BOOL added = [self addUserToRosterIfNeeded:message.from];
+    if (added) {
         [_cachedMessages addObject:message];
+    }
+    return added;
+}
+
+-(BOOL)addUserToRosterIfNeeded:(XMPPJID*) jID{
+    XMPPUserCoreDataStorageObject *user = [_xmppRosterStorage userForJID:jID
+                                                              xmppStream:_xmppStream
+                                                    managedObjectContext:_rosterManagedObjectContext];
+    if (!user) {
+        XMPPvCardTemp* vCard = [_xmppvCardTempModule fetchvCardTempForJID:jID];
+        [_xmppRoster addUser:jID withNickname:vCard.nickname];
+        NSLog(@"got a message with no roster item, adding sender %@ with nickname: %@", jID, vCard.nickname);
         return YES;
     } else {
         return NO;
@@ -520,7 +517,7 @@ NSString * const EOUnreadNotificationCount = @"EOUnreadNotificationCount";
             RecentContact* contact = [_recentContactsDict objectForKey:with];
             if (contact){
                 NSTimeInterval delta = [messageDate timeIntervalSinceDate:contact.time];
-                if ((delta == 0 && [strMessage isEqual:contact.message]) || delta < 0) {
+                if ((delta < 5 && [strMessage isEqual:contact.message]) || delta < 0) {
                     NSLog(@"ignoring message(%@ - at:%@) that is either too old or has same time(%@) and same content with the latest one", strMessage, messageDate, contact.time);
                     continue;
                 }

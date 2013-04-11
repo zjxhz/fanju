@@ -15,7 +15,8 @@
 #import "UIView+CocoaPlant.h"
 #import "NewUserDetailsViewController.h"
 #import "NSDictionary+ParseHelper.h"
-
+#import "ODRefreshControl.h"
+#import "SVProgressHUD.h"
 #define kChatBarHeight1                      40
 #define kChatBarHeight4                      94
 #define TEXT_VIEW_X                          7   // 40  (with CameraButton)
@@ -23,7 +24,7 @@
 #define TEXT_VIEW_WIDTH                      249 // 216 (with CameraButton)
 #define TEXT_VIEW_HEIGHT_MIN                 90
 #define MessageFontSize                      16
-
+#define FETCH_LIMIT 20
 #define UIKeyboardNotificationsObserve() \
 NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter]; \
 [notificationCenter addObserver:self selector:@selector(keyboardWillShow:) name:UIKeyboardWillShowNotification object:nil]; \
@@ -42,6 +43,10 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
     NSMutableArray *_bubbleData;
     CGFloat _keyboardHeight;
     UserProfile* _profile;
+    XMPPUserCoreDataStorageObject *_contactXMPPUser;
+    ODRefreshControl* _refreshControl;
+    NSFetchRequest *_fetchRequest;
+    NSInteger _fetchOffset;
 }
 
 @end
@@ -66,12 +71,13 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
     self.title = @"聊天";
     self.view.backgroundColor = [UIColor whiteColor];
     _bubbleTable = [[UIBubbleTableView alloc] initWithFrame:CGRectZero style:UITableViewStylePlain];
-    
     [self.view addSubview:_bubbleTable];
     _bubbleTable.bubbleDataSource = self;
     _bubbleTable.showAvatars = YES;
     _bubbleTable.avatarDelegate = self;
     [_bubbleTable reloadData];
+    _refreshControl = [[ODRefreshControl alloc] initInScrollView:_bubbleTable];
+    [_refreshControl addTarget:self action:@selector(loadEarlierMessages:) forControlEvents:UIControlEventValueChanged];
 }
 
 
@@ -167,6 +173,13 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
     [self scrollToBottomAnimated:NO];
 }
 
+-(void)viewDidAppear:(BOOL)animated{
+    [super viewDidAppear:animated];
+    if ([_textView isFirstResponder]) {
+        [_textView resignFirstResponder];
+    }
+}
+
 - (void)viewWillDisappear:(BOOL)animated {
     [super viewWillAppear:animated];
     UIKeyboardNotificationsUnobserve(); // as soon as possible
@@ -181,23 +194,48 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
 
 -(void) requestMessages{
     NSManagedObjectContext* context = [XMPPHandler sharedInstance].messageManagedObjectContext;
-    NSFetchRequest *req = [[NSFetchRequest alloc] init];
-    req.entity = [NSEntityDescription entityForName:@"EOMessage" inManagedObjectContext:context];
+    _fetchRequest = [[NSFetchRequest alloc] init];
+    _fetchRequest.entity = [NSEntityDescription entityForName:@"EOMessage" inManagedObjectContext:context];
     
     UserProfile* me = [Authentication sharedInstance].currentUser;
-    req.predicate = [NSPredicate predicateWithFormat:@"(type == 'chat') AND \
+    _fetchRequest.predicate = [NSPredicate predicateWithFormat:@"(type == 'chat') AND \
                      ( (receiver BEGINSWITH %@ AND sender BEGINSWITH %@) \
                         OR (receiver BEGINSWITH %@ AND sender BEGINSWITH %@) )", _contactJIDStr, me.jabberID, me.jabberID, _contactJIDStr];
+    _fetchRequest.sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"time" ascending:NO]];
+    _fetchRequest.fetchLimit = FETCH_LIMIT;
+    _fetchOffset = FETCH_LIMIT;
     NSError* error;
-    NSArray* objects = [context executeFetchRequest:req error:&error];
-    for (EOMessage *message in objects) {
-        [_bubbleData addObject:[self bubbleFromMessage:message]];
-    }
-    [_bubbleTable reloadData];
+    NSArray* objects = [context executeFetchRequest:_fetchRequest error:&error];
+    [self insertMessageBubbles:objects];
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(messageDidSave:)
                                                  name:EOMessageDidSaveNotification
                                                object:nil];
+    
+}
+
+-(void)loadEarlierMessages:(id)sender{
+    NSManagedObjectContext* context = [XMPPHandler sharedInstance].messageManagedObjectContext;
+    _fetchRequest.fetchOffset = _fetchOffset;
+    _fetchRequest.fetchLimit = FETCH_LIMIT;
+    NSArray* objects = [context executeFetchRequest:_fetchRequest error:nil];
+    [self insertMessageBubbles:objects];
+    _fetchOffset += objects.count;
+    [_refreshControl endRefreshing];
+    if (objects.count == 0) {
+        [SVProgressHUD dismissWithSuccess:@"已无更早消息"];
+    } else {
+        
+//        _bubbleTable scrollToRowAtIndexPath:<#(NSIndexPath *)#> atScrollPosition:<#(UITableViewScrollPosition)#> animated:<#(BOOL)#>
+    }
+}
+
+
+-(void)insertMessageBubbles:(NSArray*)messages{
+    for (EOMessage *message in messages) {
+        [_bubbleData insertObject:[self bubbleFromMessage:message] atIndex:0];
+    }
+    [_bubbleTable reloadData];
 }
 
 -(NSBubbleData*)bubbleFromMessage:(EOMessage*)message{
@@ -205,25 +243,23 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
     NSBubbleData *bubble = [NSBubbleData dataWithText:message.message date:message.time type:bubbleType];
     XMPPJID* contactJID = [XMPPJID jidWithString:message.sender];
     XMPPHandler* xmppHandler =[XMPPHandler sharedInstance];
-    XMPPUserCoreDataStorageObject *user = nil;
-    if (bubbleType  == BubbleTypeMine) {
-         user = [xmppHandler.xmppRosterStorage myUserForXMPPStream:xmppHandler.xmppStream managedObjectContext:xmppHandler.rosterManagedObjectContext];
-    } else {
-         user = [xmppHandler.xmppRosterStorage userForJID:contactJID
-                                               xmppStream:xmppHandler.xmppStream
-                                     managedObjectContext:xmppHandler.rosterManagedObjectContext];
-    }
-    if (user.photo) {
-        bubble.avatar = user.photo;
-    } else {
-        NSData *photoData = [xmppHandler.xmppvCardAvatarModule photoDataForJID:user.jid];
-        if (photoData){
-            bubble.avatar =  [UIImage imageWithData:photoData];
+    if (bubbleType  == BubbleTypeSomeoneElse) {
+        if (!_contactXMPPUser) {
+            _contactXMPPUser =[xmppHandler.xmppRosterStorage userForJID:contactJID
+                                                                xmppStream:xmppHandler.xmppStream
+                                                      managedObjectContext:xmppHandler.rosterManagedObjectContext];
+        }
+        if (_contactXMPPUser.photo) {
+            bubble.avatar = _contactXMPPUser.photo;
         } else {
-            [xmppHandler.xmppvCardTempModule fetchvCardTempForJID:contactJID useCache:NO];
+            NSData *photoData = [xmppHandler.xmppvCardAvatarModule photoDataForJID:_contactXMPPUser.jid];
+            if (photoData){
+                bubble.avatar =  [UIImage imageWithData:photoData];
+            } else {
+                [xmppHandler.xmppvCardTempModule fetchvCardTempForJID:contactJID useCache:NO];
+            }
         }
     }
-    //TODO maybe we could cache the user somewhere, so no need to query all the time
     return bubble;
 }
 
@@ -238,8 +274,22 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
     NSString* message = _textView.text;
     _textView.text = nil;
     [self textViewDidChange:_textView];
-    [[XMPPHandler sharedInstance] saveMessage:[Authentication sharedInstance].currentUser.jabberID receiver:_contactJIDStr message:message time:[NSDate date] hasRead:NO];
-    //message will be sent after it's saved, check messageDidSave:
+    [self sendMessage:message To:_contactJIDStr];
+}
+
+-(void)sendMessage:(NSString*)message To:(NSString*)to{
+    [[XMPPHandler sharedInstance] addUserToRosterIfNeeded:[XMPPJID jidWithString:to] ];
+    NSLog(@"sending message: %@", message);
+    NSString* messageStr = message;
+    NSXMLElement *body = [NSXMLElement elementWithName:@"body"];
+    [body setStringValue:messageStr];
+    NSXMLElement *messageElement = [NSXMLElement elementWithName:@"message"];
+    UserProfile* me = [Authentication sharedInstance].currentUser;
+    [messageElement addAttributeWithName:@"from" stringValue:me.jabberID];
+    [messageElement addAttributeWithName:@"to" stringValue:to];
+    [messageElement addAttributeWithName:@"type" stringValue:@"chat"];
+    [messageElement addChild:body];
+    [[XMPPHandler sharedInstance].xmppStream sendElement:messageElement];
 }
 
 -(void)layoutUI{
@@ -361,16 +411,12 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
         return; //not for this conversation
     }
 
-    if ([messageMO.sender isEqualToString:me.jabberID]) {
-        [[XMPPHandler sharedInstance] sendMessage:messageMO];
-    }
     _bubbleTable.typingBubble = NSBubbleTypingTypeNobody;
     NSBubbleData *bubble = [self bubbleFromMessage:messageMO];
     [_bubbleData addObject:bubble];
     [_bubbleTable reloadData];
     [self layoutUI];
-    [self scrollToBottomAnimated:NO];
-
+    [self scrollToBottomAnimated:YES];
 }
 
 #pragma mark - UIBubbleTableViewDataSource implementation
@@ -409,4 +455,6 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
 
     [self.navigationController pushViewController:newDeail animated:YES];
 }
+
+
 @end

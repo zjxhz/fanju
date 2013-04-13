@@ -426,7 +426,7 @@
         [menuButton setTitle:@"读取中" forState:UIControlStateNormal];
         menuButton.userInteractionEnabled = NO;
     } else {
-        [menuButton setTitle:@"菜 式" forState:UIControlStateNormal];
+        [menuButton setTitle:@"菜式" forState:UIControlStateNormal];
         menuButton.userInteractionEnabled = YES;
     }
 //    [menuButton sizeToFit];
@@ -514,7 +514,7 @@
     [menuBtn setBackgroundImage:menu_push forState:UIControlStateSelected | UIControlStateHighlighted ];
     [menuBtn setTitle:@"菜式" forState:UIControlStateNormal];
     menuBtn.titleLabel.textColor = RGBCOLOR(220, 220, 220);
-    menuBtn.titleLabel.font = [UIFont systemFontOfSize:14];
+    menuBtn.titleLabel.font = [UIFont systemFontOfSize:12];
     [menuBtn addTarget:self action:@selector(displayMenu:) forControlEvents:UIControlEventTouchUpInside];
     
     [hostView addSubview:imgView];

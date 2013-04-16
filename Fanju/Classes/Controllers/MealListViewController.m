@@ -74,9 +74,9 @@
     view.backgroundColor = [UIColor colorWithRed:0 green:0 blue:0 alpha:0.5];
     UIImage* clockImage = [UIImage imageNamed:@"title_time"];
     UIImageView *clockImageView = [[UIImageView alloc] initWithImage:clockImage];
-    clockImageView.frame = CGRectMake(9, 3, clockImage.size.width, clockImage.size.height);
+    clockImageView.frame = CGRectMake(9, 5, clockImage.size.width, clockImage.size.height);
     CGFloat x = clockImageView.frame.origin.x + clockImageView.frame.size.width + 6;
-    UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(x, 3, 120, 20)];
+    UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(x, 0, 120, 23)];
     label.text = NSLocalizedString(text, nil);
     label.textColor = RGBCOLOR(245, 245, 245);
     label.font = [UIFont systemFontOfSize:14];

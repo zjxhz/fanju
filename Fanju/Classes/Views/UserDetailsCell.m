@@ -42,7 +42,7 @@
         _nextMealView.alpha = 0;
         [self.contentView addSubview:_nextMealView];
         
-        _nextMealLabel = [[UILabel alloc] initWithFrame:CGRectMake(84, 5, 0, 0)];
+        _nextMealLabel = [[UILabel alloc] initWithFrame:CGRectMake(74, 2, 0, 0)];
         _nextMealLabel.font = [UIFont systemFontOfSize:12];
         _nextMealLabel.textColor = RGBCOLOR(220, 220, 220);
         _nextMealLabel.backgroundColor = [UIColor clearColor];
@@ -51,7 +51,7 @@
         _nextMealLabel.text = @"下一个饭局：";
         [_nextMealLabel sizeToFit];
         
-        _nextMealText = [[UITextField alloc] initWithFrame:CGRectMake(84, 19, 200, 18)];
+        _nextMealText = [[UITextField alloc] initWithFrame:CGRectMake(88, 18, 200, 18)];
         _nextMealText.userInteractionEnabled = NO;
         _nextMealText.font = [UIFont systemFontOfSize:15];
         _nextMealText.adjustsFontSizeToFitWidth = YES;

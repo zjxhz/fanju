@@ -64,7 +64,6 @@
         self.tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
         self.tableView.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"bg"]];
         _sections = @[@"", @"兴趣爱好（%d）", @"照片", @"资料", @"社交网络", @"饭友的评论"];
-        self.navigationItem.leftBarButtonItem = [[WidgetFactory sharedFactory] backButtonWithTarget:self.navigationController action:@selector(popViewControllerAnimated:)];
         self.tableView.showsVerticalScrollIndicator = NO;
     }
     return self;
@@ -124,16 +123,20 @@
 }
 -(void)viewDidAppear:(BOOL)animated{
     [super viewDidAppear:animated];
-//    [self reload:YES];
     [self sendVisited];
 }
 
 -(void)setUser:(UserProfile *)user{
     _user = user;
-//    self.title = _user.name;
-    self.navigationItem.titleView = [[WidgetFactory sharedFactory] titleViewWithTitle:_user.name];
+    //hack: delayed title update after by 0.5s, or the title will appear on the left before it goes to the center if this controller is pushed from the notification view, weird.
+    [NSTimer scheduledTimerWithTimeInterval:0.4 target:self selector:@selector(updateTitle) userInfo:nil repeats:NO];
+
     [self loadComments];
     [self.tableView reloadData];
+}
+
+-(void)updateTitle{
+    self.navigationItem.titleView = [[WidgetFactory sharedFactory] titleViewWithTitle:_user.name];
 }
 
 -(void)viewDidUnload{
@@ -605,15 +608,16 @@
 //          NSStringFromCGSize(resizedImage.size) );
     _hud = [MBProgressHUD showHUDAddedTo:picker.view animated:YES];
 	_hud.mode = MBProgressHUDModeAnnularDeterminate;
+    NSString* filename  = [NSString stringWithFormat:@"%d_%@_%.0f.jpg", _user.uID, _operation == ChangeAvatar ? @"a" : @"p", [[NSDate date] timeIntervalSince1970] * 1000 ];
     if (_operation == ChangeAvatar) {
-        [self doChangeAvatar:originalImage];
+        [self doChangeAvatar:originalImage withName:filename];
     } else {
-        [self doAddPhoto:originalImage];
+        [self doAddPhoto:originalImage withName:filename];
     }
 }
 
--(void)doAddPhoto:(UIImage*) resizedImage{
-    [[NetworkHandler getHandler] uploadImage:resizedImage toURL:[NSString stringWithFormat:@"user/%d/photos/", _user.uID] success:^(id obj){
+-(void)doAddPhoto:(UIImage*) resizedImage withName:(NSString*)filename{
+    [[NetworkHandler getHandler] uploadImage:resizedImage withName:filename toURL:[NSString stringWithFormat:@"user/%d/photos/", _user.uID] success:^(id obj){
         NSDictionary* result = obj;
         if ([[result objectForKey:@"status"] isEqualToString:@"OK"]) {
             UserPhoto* photo = [UserPhoto photoWithData:result];
@@ -638,18 +642,22 @@
     }];
 }
 
--(void)doChangeAvatar:(UIImage*) resizedImage{
-    [[NetworkHandler getHandler] uploadImage:resizedImage toURL:[NSString stringWithFormat:@"user/%d/avatar/", _user.uID]
+-(void)doChangeAvatar:(UIImage*)resizedImage withName:(NSString*)filename{
+    [[NetworkHandler getHandler] uploadImage:resizedImage withName:filename toURL:[NSString stringWithFormat:@"user/%d/avatar/", _user.uID]
                                      success:^(id obj) {
                                          NSLog(@"avatar updated");
+//                                         [_userDetailsCell.avatar.imageMemoryCache removeAllObjectsWithPrefix:[_user avatarFullUrl]]; //invalidate the previous image as it might have been changed(url is still same)
                                          _user.avatarURL  = [obj objectForKey:@"avatar"];
                                          _user.smallAvatarURL = [obj objectForKey:@"small_avatar"];
                                          _userDetailsCell.avatar.image = resizedImage;
+                                         
                                          [_userDetailsCell.avatar setPathToNetworkImage:[_user avatarFullUrl]];
                                          [self.tableView reloadData];
                                          [[Authentication sharedInstance] relogin];
                                          [_hud hide:YES];
                                          [self dismissModalViewControllerAnimated:YES];
+                                         [[NSNotificationCenter defaultCenter] postNotificationName:AVATAR_UPDATED_NOTIFICATION object:[_user avatarFullUrl]];
+                                         
                                      } failure:^{
                                          NSLog(@"failed to update avatar");
                                          _hud.labelText = @"上传失败";

@@ -9,5 +9,6 @@
 #import <UIKit/UIKit.h>
 
 @interface MobileNumberCell : UITableViewCell
-
+@property(nonatomic, weak) IBOutlet UITextField* mobileTextField;
+@property(nonatomic, weak) IBOutlet UIButton* changeMobileButton;
 @end

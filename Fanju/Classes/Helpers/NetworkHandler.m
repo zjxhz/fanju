@@ -146,11 +146,8 @@ static int t = 0;
     [request send];
 }
 
--(void)uploadImage:(UIImage*)image toURL:(NSString*)url success:(retrieved_t)success  failure:(retrieve_failed_t)failure{
-    [self uploadImage:image toURL:url success:success failure:failure progress:NULL];
-}
 
--(void)uploadImage:(UIImage*)image toURL:(NSString*)url success:(retrieved_t)success  failure:(retrieve_failed_t)failure progress:(upload_progress_t)progress{
+-(void)uploadImage:(UIImage*)image withName:(NSString*)filename toURL:(NSString*)url success:(retrieved_t)success  failure:(retrieve_failed_t)failure progress:(upload_progress_t)progress{
     self.success = [success copy];
     self.failure = [failure copy];
     self.upload_progress = progress;
@@ -162,11 +159,13 @@ static int t = 0;
     request.response = [[TTURLDataResponse alloc] init];
     
     NSData* file = UIImageJPEGRepresentation(image, 1.0);
-    [request addFile:file mimeType:@"image/jpeg" fileName:@"file"];
+    [request addFile:file mimeType:@"image/jpeg" fileName:filename];
     NSLog(@"uploading file...");
     
     [request send];
 }
+
+
 
 - (void)sendJSonRequest:(NSString *)url 
                 method:(http_method_t)method 
@@ -222,8 +221,10 @@ static int t = 0;
                 AppDelegate *appDelegate = (AppDelegate*)[UIApplication sharedApplication].delegate;
                 [appDelegate showLogin];
             } else {
-                [SVProgressHUD dismissWithError:@"Network Error" afterDelay:1];   
+                [SVProgressHUD dismissWithError:@"Network Error" afterDelay:1];
+                
                 NSData * data = [error.userInfo objectForKey:@"responsedata"];
+                NSLog([[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding]) ;
                 NSString* html = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
                 
                 NSString* errorPage = [NSString stringWithFormat:@"%@/error.html", NSTemporaryDirectory()];
@@ -252,6 +253,6 @@ didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge*)challenge{
     if (self.upload_progress != NULL) {
         self.upload_progress(request.totalBytesLoaded, request.totalBytesExpected);
     }
-    NSLog(@"uploading %d/%d: %.2f%%", request.totalBytesLoaded, request.totalBytesExpected, request.totalBytesLoaded * 100.0 / request.totalBytesExpected);
+//    NSLog(@"uploading %d/%d: %.2f%%", request.totalBytesLoaded, request.totalBytesExpected, request.totalBytesLoaded * 100.0 / request.totalBytesExpected);
 }
 @end

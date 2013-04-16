@@ -7,7 +7,12 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "MealInfo.h"
 
-@interface JoinMealViewController : UIViewController
-
+@interface JoinMealViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, UIGestureRecognizerDelegate>{
+    IBOutlet UITableView* _tableView;
+    IBOutlet UIButton* _confirmButton;
+}
+@property(nonatomic, strong) MealInfo* mealInfo;
+-(IBAction)joinMeal:(id)sender;
 @end

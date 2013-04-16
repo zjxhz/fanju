@@ -41,7 +41,7 @@ static NSDateFormatter *_dateFormatter;
         _participants = [[NSMutableArray alloc] init];
         _likes = [[NSMutableArray alloc] init];
         _photoURL = [data objectForKey:@"photo"];
-        _price = [[data objectForKey:@"list_price"] intValue];
+        _price = [[data objectForKey:@"list_price"] doubleValue];
         for (NSDictionary *dict in [data objectForKey:@"participants"]) {
             [_participants addObject: [UserProfile profileWithData:dict]];
         }

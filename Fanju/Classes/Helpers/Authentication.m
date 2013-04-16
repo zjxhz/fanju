@@ -98,7 +98,7 @@ NSString * const EODidLogoutNotification = @"EODidLogoutNotification";
 //re-login may be needed as the cookie can be invalid(e.g. password was changed somewhere else), and if it's invalid then the cookies 
 //should be deleted by logging out
 -(void)relogin{
-    if (_currentUser && _currentUser.password) {
+    if (_currentUser && _currentUser.username && _currentUser.password) {
         NSLog(@"logging in with username and password");
         [[Authentication sharedInstance] loginWithUserName:_currentUser.username password:_currentUser.password];
     } else if([[self sinaweibo] isLoggedIn]) {
@@ -109,6 +109,7 @@ NSString * const EODidLogoutNotification = @"EODidLogoutNotification";
         [self logout];
     }
 }
+
 -(void)userRegisteredWithData:(NSDictionary*)data{
     [self userDidLoginWithData:data];
 }

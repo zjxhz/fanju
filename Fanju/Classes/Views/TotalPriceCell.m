@@ -1,14 +1,14 @@
 //
-//  TotolPriceCell.m
+//  TotalPriceCell.m
 //  Fanju
 //
 //  Created by Xu Huanze on 4/14/13.
 //  Copyright (c) 2013 Wayne. All rights reserved.
 //
 
-#import "TotolPriceCell.h"
+#import "TotalPriceCell.h"
 
-@implementation TotolPriceCell
+@implementation TotalPriceCell
 
 - (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
 {

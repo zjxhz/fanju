@@ -82,6 +82,7 @@
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(unreadNotifUpdated:)
                                                      name:EOUnreadNotificationCount object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(avatarUpdated:) name:AVATAR_UPDATED_NOTIFICATION object:nil];
         self.tableView.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"side_bg"]];
         
         _header1 = [self createHeaderWithTitle:@"找朋友" image:[UIImage imageNamed:@"side_social"]];
@@ -395,8 +396,10 @@
 }
 
 -(void)showViewController:(UIViewController*)controller{
-    if (controller != _lastViewController) {
-        self.sideMenu.navigationController.viewControllers = [NSArray arrayWithObject:controller];
+    if (controller != _lastViewController || self.sideMenu.navigationController.viewControllers.count > 1) {
+        [self.sideMenu.navigationController setViewControllers:@[controller] animated:YES];
+    }
+    if (controller != self.userDetailsViewController) {
         [self.sideMenu.navigationController setToolbarHidden:YES];
     }
     _lastViewController = controller;
@@ -482,6 +485,10 @@
 #pragma mark UIGestureRecognizerDelegate
 - (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldReceiveTouch:(UITouch *)touch{
     return YES;
+}
+
+-(void)avatarUpdated:(NSNotification*)notif {
+    [self.tableView reloadData];
 }
 
 @end

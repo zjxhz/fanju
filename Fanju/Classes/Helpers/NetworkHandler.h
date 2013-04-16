@@ -56,6 +56,5 @@ http_method_t;
 - (void)request:(TTURLRequest*)request
 didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge*)challenge;
 
--(void)uploadImage:(UIImage*)image toURL:(NSString*)url success:(retrieved_t)success  failure:(retrieve_failed_t)failure;
--(void)uploadImage:(UIImage*)image toURL:(NSString*)url success:(retrieved_t)success  failure:(retrieve_failed_t)failure progress:(upload_progress_t)progress;
+-(void)uploadImage:(UIImage*)image withName:(NSString*)filename toURL:(NSString*)url success:(retrieved_t)success  failure:(retrieve_failed_t)failure progress:(upload_progress_t)progress;
 @end

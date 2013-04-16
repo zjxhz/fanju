@@ -1,5 +1,5 @@
 //
-//  TotolPriceCell.h
+//  TotalPriceCell.h
 //  Fanju
 //
 //  Created by Xu Huanze on 4/14/13.
@@ -8,6 +8,6 @@
 
 #import <UIKit/UIKit.h>
 
-@interface TotolPriceCell : UITableViewCell
-
+@interface TotalPriceCell : UITableViewCell
+@property(nonatomic, weak) IBOutlet UILabel* totalPriceLabel;
 @end

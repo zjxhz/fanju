@@ -15,6 +15,7 @@
 //#define EOHOST [[NSUserDefaults standardUserDefaults] objectForKey:@"HOST"] ? [[NSUserDefaults standardUserDefaults] objectForKey:@"HOST"] : @"www.fanjoin.com"
 #define EOHOST @"www.fanjoin.com"
 //#define EOHOST @"localhost:8000"
+//#define EOHOST @"www.ifunjoin.com:8001"
 #define HTTPS @"http" // use http for https in development
 #define APP_SCHEME @"Fanju"
 #define WEIBO_APP_KEY @"4071331500"
@@ -25,7 +26,9 @@
 #define PAGE_LIMIT 5 //number of items to be shown in one page
 #define UNREAD_MESSAGE_COUNT @"UNREAD_MESSAGE_COUNT"
 #define UNREAD_NOTIFICATION_COUNT @"UNREAD_NOTIFICATION_COUNT"
+#define AVATAR_UPDATED_NOTIFICATION @"AVATAR_UPDATED_NOTIFICATION"
 #define UNREAD_ALL_COUNT @"UNREAD_ALL_COUNT"
 #define EOUnreadCount @"EOUnreadCount"
 #define LAST_MESSAGE_RETRIEVE_TIME @"LAST_MESSAGE_RETRIEVE_TIME"
+#define ALIPAY_PAY_RESULT @"ALIPAY_PAY_SUCCESS"
 #endif

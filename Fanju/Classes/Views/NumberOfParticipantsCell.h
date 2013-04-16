@@ -7,7 +7,9 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "AKSegmentedControl.h"
 
 @interface NumberOfParticipantsCell : UITableViewCell
-
+@property(nonatomic, weak) IBOutlet UILabel* numberLabel;
+@property(nonatomic, strong) AKSegmentedControl* segControll;
 @end

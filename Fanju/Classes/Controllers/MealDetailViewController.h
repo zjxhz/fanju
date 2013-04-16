@@ -13,7 +13,6 @@
 #import "Location.h"
 #import "ShareTableViewController.h"
 #import "WEPopoverController.h"
-#import "CreateOrderViewController.h"
 #import "AvatarFactory.h"
 #import "MealMenu.h"
 #import "MenuTableViewController.h"

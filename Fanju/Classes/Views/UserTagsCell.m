@@ -127,7 +127,6 @@
     UserListViewController* ul = [[UserListViewController alloc] initWithStyle:UITableViewStylePlain];
     ul.baseURL = [NSString stringWithFormat:@"http://%@/api/v1/usertag/%d/users/?format=json", EOHOST, tag.uID];
     ul.title = tag.name;
-    ul.navigationItem.leftBarButtonItem = [[WidgetFactory sharedFactory] backButtonWithTarget:_rootController.navigationController action:@selector(popViewControllerAnimated:)];
     ul.navigationItem.hidesBackButton = YES;
     ul.tag = tag;
     ul.showAddTagButton = YES;

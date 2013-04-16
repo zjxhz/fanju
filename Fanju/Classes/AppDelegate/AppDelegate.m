@@ -26,8 +26,10 @@
 #import "RKLog.h"
 #import "AlixPay.h"
 #import "DataVerifier.h"
-
-@interface AppDelegate() 
+#import "DictHelper.h"
+@interface AppDelegate() {
+    UINavigationController* _navigationController;
+}
 @end
 
 @implementation AppDelegate
@@ -55,31 +57,31 @@
     });
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     
+
 //    [TTStyleSheet setGlobalStyleSheet:[[MyCustomStylesheet alloc] init]]; 
     MealListViewController *meal = [[MealListViewController alloc] initWithNibName:@"MealListViewController" bundle:nil];
-    UINavigationController *navigationController = [[UINavigationController alloc] initWithRootViewController:meal];
-    [navigationController.navigationBar setBackgroundImage:[UIImage imageNamed:@"topbar_bg"] forBarMetrics:UIBarMetricsDefault];
+    _navigationController = [[UINavigationController alloc] initWithRootViewController:meal];
     NewSidebarViewController *sideMenuViewController = [NewSidebarViewController sideBar];
     sideMenuViewController.mealListViewController = meal;
     
     [[LocationProvider sharedProvider] obtainCurrentLocation:[Authentication sharedInstance]];
-#warning check if below line is really needed
     [[TTURLRequestQueue mainQueue] setMaxContentLength:0];
     
     // make sure to display the navigation controller before calling this
-    MFSideMenu* sideMenu = [MFSideMenu menuWithNavigationController:navigationController leftSideMenuController:sideMenuViewController rightSideMenuController:nil];
+    MFSideMenu* sideMenu = [MFSideMenu menuWithNavigationController:_navigationController leftSideMenuController:sideMenuViewController rightSideMenuController:nil];
     sideMenuViewController.sideMenu = sideMenu;
     
     UIRemoteNotificationType allowedNotifications = UIRemoteNotificationTypeAlert |  UIRemoteNotificationTypeBadge | UIRemoteNotificationTypeSound;
     [[UIApplication sharedApplication] registerForRemoteNotificationTypes:allowedNotifications];
     
-    [Crittercism enableWithAppID:@"50ac205641ae503e5c000004"];
+//    [Crittercism enableWithAppID:@"50ac205641ae503e5c000004"];
     
     [self initSinaweibo];
     [[Authentication sharedInstance] relogin];
     
-    self.window.rootViewController = navigationController;
-    [navigationController.view addSubview:[OverlayViewController sharedOverlayViewController].view];
+    self.window.rootViewController = _navigationController;
+    [_navigationController.view addSubview:[OverlayViewController sharedOverlayViewController].view];
+    [self customNavigationBar];
     [self.window makeKeyAndVisible];
     [meal viewDidAppear:NO];
     RKLogConfigureByName("*", RKLogLevelOff); //disable RK logs, for now, it's annoying 
@@ -98,6 +100,17 @@
     }
 }
 
+-(void)customNavigationBar{
+    UIImage* backImg = [[UIImage imageNamed:@"toplf"] resizableImageWithCapInsets:UIEdgeInsetsMake(0, 14, 0, 15)];
+    UIImage* backImgPush = [[UIImage imageNamed:@"toplf_push"]  resizableImageWithCapInsets:UIEdgeInsetsMake(0, 14, 0, 15)];
+    [[UINavigationBar appearance]setBackgroundImage:[UIImage imageNamed:@"topbar_bg"] forBarMetrics:UIBarMetricsDefault];
+    [[UIBarButtonItem appearance] setBackButtonBackgroundImage:backImg forState:UIControlStateNormal barMetrics:UIBarMetricsDefault];
+    [[UIBarButtonItem appearance] setBackButtonBackgroundImage:backImgPush forState:UIControlStateSelected | UIControlStateHighlighted barMetrics:UIBarMetricsDefault];
+}
+
+-(void)popupViewController{
+    [_navigationController popViewControllerAnimated:YES];
+}
 - (void)applicationDidBecomeActive:(UIApplication *)application
 {
     [self.sinaweibo applicationDidBecomeActive];
@@ -117,43 +130,31 @@
 	if (result) {
 		//是否支付成功
 		if (9000 == result.statusCode) {
-			/*
-			 *用公钥验证签名
-			 */
-			id<DataVerifier> verifier = CreateRSADataVerifier([[NSBundle mainBundle] objectForInfoDictionaryKey:@"RSA public key"]);
-			if ([verifier verifyString:result.resultString withSign:result.signString]) {
-				UIAlertView * alertView = [[UIAlertView alloc] initWithTitle:@"提示"
-																	 message:result.statusMessage
-																	delegate:nil
-														   cancelButtonTitle:@"确定"
-														   otherButtonTitles:nil];
-				[alertView show];
-			}//验签错误
-			else {
-				UIAlertView * alertView = [[UIAlertView alloc] initWithTitle:@"提示"
-																	 message:@"签名错误"
-																	delegate:nil
-														   cancelButtonTitle:@"确定"
-														   otherButtonTitles:nil];
-				[alertView show];
-			}
-		}
-		//如果支付失败,可以通过result.statusCode查询错误码
-		else {
-			UIAlertView * alertView = [[UIAlertView alloc] initWithTitle:@"提示"
-																 message:result.statusMessage
-																delegate:nil
-													   cancelButtonTitle:@"确定"
-													   otherButtonTitles:nil];
-			[alertView show];
-		}
-		
-	}
+            NSString* url = [NSString stringWithFormat:@"http://%@/pay/alipay/app/back/sync/", EOHOST];
+            NSArray* params = @[[DictHelper dictWithKey:@"alipay_result" andValue:result.resultString],
+                                [DictHelper dictWithKey:@"sign" andValue:result.signString]];
+            [[NetworkHandler getHandler] requestFromURL:url method:POST parameters:params cachePolicy:TTURLRequestCachePolicyNone success:^(id obj) {
+                NSLog(@"result: %@", obj);
+                [[NSNotificationCenter defaultCenter] postNotificationName:ALIPAY_PAY_RESULT object:obj userInfo:nil];
+            } failure:^{
+                NSLog(@"failed to pay");
+                NSDictionary* dic = @{@"status": @"NOK", @"message":@"支付已经成功，但是同步服务器产生了网络错误，请联系客服"};
+                [[NSNotificationCenter defaultCenter] postNotificationName:ALIPAY_PAY_RESULT object:dic userInfo:nil];
+            }];
+        } else { //验签错误
+                NSDictionary* dic = @{@"status": @"NOK", @"message":@"支付已经成功，但是产生了签名错误，请联系客服"};
+				[[NSNotificationCenter defaultCenter] postNotificationName:ALIPAY_PAY_RESULT object:dic userInfo:nil];
+        }
+    } else {
+        NSDictionary* dic = @{@"status": @"NOK", @"message":result.statusMessage};
+        [[NSNotificationCenter defaultCenter] postNotificationName:ALIPAY_PAY_RESULT object:dic userInfo:nil];
+    }
 }
+
 
 - (BOOL)application:(UIApplication *)application openURL:(NSURL *)url sourceApplication:(NSString *)sourceApplication annotation:(id)annotation
 {
-    return [self.sinaweibo handleOpenURL:url];
+    return [self application:application handleOpenURL:url];
 }
 
 - (void)applicationWillTerminate:(UIApplication *)application

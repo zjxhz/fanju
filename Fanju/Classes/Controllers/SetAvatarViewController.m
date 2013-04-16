@@ -88,16 +88,16 @@
     }
     [SVProgressHUD showWithStatus:@"正在上传……" maskType:SVProgressHUDMaskTypeBlack];
     _user.avatar = _photoView.image;
-
-    [[NetworkHandler getHandler] uploadImage:_user.avatar toURL:[NSString stringWithFormat:@"user/%d/avatar/", _user.uID] 
-                                         success:^(id obj) {
-                                             NSLog(@"avatar updated");
-                                             [Authentication sharedInstance].delegate = self;
-                                             [[Authentication sharedInstance] relogin];
-                                         } failure:^{
-                                             NSLog(@"failed to update avatar");
-                                             [SVProgressHUD dismissWithError:@"头像上传失败"];
-                                         }];
+    assert(0);//not implemented
+//    [[NetworkHandler getHandler] uploadImage:_user.avatar toURL:[NSString stringWithFormat:@"user/%d/avatar/", _user.uID] 
+//                                         success:^(id obj) {
+//                                             NSLog(@"avatar updated");
+//                                             [Authentication sharedInstance].delegate = self;
+//                                             [[Authentication sharedInstance] relogin];
+//                                         } failure:^{
+//                                             NSLog(@"failed to update avatar");
+//                                             [SVProgressHUD dismissWithError:@"头像上传失败"];
+//                                         }];
 }
 
 

@@ -31,8 +31,6 @@
     [super viewDidLoad];
     [self.mealBg addSubview:_mealImage];
     self.navigationItem.titleView  = [[WidgetFactory sharedFactory] titleViewWithTitle:@"订单详情"];
-    self.navigationItem.hidesBackButton = YES;
-    self.navigationItem.leftBarButtonItem = [[WidgetFactory sharedFactory]backButtonWithTarget:self.navigationController action:@selector(popViewControllerAnimated:)];
     [self buildUI];
 }
 

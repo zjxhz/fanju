@@ -30,6 +30,8 @@
 #import "WidgetFactory.h"
 #import "OrderInfo.h"
 #import "OrderDetailsViewController.h"
+#import "JoinMealViewController.h"
+#import "NewSidebarViewController.h"
 
 @implementation MealDetailViewController{
     MealDetailsViewDelegate* _mealDetailsViewDelegate;
@@ -75,28 +77,16 @@
 
 -(void)requestOrderStatus{
     UserProfile* currentUser = [[Authentication sharedInstance] currentUser];
-    [[NetworkHandler getHandler] requestFromURL:[NSString stringWithFormat:@"http://%@/api/v1/order/?&meal__id=%d&customer__id=%d&format=json", EOHOST, self.mealInfo.mID, currentUser.uID]
+    [[NetworkHandler getHandler] requestFromURL:[NSString stringWithFormat:@"http://%@/api/v1/order/?&meal__id=%d&customer__id=%d&status__gt=1&format=json", EOHOST, self.mealInfo.mID, currentUser.uID]
                                          method:GET
-                                    cachePolicy:TTURLRequestCachePolicyDefault
+                                    cachePolicy:TTURLRequestCachePolicyNone
                                         success:^(id obj) {
                                             NSArray *orders = [obj objectForKeyInObjects];
                                             if (orders && [orders count] > 0){
                                                 NSDictionary* data = orders[0];
                                                 _myOrder = [OrderInfo orderInfoWithData:data];
-                                                if (_myOrder.status == 1) {
-                                                    if (self.mealInfo.actualPersons >= self.mealInfo.maxPersons) {
-                                                        [_joinButton setTitle:@"卖光了" forState:UIControlStateNormal];
-                                                        [_joinButton removeTarget:self action:@selector(joinMeal:) forControlEvents:UIControlEventTouchDown];
-                                                    } else {
-                                                        [_joinButton setTitle:@"去支付" forState:UIControlStateNormal];
-                                                        [_joinButton addTarget:self action:@selector(payForOrder:) forControlEvents:UIControlEventTouchDown];
-                                                    }
-                                                } else if(_myOrder.status > 1){
-                                                    [_joinButton setTitle:@"已支付，查看订单" forState:UIControlStateNormal];
-                                                    [_joinButton addTarget:self action:@selector(viewOrder:) forControlEvents:UIControlEventTouchDown];
-                                                } else {
-                                                    NSLog(@"illegal order status: %d", _myOrder.status);
-                                                }
+                                                [_joinButton setTitle:@"已支付，查看订单" forState:UIControlStateNormal];
+                                                [_joinButton addTarget:self action:@selector(viewOrder:) forControlEvents:UIControlEventTouchDown];
                                             } else {
                                                 if (self.mealInfo.actualPersons >= self.mealInfo.maxPersons) {
                                                     [_joinButton setTitle:@"卖光了" forState:UIControlStateNormal];
@@ -186,9 +176,6 @@
 -(void)buildUI{
     self.tableView.showsVerticalScrollIndicator = NO;
     self.navigationItem.titleView = [[WidgetFactory sharedFactory]titleViewWithTitle:_mealInfo.topic];
-    
-    self.navigationItem.leftBarButtonItem = [[WidgetFactory sharedFactory]backButtonWithTarget:self.navigationController action:@selector(popViewControllerAnimated:)];
-    self.navigationItem.hidesBackButton = YES;
     self.navigationItem.rightBarButtonItem = [[WidgetFactory sharedFactory]normalBarButtonItemWithTitle:@"分享" target:self action:@selector(onShareClicked:)];
     
     self.tableView.separatorColor = [UIColor clearColor];
@@ -426,7 +413,7 @@
         [menuButton setTitle:@"读取中" forState:UIControlStateNormal];
         menuButton.userInteractionEnabled = NO;
     } else {
-        [menuButton setTitle:@"菜 式" forState:UIControlStateNormal];
+        [menuButton setTitle:@"菜式" forState:UIControlStateNormal];
         menuButton.userInteractionEnabled = YES;
     }
 //    [menuButton sizeToFit];
@@ -536,10 +523,9 @@
         AppDelegate *delegate = (AppDelegate*)[UIApplication sharedApplication].delegate;
         [delegate showLogin];
     } else {
-        CreateOrderViewController* order = [[CreateOrderViewController alloc] initWithNibName:nil bundle:nil];
-        order.mealInfo = self.mealInfo;
-        order.delegate = self;
-        [self.navigationController pushViewController:order animated:YES];
+        JoinMealViewController* vc = [[JoinMealViewController alloc] init];
+        vc.mealInfo = self.mealInfo;
+        [self.navigationController pushViewController:vc animated:YES];
     }
 }
 
@@ -618,7 +604,7 @@
 #pragma mark UserImageViewDelegate
 -(void)userImageTapped:(UserProfile*)user{
     NewUserDetailsViewController *detailVC = [[NewUserDetailsViewController alloc] initWithStyle:UITableViewStylePlain];
-    detailVC.user = user;
+    detailVC.userID = [NSString stringWithFormat:@"%d", user.uID];//do not set user object here as it does not contain full information
     [self.navigationController pushViewController:detailVC
                                          animated:YES];
 }

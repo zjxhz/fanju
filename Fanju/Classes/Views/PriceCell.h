@@ -9,5 +9,6 @@
 #import <UIKit/UIKit.h>
 
 @interface PriceCell : UITableViewCell
+@property(nonatomic, weak) IBOutlet UILabel* priceLabel;
 
 @end

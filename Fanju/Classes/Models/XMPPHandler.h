@@ -40,7 +40,7 @@
 -(void)updateUnreadCount;
 -(void)deleteRecentContact:(NSString*)jid;
 -(void)markMessagesReadFrom:(NSString*)contactJID;
--(void)saveMessage:(NSString*)sender receiver:(NSString*)receiver message:(NSString*)message time:(NSDate*)time hasRead:(BOOL)read;
+-(void)saveMessage:(NSString*)sender receiver:(NSString*)receiver message:(NSString*)message time:(NSDate*)time hasRead:(BOOL)read silenly:(BOOL)silently;
 -(void)retrieveMessagesWith:(NSString*)with after:(NSTimeInterval)interval retrievingFromList:(BOOL)retrievingFromList;
 -(BOOL)addUserToRosterIfNeeded:(XMPPJID*)jID;
 @end

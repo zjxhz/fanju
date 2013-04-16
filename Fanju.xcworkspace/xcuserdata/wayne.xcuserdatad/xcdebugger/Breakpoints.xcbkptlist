@@ -188,11 +188,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Fanju/Classes/Models/XMPPHandler.m"
-         timestampString = "387107039.342821"
+         timestampString = "387793748.373702"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "518"
-         endingLineNumber = "518"
+         startingLineNumber = "524"
+         endingLineNumber = "524"
          landmarkName = "-handleRetrievedMessages:after:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -246,19 +246,6 @@
          startingLineNumber = "20"
          endingLineNumber = "20"
          landmarkName = "+tableView:rowHeightForObject:"
-         landmarkType = "5">
-      </FileBreakpoint>
-      <FileBreakpoint
-         shouldBeEnabled = "Yes"
-         ignoreCount = "0"
-         continueAfterRunningActions = "No"
-         filePath = "Fanju/Classes/Controllers/MealListViewController.m"
-         timestampString = "387612131.656698"
-         startingColumnNumber = "9223372036854775807"
-         endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "262"
-         endingLineNumber = "262"
-         landmarkName = "-loginWithWeibo:"
          landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
@@ -396,11 +383,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Fanju/Classes/Controllers/JoinMealViewController.m"
-         timestampString = "387724076.236421"
+         timestampString = "387791110.361595"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "279"
-         endingLineNumber = "279"
+         startingLineNumber = "280"
+         endingLineNumber = "280"
          landmarkName = "-alixPayResult:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -467,19 +454,6 @@
          startingLineNumber = "291"
          endingLineNumber = "291"
          landmarkName = "-showMealList"
-         landmarkType = "5">
-      </FileBreakpoint>
-      <FileBreakpoint
-         shouldBeEnabled = "Yes"
-         ignoreCount = "0"
-         continueAfterRunningActions = "No"
-         filePath = "Fanju/Classes/Controllers/NewUserDetailsViewController.m"
-         timestampString = "387724484.009976"
-         startingColumnNumber = "9223372036854775807"
-         endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "120"
-         endingLineNumber = "120"
-         landmarkName = "-viewWillDisappear:"
          landmarkType = "5">
       </FileBreakpoint>
    </FileBreakpoints>

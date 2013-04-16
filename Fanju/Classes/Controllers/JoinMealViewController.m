@@ -299,5 +299,12 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
     return YES;
 }
 
+- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex {
+	if (alertView.tag == 123) {
+		NSString * URLString = @"http://itunes.apple.com/cn/app/id535715926?mt=8";
+		[[UIApplication sharedApplication] openURL:[NSURL URLWithString:URLString]];
+	}
+}
+
 
 @end

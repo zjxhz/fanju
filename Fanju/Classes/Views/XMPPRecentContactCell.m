@@ -76,7 +76,6 @@
             self.textLabel.text = nil;
             self.detailTextLabel.text = nil;
             [_numberBadge removeFromSuperview];
-            return;
         }
         
         if (user.photo) {
@@ -106,6 +105,9 @@
         } else {
             [_numberBadge removeFromSuperview];
         }
+
+        
+
     }
 
 

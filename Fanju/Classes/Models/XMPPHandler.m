@@ -138,7 +138,6 @@ NSString * const EOUnreadNotificationCount = @"EOUnreadNotificationCount";
     if (read) {
         contact.unread = [NSNumber numberWithInteger:0]; // got a read message, set all older message as read
     }
-    [self updateUnreadCount];
 }
 
 -(void)markMessagesReadFrom:(NSString*)contactJID{
@@ -183,7 +182,8 @@ NSString * const EOUnreadNotificationCount = @"EOUnreadNotificationCount";
 -(void)updateUnreadCount{
     int totoalUnread = 0;
     for(RecentContact* c in [_recentContactsDict allValues]){
-        totoalUnread += [c.unread integerValue];
+        NSInteger unread = [c.unread integerValue];
+        totoalUnread += unread;
     }
     [[NSNotificationCenter defaultCenter] postNotificationName:EOUnreadMessageCount
                                                         object:[NSNumber numberWithInteger:totoalUnread]
@@ -237,7 +237,7 @@ NSString * const EOUnreadNotificationCount = @"EOUnreadNotificationCount";
     NSLog(@"XMPP Message sent: %@", message);
     if ([message isMessageWithBody]) {
         NSString* strMessage = [[message elementForName:@"body"] stringValue];
-        [self saveMessage:message.fromStr receiver:message.toStr message:strMessage time:[NSDate date] hasRead:NO];
+        [self saveMessage:message.fromStr receiver:message.toStr message:strMessage time:[NSDate date] hasRead:NO silenly:NO];
     }
 }
 
@@ -346,14 +346,14 @@ NSString * const EOUnreadNotificationCount = @"EOUnreadNotificationCount";
 
 -(void)handleReceivedMessage:(XMPPMessage*)message{
     NSString* strMessage = [[message elementForName:@"body"] stringValue];
-    [self saveMessage:message.fromStr receiver:message.toStr message:strMessage  time:[NSDate date] hasRead:NO];
+    [self saveMessage:message.fromStr receiver:message.toStr message:strMessage  time:[NSDate date] hasRead:NO silenly:NO];
     if (![message.from.bare isEqualToString:_currentContact]){
         [self updateStatusBarFrom:message.fromStr withMessage:strMessage];
     }
 }
 
 
--(void)saveMessage:(NSString*)sender receiver:(NSString*)receiver message:(NSString*)message time:(NSDate*)time hasRead:(BOOL)read{
+-(void)saveMessage:(NSString*)sender receiver:(NSString*)receiver message:(NSString*)message time:(NSDate*)time hasRead:(BOOL)read silenly:(BOOL)silently{
     EOMessage* messageMO  = [NSEntityDescription insertNewObjectForEntityForName:@"EOMessage" inManagedObjectContext:_messageManagedObjectContext];
     XMPPJID *senderJID = [XMPPJID jidWithString:sender];
     XMPPJID *receiverJID = [XMPPJID jidWithString:receiver];
@@ -366,15 +366,18 @@ NSString * const EOUnreadNotificationCount = @"EOUnreadNotificationCount";
     messageMO.type = @"chat";
     
     [self updateRecentMessages:messageMO hasRead:read];
-    
-    NSError* error;
-    if(![_messageManagedObjectContext save:&error]){
-        NSLog(@"failed to save a message");
-    } else {
-        [[NSNotificationCenter defaultCenter] postNotificationName:EOMessageDidSaveNotification
-                                                            object:messageMO
-                                                          userInfo:nil];
+    if (!silently) {
+        [self updateUnreadCount];
+        NSError* error;
+        if(![_messageManagedObjectContext save:&error]){
+            NSLog(@"failed to save a message");
+        } else {
+            [[NSNotificationCenter defaultCenter] postNotificationName:EOMessageDidSaveNotification
+                                                                object:messageMO
+                                                              userInfo:nil];
+        }
     }
+
 }
 
 -(void)addReceiverBeforeSendingIfNeeded:(XMPPJID*)jID{
@@ -523,7 +526,13 @@ NSString * const EOUnreadNotificationCount = @"EOUnreadNotificationCount";
                 }
             }
             BOOL read = [element attributeBoolValueForName:@"isRead"];
-            [self saveMessage:from receiver:to message:strMessage time:messageDate hasRead:read];
+            BOOL silently = YES;
+            if (i == chatElement.children.count - 1) {
+                NSLog(@"last message with %@, refreshing UI", with);
+                silently = NO;
+            }
+            [self saveMessage:from receiver:to message:strMessage time:messageDate hasRead:read silenly:silently];
+
         }
     }
     NSInteger more = [[chatElement attributeStringValueForName:@"more"] integerValue];

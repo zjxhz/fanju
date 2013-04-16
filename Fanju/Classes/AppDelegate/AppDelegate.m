@@ -146,6 +146,7 @@
 				[[NSNotificationCenter defaultCenter] postNotificationName:ALIPAY_PAY_RESULT object:dic userInfo:nil];
         }
     } else {
+        NSLog(@"alixpay failed with status message: %@", result.statusMessage);
         NSDictionary* dic = @{@"status": @"NOK", @"message":result.statusMessage};
         [[NSNotificationCenter defaultCenter] postNotificationName:ALIPAY_PAY_RESULT object:dic userInfo:nil];
     }

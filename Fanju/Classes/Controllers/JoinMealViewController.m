@@ -271,6 +271,7 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
                                                    otherButtonTitles:nil];
         [alertView setTag:123];
         [alertView show];
+        [SVProgressHUD dismiss];
     }
 }
 

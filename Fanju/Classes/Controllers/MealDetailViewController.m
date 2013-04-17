@@ -28,7 +28,6 @@
 #import "NINetworkImageView.h"
 #import "MapViewController.h"
 #import "WidgetFactory.h"
-#import "OrderInfo.h"
 #import "OrderDetailsViewController.h"
 #import "JoinMealViewController.h"
 #import "NewSidebarViewController.h"
@@ -36,7 +35,6 @@
 @implementation MealDetailViewController{
     MealDetailsViewDelegate* _mealDetailsViewDelegate;
     OrderInfo* _myOrder;
-
 }
 
 @synthesize mealInfo = _mealInfo;
@@ -56,39 +54,24 @@
     [self initTabView];
 }
 
-- (void)updateJoinButton {
-    [self requestOrderStatus];
-//    UserProfile* currentUser = [[Authentication sharedInstance] currentUser];
-//    NSString *userID = currentUser ? [NSString stringWithFormat:@"%d", currentUser.uID] : nil;
-//    if (self.mealInfo.actualPersons >= self.mealInfo.maxPersons) {
-//        [_joinButton setTitle:@"卖光了" forState:UIControlStateNormal];
-////        _joinButton.backgroundColor = RGBCOLOR(0xF2, 0x2A, 0x39);
-//        [_joinButton removeTarget:self action:@selector(joinMeal:) forControlEvents:UIControlEventTouchDown];
-//    } else if (userID && [self.mealInfo hasJoined:userID]) {
-//        [_joinButton setTitle:@"已参加" forState:UIControlStateNormal];
-////        _joinButton.backgroundColor = RGBCOLOR(0xFF, 0xCC, 0);
-//        [_joinButton removeTarget:self action:@selector(joinMeal:) forControlEvents:UIControlEventTouchDown];
-//    } else {
-//        [_joinButton setTitle:@"参加饭局" forState:UIControlStateNormal];
-////        _joinButton.backgroundColor = RGBCOLOR(0, 0x99, 0);
-//        [_joinButton addTarget:self action:@selector(joinMeal:) forControlEvents:UIControlEventTouchDown];
-//    }
-}
-
 -(void)requestOrderStatus{
     UserProfile* currentUser = [[Authentication sharedInstance] currentUser];
-    [[NetworkHandler getHandler] requestFromURL:[NSString stringWithFormat:@"http://%@/api/v1/order/?&meal__id=%d&customer__id=%d&status__gt=1&format=json", EOHOST, self.mealInfo.mID, currentUser.uID]
+    [[NetworkHandler getHandler] requestFromURL:[NSString stringWithFormat:@"http://%@/api/v1/order/?&meal__id=%d&customer__id=%d&status=2&format=json", EOHOST, self.mealInfo.mID, currentUser.uID]
                                          method:GET
                                     cachePolicy:TTURLRequestCachePolicyNone
                                         success:^(id obj) {
-                                            NSArray *orders = [obj objectForKeyInObjects];
-                                            if (orders && [orders count] > 0){
+                                            NSArray *orders = [obj objectForKeyInObjects];                                            
+                                            if (orders && [orders count] > 1) {
+                                                NSLog(@"WARNING: possible duplicated orders found for meal(%d) and user(%d)", self.mealInfo.mID, currentUser.uID);
+                                            } else if (orders && [orders count] == 1){
                                                 NSDictionary* data = orders[0];
                                                 _myOrder = [OrderInfo orderInfoWithData:data];
                                                 [_joinButton setTitle:@"已支付，查看订单" forState:UIControlStateNormal];
                                                 [_joinButton addTarget:self action:@selector(viewOrder:) forControlEvents:UIControlEventTouchDown];
                                             } else {
-                                                if (self.mealInfo.actualPersons >= self.mealInfo.maxPersons) {
+                                                if([self.mealInfo.time compare:[NSDate date]] == NSOrderedAscending){
+                                                    [_joinButton setTitle:@"已结束" forState:UIControlStateNormal];
+                                                }  else if (self.mealInfo.actualPersons >= self.mealInfo.maxPersons) {
                                                     [_joinButton setTitle:@"卖光了" forState:UIControlStateNormal];
                                                     [_joinButton removeTarget:self action:@selector(joinMeal:) forControlEvents:UIControlEventTouchDown];
                                                 } else {
@@ -114,6 +97,8 @@
     [self.navigationController pushViewController:orderVC animated:YES];
 }
 
+
+
 - (void)initTabView {
     UIImage* toolbarShadow = [UIImage imageNamed:@"toolbar_shadow"];
     _tabBar = [[UIView alloc] initWithFrame:CGRectMake(0, self.view.frame.size.height - TAB_BAR_HEIGHT, self.view.frame.size.width, TAB_BAR_HEIGHT)];
@@ -129,8 +114,12 @@
     _joinButton.titleLabel.textColor = [UIColor whiteColor];
     _joinButton.titleLabel.font = [UIFont boldSystemFontOfSize:19];
 
-    _tabBar.hidden = YES;
-    [self updateJoinButton];
+    if (!_unfinishedOrder) {
+        _tabBar.hidden = YES;
+    } else {
+        [_joinButton setTitle:@"去支付" forState:UIControlStateNormal];
+        [_joinButton addTarget:self action:@selector(finishOrder:) forControlEvents:UIControlEventTouchDown];
+    }
     
     UIImage* comment_img = [UIImage imageNamed:@"toolbth2"];
     UIImage* comment_img_push = [UIImage imageNamed:@"toolbth2_push"];
@@ -207,8 +196,20 @@
 
 -(void)viewWillAppear:(BOOL)animated{
     _mealDetailsViewDelegate.detailsHeight = _detailsView.frame.size.height;
+    if (!_unfinishedOrder) {
+        [self requestOrderStatus];
+    }
     [super viewWillAppear:animated];
+    
 }
+
+-(void)finishOrder:(id)sender{
+    JoinMealViewController* vc = [[JoinMealViewController alloc] init];
+    vc.mealInfo = self.mealInfo;
+    vc.numberOfPersons = _unfinishedOrder.numerOfPersons;
+    [self.navigationController pushViewController:vc animated:YES];
+}
+
 -(void)viewDidAppear:(BOOL)animated{
     [super viewDidAppear:animated];
     CGRect frame = self.tableView.frame;
@@ -534,7 +535,7 @@
     [self.mealInfo join:me withTotalNumberOfPersons:num_persons];
     [self updateNumberOfParticipants];
     [self rebuildParticipantsView];
-    [self updateJoinButton];
+    [self requestOrderStatus];
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation

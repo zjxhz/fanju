@@ -20,6 +20,7 @@
 #import "SinaWeibo.h"
 #import "WBSendView.h"
 #import "MealDetailsViewDelegate.h"
+#import "OrderInfo.h"
 
 #define MAP_HEIGHT 175
 #define TAB_BAR_HEIGHT 49
@@ -70,5 +71,6 @@
 @property(nonatomic, strong) NSString* mealID;
 @property (nonatomic, strong) MealInfo *mealInfo;
 @property (nonatomic, readonly)  UIView* tabBar;
+@property (nonatomic, strong) OrderInfo* unfinishedOrder;
 
 @end

@@ -16,6 +16,9 @@
 
 @interface MyMealsViewController : TTTableViewController <UITableViewDelegate>{
     LoadMoreTableItem *_loadMore;
+    UIView* _payingOrdersHeader;
+    UIView* _upcomingOrdersHeader;
+    UIView* _passedOrdersHeader;
 }
 
 @end

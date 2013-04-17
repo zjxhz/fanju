@@ -14,5 +14,6 @@
     IBOutlet UIButton* _confirmButton;
 }
 @property(nonatomic, strong) MealInfo* mealInfo;
+@property(nonatomic) NSInteger numberOfPersons;
 -(IBAction)joinMeal:(id)sender;
 @end

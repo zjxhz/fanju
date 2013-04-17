@@ -25,6 +25,7 @@
     NSDate* _messageRetrieveDate;//current retrieve time as there may be several pages when retrieving
     NSDateFormatter* _formatter;
     NSMutableDictionary* _lastRetrievedTimes; //time of last retrieving messages for a contact to avoid duplicate retrieves
+    dispatch_queue_t _background_queue;
 }
 @property(nonatomic, strong) XMPPStream* xmppStream;
 @property(nonatomic, strong) NSManagedObjectContext* messageManagedObjectContext;

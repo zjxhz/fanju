@@ -7,7 +7,6 @@
 //
 
 #import "MyMealsViewController.h"
-#import "OrderTableItem.h"
 #import "MealTableItemCell.h"
 #import "MealThumbnailTableItemCell.h"
 #import "WEPopoverController.h"
@@ -23,26 +22,9 @@
 #import "LoadMoreTableItem.h"
 #import "LoadMoreTableItemCell.h"
 #import "AKSegmentedControl.h"
-
-@interface OrderListDataSource : TTListDataSource
-
-@end
-
-@implementation OrderListDataSource
-
-- (Class)tableView:(UITableView*)tableView cellClassForObject:(id) object {
-    
-	if ([object isKindOfClass:[OrderTableItem class]]) {  
-		return [MealThumbnailTableItemCell class];  
-	} else if ([object isKindOfClass:[LoadMoreTableItem class]]){
-        return [LoadMoreTableItemCell class];
-    }
-    
-	return [super tableView:tableView
-	     cellClassForObject:object];
-}
-
-@end
+#import "OrderListDataSource.h"
+#import "ODRefreshControl.h"
+#import "MealDetailViewController.h"
 
 @interface MyInvitationsDataSource : TTListDataSource 
 
@@ -61,7 +43,9 @@
 }
 @end
 
-@implementation MyMealsViewController
+@implementation MyMealsViewController{
+    ODRefreshControl* _refreshControl;
+}
 
 
 - (id) init{
@@ -91,6 +75,9 @@
     [seg setButtonsArray:@[bl, br]];
     [seg addTarget:self action:@selector(selectionChanged:) forControlEvents:UIControlEventValueChanged];
     self.navigationItem.titleView = seg;
+    
+    _refreshControl = [[ODRefreshControl alloc] initInScrollView:self.tableView];
+    [_refreshControl addTarget:self action:@selector(loadOrders) forControlEvents:UIControlEventValueChanged];
 }
 
 -(UIButton*)createSegmentButton:(NSString*)title withNormalImage:(UIImage*)push pushImage:(UIImage*)normal{
@@ -129,7 +116,7 @@
                                             OrderListDataSource *ds = [[OrderListDataSource alloc] init];
                                             
                                             for (NSDictionary *dict in orders) {
-                                                [ds.items addObject:[OrderTableItem itemWithOrderInfo:[OrderInfo orderInfoWithData:dict]]];
+                                                [ds addOrder:[OrderInfo orderInfoWithData:dict]];
                                             }     
                                             NSInteger offset = [result offset];
                                             NSInteger totalCount = [result totalCount];
@@ -141,53 +128,55 @@
                                                 _loadMore.amount = totalCount;
                                                 _loadMore.limit = limit;
                                                 _loadMore.baseURL = baseURL;
-                                                [ds.items addObject:_loadMore];
+//                                                [ds.items addObject:_loadMore];
                                             }
                                             self.dataSource = ds;
+                                            [_refreshControl endRefreshing];
                                             
                                         } failure:^{
-#warning fail handling
+                                            [_refreshControl endRefreshing];
+                                            NSLog(@"failed to load orders");
                                         }];
 }
 
--(void) loadMoreOrders{
-    if (![_loadMore hasMore]) {
-        return;
-    } 
-    [[NetworkHandler getHandler] requestFromURL:[_loadMore nextPageURL]
-                                         method:GET 
-                                    cachePolicy:TTURLRequestCachePolicyNetwork
-                                        success:^(id obj) {
-                                            //load data
-                                            NSDictionary* result = obj;
-                                            NSArray *orders = [obj objectForKeyInObjects];
-                                            OrderListDataSource *ds = self.dataSource;
-                                            NSMutableArray * indexPaths = [NSMutableArray array];
-                                            for (int i = 0; i < orders.count; ++i) {
-                                                NSDictionary *dict = [orders objectAtIndex:i];
-                                                [ds.items insertObject:[OrderTableItem itemWithOrderInfo:[OrderInfo orderInfoWithData:dict]] atIndex:(ds.items.count - 1)];
-                                                NSIndexPath *indexPath = [NSIndexPath indexPathForRow:ds.items.count - 1 inSection:0];
-                                                [indexPaths addObject:indexPath];
-                                            }
-                                            [self.tableView insertRowsAtIndexPaths:indexPaths withRowAnimation:UITableViewRowAnimationTop];
-                                            
-                                            
-                                            //update load more text and decide if it should be removed
-                                             _loadMore.loading = NO;
-//                                            [self reloadLastRow];
-                                            _loadMore.offset = [result offset];
-                                            if (![_loadMore hasMore])  {
-                                                [ds.items removeLastObject];
-                                                NSArray *rowToDelete = [NSArray arrayWithObject:[NSIndexPath indexPathForRow:(ds.items.count - 1) inSection:0]];
-                                                [self.tableView  deleteRowsAtIndexPaths:rowToDelete withRowAnimation:UITableViewRowAnimationAutomatic];
-                                            }
-                                            [self.tableView reloadData];
-                                            
-                                        } failure:^{
-                                            NSLog(@"failed to load more orders");
-#warning fail handling
-                                        }];
-}
+//-(void) loadMoreOrders{
+//    if (![_loadMore hasMore]) {
+//        return;
+//    } 
+//    [[NetworkHandler getHandler] requestFromURL:[_loadMore nextPageURL]
+//                                         method:GET 
+//                                    cachePolicy:TTURLRequestCachePolicyNetwork
+//                                        success:^(id obj) {
+//                                            //load data
+//                                            NSDictionary* result = obj;
+//                                            NSArray *orders = [obj objectForKeyInObjects];
+//                                            OrderListDataSource *ds = self.dataSource;
+//                                            NSMutableArray * indexPaths = [NSMutableArray array];
+//                                            for (int i = 0; i < orders.count; ++i) {
+//                                                NSDictionary *dict = [orders objectAtIndex:i];
+//                                                [ds.items insertObject:[OrderTableItem itemWithOrderInfo:[OrderInfo orderInfoWithData:dict]] atIndex:(ds.items.count - 1)];
+//                                                NSIndexPath *indexPath = [NSIndexPath indexPathForRow:ds.items.count - 1 inSection:0];
+//                                                [indexPaths addObject:indexPath];
+//                                            }
+//                                            [self.tableView insertRowsAtIndexPaths:indexPaths withRowAnimation:UITableViewRowAnimationTop];
+//                                            
+//                                            
+//                                            //update load more text and decide if it should be removed
+//                                             _loadMore.loading = NO;
+////                                            [self reloadLastRow];
+//                                            _loadMore.offset = [result offset];
+//                                            if (![_loadMore hasMore])  {
+//                                                [ds.items removeLastObject];
+//                                                NSArray *rowToDelete = [NSArray arrayWithObject:[NSIndexPath indexPathForRow:(ds.items.count - 1) inSection:0]];
+//                                                [self.tableView  deleteRowsAtIndexPaths:rowToDelete withRowAnimation:UITableViewRowAnimationAutomatic];
+//                                            }
+//                                            [self.tableView reloadData];
+//                                            
+//                                        } failure:^{
+//                                            NSLog(@"failed to load more orders");
+//#warning fail handling
+//                                        }];
+//}
 
 - (void)loadInvitationsWithOffset:(NSInteger)offset{
     int userID = [Authentication sharedInstance].currentUser.uID;
@@ -209,6 +198,9 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    _payingOrdersHeader = [self createHeader:@"30分钟内未支付的饭局"];
+    _upcomingOrdersHeader = [self createHeader:@"最近的饭局"];
+    _passedOrdersHeader = [self createHeader:@"已经结束的饭局"];
     [self loadOrders];
 }
 
@@ -224,8 +216,49 @@
 }
 
 - (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section {
-    return 0;
+    return 23;
 }
+
+- (UIView*)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section{
+    OrderListDataSource* ds = self.dataSource;
+    if (section == 0) {
+        if (ds.payingOrders.count > 0) {
+            return _payingOrdersHeader;
+        } else if(ds.upcomingOrders.count > 0){
+            return _upcomingOrdersHeader;
+        } else {
+            return _passedOrdersHeader;
+        }
+    } else if(section == 1){
+        if(ds.payingOrders.count > 0){
+            return ds.upcomingOrders.count > 0 ? _upcomingOrdersHeader : _passedOrdersHeader;
+        } else {
+            return _passedOrdersHeader;
+        }
+    } else {
+        return _passedOrdersHeader;
+    }
+}
+
+-(UIView*)createHeader:(NSString*)text{
+    UIView* view = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, 22)];
+    view.backgroundColor = [UIColor colorWithRed:0 green:0 blue:0 alpha:0.5];
+    UIImage* clockImage = [UIImage imageNamed:@"title_time"];
+    UIImageView *clockImageView = [[UIImageView alloc] initWithImage:clockImage];
+    clockImageView.frame = CGRectMake(9, 5, clockImage.size.width, clockImage.size.height);
+    CGFloat x = clockImageView.frame.origin.x + clockImageView.frame.size.width + 6;
+    UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(x, 0, 250, 23)];
+    label.text = NSLocalizedString(text, nil);
+    label.textColor = RGBCOLOR(245, 245, 245);
+    label.font = [UIFont systemFontOfSize:14];
+    label.backgroundColor = [UIColor clearColor];
+    label.layer.shadowColor = RGBACOLOR(0, 0, 0, 0.5).CGColor;
+    label.layer.shadowOffset = CGSizeMake(0, 1);
+    [view addSubview:clockImageView];
+    [view addSubview:label];
+    return view;
+}
+
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
      MyInvitationsDataSource *ds = self.dataSource;
@@ -244,20 +277,27 @@
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath{
     id obj = [self.dataSource tableView:tableView objectForRowAtIndexPath:indexPath];
-    if ([obj isKindOfClass:[OrderTableItem class]]) {
-        OrderTableItem *item = obj;
-        OrderInfo* order = item.orderInfo;
-        OrderDetailsViewController *details = [[OrderDetailsViewController alloc] initWithNibName:@"OrderDetailsViewController" bundle:nil];
-        details.order = order;
-        [self.navigationController pushViewController:details
-                                             animated:YES];
+    if ([obj isKindOfClass:[OrderInfo class]]) {
+        
+        OrderInfo* order = obj;
+        if (order.status == 1) {//unpaid
+            MealDetailViewController* mealVC = [[MealDetailViewController alloc] init];
+            mealVC.unfinishedOrder = order;
+            mealVC.mealInfo = order.meal;
+            [self.navigationController pushViewController:mealVC animated:YES];
+        } else {
+            OrderDetailsViewController *details = [[OrderDetailsViewController alloc] initWithNibName:@"OrderDetailsViewController" bundle:nil];
+            details.order = order;
+            [self.navigationController pushViewController:details
+                                                 animated:YES];
+        }
     } else if ([obj isKindOfClass:[LoadMoreTableItem class]]){
         if (_loadMore.loading) {
             return;
         }
         _loadMore.loading = YES;
         [self reloadLastRow];
-        [self loadMoreOrders];
+//        [self loadMoreOrders];
     }
 }
 

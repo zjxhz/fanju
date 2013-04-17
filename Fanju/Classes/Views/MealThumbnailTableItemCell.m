@@ -10,9 +10,9 @@
 #import "MealTableItem.h"
 #import "MealInvitationTableItem.h"
 #import "DateUtil.h"
-#import "OrderTableItem.h"
 #import "AvatarFactory.h"
 #import "NINetworkImageView.h"
+#import "OrderInfo.h"
 
 #define CELL_HEIGHT 125
 #define THUMBNAIL_LENGTH 107
@@ -115,7 +115,7 @@
     UIImageView* separatorView = [[UIImageView alloc] initWithFrame:CGRectMake(0, CELL_HEIGHT - separatorImg.size.height, separatorImg.size.width, separatorImg.size.height)];
     separatorView.image = separatorImg;
     [self.contentView addSubview:separatorView];
-    _item = nil;
+    self.selectionStyle = UITableViewCellSelectionStyleNone;
 }
 
 - (id)initWithStyle:(UITableViewCellStyle)style
@@ -128,56 +128,50 @@
 	return self;
 }
 
-
-- (id)object {
-	return _item;  
+-(id)object{
+    return _orderInfo;
 }
 
 - (void)setObject:(id)object {
-	if (_item != object) {
-		[super setObject:object];
-        MealInfo *mealInfo = nil;
-        MealInvitation *mealInvitation = nil;
-        OrderInfo *order = nil;
-        if ([object isKindOfClass:[OrderTableItem class]]) {
-            OrderTableItem *orderTableItem =  object;
-            order = orderTableItem.orderInfo;
-            mealInfo = order.meal;
-        } else if([object isKindOfClass:[MealInvitationTableItem class]]) {
-            MealInvitationTableItem *mealInvitationTableItem = object;
-            mealInvitation = mealInvitationTableItem.mealInvitation;        
-            mealInfo = mealInvitation.meal;
-        } 
-        
-        if (mealInvitation) {
+    [super setObject:object];
+    MealInfo *mealInfo = nil;
+    MealInvitation *mealInvitation = nil;
+    if ([object isKindOfClass:[OrderInfo class]]) {
+        _orderInfo = object;
+        mealInfo = _orderInfo.meal;
+    } else if([object isKindOfClass:[MealInvitationTableItem class]]) {
+        MealInvitationTableItem *mealInvitationTableItem = object;
+        mealInvitation = mealInvitationTableItem.mealInvitation;        
+        mealInfo = mealInvitation.meal;
+    } 
+    
+    if (mealInvitation) {
 //            NSString *invitationString = mealInfo.type == THEMES ? NSLocalizedString(@"GatheringInvitation", nil) : NSLocalizedString(@"DatingInvitation", nil);
-//            
+//
 //            NSString* timePast = [DateUtil humanReadableIntervals:[mealInvitation.timestamp timeIntervalSinceNow]];
 //            [_fromLabel setText:[NSString stringWithFormat:invitationString, mealInvitation.from.username, timePast]];
 //            _imgView.frame = CGRectMake(2, 22, 120, 111);
-            
-        } else {
-//            _fromLabel = nil;
-            
-        }
-		// Set the data in various UI elements
-        [_imgView setPathToNetworkImage:[mealInfo photoFullUrl] forDisplaySize:CGSizeMake(THUMBNAIL_LENGTH, THUMBNAIL_LENGTH) contentMode:UIViewContentModeScaleAspectFill];
-		[_topicLabel setText:mealInfo.topic];
-		[_timeLabel setText:[mealInfo timeText]];
-        [_timeLabel sizeToFit];
-        _addressLabel.text = [NSString stringWithFormat:@"%@ %@", mealInfo.restaurant.name, mealInfo.restaurant.address];
-//        [_addressLabel sizeToFit];
-        if (order.code) {
-            _codeTextLabel.text = order.code;
-        } else {
-            _codeTextLabel.text = @"未支付";
-        }
         
-//        [_codeTextLabel sizeToFit];
-        _numberOfPersonLabel.text = [NSString stringWithFormat:@"限%d人", order.numerOfPersons];
-        [_numberOfPersonLabel sizeToFit];
+    } else {
+//            _fromLabel = nil;
         
     }
+    // Set the data in various UI elements
+    [_imgView setPathToNetworkImage:[mealInfo photoFullUrl] forDisplaySize:CGSizeMake(THUMBNAIL_LENGTH, THUMBNAIL_LENGTH) contentMode:UIViewContentModeScaleAspectFill];
+    [_topicLabel setText:mealInfo.topic];
+    [_timeLabel setText:[mealInfo timeText]];
+    [_timeLabel sizeToFit];
+    _addressLabel.text = [NSString stringWithFormat:@"%@ %@", mealInfo.restaurant.name, mealInfo.restaurant.address];
+//        [_addressLabel sizeToFit];
+    if (_orderInfo.code) {
+        _codeTextLabel.text = _orderInfo.code;
+    } else {
+        _codeTextLabel.text = @"未支付";
+    }
+    
+//        [_codeTextLabel sizeToFit];
+    _numberOfPersonLabel.text = [NSString stringWithFormat:@"限%d人", _orderInfo.numerOfPersons];
+    [_numberOfPersonLabel sizeToFit];
 }
 
 @end

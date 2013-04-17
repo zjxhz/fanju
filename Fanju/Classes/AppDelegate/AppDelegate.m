@@ -1,3 +1,4 @@
+
 //
 //  AppDelegate.m
 //  EasyOrder
@@ -141,14 +142,11 @@
                 NSDictionary* dic = @{@"status": @"NOK", @"message":@"支付已经成功，但是同步服务器产生了网络错误，请联系客服"};
                 [[NSNotificationCenter defaultCenter] postNotificationName:ALIPAY_PAY_RESULT object:dic userInfo:nil];
             }];
-        } else { //验签错误
-                NSDictionary* dic = @{@"status": @"NOK", @"message":@"支付已经成功，但是产生了签名错误，请联系客服"};
-				[[NSNotificationCenter defaultCenter] postNotificationName:ALIPAY_PAY_RESULT object:dic userInfo:nil];
+        } else {
+            NSLog(@"alixpay failed with status message: %@", result.statusMessage);
+            NSDictionary* dic = @{@"status": @"NOK", @"message":result.statusMessage};
+            [[NSNotificationCenter defaultCenter] postNotificationName:ALIPAY_PAY_RESULT object:dic userInfo:nil];
         }
-    } else {
-        NSLog(@"alixpay failed with status message: %@", result.statusMessage);
-        NSDictionary* dic = @{@"status": @"NOK", @"message":result.statusMessage};
-        [[NSNotificationCenter defaultCenter] postNotificationName:ALIPAY_PAY_RESULT object:dic userInfo:nil];
     }
 }
 

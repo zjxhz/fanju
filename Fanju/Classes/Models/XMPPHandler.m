@@ -42,6 +42,7 @@ NSString * const EOUnreadNotificationCount = @"EOUnreadNotificationCount";
         [_xmppReconnect activate:_xmppStream];
         _messageCoreDataStorage = [[ChatHistoryCoreDataStorage alloc] initWithDatabaseFilename:[NSString stringWithFormat:@"ChatHistory_%d.sqlite", _currentUser.uID]];
         _messageManagedObjectContext = [_messageCoreDataStorage mainThreadManagedObjectContext];
+        _background_queue = dispatch_queue_create("MessageRetrievingQueue", DISPATCH_QUEUE_SERIAL);
         _xmppRosterStorage = [[XMPPRosterCoreDataStorage alloc] initWithDatabaseFilename:[NSString stringWithFormat:@"XMPPRoster_%d.sqlite", _currentUser.uID]];
         _rosterManagedObjectContext = [_xmppRosterStorage mainThreadManagedObjectContext];
         
@@ -78,13 +79,32 @@ NSString * const EOUnreadNotificationCount = @"EOUnreadNotificationCount";
     [self loadRecentContacts];
 }
 
+-(NSManagedObjectContext*)backgroundMessageManagedObjectContext{
+    if (_messageManagedObjectContext) {
+        return _messageManagedObjectContext;
+    }
+    dispatch_sync(_background_queue, ^{
+        _messageManagedObjectContext = [[NSManagedObjectContext alloc] init];
+        NSPersistentStoreCoordinator* coordinator = [_messageCoreDataStorage persistentStoreCoordinator];
+        _messageManagedObjectContext.persistentStoreCoordinator = coordinator;
+        _messageManagedObjectContext.undoManager = nil;
+        
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(managedObjectContextDidSave:)
+                                                     name:NSManagedObjectContextDidSaveNotification
+                                                   object:nil];
+    });
+    return _messageManagedObjectContext;
+    
+    
+}
+
 -(void)loadRecentContacts{
     _recentContactsDict = [NSMutableDictionary dictionary];
     NSFetchRequest *req = [[NSFetchRequest alloc] init];
-    NSManagedObjectContext* context = _messageManagedObjectContext;
-    req.entity = [NSEntityDescription entityForName:@"RecentContact" inManagedObjectContext:context];
+    req.entity = [NSEntityDescription entityForName:@"RecentContact" inManagedObjectContext:_messageManagedObjectContext];
     NSError* error;
-    NSArray* objects = [context executeFetchRequest:req error:&error];
+    NSArray* objects = [_messageManagedObjectContext executeFetchRequest:req error:&error];
     for (RecentContact *contact in objects) {
         [_recentContactsDict setObject:contact forKey:contact.contact];
     }
@@ -111,13 +131,13 @@ NSString * const EOUnreadNotificationCount = @"EOUnreadNotificationCount";
         contact = [_recentContactsDict objectForKey:message.sender];
         if (![message.sender isEqualToString:_currentContact]) {
             contact.unread = [NSNumber numberWithInteger:([contact.unread integerValue] + 1)];
-            NSLog(@"unread message from %@: %@", message.sender, contact.unread);
+//            NSLog(@"unread message from %@: %@", message.sender, contact.unread);
         } else { //a message from the one i'm currently talking to
             [self markMessagesReadFrom:contact.contact]; //mark all messages from this one as read
         }
     } else if ([_recentContactsDict objectForKey:message.receiver]) { //i send a message
         contact = [_recentContactsDict objectForKey:message.receiver];
-        NSLog(@"a message sent to %@", message.receiver);
+//        NSLog(@"a message sent to %@", message.receiver);
     } else { //a message between i and a user i have never talked to
         contact = [NSEntityDescription insertNewObjectForEntityForName:@"RecentContact" inManagedObjectContext:_messageManagedObjectContext];
         UserProfile* currentUser = [Authentication sharedInstance].currentUser;
@@ -130,7 +150,7 @@ NSString * const EOUnreadNotificationCount = @"EOUnreadNotificationCount";
             contact.unread = [NSNumber numberWithInteger:1];
         }
         [_recentContactsDict setValue:contact forKey:contact.contact];
-        NSLog(@"a message betwen %@ who i have never talked to", contact.contact);
+//        NSLog(@"a message betwen %@ who i have never talked to", contact.contact);
     }
     contact.message = message.message;
     contact.time = message.time;
@@ -352,9 +372,8 @@ NSString * const EOUnreadNotificationCount = @"EOUnreadNotificationCount";
     }
 }
 
-
--(void)saveMessage:(NSString*)sender receiver:(NSString*)receiver message:(NSString*)message time:(NSDate*)time hasRead:(BOOL)read silenly:(BOOL)silently{
-    EOMessage* messageMO  = [NSEntityDescription insertNewObjectForEntityForName:@"EOMessage" inManagedObjectContext:_messageManagedObjectContext];
+-(EOMessage*)insertMessage:(NSString*)sender receiver:(NSString*)receiver message:(NSString*)message time:(NSDate*)time inContext:(NSManagedObjectContext*)context{
+    EOMessage* messageMO  = [NSEntityDescription insertNewObjectForEntityForName:@"EOMessage" inManagedObjectContext:context];
     XMPPJID *senderJID = [XMPPJID jidWithString:sender];
     XMPPJID *receiverJID = [XMPPJID jidWithString:receiver];
     sender = senderJID.bare;
@@ -364,18 +383,23 @@ NSString * const EOUnreadNotificationCount = @"EOUnreadNotificationCount";
     messageMO.time = time;
     messageMO.message = message;
     messageMO.type = @"chat";
-    
+    return messageMO;
+}
+
+//can be called outside the main thread
+-(void)saveMessage:(NSString*)sender receiver:(NSString*)receiver message:(NSString*)message time:(NSDate*)time hasRead:(BOOL)read silenly:(BOOL)silently{
+    EOMessage* messageMO = [self insertMessage:sender receiver:receiver message:message time:time inContext:_messageManagedObjectContext];
     [self updateRecentMessages:messageMO hasRead:read];
     if (!silently) {
-        [self updateUnreadCount];
-        NSError* error;
-        if(![_messageManagedObjectContext save:&error]){
-            NSLog(@"failed to save a message");
-        } else {
-            [[NSNotificationCenter defaultCenter] postNotificationName:EOMessageDidSaveNotification
+            [self updateUnreadCount];
+            NSError* error;
+            if(![_messageManagedObjectContext save:&error]){
+                NSLog(@"failed to save a message");
+            } else {
+                [[NSNotificationCenter defaultCenter] postNotificationName:EOMessageDidSaveNotification
                                                                 object:messageMO
                                                               userInfo:nil];
-        }
+            }
     }
 
 }
@@ -496,52 +520,91 @@ NSString * const EOUnreadNotificationCount = @"EOUnreadNotificationCount";
 }
 
 -(void)handleRetrievedMessages:(NSXMLElement*)chatElement after:(NSString*)after{
-    NSDate* date = [self.formatter dateFromString:after];
-    NSDate* endDate = [self.formatter dateFromString:[chatElement attributeStringValueForName:@"end"]];
-    
-    NSString* with = [XMPPJID jidWithString:[chatElement attributeStringValueForName:@"with"]].bare;
-    for (int i = 0; i < chatElement.children.count; ++i) {
-        NSXMLElement* element = chatElement.children[i];
-        NSString* from = nil;
-        NSString* to = nil;
-
-        if ([element.name isEqual:@"to"] ) {
-            from =  [_currentUser jabberID];
-            to = with;
-        } else if([element.name isEqual:@"from"]){
-            to = [_currentUser jabberID];
-            from = with;
-        } 
+    dispatch_async(_background_queue, ^(void){
+        NSDate* date = [self.formatter dateFromString:after];
+        NSDate* endDate = [self.formatter dateFromString:[chatElement attributeStringValueForName:@"end"]];
         
-        if ([element.name isEqual:@"from"] || [element.name isEqual:@"to"]){
-            NSString* strMessage = [[element elementForName:@"body"] stringValue];
-            NSInteger seconds = [[element attributeStringValueForName:@"secs"] integerValue];
-            NSDate* messageDate = i == chatElement.children.count - 1 ? endDate : [date dateByAddingTimeInterval:seconds];//last message time must be accurate(in ms), others are in seconds
-            RecentContact* contact = [_recentContactsDict objectForKey:with];
-            if (contact){
-                NSTimeInterval delta = [messageDate timeIntervalSinceDate:contact.time];
-                if ((delta < 5 && [strMessage isEqual:contact.message]) || delta < 0) {
-                    NSLog(@"ignoring message(%@ - at:%@) that is either too old or has same time(%@) and same content with the latest one", strMessage, messageDate, contact.time);
-                    continue;
+        NSString* with = [XMPPJID jidWithString:[chatElement attributeStringValueForName:@"with"]].bare;
+        NSDate* start = [NSDate date];
+        EOMessage* messageMO = nil;
+        NSInteger unread = 0;
+        for (int i = 0; i < chatElement.children.count; ++i) {
+            NSXMLElement* element = chatElement.children[i];
+            NSString* from = nil;
+            NSString* to = nil;
+            
+            if ([element.name isEqual:@"to"] ) {
+                from =  [_currentUser jabberID];
+                to = with;
+            } else if([element.name isEqual:@"from"]){
+                to = [_currentUser jabberID];
+                from = with;
+            }
+            
+            if ([element.name isEqual:@"from"] || [element.name isEqual:@"to"]){
+                NSString* strMessage = [[element elementForName:@"body"] stringValue];
+                NSInteger seconds = [[element attributeStringValueForName:@"secs"] integerValue];
+                NSDate* messageDate = i == chatElement.children.count - 1 ? endDate : [date dateByAddingTimeInterval:seconds];//last message time must be accurate(in ms), others are in seconds
+                RecentContact* contact = [_recentContactsDict objectForKey:with];
+                if (contact){
+                    NSTimeInterval delta = [messageDate timeIntervalSinceDate:contact.time];
+                    if ((delta < 5 && [strMessage isEqual:contact.message]) || delta < 0) {
+                        NSLog(@"ignoring message(%@ - at:%@) that is either too old or has same time(%@) and same content with the latest one", strMessage, messageDate, contact.time);
+                        continue;
+                    }
                 }
+                BOOL read = [element attributeBoolValueForName:@"isRead"];
+                if (!read && ![from isEqual:[_currentUser jabberID]]) {
+                    unread++;
+                }
+                BOOL silently = YES;
+                if (i == chatElement.children.count - 1) {
+                    NSLog(@"last message with %@, refreshing UI", with);
+                    silently = NO;
+                }
+                messageMO = [self insertMessage:from receiver:to message:strMessage time:messageDate inContext:[self backgroundMessageManagedObjectContext]];
             }
-            BOOL read = [element attributeBoolValueForName:@"isRead"];
-            BOOL silently = YES;
-            if (i == chatElement.children.count - 1) {
-                NSLog(@"last message with %@, refreshing UI", with);
-                silently = NO;
-            }
-            [self saveMessage:from receiver:to message:strMessage time:messageDate hasRead:read silenly:silently];
-
         }
-    }
-    NSInteger more = [[chatElement attributeStringValueForName:@"more"] integerValue];
-    if (more > 0) {
-        NSLog(@"retrieving more messages after %@", endDate);
-        [self retrieveMessagesWith:with after:[endDate timeIntervalSince1970] retrievingFromList:NO];
-    }
-}
+        if (messageMO) {
+            RecentContact* contact = [_recentContactsDict valueForKey:with];
+            if (!contact) {
+                contact = [NSEntityDescription insertNewObjectForEntityForName:@"RecentContact" inManagedObjectContext:[self backgroundMessageManagedObjectContext]];
+                UserProfile* currentUser = [Authentication sharedInstance].currentUser;
+                BOOL iamSender = [messageMO.sender hasPrefix:currentUser.jabberID];
+                if (iamSender) {
+                    contact.contact = messageMO.receiver;
+                } else {
+                    contact.contact = messageMO.sender;
+                }
+                [_recentContactsDict setValue:contact forKey:contact.contact];
+            }
+            contact.message = messageMO.message;
+            contact.time = messageMO.time;
+            contact.unread = [NSNumber numberWithInteger:([contact.unread integerValue] + unread)];
+            [_recentContactsDict setValue:contact forKey:contact.contact];
+            
+            NSError* error;
+            if(![[self backgroundMessageManagedObjectContext] save:&error]){
+                NSLog(@"failed to save a message in background");
+            }
+            
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [self updateUnreadCount];
+                [[NSNotificationCenter defaultCenter] postNotificationName:EOMessageDidSaveNotification
+                                                                    object:messageMO
+                                                                  userInfo:nil];
+            });
+            NSLog(@"%.3fs for processing retrived messages", [[NSDate date] timeIntervalSinceDate:start]);
+        }
+         NSInteger more = [[chatElement attributeStringValueForName:@"more"] integerValue];
+        if (more > 0) {
+            NSLog(@"retrieving more messages after %@", endDate);
+            [self retrieveMessagesWith:with after:[endDate timeIntervalSince1970] retrievingFromList:NO];
+        }
+        [NSThread sleepForTimeInterval:0.1];//slow down the background saving as it might block GUIs
 
+    });
+}
 
 - (void)goOnline
 {

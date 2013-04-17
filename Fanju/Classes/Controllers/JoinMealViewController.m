@@ -31,7 +31,6 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
 [[NSNotificationCenter defaultCenter] removeObserver:self];
 
 @interface JoinMealViewController (){
-    NSInteger _numberOfPersons;
     PriceCell* _priceCell;
     NumberOfParticipantsCell* _numberCell;
     TotalPriceCell* _totalPriceCell;
@@ -247,12 +246,19 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
                                     cachePolicy:TTURLRequestCachePolicyNone
                                         success:^(id obj) {
                                             NSDictionary* dic = obj;
-                                            OrderInfo* order = [OrderInfo orderInfoWithData:dic];
-                                            NSString* signedString = [dic objectForKey:@"app_req_str"];
-                                            [self payFor:order withSignedString:signedString];
-                                            [_confirmButton setEnabled:YES];
+                                             //note: as order has attribute "status" too if success status will set to the status of the order
+                                            if ([dic[@"status"] isEqual:@"NOK"]) {
+                                                
+                                                [SVProgressHUD dismissWithError:dic[@"message"]];
+                                                [_confirmButton setEnabled:YES];
+
+                                            } else {
+                                                OrderInfo* order = [OrderInfo orderInfoWithData:dic];
+                                                NSString* signedString = [dic objectForKey:@"app_req_str"];
+                                                [self payFor:order withSignedString:signedString];
+                                                [_confirmButton setEnabled:NO];                                            }
                                         } failure:^{
-                                            [SVProgressHUD dismissWithError:@"加入饭局失败"];
+                                            [SVProgressHUD dismissWithError:@"加入饭局失败，请稍后重试"];
                                             [_confirmButton setEnabled:YES];
                                         }];
 }
@@ -287,7 +293,10 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
         detail.navigationItem.rightBarButtonItem = [[WidgetFactory sharedFactory] normalBarButtonItemWithTitle:@"完成" target:[NewSidebarViewController sideBar] action:@selector(showMealList)];
         [self.navigationController pushViewController:detail animated:YES];
     } else {
-        [SVProgressHUD dismissWithError:result[@"message"]];
+        [SVProgressHUD dismiss];
+        UIAlertView* a = [[UIAlertView alloc] initWithTitle:@"支付失败" message:result[@"message"] delegate:nil cancelButtonTitle:@"确定" otherButtonTitles:nil];
+        [a show];
+        [_confirmButton setEnabled:YES];
     }
 }
 

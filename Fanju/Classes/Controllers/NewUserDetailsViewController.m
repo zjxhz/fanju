@@ -36,7 +36,6 @@
 #define TAG_COMMENT @"发评论"
 
 @interface NewUserDetailsViewController (){
-    NSArray* _sections;
     BOOL _loadingComments;
     NSMutableArray* _commentItems;
     PhotoThumbnailCell* _photoCell;
@@ -63,7 +62,6 @@
         self.tableView.dataSource = self;
         self.tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
         self.tableView.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"bg"]];
-        _sections = @[@"", @"兴趣爱好（%d）", @"照片", @"资料", @"社交网络", @"饭友的评论"];
         self.tableView.showsVerticalScrollIndicator = NO;
     }
     return self;
@@ -449,7 +447,7 @@
 }
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView{
-    return _sections.count;
+    return 6;
 }
 
 //- (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section{

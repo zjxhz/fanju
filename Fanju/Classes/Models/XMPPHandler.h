@@ -29,6 +29,7 @@
 }
 @property(nonatomic, strong) XMPPStream* xmppStream;
 @property(nonatomic, strong) NSManagedObjectContext* messageManagedObjectContext;
+@property(nonatomic, strong) NSManagedObjectContext* backgroundMessageManagedObjectContext;
 @property(nonatomic, strong) NSManagedObjectContext* rosterManagedObjectContext;
 @property(nonatomic, readonly) NSArray* recentContacts;
 @property(nonatomic, readonly) XMPPRosterCoreDataStorage* xmppRosterStorage;

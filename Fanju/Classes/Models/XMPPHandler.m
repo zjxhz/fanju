@@ -80,24 +80,42 @@ NSString * const EOUnreadNotificationCount = @"EOUnreadNotificationCount";
 }
 
 -(NSManagedObjectContext*)backgroundMessageManagedObjectContext{
-    if (_messageManagedObjectContext) {
-        return _messageManagedObjectContext;
+    if (_backgroundMessageManagedObjectContext) {
+        return _backgroundMessageManagedObjectContext;
     }
-    dispatch_sync(_background_queue, ^{
-        _messageManagedObjectContext = [[NSManagedObjectContext alloc] init];
+    dispatch_block_t block = ^{
+        _backgroundMessageManagedObjectContext = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSConfinementConcurrencyType];
         NSPersistentStoreCoordinator* coordinator = [_messageCoreDataStorage persistentStoreCoordinator];
-        _messageManagedObjectContext.persistentStoreCoordinator = coordinator;
-        _messageManagedObjectContext.undoManager = nil;
+        _backgroundMessageManagedObjectContext.persistentStoreCoordinator = coordinator;
+        _backgroundMessageManagedObjectContext.undoManager = nil;
         
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(managedObjectContextDidSave:)
                                                      name:NSManagedObjectContextDidSaveNotification
                                                    object:nil];
-    });
-    return _messageManagedObjectContext;
+    };
+    if( dispatch_get_current_queue() == _background_queue){
+        block();
+    } else {
+        dispatch_sync(_background_queue, block);
+    }
     
-    
+    return _backgroundMessageManagedObjectContext;
 }
+
+- (void)managedObjectContextDidSave:(NSNotification *)notification
+{
+	NSManagedObjectContext *sender = (NSManagedObjectContext *)[notification object];
+	
+	if ((sender != _backgroundMessageManagedObjectContext) &&
+	    (sender.persistentStoreCoordinator == _backgroundMessageManagedObjectContext.persistentStoreCoordinator))
+	{	
+		dispatch_async(_background_queue, ^{
+			[_backgroundMessageManagedObjectContext mergeChangesFromContextDidSaveNotification:notification];
+		});
+    }
+}
+
 
 -(void)loadRecentContacts{
     _recentContactsDict = [NSMutableDictionary dictionary];
@@ -596,7 +614,7 @@ NSString * const EOUnreadNotificationCount = @"EOUnreadNotificationCount";
             });
             NSLog(@"%.3fs for processing retrived messages", [[NSDate date] timeIntervalSinceDate:start]);
         }
-         NSInteger more = [[chatElement attributeStringValueForName:@"more"] integerValue];
+        NSInteger more = [[chatElement attributeStringValueForName:@"more"] integerValue];
         if (more > 0) {
             NSLog(@"retrieving more messages after %@", endDate);
             [self retrieveMessagesWith:with after:[endDate timeIntervalSince1970] retrievingFromList:NO];

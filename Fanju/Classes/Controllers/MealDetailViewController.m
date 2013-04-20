@@ -488,9 +488,9 @@
     UIImage* cost_bg = [UIImage imageNamed:@"renjun_mon"];
     UIImageView* cost_view = [[UIImageView alloc] initWithImage:cost_bg];
     cost_view.frame = CGRectMake(9, 0, cost_bg.size.width, cost_bg.size.height);
-    UILabel* cost_label = [[UILabel alloc] initWithFrame:CGRectMake(21, 2, 60, 20)];
+    UILabel* cost_label = [[UILabel alloc] initWithFrame:CGRectMake(21, 1.5, 60, 20)];
     cost_label.backgroundColor = [UIColor clearColor];
-    cost_label.textColor = RGBCOLOR(200, 200, 200);
+    cost_label.textColor = RGBCOLOR(220, 220, 220);
     cost_label.text = [NSString stringWithFormat:@"人均：¥%.0f", _mealInfo.price];
     cost_label.font = [UIFont systemFontOfSize:12];
     

@@ -59,6 +59,7 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
     _tableView.delegate = self;
     AppDelegate *delegate = (AppDelegate*)[UIApplication sharedApplication].delegate;
     self.view.backgroundColor = [UIColor colorWithPatternImage:delegate.bgImage];
+    self.navigationItem.titleView  = [[WidgetFactory sharedFactory] titleViewWithTitle:@"参加饭局"];
     UITapGestureRecognizer* tap  = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(viewTapped:)];
     tap.delegate = self;
     [self.view addGestureRecognizer:tap];
@@ -86,15 +87,6 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
     
     return 45;
 }
-
-
-
-//-(NSString*)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section{
-//    if (section == 1) {
-//        return @"联系方式";
-//    }
-//    return nil;
-//}
 
 
 -(CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section{

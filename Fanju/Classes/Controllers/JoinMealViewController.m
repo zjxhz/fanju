@@ -87,19 +87,42 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
     return 45;
 }
 
--(CGFloat)tableView:(UITableView *)tableView heightForFooterInSection:(NSInteger)section{
-    return section == 0 ? 0 : 30;
-}
 
--(NSString*)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section{
-    if (section == 1) {
-        return @"联系方式";
-    }
-    return nil;
-}
+
+//-(NSString*)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section{
+//    if (section == 1) {
+//        return @"联系方式";
+//    }
+//    return nil;
+//}
+
 
 -(CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section{
-    return section == 0 ? 12 : 30;
+    return section == 0 ? 20 : 25;
+}
+
+-(UIView*)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section{
+    if (section == 0) {
+        return nil;
+    }
+    UIView* view = [[UIView alloc] initWithFrame:CGRectMake(0, 10, 320, 30)];
+    UILabel* line = [self headerLabel:@"联系方式"];
+    line.frame = CGRectMake(10, 0, 300, 15);
+    [view addSubview:line];
+    return view;
+}
+
+-(UILabel*)headerLabel:(NSString*)text{
+    UILabel* label = [[UILabel alloc] init];
+    label.text = text;
+    label.textColor = RGBCOLOR(0, 0, 0);
+    label.font = [UIFont systemFontOfSize:14];
+    label.backgroundColor = [UIColor clearColor];
+    return label;
+}
+
+-(CGFloat)tableView:(UITableView *)tableView heightForFooterInSection:(NSInteger)section{
+    return section == 0 ? 0 : 30;
 }
 
 -(UIView*)tableView:(UITableView *)tableView viewForFooterInSection:(NSInteger)section{
@@ -108,9 +131,9 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
     }
     UIView* view = [[UIView alloc] initWithFrame:CGRectMake(0, 10, 320, 30)];
     UILabel* line0 = [self footerLabel:@"手机号码是非公开信息"];
-    line0.frame = CGRectMake(10, 0, 300, 15);
+    line0.frame = CGRectMake(10, 4, 300, 15);
     UILabel* line1 = [self footerLabel:@"用于饭局临时变更的信息通知或用户未按时参加饭局时的提醒确认"];
-    line1.frame = CGRectMake(10, 15, 300, 15);
+    line1.frame = CGRectMake(10, 19, 300, 15);
     [view addSubview:line0];
     [view addSubview:line1];
     return view;

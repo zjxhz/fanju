@@ -7,6 +7,7 @@
 //
 
 #import "WidgetFactory.h"
+#import <QuartzCore/QuartzCore.h>
 
 @implementation WidgetFactory
 +(WidgetFactory*)sharedFactory {
@@ -63,4 +64,17 @@
 
 }
 
+-(UIView*)tabBarInView:(UIView*)view withButton:(UIButton*)button{
+    UIImage* toolbarShadow = [UIImage imageNamed:@"toolbar_shadow"];
+    UIImage* bg = [UIImage imageNamed:@"toolbar_bg"];
+    UIView* tabBar = [[UIView alloc] initWithFrame:CGRectMake(0, view.frame.size.height - bg.size.height, bg.size.width, bg.size.height)];
+    tabBar.backgroundColor = [UIColor colorWithPatternImage:bg];
+    
+    [tabBar addSubview:button];
+    button.frame = CGRectMake((tabBar.frame.size.width - button.frame.size.width) / 2, (tabBar.frame.size.height - button.frame.size.height) / 2, button.frame.size.width, button.frame.size.height);
+    UIImageView* shadowView = [[UIImageView alloc] initWithFrame:CGRectMake(0, -toolbarShadow.size.height, toolbarShadow.size.width, toolbarShadow.size.height)];
+    shadowView.image = toolbarShadow;
+    [tabBar addSubview:shadowView];
+    return tabBar;
+}
 @end

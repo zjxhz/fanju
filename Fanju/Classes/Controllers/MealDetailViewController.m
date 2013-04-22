@@ -104,13 +104,11 @@
     _tabBar = [[UIView alloc] initWithFrame:CGRectMake(0, self.view.frame.size.height - TAB_BAR_HEIGHT, self.view.frame.size.width, TAB_BAR_HEIGHT)];
     _tabBar.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"toolbar_bg"]];
     UIImage* join_img = [UIImage imageNamed:@"toolbth1"];
-    UIImage* join_img_push = [UIImage imageNamed:@"toolbth1_push"];
-    CGFloat x = JOIN_BUTTON_X;
-    CGFloat y = (_tabBar.frame.size.height - join_img.size.height + toolbarShadow.size.height) / 2;
+    UIImage* comment_img = [UIImage imageNamed:@"toolbth2"];
+    CGFloat x = (320 - join_img.size.width - comment_img.size.width) / 2;
+    CGFloat y = (_tabBar.frame.size.height - join_img.size.height) / 2;
     _joinButton = [[UIButton alloc] initWithFrame:CGRectMake(JOIN_BUTTON_X, y, join_img.size.width, join_img.size.height)];
-    [_joinButton setBackgroundImage:join_img forState:UIControlStateNormal];
-    [_joinButton setBackgroundImage:join_img_push forState:UIControlStateSelected | UIControlStateHighlighted ];
-    _joinButton.titleLabel.textAlignment  = UITextAlignmentCenter;
+    [_joinButton setBackgroundImage:join_img forState:UIControlStateNormal];    _joinButton.titleLabel.textAlignment  = UITextAlignmentCenter;
     _joinButton.titleLabel.textColor = [UIColor whiteColor];
     _joinButton.titleLabel.font = [UIFont boldSystemFontOfSize:19];
 
@@ -121,7 +119,7 @@
         [_joinButton addTarget:self action:@selector(finishOrder:) forControlEvents:UIControlEventTouchDown];
     }
     
-    UIImage* comment_img = [UIImage imageNamed:@"toolbth2"];
+
     UIImage* comment_img_push = [UIImage imageNamed:@"toolbth2_push"];
     x = _joinButton.frame.origin.x + _joinButton.frame.size.width;
     UIButton* commentButton = [[UIButton alloc] initWithFrame:CGRectMake(x, y, comment_img.size.width, comment_img.size.height)];
@@ -132,7 +130,7 @@
     [_tabBar addSubview:commentButton];
     [self.view addSubview:_tabBar];
     
-    UIImageView* shadowView = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, toolbarShadow.size.width, toolbarShadow.size.height)];
+    UIImageView* shadowView = [[UIImageView alloc] initWithFrame:CGRectMake(0, -toolbarShadow.size.height, toolbarShadow.size.width, toolbarShadow.size.height)];
     shadowView.image = toolbarShadow;
     [_tabBar addSubview:shadowView];
 }
@@ -148,9 +146,9 @@
 }
 
 -(void)requetMealDetails{
-    [[NetworkHandler getHandler] requestFromURL:[NSString stringWithFormat:@"http://%@/api/v1/meal/%@/?format=json&limit=0", EOHOST, _mealID]
+    [[NetworkHandler getHandler] requestFromURL:[NSString stringWithFormat:@"http://%@/api/v1/meal/%@/?format=json", EOHOST, _mealID]
                                         method:GET
-                                cachePolicy:TTURLRequestCachePolicyDefault
+                                cachePolicy:TTURLRequestCachePolicyNetwork
                                         success:^(id obj) {
                                             NSDictionary* dic = obj;
                                             MealInfo* meal = [MealInfo mealInfoWithData:dic];
@@ -191,7 +189,9 @@
     
     TTSectionedDataSource* ds = [[TTSectionedDataSource alloc] initWithItems:items sections:sections];
     self.dataSource = ds;
-    //    [self requestDataFromServer];
+    if (!_mealInfo) {
+        [self requestDataFromServer];
+    };
 }
 
 -(void)viewWillAppear:(BOOL)animated{

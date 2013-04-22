@@ -94,6 +94,8 @@
 -(void)viewWillAppear:(BOOL)animated{
     [super viewWillAppear:animated];
     self.wantsFullScreenLayout = YES;
+    [self viewInFullScreen:YES];
+    _fullScreen = YES;
     self.navigationController.navigationBar.translucent = YES;
     [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleBlackTranslucent];
     [self.navigationController.view setNeedsLayout];
@@ -185,7 +187,11 @@
 
 -(void)viewTapped:(id)sender{
     _fullScreen = !_fullScreen;
-    [[UIApplication sharedApplication] setStatusBarHidden:_fullScreen];
-    [self.navigationController setNavigationBarHidden:_fullScreen];
+    [self viewInFullScreen:_fullScreen];
+}
+
+-(void)viewInFullScreen:(BOOL)fullScreen{
+    [[UIApplication sharedApplication] setStatusBarHidden:fullScreen];
+    [self.navigationController setNavigationBarHidden:fullScreen];
 }
 @end

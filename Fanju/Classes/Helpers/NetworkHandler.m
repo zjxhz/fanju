@@ -224,7 +224,7 @@ static int t = 0;
                 [SVProgressHUD dismissWithError:@"Network Error" afterDelay:1];
                 
                 NSData * data = [error.userInfo objectForKey:@"responsedata"];
-                NSLog([[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding]) ;
+//                NSLog([[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding]) ;
                 NSString* html = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
                 
                 NSString* errorPage = [NSString stringWithFormat:@"%@/error.html", NSTemporaryDirectory()];

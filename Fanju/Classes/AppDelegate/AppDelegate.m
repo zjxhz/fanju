@@ -69,7 +69,7 @@
     [[TTURLRequestQueue mainQueue] setMaxContentLength:0];
     
     // make sure to display the navigation controller before calling this
-    MFSideMenu* sideMenu = [MFSideMenu menuWithNavigationController:_navigationController leftSideMenuController:sideMenuViewController rightSideMenuController:nil];
+    MFSideMenu* sideMenu = [MFSideMenu menuWithNavigationController:_navigationController leftSideMenuController:sideMenuViewController rightSideMenuController:nil panMode:0];//no pan
     sideMenuViewController.sideMenu = sideMenu;
     
     UIRemoteNotificationType allowedNotifications = UIRemoteNotificationTypeAlert |  UIRemoteNotificationTypeBadge | UIRemoteNotificationTypeSound;

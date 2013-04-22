@@ -13,11 +13,7 @@
 #import "CellTextEditorViewController.h"
 #import "PullRefreshTableViewController2.h"
 #import "NewTagViewController.h"
-
-typedef enum {
-    ChangeAvatar, AddPhoto
-}
-PhotoUploadingOperation;
+#import "ImageUploader.h"
 
 @protocol NewUserDetailsViewControllerDelegate <NSObject>
 
@@ -27,7 +23,7 @@ PhotoUploadingOperation;
 
 @end
 
-@interface NewUserDetailsViewController : PullRefreshTableViewController2<UITableViewDelegate, UITableViewDataSource, PhotoThumbnailCellDelegate,UINavigationControllerDelegate, UIImagePickerControllerDelegate, UserDetailSaveDelegate,  CellTextEditorDelegate, TTPostControllerDelegate, UIActionSheetDelegate, UIGestureRecognizerDelegate, TagViewControllerDelegate>
+@interface NewUserDetailsViewController : PullRefreshTableViewController2<UITableViewDelegate, UITableViewDataSource, PhotoThumbnailCellDelegate,UINavigationControllerDelegate, UserDetailSaveDelegate,  CellTextEditorDelegate, TTPostControllerDelegate, UIActionSheetDelegate, UIGestureRecognizerDelegate, TagViewControllerDelegate, ImageUploaderDelegate>
 @property(nonatomic, strong) UserProfile* user;
 @property(nonatomic, weak) id<NewUserDetailsViewControllerDelegate> delegate;
 @property(nonatomic, strong) NSString* userID;

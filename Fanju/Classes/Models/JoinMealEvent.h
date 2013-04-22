@@ -14,7 +14,7 @@
 @interface JoinMealEvent : SimpleUserEvent
 @property(nonatomic, strong) NSString* participantID;
 @property(nonatomic, strong) UserProfile* participant;
-@property(nonatomic, strong) NSString* mealID;
+@property(nonatomic) NSInteger mealID;
 @property(nonatomic, strong) MealInfo* meal;
 @property(nonatomic, strong) NSString* mealTopic;
 @property(nonatomic, strong) NSString* mealPhoto;

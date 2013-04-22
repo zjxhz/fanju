@@ -136,6 +136,10 @@
     self.backgroundColor = [UIColor clearColor];
 }
 
+-(void)prepareForReuse{
+    [super prepareForReuse];
+    _avatar.image = nil;
+}
 
 #pragma mark -
 #pragma mark TTTableViewCell

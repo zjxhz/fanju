@@ -260,7 +260,7 @@
 -(IBAction)loginWithWeibo:(id)sender{
     [Authentication sharedInstance].delegate = self;
     if ([EOHOST hasPrefix:@"localhost"] || [EOHOST hasPrefix:@"www.ifunjoin"]) { //quick hack as it's not possible to login as weibo user on localhost
-        [[Authentication sharedInstance] loginWithUserName:@"1" password:@"1"];
+        [[Authentication sharedInstance] loginWithUserName:@"xuaxu" password:@"qqqqqq"];
         return;
     }
     [[Authentication sharedInstance] loginAsSinaWeiboUser:self];

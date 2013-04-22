@@ -24,6 +24,7 @@
 #import "UploadPhotoEventCell.h"
 #import "SimpleUserEventCell.h"
 #import "WidgetFactory.h"
+#import "SVProgressHUD.h"
 
 @interface NotificationViewController (){
     NSMutableArray* _notifications;
@@ -323,9 +324,7 @@
     if([event isKindOfClass:[JoinMealEvent class]]){
         JoinMealEvent* je = (JoinMealEvent*)event;
         if (je.mealID) {
-            MealDetailViewController *mealDetail = [[MealDetailViewController alloc] init];
-            mealDetail.mealID = je.mealID;
-            [self.navigationController pushViewController:mealDetail animated:YES];
+            [self pushMealDetailsView:je.mealID];
         }
     } else if ([event isKindOfClass:[SimpleUserEvent class]]) {
         SimpleUserEvent* se = event;
@@ -334,6 +333,23 @@
         }
         
     } 
+}
+
+-(void)pushMealDetailsView:(NSInteger)mealID{
+    MealDetailViewController *mealDetail = [[MealDetailViewController alloc] init];
+    [[NetworkHandler getHandler] requestFromURL:[NSString stringWithFormat:@"http://%@/api/v1/meal/%d/?format=json", EOHOST, mealID]
+                                         method:GET
+                                    cachePolicy:TTURLRequestCachePolicyDefault
+                                        success:^(id obj) {
+                                            NSDictionary* dic = obj;
+                                            MealInfo* meal = [MealInfo mealInfoWithData:dic];
+                                            mealDetail.mealInfo = meal;
+                                            [self.navigationController pushViewController:mealDetail animated:YES];
+                                        } failure:^{
+                                            NSLog(@"failed to get user  for id %d", mealID);
+                                        }];
+    
+
 }
 #pragma mark - UIGestureRecognizerDelegate
 - (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldReceiveTouch:(UITouch *)touch{
@@ -356,8 +372,18 @@
 }
 
 -(void)pushUserDetails:(NSString*)userID{
-    NewUserDetailsViewController* detailViewController = [[NewUserDetailsViewController alloc] initWithStyle:UITableViewStylePlain];
-    detailViewController.userID = userID;
-    [self.navigationController pushViewController:detailViewController animated:YES];
+    [[NetworkHandler getHandler] requestFromURL:[NSString stringWithFormat:@"http://%@/api/v1/user/%@/?format=json", EOHOST, userID]
+                                         method:GET
+                                    cachePolicy:TTURLRequestCachePolicyDefault
+                                        success:^(id obj) {
+                                            NSDictionary* dic = obj;
+                                            UserProfile* user = [UserProfile profileWithData:dic];
+                                            NewUserDetailsViewController* detailViewController = [[NewUserDetailsViewController alloc] initWithStyle:UITableViewStylePlain];
+                                            detailViewController.user = user;
+                                            [self.navigationController pushViewController:detailViewController animated:YES];
+                                        } failure:^{
+                                            NSLog(@"failed to get user  for id %@", userID);
+                                        }];
 }
+
 @end

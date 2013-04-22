@@ -27,19 +27,19 @@
         [photoLabel sizeToFit];
         [self.contentView addSubview:photoLabel];
         
-        UILabel* moreLabel = [[UILabel alloc] initWithFrame:CGRectMake(246, 10, 0, 0)];
-        moreLabel.textColor = RGBCOLOR(150, 150, 150);
+        _seeAllButton = [[UILabel alloc] initWithFrame:CGRectMake(246, 10, 0, 0)];
+        _seeAllButton.textColor = RGBCOLOR(150, 150, 150);
         //    moreButton.backgroundColor = [UIColor clearColor];
-        moreLabel.font = [UIFont systemFontOfSize:12];
-        moreLabel.text = @"查看更多";
-        moreLabel.backgroundColor = [UIColor clearColor];
-        [moreLabel sizeToFit];
-        [self.contentView addSubview:moreLabel];
+        _seeAllButton.font = [UIFont systemFontOfSize:12];
+        _seeAllButton.text = @"查看更多";
+        _seeAllButton.backgroundColor = [UIColor clearColor];
+        [_seeAllButton sizeToFit];
+        [self.contentView addSubview:_seeAllButton];
         
         UIImage* disclosureIcon = [UIImage imageNamed:@"disclosure"];
-        UIImageView* disclosureView = [[UIImageView alloc] initWithFrame:CGRectMake(295, 10, disclosureIcon.size.width, disclosureIcon.size.height)];
-        disclosureView.image = disclosureIcon;
-        [self.contentView addSubview:disclosureView];
+        _disclosureView = [[UIImageView alloc] initWithFrame:CGRectMake(295, 10, disclosureIcon.size.width, disclosureIcon.size.height)];
+        _disclosureView.image = disclosureIcon;
+        [self.contentView addSubview:_disclosureView];
     }
     return self;
 }

@@ -13,4 +13,5 @@
 -(UIBarButtonItem*)backButtonWithTarget:(id)target action:(SEL)action;
 -(UIView*)titleViewWithTitle:(NSString*)title;
 -(UIBarButtonItem*)normalBarButtonItemWithTitle:(NSString*)title target:(id)target action:(SEL)action;
+-(UIView*)tabBarInView:(UIView*)view withButton:(UIButton*)button;
 @end

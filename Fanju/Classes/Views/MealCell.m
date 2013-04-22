@@ -38,6 +38,7 @@
 
 -(void)prepareForReuse{
     [super prepareForReuse];
+    _mealView.image = nil;
     [_participants makeObjectsPerformSelector:@selector(removeFromSuperview)];
 }
 

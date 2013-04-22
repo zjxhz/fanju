@@ -32,6 +32,8 @@
 #import "PhotoTitleCell.h"
 #import "UserInfoCell.h"
 #import "UserSocialCell.h"
+#import "AlbumViewController.h"
+
 #define TAG_MSG @"发消息"
 #define TAG_COMMENT @"发评论"
 
@@ -42,13 +44,12 @@
     UserPhoto* _selectedPhoto;
     NSInteger _selectedIndex;
     NSArray* _allPhotos;
-    PhotoUploadingOperation _operation;
     UIActionSheet* _imagePickerActions;
     UIActionSheet* _imageDeleteOrViewActions;
-    MBProgressHUD* _hud;
     UserTagsCell* _tagCell;
     UIToolbar* _toolbar;
     UIImageView* _shadowView;
+    ImageUploader* _imageUploader;
     
 }
 @property(nonatomic, strong) UserDetailsCell* userDetailsCell;
@@ -126,9 +127,7 @@
 
 -(void)setUser:(UserProfile *)user{
     _user = user;
-    //hack: delayed title update after by 0.5s, or the title will appear on the left before it goes to the center if this controller is pushed from the notification view, weird.
-    [NSTimer scheduledTimerWithTimeInterval:0.4 target:self selector:@selector(updateTitle) userInfo:nil repeats:NO];
-
+    self.navigationItem.titleView = [[WidgetFactory sharedFactory] titleViewWithTitle:_user.name];
     [self loadComments];
     [self.tableView reloadData];
 }
@@ -352,22 +351,25 @@
 }
 
 -(void)editAvatar:(id)sender{
-    _operation = ChangeAvatar;
-    [self presentImagePicker];
+    if (!_imageUploader) {
+        _imageUploader = [[ImageUploader alloc] initWithViewController:self delegate:self];
+    }
+    [_imageUploader uploadImageForUser:_user option:AVATAR];
 }
 
 
 -(void)addPhoto:(id)sender{
-    _operation = AddPhoto;
-    [self presentImagePicker];
+    if (_user.photos.count >= 15) {
+        UIAlertView* a = [[UIAlertView alloc] initWithTitle:@"提示" message:@"抱歉，目前最多只能上传15张照片" delegate:nil cancelButtonTitle:@"确定" otherButtonTitles: nil];
+        [a show];
+        return;
+    }
+    if (!_imageUploader) {
+        _imageUploader = [[ImageUploader alloc] initWithViewController:self delegate:self];
+    }
+    [_imageUploader uploadImageForUser:_user option:PHOTO];
 }
 
--(void)presentImagePicker{
-    if (!_imagePickerActions) {
-        _imagePickerActions = [[UIActionSheet alloc] initWithTitle:nil delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"拍照", @"相册", nil];
-    }
-    [_imagePickerActions showFromToolbar:self.navigationController.toolbar];
-}
 
 -(BOOL)isViewForMyself{
     if (!_user) {
@@ -468,7 +470,11 @@
     } else if(indexPath.section == 1){
         if (indexPath.row == 0) {
             NSString* CellIdentifier = @"PhotoTitleCell";
-            cell = [[PhotoTitleCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier];
+            PhotoTitleCell* photoTitleCell = [[PhotoTitleCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier];
+            cell = photoTitleCell;
+            BOOL seeMore = _user.photos.count > 4;
+            photoTitleCell.seeAllButton.hidden = !seeMore;
+            photoTitleCell.disclosureView.hidden = !seeMore;
         } else {
             NSString* CellIdentifier = @"PhotoThumbnailCell";
             cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
@@ -565,8 +571,12 @@
 }
 
 #pragma mark PhotoThumbnailCellDelegate
--(void)didSelectAddPhoto{
-    [self addPhoto:nil];
+-(void)addOrRequestPhoto{
+    if ([self isViewForMyself]) {
+        [self addPhoto:nil];
+    } else {
+        NSLog(@"not implemented");
+    }
 }
 
 -(void) showUsrPhotos:(NSArray*)photos atIndex:(NSInteger)index{
@@ -589,89 +599,19 @@
     }
 }
 
-#pragma mark UIImagePickerControllerDelegate
-- (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info{
-//    CGRect cropRect = [[info valueForKey:UIImagePickerControllerCropRect] CGRectValue];
-    
-    UIImage *originalImage = [info valueForKey:UIImagePickerControllerOriginalImage];
-//    cropRect = [originalImage convertCropRect:cropRect];
-//    UIImage *croppedImage = [originalImage croppedImage:cropRect];
-//    CGFloat length = croppedImage.size.height > croppedImage.size.width ? croppedImage.size.height : croppedImage.size.width;
-//    CGSize resizeSize = length > 640 ? CGSizeMake(640, 640) : croppedImage.size;
-//    UIImage *resizedImage = [croppedImage resizedImage:resizeSize imageOrientation:originalImage.imageOrientation];
-//    NSLog(@"crop and resizing - cropRect:%@ ==> %@ -> %@ -> %@",
-//          NSStringFromCGRect(cropRect),
-//          NSStringFromCGSize(originalImage.size),
-//          NSStringFromCGSize(croppedImage.size),
-//          NSStringFromCGSize(resizedImage.size) );
-    _hud = [MBProgressHUD showHUDAddedTo:picker.view animated:YES];
-	_hud.mode = MBProgressHUDModeAnnularDeterminate;
-    NSString* filename  = [NSString stringWithFormat:@"%d_%@_%.0f.jpg", _user.uID, _operation == ChangeAvatar ? @"a" : @"p", [[NSDate date] timeIntervalSince1970] * 1000 ];
-    if (_operation == ChangeAvatar) {
-        [self doChangeAvatar:originalImage withName:filename];
-    } else {
-        [self doAddPhoto:originalImage withName:filename];
-    }
-}
-
--(void)doAddPhoto:(UIImage*) resizedImage withName:(NSString*)filename{
-    [[NetworkHandler getHandler] uploadImage:resizedImage withName:filename toURL:[NSString stringWithFormat:@"user/%d/photos/", _user.uID] success:^(id obj){
-        NSDictionary* result = obj;
-        if ([[result objectForKey:@"status"] isEqualToString:@"OK"]) {
-            UserPhoto* photo = [UserPhoto photoWithData:result];
-            [_user.photos addObject:photo];
-            [_photoCell addUploadedPhoto:photo withLocalImage:resizedImage];
-            [[Authentication sharedInstance] relogin]; // to refresh photos, or we can just add the new photo TODO
-            [self.tableView reloadData];
-        }
-        else {
-            _hud.labelText = @"上传失败";
-        }
-        [_hud hide:YES];
-        [self dismissModalViewControllerAnimated:YES];
-    } failure:^{
-        _hud.labelText = @"上传失败";
-        [_hud hide:YES afterDelay:1];
-        [self dismissModalViewControllerAnimated:YES];
-        NSLog(@"failed to upload images");
-        [self dismissModalViewControllerAnimated:YES];
-    } progress:^(NSInteger totalBytesLoaded, NSInteger totalBytesExpected) {
-        _hud.progress = totalBytesLoaded * 1.0 / totalBytesExpected;
-    }];
-}
-
--(void)doChangeAvatar:(UIImage*)resizedImage withName:(NSString*)filename{
-    [[NetworkHandler getHandler] uploadImage:resizedImage withName:filename toURL:[NSString stringWithFormat:@"user/%d/avatar/", _user.uID]
-                                     success:^(id obj) {
-                                         NSLog(@"avatar updated");
-//                                         [_userDetailsCell.avatar.imageMemoryCache removeAllObjectsWithPrefix:[_user avatarFullUrl]]; //invalidate the previous image as it might have been changed(url is still same)
-                                         _user.avatarURL  = [obj objectForKey:@"avatar"];
-                                         _user.smallAvatarURL = [obj objectForKey:@"small_avatar"];
-                                         _userDetailsCell.avatar.image = resizedImage;
-                                         
-                                         [_userDetailsCell.avatar setPathToNetworkImage:[_user avatarFullUrl]];
-                                         [self.tableView reloadData];
-                                         [[Authentication sharedInstance] relogin];
-                                         [_hud hide:YES];
-                                         [self dismissModalViewControllerAnimated:YES];
-                                         [[NSNotificationCenter defaultCenter] postNotificationName:AVATAR_UPDATED_NOTIFICATION object:[_user avatarFullUrl]];
-                                         
-                                     } failure:^{
-                                         NSLog(@"failed to update avatar");
-                                         _hud.labelText = @"上传失败";
-                                         [_hud hide:YES afterDelay:1];
-                                         [self dismissModalViewControllerAnimated:YES];
-                                     }progress:^(NSInteger totalBytesLoaded, NSInteger totalBytesExpected) {
-                                         _hud.progress = totalBytesLoaded * 1.0 / totalBytesExpected;
-                                     }];
-}
 
 - (void)imagePickerControllerDidCancel:(UIImagePickerController *)picker{
     [self dismissModalViewControllerAnimated:YES];
 }
 
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath{
-    if (indexPath.section == 2){
+    if (indexPath.section == 1 && indexPath.row == 0) {
+        if (_user.photos.count > 4) {
+            AlbumViewController* vc = [[AlbumViewController alloc] init];
+            vc.user = _user;
+            [self.navigationController pushViewController:vc animated:YES];
+        }
+    }else if (indexPath.section == 2){
         [self showAllTags];
     }
 }
@@ -747,27 +687,12 @@
                 [self deleteUserPhoto:_selectedPhoto];
                 break;
             case 1: //view
-//                [self showUserPhotoAsync];
-                [self showUsrPhotos:_allPhotos atIndex:_selectedIndex];
+                [self showUserPhotoAsync];
                 break;
             default:
                 break;
         }
-    } else if(_imagePickerActions == actionSheet){
-        UIImagePickerController *pickerController = [[UIImagePickerController alloc] init];
-        pickerController.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
-        if (buttonIndex == 0) {
-            pickerController.sourceType = UIImagePickerControllerSourceTypeCamera;
-        } else if (buttonIndex == 2){
-            return;
-        }
-        pickerController.delegate = self;
-//        pickerController.allowsEditing = YES;
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [self presentModalViewController:pickerController animated:YES];
-        });
-
-    }
+    } 
 }
 
 -(void)showUserPhotoAsync{
@@ -841,5 +766,30 @@
 #pragma mark TagViewControllerDelegate
 -(void)tagsSaved:(NSArray*)newTags forUser:(UserProfile*)user{
     [self.tableView reloadData];
+}
+
+#pragma mark ImageUploaderDelegate
+-(void)didUploadPhoto:(UIImage*)image withData:(NSDictionary *)data{
+    UserPhoto* photo = [UserPhoto photoWithData:data];
+    [_user.photos addObject:photo];
+    [_photoCell addUploadedPhoto:photo withLocalImage:image];
+    [[Authentication sharedInstance] relogin]; // to refresh photos, or we can just add the new photo TODO
+    [self.tableView reloadData];
+}
+-(void)didFailUploadPhoto:(UIImage*)image{
+    
+}
+-(void)didUploadAvatar:(UIImage*)image withData:(NSDictionary *)data{
+    _user.avatarURL  = [data objectForKey:@"avatar"];
+    _user.smallAvatarURL = [data objectForKey:@"small_avatar"];
+    _userDetailsCell.avatar.image = image;
+    
+    [_userDetailsCell.avatar setPathToNetworkImage:[_user avatarFullUrl]];
+    [self.tableView reloadData];
+    [[Authentication sharedInstance] relogin];
+}
+
+-(void)didFailUploadAvatar:(UIImage*)image{
+    
 }
 @end

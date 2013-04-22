@@ -56,8 +56,7 @@
         JoinMealEvent* je = event;
         NSString* participantID = [data valueForKey:@"participant"];
         je.participantID = participantID;
-        NSString* mealID = [data valueForKey:@"meal"];
-        je.mealID = mealID;
+        je.mealID =  [[data valueForKey:@"meal"] integerValue];
         je.mealTopic = [data valueForKey:@"topic"];
         je.eventDescription =  [data valueForKey:@"event"];
         NSString* mealPhoto = [data valueForKey:@"meal_photo"];

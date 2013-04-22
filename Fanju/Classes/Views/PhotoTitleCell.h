@@ -9,5 +9,6 @@
 #import <UIKit/UIKit.h>
 
 @interface PhotoTitleCell : UITableViewCell
-
+@property(nonatomic, readonly) UILabel* seeAllButton;
+@property(nonatomic, readonly) UIImageView* disclosureView;
 @end

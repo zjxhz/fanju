@@ -10,6 +10,7 @@
 #import "NINetworkImageView.h"
 #import "AvatarFactory.h"
 #import "PhotoViewController.h"
+#import "Authentication.h"
 
 #define PHOTO_BG_WIDTH 70
 #define PHOTO_BG_HEIGHT PHOTO_BG_WIDTH
@@ -18,7 +19,6 @@
 #define PHOTO_BG_GAP 2
 @interface PhotoThumbnailCell(){
     BOOL _editable;
-    UIImageView *_addPhotoImageView;
     NSMutableArray* _imageViews;
     NSMutableArray* _contentViews;
     UIScrollView* _scrollView;
@@ -45,7 +45,7 @@
     for(UIView *view in _contentViews){
         [view removeFromSuperview];
     }
-//    [_addPhotoImageView removeFromSuperview];
+    [_addOrRequestPhotoButton removeFromSuperview];
     [self buildUI];
 }
 
@@ -57,12 +57,28 @@
     _scrollView.showsHorizontalScrollIndicator = NO;
     _scrollView.backgroundColor = [UIColor clearColor];
     [self resetContentSize:photos.count];
+    if (photos.count == 0) {
+        [self addAddOrRequestPhotoButton];
+    }
     for (int i = 0; i < photos.count; ++i) {
         [self addPhoto:[_user.photos objectAtIndex:i] atIndex:i];
     }
     [self.contentView addSubview:_scrollView];
+}
 
-//    [self createAddPhotoButtonIfNeeded];
+-(void)addAddOrRequestPhotoButton{
+    _addOrRequestPhotoButton = [[UIButton alloc] initWithFrame:[self frameAtIndex:0]];
+    UserProfile* currentUser = [Authentication sharedInstance].currentUser;
+    UIImage* bgImg = nil;
+    if ([_user isEqual:currentUser]) {
+        bgImg = [UIImage imageNamed:@"photo_add"];
+    } else {
+        bgImg = [UIImage imageNamed:@"photo_request"];
+    }
+    _addOrRequestPhotoButton.userInteractionEnabled = YES;
+    [_addOrRequestPhotoButton setBackgroundImage:bgImg forState:UIControlStateNormal];
+    [_addOrRequestPhotoButton addTarget:self action:@selector(addOrRequestTapped:) forControlEvents:UIControlEventTouchUpInside];
+    [_scrollView addSubview:_addOrRequestPhotoButton];
 }
 
 -(void)resetContentSize:(NSInteger)photoCount{
@@ -112,8 +128,8 @@
     return CGRectMake((PHOTO_BG_WIDTH + PHOTO_BG_GAP) * index, 0, PHOTO_BG_WIDTH, PHOTO_BG_HEIGHT);
 }
 
--(void)addTapped:(id)sender{
-    [self.delegate didSelectAddPhoto];
+-(void)addOrRequestTapped:(id)sender{
+    [self.delegate addOrRequestPhoto];
 }
 
 -(void)photoTapped:(id)sender{

@@ -234,12 +234,11 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
 
 -(IBAction)joinMeal:(id)sender{
     [_confirmButton setEnabled:NO];
-    [_confirmButton removeTarget:self action:@selector(confirmButtonClicked:) forControlEvents:UIControlEventTouchDown];
     NSString *mealID = [NSString stringWithFormat:@"%d", self.mealInfo.mID];
     NSString *numberOfPerson = [NSString stringWithFormat:@"%d", _numberOfPersons];
     NSArray *params = @[[DictHelper dictWithKey:@"meal_id" andValue:mealID],
                         [DictHelper dictWithKey:@"num_persons" andValue:numberOfPerson]];
-    [SVProgressHUD showWithStatus:@"正在支付……" maskType:SVProgressHUDMaskTypeBlack];
+    [SVProgressHUD showWithStatus:@"正在支付…" maskType:SVProgressHUDMaskTypeBlack];
     [[NetworkHandler getHandler] requestFromURL:[NSString stringWithFormat:@"http://%@/api/v1/user/%d/order/", EOHOST, [Authentication sharedInstance].currentUser.uID]
                                          method:POST
                                      parameters:params
@@ -270,17 +269,36 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
     int ret = [alixpay pay:orderString applicationScheme:APP_SCHEME];
     
     if (ret == kSPErrorAlipayClientNotInstalled) {
-        UIAlertView * alertView = [[UIAlertView alloc] initWithTitle:@"提示"
-                                                             message:@"您还没有安装支付宝快捷支付，请先安装。"
-                                                            delegate:self
-                                                   cancelButtonTitle:@"确定"
-                                                   otherButtonTitles:nil];
-        [alertView setTag:123];
-        [alertView show];
+        UIWebView* webView = [[UIWebView alloc] init];
+        UIViewController* vc = [[UIViewController alloc] init];
+        vc.view = webView;
+        NSURL* url = [NSURL URLWithString:[NSString stringWithFormat:@"http://%@/meal/%d/", EOHOST, _mealInfo.mID]];
+        NSString* params = [NSString stringWithFormat:@"meal_id=%d&num_persons=%d", _mealInfo.mID, _numberOfPersons];
+        NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:url];
+        [request setHTTPMethod:@"POST"];
+        [request setHTTPBody:[params dataUsingEncoding:NSUTF8StringEncoding]];
+        [webView loadRequest:request];
+        webView.delegate = self;
+        vc.navigationItem.rightBarButtonItem = [[WidgetFactory sharedFactory]normalBarButtonItemWithTitle:@"取消" target:self action:@selector(cancel:)];
+        UINavigationController *nc = [[UINavigationController alloc] initWithRootViewController:vc];
+        [self.navigationController presentModalViewController:nc animated:YES];
         [SVProgressHUD dismiss];
     }
 }
 
+-(void)cancel:(id)sender{
+    [self cancelWithError:@"已取消"];
+}
+
+-(void)cancelWithError:(NSString*)message{
+    [_confirmButton setEnabled:YES];
+    [self dismissModalViewControllerAnimated:YES];
+    if (message) {
+        [SVProgressHUD dismissWithError:message afterDelay:3.0];
+    } else {
+        [SVProgressHUD dismiss];
+    }
+}
 
 -(void)alixPayResult:(NSNotification*)notif{
     NSDictionary* result = notif.object;
@@ -308,12 +326,37 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
     return YES;
 }
 
-- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex {
-	if (alertView.tag == 123) {
-		NSString * URLString = @"http://itunes.apple.com/cn/app/id535715926?mt=8";
-		[[UIApplication sharedApplication] openURL:[NSURL URLWithString:URLString]];
-	}
+
+#pragma mark UIWebviewDelegate
+- (BOOL)webView:(UIWebView *)webView shouldStartLoadWithRequest:(NSURLRequest *)request navigationType:(UIWebViewNavigationType)navigationType{
+    NSString* urlStr = request.URL.absoluteString;
+    NSLog(@"start loading %@", urlStr);
+    NSString* successURL = [NSString stringWithFormat:@"http://%@/meal/%d/order/", EOHOST, _mealInfo.mID];
+    NSString* failedURL = [NSString stringWithFormat:@"http://%@/error/", EOHOST];
+    if ([urlStr hasPrefix:successURL]) {
+        NSArray* components = [urlStr componentsSeparatedByString:@"/"];
+        NSString* orderID = [components objectAtIndex:(components.count - 2)];
+        [self dismissModalViewControllerAnimated:YES];
+        [[NetworkHandler getHandler] requestFromURL:[NSString stringWithFormat:@"http://%@/api/v1/order/%@/", EOHOST, orderID]
+                                             method:GET
+                                        cachePolicy:TTURLRequestCachePolicyNone
+                                            success:^(id obj) {
+                                                [SVProgressHUD showWithStatus:@"付款成功，查询订单信息…"];
+                                                NSDictionary* dic = obj;
+                                                OrderInfo* order = [OrderInfo orderInfoWithData:dic];
+                                                [[NSNotificationCenter defaultCenter] postNotificationName:ALIPAY_PAY_RESULT
+                                                                                                    object:@{@"status":@"OK", @"code":order.code}];
+                                            } failure:^{
+                                                [SVProgressHUD dismissWithError:@"查询订单信息失败，请稍后刷新我的饭局页面"];
+                                                [_confirmButton setEnabled:YES];
+                                            }];
+        
+        [SVProgressHUD dismissWithSuccess:@"付款成功" afterDelay:0.9];
+        return NO;
+    } else if([urlStr hasPrefix:failedURL]){
+        [self cancelWithError:@"抱歉，付款遇到了问题，请联系客服。"];
+        return NO;
+    }
+    return YES;
 }
-
-
 @end

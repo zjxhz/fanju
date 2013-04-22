@@ -9,7 +9,7 @@
 #import <UIKit/UIKit.h>
 #import "MealInfo.h"
 
-@interface JoinMealViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, UIGestureRecognizerDelegate>{
+@interface JoinMealViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, UIGestureRecognizerDelegate, UIWebViewDelegate>{
     IBOutlet UITableView* _tableView;
     IBOutlet UIButton* _confirmButton;
 }

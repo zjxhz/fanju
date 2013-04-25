@@ -158,7 +158,7 @@ const NSInteger MOST_POPULAR_TAG_COUNT = 5;
 
 - (void)save:(id)sender
 {
-    if (_user.tags.count < 3) {
+    if (_selectedTags.count < 3) {
         UIAlertView *a = [[UIAlertView alloc] initWithTitle:@"兴趣少于3个" message:@"请至少选择3项您感兴趣的内容" delegate:nil cancelButtonTitle:@"确定" otherButtonTitles: nil];
         [a show];
         return;

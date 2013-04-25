@@ -110,7 +110,7 @@
     [self.navigationController.toolbar setBackgroundImage:toolbarBg forToolbarPosition:UIToolbarPositionAny barMetrics:UIBarMetricsDefault];
     
     UIImage* toolbarShadow = [UIImage imageNamed:@"toolbar_shadow"];
-    _shadowView = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, toolbarShadow.size.width, toolbarShadow.size.height)];
+    _shadowView = [[UIImageView alloc] initWithFrame:CGRectMake(0, -toolbarShadow.size.height, toolbarShadow.size.width, toolbarShadow.size.height)];
     _shadowView.image = toolbarShadow;
     [self.navigationController.toolbar addSubview:_shadowView];
 }
@@ -498,7 +498,6 @@
             [self.tableView reloadData];
             recalculateHeight = NO;
         }
-        
     }  else if(indexPath.section == 3){
         NSString* CellIdentifier = @"UserInfoCell";
         cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];

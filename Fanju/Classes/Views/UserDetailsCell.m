@@ -152,28 +152,29 @@
 
 
 -(void) requestNextMeal{
-    NSString* url = [NSString stringWithFormat:@"http://%@/api/v1/user/%d/order/?format=json&order_by=meal__start_date", EOHOST, _user.uID];
+    NSString* url = [NSString stringWithFormat:@"http://%@/api/v1/user/%d/meal/", EOHOST, _user.uID];
     //use a new instance of network handler as there might be simultaneous reqeusts on the user details view 
     [[NetworkHandler getHandler] requestFromURL:url method:GET cachePolicy:TTURLRequestCachePolicyDefault
                                         success:^(id obj) {
-                                            NSArray *orders = [obj objectForKeyInObjects];
-                                            if (orders && [orders count] > 0) {
-                                                OrderInfo *order = [OrderInfo orderInfoWithData:[orders objectAtIndex:0]];
+                                            NSArray *meals = [obj objectForKeyInObjects];
+                                            if (meals && [meals count] > 0) {
+                                                MealInfo *meal = [MealInfo mealInfoWithData:[meals objectAtIndex:0]];
                                                 [UIView animateWithDuration:0.9 animations:^{
-                                                    _nextMealText.text = order.meal.topic;
+                                                    _nextMealText.text = meal.topic;
                                                     _nextMealView.alpha = 1;
                                                 }];
                                                 
                                                 
 //                                                [_nextMealText sizeToFit];
                                             } else {
-                                                _nextMealView.alpha = 0;
-//                                                _nextMealLabel.text = @"最近没有饭局";
+                                                _nextMealView.alpha = 1;
+                                                _nextMealText.text = @"最近没有饭局";
 //                                                _nextMealTimeLabel.text = @"";
                                             }
                                         } failure:^{
                                             NSLog(@"failed to fetch order for %@", _user);
-//                                            _nextMealLabel.text = @"获取饭局失败";
+                                            _nextMealText.text = @"获取饭局失败";
+                                            _nextMealView.alpha = 1;
 //                                            _nextMealTimeLabel.text = @"";
                                         }];
 }

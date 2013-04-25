@@ -169,7 +169,7 @@
 
 -(void)buildUI{
     [_contentViews makeObjectsPerformSelector:@selector(removeFromSuperview)];
-    
+    [_addButton removeFromSuperview];
     NSArray* photos = [_user photos];
     _photoViews = [NSMutableArray array];
     _contentViews = [NSMutableArray array];
@@ -184,7 +184,7 @@
 
 -(void)resetContentSize{
     NSInteger tiles = _user.photos.count;
-    if (_editing && _addButton) {
+    if (_addButton) {
         tiles++;
     }
     NSInteger rows =  tiles/ 3 + (tiles % 3 == 0 ? 0 : 1);
@@ -192,7 +192,7 @@
 }
 
 -(void)addAddButtonIfNeeded{
-    if (_editing && _user.photos.count < 15 && [[Authentication sharedInstance].currentUser isEqual:_user]) {
+    if (_user.photos.count < 15 && [[Authentication sharedInstance].currentUser isEqual:_user]) {
         _addButton= [[UIButton alloc] initWithFrame:[self frameAtIndex:_user.photos.count]];
         [_addButton setBackgroundImage:[UIImage imageNamed:@"album_add_photo"] forState:UIControlStateNormal];
         [_addButton addTarget:self action:@selector(addPhoto:) forControlEvents:UIControlEventTouchUpInside];

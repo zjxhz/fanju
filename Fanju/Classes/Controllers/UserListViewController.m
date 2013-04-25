@@ -69,7 +69,7 @@
 -(NSArray*) createToolbarItems{
     UIBarButtonItem* flexiSpace = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
     UIImage* toolbarBg = [UIImage imageNamed:@"toolbar_bg"] ;
-    UIImage* buttonBG = [UIImage imageNamed:@"add_tag_bg"];
+    UIImage* buttonBG = [UIImage imageNamed:@"confirm_btn_big"];
     UIButton* button = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, buttonBG.size.width, buttonBG.size.height)];
     [button addTarget:self action:@selector(addTagToMine:) forControlEvents:UIControlEventTouchUpInside];
     [button setBackgroundImage:buttonBG forState:UIControlStateNormal];

@@ -51,7 +51,7 @@
         UIView *infoView = [[UIView alloc] initWithFrame:CGRectMake(INFO_FRAME_X, 0, 320 - INFO_FRAME_X, CELL_HEIGHT)];
         [self.contentView addSubview:infoView];
         
-        _username = [[UILabel alloc] initWithFrame:CGRectMake(0, 11, 100, 20)];
+        _username = [[UILabel alloc] initWithFrame:CGRectMake(0, 11, 200, 20)];
         [_username setBackgroundColor:[UIColor clearColor]];
         _username.font = [UIFont boldSystemFontOfSize:16];
         [infoView addSubview:_username];

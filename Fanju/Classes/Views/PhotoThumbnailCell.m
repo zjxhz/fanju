@@ -59,6 +59,8 @@
     [self resetContentSize:photos.count];
     if (photos.count == 0) {
         [self addAddOrRequestPhotoButton];
+    } else if([[Authentication sharedInstance].currentUser isEqual:_user] && _user.photos.count < 15){
+        [self addAddOrRequestPhotoButton];
     }
     for (int i = 0; i < photos.count; ++i) {
         [self addPhoto:[_user.photos objectAtIndex:i] atIndex:i];
@@ -67,7 +69,7 @@
 }
 
 -(void)addAddOrRequestPhotoButton{
-    _addOrRequestPhotoButton = [[UIButton alloc] initWithFrame:[self frameAtIndex:0]];
+    _addOrRequestPhotoButton = [[UIButton alloc] initWithFrame:[self frameAtIndex:_user.photos.count]];
     UserProfile* currentUser = [Authentication sharedInstance].currentUser;
     UIImage* bgImg = nil;
     if ([_user isEqual:currentUser]) {
@@ -79,10 +81,15 @@
     [_addOrRequestPhotoButton setBackgroundImage:bgImg forState:UIControlStateNormal];
     [_addOrRequestPhotoButton addTarget:self action:@selector(addOrRequestTapped:) forControlEvents:UIControlEventTouchUpInside];
     [_scrollView addSubview:_addOrRequestPhotoButton];
+    [self resetContentSize:_user.photos.count];
 }
 
 -(void)resetContentSize:(NSInteger)photoCount{
-    _scrollView.contentSize = CGSizeMake( (PHOTO_BG_WIDTH + PHOTO_BG_GAP) * photoCount, 70);
+    int count = photoCount;
+    if (_addOrRequestPhotoButton) {
+        count++;
+    }
+    _scrollView.contentSize = CGSizeMake( (PHOTO_BG_WIDTH + PHOTO_BG_GAP) * count, 70);
 }
 
 -(void)addPhoto:(UserPhoto*)photo atIndex:(NSInteger)index{

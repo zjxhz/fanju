@@ -12,6 +12,7 @@
 #import "NetworkHandler.h"
 #import "UserProfile.h"
 #import "Const.h"
+#import "UIImage+Resize.h"
 
 #define LARGE_AVATAR_LENGTH 220
 #define MAX_PHOTO_HEIGHT 1920
@@ -72,7 +73,7 @@
           NSStringFromCGSize(newSize));
     
     if (!CGSizeEqualToSize(image.size, newSize)) {
-         image = [image resizedImage:newSize imageOrientation:image.imageOrientation];
+        image = [image imageScaledToSize:newSize];
     }
 
     

@@ -47,7 +47,6 @@
 #define PARTICIPANTS_WIDTH 53
 #define PARTICIPANTS_HEIGHT PARTICIPANTS_WIDTH
 #define PARTICIPANTS_GAP 2
-#define JOIN_BUTTON_X 36.5
 @interface MealDetailViewController : TTTableViewController <MKMapViewDelegate, ShareToDelegate, SinaWeiboDelegate, WBSendViewDelegate, UserImageViewDelegate>{
     UIView *_detailsView;
     UIButton* _mapButton;

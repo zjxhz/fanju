@@ -107,7 +107,7 @@
     UIImage* comment_img = [UIImage imageNamed:@"toolbth2"];
     CGFloat x = (320 - join_img.size.width - comment_img.size.width) / 2;
     CGFloat y = (_tabBar.frame.size.height - join_img.size.height) / 2;
-    _joinButton = [[UIButton alloc] initWithFrame:CGRectMake(JOIN_BUTTON_X, y, join_img.size.width, join_img.size.height)];
+    _joinButton = [[UIButton alloc] initWithFrame:CGRectMake(x, y, join_img.size.width, join_img.size.height)];
     [_joinButton setBackgroundImage:join_img forState:UIControlStateNormal];    _joinButton.titleLabel.textAlignment  = UITextAlignmentCenter;
     _joinButton.titleLabel.textColor = [UIColor whiteColor];
     _joinButton.titleLabel.font = [UIFont boldSystemFontOfSize:19];

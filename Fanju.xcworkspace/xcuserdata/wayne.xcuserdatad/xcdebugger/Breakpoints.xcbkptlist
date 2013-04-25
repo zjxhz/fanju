@@ -13,8 +13,8 @@
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "344"
          endingLineNumber = "344"
-         landmarkName = "-webView:shouldStartLoadWithRequest:navigationType:"
-         landmarkType = "5">
+         landmarkName = "@implementation JoinMealViewController"
+         landmarkType = "3">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "Yes"
@@ -26,20 +26,7 @@
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "304"
          endingLineNumber = "304"
-         landmarkName = "-alixPayResult:"
-         landmarkType = "5">
-      </FileBreakpoint>
-      <FileBreakpoint
-         shouldBeEnabled = "Yes"
-         ignoreCount = "0"
-         continueAfterRunningActions = "No"
-         filePath = "Fanju/Classes/Controllers/JoinMealViewController.m"
-         timestampString = "388311040.48246"
-         startingColumnNumber = "9223372036854775807"
-         endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "338"
-         endingLineNumber = "338"
-         landmarkName = "-webView:shouldStartLoadWithRequest:navigationType:"
+         landmarkName = "-cancel:"
          landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
@@ -52,7 +39,111 @@
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "332"
          endingLineNumber = "332"
-         landmarkName = "-webView:shouldStartLoadWithRequest:navigationType:"
+         landmarkName = "-alixPayResult:"
+         landmarkType = "5">
+      </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "Yes"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         filePath = "Fanju/Classes/Controllers/UserTagsViewController.m"
+         timestampString = "388565509.491366"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "86"
+         endingLineNumber = "86"
+         landmarkName = "-saveSeleted:"
+         landmarkType = "5">
+      </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "Yes"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         filePath = "Fanju/Classes/Controllers/NewTagViewController.m"
+         timestampString = "388565613.739925"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "161"
+         endingLineNumber = "161"
+         landmarkName = "-save:"
+         landmarkType = "5">
+      </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "Yes"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         filePath = "Fanju/Classes/Controllers/JoinMealViewController.m"
+         timestampString = "388579805.641252"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "319"
+         endingLineNumber = "319"
+         landmarkName = "-alixPayResult:"
+         landmarkType = "5">
+      </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "Yes"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         filePath = "Fanju/Classes/Controllers/MealDetailViewController.m"
+         timestampString = "388580362.091736"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "58"
+         endingLineNumber = "58"
+         landmarkName = "-requestOrderStatus"
+         landmarkType = "5">
+      </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "Yes"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         filePath = "Fanju/Classes/Controllers/MealDetailViewController.m"
+         timestampString = "388580367.989607"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "63"
+         endingLineNumber = "63"
+         landmarkName = "-requestOrderStatus"
+         landmarkType = "5">
+      </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "Yes"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         filePath = "Fanju/Classes/Controllers/MealDetailViewController.m"
+         timestampString = "388580376.425173"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "86"
+         endingLineNumber = "86"
+         landmarkName = "-requestOrderStatus"
+         landmarkType = "5">
+      </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "Yes"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         filePath = "Fanju/Classes/Views/PhotoThumbnailCell.m"
+         timestampString = "388589653.329304"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "48"
+         endingLineNumber = "48"
+         landmarkName = "-setUser:"
+         landmarkType = "5">
+      </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "Yes"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         filePath = "Fanju/Classes/Helpers/ImageUploader.m"
+         timestampString = "388592314.16113"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "63"
+         endingLineNumber = "63"
+         landmarkName = "-imagePickerController:didFinishPickingMediaWithInfo:"
          landmarkType = "5">
       </FileBreakpoint>
    </FileBreakpoints>

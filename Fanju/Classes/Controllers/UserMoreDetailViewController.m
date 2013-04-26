@@ -110,9 +110,8 @@
 -(void)setProfile:(UserProfile *)profile{
     _profile = profile;
     _birthday = profile.birthday;
-    NSArray *sectionItems0 = [NSArray arrayWithObjects:
-                              [NSMutableArray arrayWithObjects:@"名字", _profile.name, nil],
-                              [NSMutableArray arrayWithObjects:@"个人签名", _profile.motto, nil], nil];
+    NSArray *sectionItems0 = @[[NSMutableArray arrayWithObjects:@"名字", _profile.name, nil],
+                              [NSMutableArray arrayWithObjects:@"个人签名", _profile.motto, nil]];
     
     NSString* updated = @"未知时间";
     if (_profile.locationUpdatedTime) {
@@ -131,32 +130,29 @@
         relation = @"陌生人";
     }
     
-    NSArray *sectionItems1 = [NSArray arrayWithObjects:
+    NSArray *sectionItems1 = @[
                               [NSMutableArray arrayWithObjects:@"位置信息", distance, nil],
-                              [NSMutableArray arrayWithObjects:@"关系", relation, nil], nil];
+                              [NSMutableArray arrayWithObjects:@"关系", relation, nil]];
     
-    NSArray *sectionItems2 = [NSArray arrayWithObjects:
+    NSArray *sectionItems2 = @[
                               [NSMutableArray arrayWithObjects:@"性别", @"      ", nil],//quick and dirty fix, spaces to make sure there is room for the gender icon 
                               [NSMutableArray arrayWithObjects:@"年龄", [NSString stringWithFormat:@"%d", [_profile age]], nil], 
                               [NSMutableArray arrayWithObjects:@"星座", [_profile constellation], nil],//todo how to calculate? 
-                              [NSMutableArray arrayWithObjects:@"注册日期",  [DateUtil longStringFromDate:_profile.dateJoined], nil], nil];
-    NSArray *sectionItems3 = [NSArray arrayWithObjects:
-                              [NSMutableArray arrayWithObjects:@"新浪微博", _profile.weiboID ? @"已绑定" : @"未绑定", nil],nil];
+                              [NSMutableArray arrayWithObjects:@"注册日期",  [DateUtil longStringFromDate:_profile.dateJoined], nil]];
+    NSArray *sectionItems3 = @[[NSMutableArray arrayWithObjects:@"新浪微博", _profile.weiboID ? @"已绑定" : @"未绑定", nil]];
    
     _industry = _profile.industry;
     _occupation = _profile.occupation;
-    NSArray *sectionItems4 = @[
-                              [@[@"爱好和特点", [_profile tagsToString]] mutableCopy],
+    NSArray *sectionItems4 = @[[@[@"爱好和特点", [_profile tagsToString]] mutableCopy],
                               [@[@"职业",  [NSString stringWithFormat:@"%@\n%@",_industry, _occupation]] mutableCopy],
                               [@[@"公司", _profile.workFor ? _profile.workFor : @""] mutableCopy],
                               [@[@"学校", _profile.college ? _profile.college : @""] mutableCopy]];
     
-    _sectionItems = [NSArray arrayWithObjects:
-                             sectionItems0, //placeholder for section 0 
-                             sectionItems1, 
-                             sectionItems2, 
-                             sectionItems3, 
-                             sectionItems4, nil];
+    _sectionItems = @[sectionItems0, //placeholder for section 0
+                      sectionItems1,
+                      sectionItems2,
+                      sectionItems3,
+                    sectionItems4];
     
 
 }

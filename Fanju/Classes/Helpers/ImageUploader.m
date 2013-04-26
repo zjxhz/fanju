@@ -42,7 +42,13 @@
     if (!_imagePickerActions) {
         _imagePickerActions = [[UIActionSheet alloc] initWithTitle:nil delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"拍照", @"相册", nil];
     }
-    [_imagePickerActions showFromToolbar:_viewController.navigationController.toolbar];
+    BOOL toolbarHidden = _viewController.navigationController.toolbar.hidden;
+    if (toolbarHidden) {
+        [_imagePickerActions showInView:_viewController.view];
+    } else {
+        [_imagePickerActions showFromToolbar:_viewController.navigationController.toolbar];
+    }
+
 }
 
 

@@ -138,12 +138,64 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Fanju/Classes/Helpers/ImageUploader.m"
-         timestampString = "388592314.16113"
+         timestampString = "388647280.677512"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "63"
-         endingLineNumber = "63"
+         startingLineNumber = "69"
+         endingLineNumber = "69"
          landmarkName = "-imagePickerController:didFinishPickingMediaWithInfo:"
+         landmarkType = "5">
+      </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "Yes"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         filePath = "Fanju/Classes/Models/XMPPHandler.m"
+         timestampString = "388650345.782149"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "85"
+         endingLineNumber = "85"
+         landmarkName = "-loadLatestNotificationDate"
+         landmarkType = "5">
+      </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "Yes"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         filePath = "Fanju/Classes/Models/XMPPHandler.m"
+         timestampString = "388676266.685971"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "579"
+         endingLineNumber = "579"
+         landmarkName = "-handleRetrievedMessages:after:"
+         landmarkType = "5">
+      </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "Yes"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         filePath = "Fanju/Classes/Models/XMPPHandler.m"
+         timestampString = "388676266.685971"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "592"
+         endingLineNumber = "592"
+         landmarkName = "-handleRetrievedMessages:after:"
+         landmarkType = "5">
+      </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "Yes"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         filePath = "Fanju/Classes/Models/XMPPHandler.m"
+         timestampString = "388676266.685971"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "610"
+         endingLineNumber = "610"
+         landmarkName = "-handleRetrievedMessages:after:"
          landmarkType = "5">
       </FileBreakpoint>
    </FileBreakpoints>

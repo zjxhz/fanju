@@ -52,11 +52,19 @@
     [self requestEvents];
 }
 
+-(void)viewDidAppear:(BOOL)animated{
+    [super viewDidAppear:animated];
+    [[NSNotificationCenter defaultCenter] postNotificationName:EOUnreadNotificationCount
+                                                        object:[NSNumber numberWithInteger:0]
+                                                      userInfo:nil];
+    [[XMPPHandler sharedInstance] markMessagesReadFrom:PUBSUB_SERVICE];
+}
+
 -(void) requestEvents{
     NSFetchRequest *req = [[NSFetchRequest alloc] init];
     NSManagedObjectContext* context = [XMPPHandler sharedInstance].messageManagedObjectContext;
     req.entity = [NSEntityDescription entityForName:@"EOMessage" inManagedObjectContext:context];
-//    req.predicate = [NSPredicate predicateWithFormat:@"node.length > 0"]; //TODO notification filtering
+    req.predicate = [NSPredicate predicateWithFormat:@"node != ''"];
     NSSortDescriptor *sortByTime = [[NSSortDescriptor alloc] initWithKey:@"time" ascending:NO];
     req.sortDescriptors = @[sortByTime];
     
@@ -78,27 +86,7 @@
 }
 
 -(void)createAndInsertEvent:(EOMessage*)message append:(BOOL)append{
-    id event = [[EventFactory sharedFactory] createEvent:message];
-//    if ([event isKindOfClass:[SimpleUserEvent class]]) {
-//        SimpleUserEvent* sue = event;
-//        [self setOrFetchUser:sue propertyName:@"user" userID:sue.userID];
-//    } else if([event isKindOfClass:[JoinMealEvent class]]){
-//        JoinMealEvent* je = event;
-//        [self setOrFetchUser:je propertyName:@"participant" userID:je.participantID];
-//        MealInfo* meal = [self loadMealFromCache:je.mealID];
-//        
-//        if (meal) {
-//            je.meal = meal;
-//            [self.tableView reloadData];
-//        } else {//user info not found in cache, touch the network and save it to cache for later use
-//            [[NetworkHandler getHandler] requestFromURL:[self mealURL:je.mealID] method:GET cachePolicy:TTURLRequestCachePolicyDefault success:^(id obj){
-//                [self.tableView reloadData];
-//            } failure:^{
-//                NSLog(@"failed to load meal in notifications");
-//            }];
-//        }
-//    }
-    
+    id event = [[EventFactory sharedFactory] createEvent:message];    
     if (event) {
         if (append) {
             [_notifications addObject:event];
@@ -109,55 +97,6 @@
     }
 }
 
-//-(void)setOrFetchUser:(id)target propertyName:(NSString*)propertyName userID:(NSString*)userID{
-//    UserProfile* user = [self loadUserFromCache:userID];
-//    
-//    if (user) {
-//        [target setValue:user forKey:propertyName];
-//        [self loadUserAvatar:user];
-//        [self.tableView reloadData];
-//    } else {//user info not found in cache, touch the network and save it to cache for later use
-//        [[NetworkHandler getHandler] requestFromURL:[self userURL:userID] method:GET cachePolicy:TTURLRequestCachePolicyDefault success:^(id obj){
-//            [self.tableView reloadData];
-//        } failure:^{
-//            NSLog(@"failed to load users in notifications");
-//        }];
-//    }
-//}
-
-//-(UserProfile*)loadUserFromCache:(NSString*)userID{
-//    NSString* url = [self userURL:userID];
-//    NSData* cachedData = [[TTURLCache sharedCache] dataForURL:url];
-//    NSDictionary* dict = [cachedData objectFromJSONData];
-//    if (dict) {
-//        return [UserProfile profileWithData:dict];
-//    }
-//    return nil;
-//}
-
-//-(MealInfo*)loadMealFromCache:(NSString*)mealID{
-//    NSString* url = [NSString stringWithFormat:@"http://%@/api/v1/meal/%@/?format=json", EOHOST, mealID];
-//    NSData* cachedData = [[TTURLCache sharedCache] dataForURL:url];
-//    NSDictionary* dict = [cachedData objectFromJSONData];
-//    if (dict) {
-//        return [MealInfo mealInfoWithData:dict];
-//    }
-//    return nil;
-//}
-
-//-(NSString*)userURL:(NSString*)userID{
-//   return [NSString stringWithFormat:@"http://%@/api/v1/simple_user/%@/?format=json", EOHOST, userID];
-//}
-//
-//-(NSString*)mealURL:(NSString*)mealID{
-//    return [NSString stringWithFormat:@"http://%@/api/v1/meal/%@/?format=json", EOHOST, mealID];
-//}
-
-//-(void)loadUserAvatar:(UserProfile*)user{
-//    TTURLRequest* request = [TTURLRequest requestWithURL:[user smallAvatarFullUrl] delegate:nil];
-//    request.response = [[TTURLImageResponse alloc] init];
-//    [request send];
-//}
 
 -(void)notificationDidSave:(NSNotification*)notif{
     EOMessage* message = notif.object;

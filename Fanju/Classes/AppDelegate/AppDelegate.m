@@ -26,7 +26,6 @@
 #import "NewSidebarViewController.h"
 #import "RKLog.h"
 #import "AlixPay.h"
-#import "DataVerifier.h"
 #import "DictHelper.h"
 @interface AppDelegate() {
     UINavigationController* _navigationController;

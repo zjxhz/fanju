@@ -28,7 +28,6 @@
 @interface NewSidebarViewController (){
     BOOL _showLoginAfterLeftBarHides;
     NSInteger _unreadMessageCount;
-    NSInteger _unreadNotificationCount;
     MKNumberBadgeView* _unreadMsgBadge;
     MKNumberBadgeView* _unreadNotifBadge;
     UIViewController* _lastViewController;
@@ -70,7 +69,6 @@
          _unreadMsgBadge = [[MKNumberBadgeView alloc] initWithFrame:CGRectMake(180, 10, 40, 25)];
         _unreadNotifBadge = [[MKNumberBadgeView alloc] initWithFrame:CGRectMake(180, 10, 40, 25)];
         _unreadMessageCount =  [[NSUserDefaults standardUserDefaults] integerForKey:UNREAD_MESSAGE_COUNT];
-        _unreadNotificationCount = [[NSUserDefaults standardUserDefaults] integerForKey:UNREAD_NOTIFICATION_COUNT];
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(didLogout:)
                                                      name:EODidLogoutNotification
@@ -222,7 +220,8 @@
                     headerCell.messageLabel.textColor = newMessageAvailableColor;
                     headerCell.unreadMessageCountLabel.textColor = newMessageAvailableColor;
                 }
-                if (_unreadNotificationCount == 0) {
+                NSInteger unreadNotifCount = [XMPPHandler sharedInstance].unreadNotifCount;
+                if (unreadNotifCount == 0) {
                     headerCell.notificationImageView.image = noNewMessageImageBg;
                     headerCell.notificationLabel.textColor = noNewMessageColor;
                     headerCell.unreadNotificationLabel.textColor = noNewMessageColor;
@@ -232,7 +231,7 @@
                     headerCell.unreadNotificationLabel.textColor = newMessageAvailableColor;
                 }
                 headerCell.unreadMessageCountLabel.text = [NSString stringWithFormat:@"%d", _unreadMessageCount];
-                headerCell.unreadNotificationLabel.text = [NSString stringWithFormat:@"%d", _unreadNotificationCount];
+                headerCell.unreadNotificationLabel.text = [NSString stringWithFormat:@"%d", unreadNotifCount];
                 [avatarView setPathToNetworkImage:[me avatarFullUrl] forDisplaySize:CGSizeMake(40, 40) contentMode:UIViewContentModeScaleAspectFill];
                 return cell;
             } else  if(indexPath.row == 1){
@@ -301,10 +300,6 @@
 
 -(void)showNotifications{
     [self showViewController:self.notificationViewController];
-    _unreadNotificationCount = 0;
-    [[NSNotificationCenter defaultCenter] postNotificationName:EOUnreadNotificationCount
-                                                        object:[NSNumber numberWithInteger:_unreadNotificationCount]
-                                                      userInfo:nil];
 }
 
 - (void)showRegistrationWizard{
@@ -469,16 +464,24 @@
 }
 
 - (void)unreadNotifUpdated:(NSNotification*)notif {
-    _unreadNotificationCount = [notif.object integerValue];
+    NSInteger unreadNotifCount = [notif.object integerValue];
+    if (_lastViewController == self.notificationViewController && self.sideMenu.navigationController.viewControllers.count == 1) {
+        //notification view is being displayed
+        unreadNotifCount = 0;
+        [XMPPHandler sharedInstance].unreadNotifCount = 0;
+        [[XMPPHandler sharedInstance] markMessagesReadFrom:PUBSUB_SERVICE];
+    } 
+
     [self.tableView reloadData];
-    [[NSUserDefaults standardUserDefaults] setInteger:_unreadNotificationCount forKey:UNREAD_NOTIFICATION_COUNT];
+    [[NSUserDefaults standardUserDefaults] setInteger:unreadNotifCount forKey:UNREAD_NOTIFICATION_COUNT];
     [[NSUserDefaults standardUserDefaults] synchronize];
+    
     [self notifyUnreadCount];
 }
 
 -(void)notifyUnreadCount{
     [[NSNotificationCenter defaultCenter] postNotificationName:EOUnreadCount
-                                                        object:[NSNumber numberWithInteger:_unreadNotificationCount + _unreadMessageCount]
+                                                        object:[NSNumber numberWithInteger:[XMPPHandler sharedInstance].unreadNotifCount + _unreadMessageCount]
                                                       userInfo:nil];
 }
 

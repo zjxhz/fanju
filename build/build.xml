@@ -1,0 +1,129 @@
+<project name="build_fanju" default="upload">
+    <target name="init">
+        <property file="build.properties" />
+        <tstamp>
+            <format property="release_time" pattern="yyyyMMdd_HHmm"/>
+        </tstamp>
+        
+    </target>
+    
+    <!--<target name="security" depends="init">
+        <exec executable="security" failonerror="true">
+            <arg value="unlock-keychain"/>
+            <arg value="-p"/>
+            <arg value="${local.keychain.password}"/>
+            <arg value="${user.home}/Library/Keychains/login.keychain"/>
+        </exec>
+    </target>-->
+
+	<target name="clean" depends="init">
+        <exec executable="/usr/bin/xcodebuild" failonerror="true">
+            <arg value="-workspace"/>
+            <arg value="${local.projectPath}/${app.id}.xcworkspace"/>
+            <arg value="-scheme"/>
+            <arg value="${scheme}"/>
+            <arg value="-configuration"/>
+            <arg value="${configuration}"/>
+            <arg value="clean"/>
+        </exec>
+    </target>
+
+	<!-- set new build version by increasing build number by 1, and enable AutoSendCrashReport-->
+	<target name="prebuild" depends="init">
+		<exec executable="python" failonerror="true" dir="${local.projectPath}">
+    		<arg value="${basedir}/gen_ver.py" />
+    		<arg value="--out" />
+    		<arg value="${basedir}/ver.txt" />    	
+    	</exec>
+    	<property file="ver.txt" />
+    	<delete file = "${basedir}/ver.txt" />
+    	<echo message="ver=${ver}" />
+    	<exec executable="agvtool" dir="${local.projectPath}" failonerror="true">
+    		<arg value="new-version" />
+    		<arg value="${ver}" />
+    	</exec>
+    	<!--set bundle version in Info file, this can be done by agvtool however there is encoding issue-->
+    	<exec executable="defaults" failonerror="true"> 
+    		<arg value="write" />
+    		<arg value="${local.projectPath}/Fanju/Fanju-Info.plist" />
+    		<arg value="CFBundleVersion" />
+    		<arg value="${ver}" />
+    	</exec>
+    	
+    	<property name="ipa_file" value="${local.ipaPath}/${app.id}_${ver}.ipa" />
+    	<property name="dsym_zip" value="${local.ipaPath}/${app.id}_${ver}.dSYM.zip" />
+    	<exec executable="defaults" failonerror="true">
+    		<arg value="write" />
+    		<arg value="${local.projectPath}/Fanju/Fanju-Info.plist" />
+    		<arg value="AutoSendCrashReport" />
+    		<arg value="TRUE" />
+    	</exec>
+	</target>
+	
+    <target name="build" depends="prebuild">
+        <fail unless="m">Version description not set, use -Dm=whatever</fail>
+        <exec executable="/usr/bin/xcodebuild" failonerror="true">
+            <arg value="-workspace"/>
+            <arg value="${local.projectPath}/${app.id}.xcworkspace"/>
+            <arg value="-scheme"/>
+            <arg value="${scheme}"/>
+            <arg value="-configuration"/>
+            <arg value="${configuration}"/>
+            <!--<arg value="clean"/>-->
+            <arg value="build"/>
+        </exec>
+    </target>
+    
+    <target name="archive" depends="prebuild">
+        <zip destfile="${dsym_zip}" basedir="${dSYM.path}"/>        
+        <exec executable="xcrun" failonerror="true">
+            <arg value="-sdk"/>
+            <arg value="iphoneos"/>
+            <arg value="PackageApplication"/>
+            <arg value="${app.path}"/>
+            <arg value="-o"/>
+            <arg value="${ipa_file}"/>
+            <!--<arg value="-sign"/> another - is needed before -sign
+            <arg value="iPhone Developer: Huanze Xu"/>
+            <arg value="-embed"/> another  - is needed before -embed
+            <arg value="${adHocProvisioningProfile}"/>-->
+        </exec>
+
+   </target>
+
+    
+    <target name="document" depends="archive">
+        <copy file="Fanju.plist" tofile="Fanju_${ver}.plist" />
+        <replace file="Fanju_${ver}.plist" token="{version}" value="${ver}" />
+        <copy file="release_template.html" tofile="release_template.html.temp" />
+        <replace file="release_template.html.temp" token="{release_time}" value="${release_time}"/>
+        <replace file="release_template.html.temp" token="{version}" value="${ver}"/>
+        <replace file="release_template.html.temp" token="{m}" value="${m}"/>
+        <loadfile property="release_note" srcFile="release_template.html.temp" />
+        <delete file="release_template.html.temp" />
+        <replace file="install.html" value="${release_note}">
+            <replacetoken><![CDATA[<!--PLACEHOLDER-->]]></replacetoken>
+        </replace>
+    </target>
+    
+    <target name="upload" depends="document">
+        <scp todir="${user}:${password}@${host}:${serverDir}" trust="YES">
+        	<fileset dir="${local.ipaPath}" >
+        		<include name="**/install.html" />
+        		<include name="**/*${ver}*" /> <!--including ipa, plist, dSYM, etc-->
+        	</fileset>
+        </scp>
+    </target>
+    
+    <target name="test" depends="init" description="testing target to verify if ant script is working">
+    	<echo message="${release_time}" />
+    	<exec executable="python" failonerror="true" dir="${local.projectPath}">
+    		<arg value="${basedir}/gen_ver.py" />
+    		<arg value="--out" />
+    		<arg value="${basedir}/ver.txt" />    	
+    	</exec>
+    	<property file="ver.txt" />
+    	<delete file = "${basedir}/ver.txt" />
+    	<echo message="ver=${ver}" />
+	</target>
+</project>

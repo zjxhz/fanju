@@ -58,7 +58,7 @@
             break;
         }
         UIImageView* avatar = [AvatarFactory avatarWithBg:participant];
-        avatar.frame = CGRectMake(24 + 55*i, 227, 53, 53);
+        avatar.frame = CGRectMake(23 + 55*i, 227, 53, 53);
         [self.contentView addSubview:avatar];
         [_participants addObject:avatar];
         i++;

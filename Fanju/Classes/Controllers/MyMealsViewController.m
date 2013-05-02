@@ -7,7 +7,6 @@
 //
 
 #import "MyMealsViewController.h"
-#import "MealTableItemCell.h"
 #import "MealThumbnailTableItemCell.h"
 #import "WEPopoverController.h"
 #import "NetworkHandler.h"

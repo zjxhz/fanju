@@ -1,10 +1,75 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <model name="" userDefinedModelVersionIdentifier="" type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="2061" systemVersion="12D78" minimumToolsVersion="Xcode 4.3" macOSVersion="Automatic" iOSVersion="Automatic">
-    <entity name="MealInfo" syncable="YES">
-        <attribute name="mID" attributeType="Integer 32" syncable="YES"/>
+    <entity name="Meal" syncable="YES">
+        <attribute name="actualPersons" optional="YES" attributeType="Integer 16" defaultValueString="0" syncable="YES"/>
+        <attribute name="introduction" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="maxPersons" optional="YES" attributeType="Integer 16" defaultValueString="0" syncable="YES"/>
+        <attribute name="mID" optional="YES" attributeType="Integer 32" defaultValueString="0" syncable="YES"/>
+        <attribute name="photoURL" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="price" optional="YES" attributeType="Float" defaultValueString="0" syncable="YES"/>
+        <attribute name="startDate" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="startTime" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="topic" attributeType="String" syncable="YES"/>
+        <relationship name="host" optional="YES" minCount="1" maxCount="1" deletionRule="Nullify" destinationEntity="User" syncable="YES"/>
+        <relationship name="participants" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="User" syncable="YES"/>
+        <relationship name="restaurant" minCount="1" maxCount="1" deletionRule="Nullify" destinationEntity="Restaurant" syncable="YES"/>
+    </entity>
+    <entity name="Message" syncable="YES">
+        <attribute name="incoming" optional="YES" attributeType="Boolean" syncable="YES"/>
+        <attribute name="message" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="read" optional="YES" attributeType="Boolean" syncable="YES"/>
+        <attribute name="time" optional="YES" attributeType="Date" syncable="YES"/>
+        <relationship name="owner" optional="YES" minCount="1" maxCount="1" deletionRule="Nullify" destinationEntity="User" syncable="YES"/>
+        <relationship name="with" optional="YES" minCount="1" maxCount="1" deletionRule="Nullify" destinationEntity="User" syncable="YES"/>
+    </entity>
+    <entity name="Notification" syncable="YES">
+        <attribute name="node" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="payload" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="time" optional="YES" attributeType="String" syncable="YES"/>
+        <relationship name="owner" optional="YES" minCount="1" maxCount="1" deletionRule="Nullify" destinationEntity="User" syncable="YES"/>
+    </entity>
+    <entity name="RecentContact" syncable="YES">
+        <attribute name="incoming" optional="YES" attributeType="Boolean" syncable="YES"/>
+        <attribute name="message" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="time" optional="YES" attributeType="Float" defaultValueString="0.0" syncable="YES"/>
+        <attribute name="unread" optional="YES" attributeType="Integer 16" defaultValueString="0" syncable="YES"/>
+        <relationship name="owner" optional="YES" minCount="1" maxCount="1" deletionRule="Nullify" destinationEntity="User" syncable="YES"/>
+        <relationship name="with" optional="YES" minCount="1" maxCount="1" deletionRule="Nullify" destinationEntity="User" syncable="YES"/>
+    </entity>
+    <entity name="Restaurant" syncable="YES">
+        <attribute name="address" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="latitude" optional="YES" attributeType="Float" defaultValueString="0.0" syncable="YES"/>
+        <attribute name="longitude" optional="YES" attributeType="Float" defaultValueString="0.0" syncable="YES"/>
+        <attribute name="name" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="rID" optional="YES" attributeType="Integer 32" defaultValueString="0" syncable="YES"/>
+        <attribute name="tel" optional="YES" attributeType="String" syncable="YES"/>
+    </entity>
+    <entity name="User" syncable="YES">
+        <attribute name="avatar" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="birthday" optional="YES" attributeType="Date" syncable="YES"/>
+        <attribute name="college" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="dateJoined" optional="YES" attributeType="Date" syncable="YES"/>
+        <attribute name="email" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="gender" optional="YES" attributeType="Integer 16" defaultValueString="0" syncable="YES"/>
+        <attribute name="industry" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="latitude" optional="YES" attributeType="Float" defaultValueString="0.0" syncable="YES"/>
+        <attribute name="locationUpdatedAt" optional="YES" attributeType="Date" syncable="YES"/>
+        <attribute name="longitude" optional="YES" attributeType="Float" defaultValueString="0.0" syncable="YES"/>
+        <attribute name="motto" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="name" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="occupation" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="password" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="uID" optional="YES" attributeType="Integer 32" defaultValueString="0" syncable="YES"/>
+        <attribute name="username" optional="YES" attributeType="String" indexed="YES" syncable="YES"/>
+        <attribute name="weiboID" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="workFor" optional="YES" attributeType="String" syncable="YES"/>
     </entity>
     <elements>
-        <element name="MealInfo" positionX="-4509" positionY="-3168" width="128" height="73"/>
+        <element name="Meal" positionX="-23645" positionY="-8370" width="128" height="223"/>
+        <element name="Restaurant" positionX="-23654" positionY="-8082" width="128" height="133"/>
+        <element name="User" positionX="-23391" positionY="-8280" width="128" height="313"/>
+        <element name="Message" positionX="-23231" positionY="-8431" width="128" height="133"/>
+        <element name="RecentContact" positionX="-23456" positionY="-8442" width="128" height="133"/>
+        <element name="Notification" positionX="-23222" positionY="-8244" width="128" height="103"/>
     </elements>
 </model>

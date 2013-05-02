@@ -68,7 +68,7 @@
 
         CommentTableItem *item = object;
         UserProfile *fromUser = item.user;
-        [_user setPathToNetworkImage:[fromUser smallAvatarFullUrl] forDisplaySize:CGSizeMake(50, 50)];
+        [_user setPathToNetworkImage:[fromUser avatarFullUrl] forDisplaySize:CGSizeMake(50, 50)];
         if (_comment) {
             [_comment removeFromSuperview];
         }

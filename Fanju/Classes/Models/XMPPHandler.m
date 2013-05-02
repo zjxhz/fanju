@@ -12,6 +12,7 @@
 #import "AppDelegate.h"
 #import "MTStatusBarOverlay.h"
 #import "XMPPElement+Delay.h"
+#import "RKObjectManager.h"
 #define MAX_RETRIEVE 20
 
 
@@ -164,13 +165,11 @@ NSString * const EOUnreadNotificationCount = @"EOUnreadNotificationCount";
         contact = [_recentContactsDict objectForKey:message.sender];
         if (![message.sender isEqualToString:_currentContact]) {
             contact.unread = [NSNumber numberWithInteger:([contact.unread integerValue] + 1)];
-//            NSLog(@"unread message from %@: %@", message.sender, contact.unread);
         } else { //a message from the one i'm currently talking to
             [self markMessagesReadFrom:contact.contact]; //mark all messages from this one as read
         }
     } else if ([_recentContactsDict objectForKey:message.receiver]) { //i send a message
         contact = [_recentContactsDict objectForKey:message.receiver];
-//        NSLog(@"a message sent to %@", message.receiver);
     } else { //a message between i and a user i have never talked to
         contact = [NSEntityDescription insertNewObjectForEntityForName:@"RecentContact" inManagedObjectContext:_messageManagedObjectContext];
         UserProfile* currentUser = [Authentication sharedInstance].currentUser;
@@ -182,8 +181,9 @@ NSString * const EOUnreadNotificationCount = @"EOUnreadNotificationCount";
             contact.contact = message.sender;
             contact.unread = [NSNumber numberWithInteger:1];
         }
+        [self addContactToCoreData:contact.contact];
+        
         [_recentContactsDict setValue:contact forKey:contact.contact];
-//        NSLog(@"a message betwen %@ who i have never talked to", contact.contact);
     }
     contact.message = message.message;
     contact.time = message.time;
@@ -193,6 +193,14 @@ NSString * const EOUnreadNotificationCount = @"EOUnreadNotificationCount";
     }
 }
 
+-(void)addContactToCoreData:(NSString*)contactJID{
+    NSString* username = [contactJID componentsSeparatedByString:@"@"][0];
+    [[RKObjectManager sharedManager] getObjectsAtPath:@"/api/v1/user/" parameters:@{@"username":username} success:^(RKObjectRequestOperation *operation, RKMappingResult *mappingResult) {
+        NSLog(@"successed fetching and adding user(%@) to core data", username);
+    } failure:^(RKObjectRequestOperation *operation, NSError *error) {
+        NSLog(@"failed to fetch and add user(%@) to core data", username);
+    }];
+}
 -(void)markMessagesReadFrom:(NSString*)contactJID{
     XMPPMessage* message = [[XMPPMessage alloc] init];
     [message addAttributeWithName:@"to" stringValue:contactJID];
@@ -628,6 +636,7 @@ NSString * const EOUnreadNotificationCount = @"EOUnreadNotificationCount";
                     } else {
                         contact.contact = messageMO.sender;
                     }
+                    [self addContactToCoreData:contact.contact];
                     [_recentContactsDict setValue:contact forKey:contact.contact];
                 }
                 contact.message = messageMO.message;

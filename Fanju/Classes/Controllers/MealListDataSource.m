@@ -7,7 +7,6 @@
 //
 
 #import "MealListDataSource.h"
-#import "MealTableItemCell.h"
 #import "MealCell.h"
 
 @implementation MealListDataSource

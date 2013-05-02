@@ -121,8 +121,6 @@ static NSDateFormatter *_dateFormatter;
     info.photoURL = _photoURL;
     info.price = _price;
     info.likes = _likes;
-    info.photo = _photo;
-    info.fullPhoto = _fullPhoto;
     return info;
 }
 

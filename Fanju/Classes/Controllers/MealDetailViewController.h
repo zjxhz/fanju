@@ -21,6 +21,7 @@
 #import "WBSendView.h"
 #import "MealDetailsViewDelegate.h"
 #import "OrderInfo.h"
+#import "MenuViewController.h"
 
 #define MAP_HEIGHT 175
 #define TAB_BAR_HEIGHT 49
@@ -61,7 +62,7 @@
     BOOL _initiallyLiked;
     BOOL _like;
     ShareTableViewController *_shareContentViewController;
-    MenuTableViewController *_menuContentViewController;
+    MenuViewController *_menuContentViewController;
     WEPopoverController *_sharePopOver;
     WEPopoverController *_menuPopover;
     SinaWeibo *_wb;

@@ -36,10 +36,6 @@ typedef enum{
 @property (nonatomic, copy) UserProfile *host;
 @property (nonatomic, copy) NSString *photoURL;
 @property (nonatomic) double price;
-@property (nonatomic, strong) UIImage* photo;
-@property (nonatomic, strong) UIImage* fullPhoto;//full photo that includes everything else excluding participants
-@property (nonatomic, strong) UIImage* croppedPhoto;
-@property (nonatomic) BOOL finishLoadingAllImages;
 
 + (MealInfo *)mealInfoWithData:(NSDictionary *)data;
 

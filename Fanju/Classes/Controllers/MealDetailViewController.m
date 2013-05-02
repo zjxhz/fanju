@@ -404,8 +404,9 @@
         [self updateMenuButton:menuButton withReadingStatus:YES];
         [self fetchMenu:sender];
     } else {
-        [_menuPopover dismissPopoverAnimated:YES];
-        [self.navigationController presentModalViewController:_cpc animated:NO];
+//        [_menuPopover dismissPopoverAnimated:YES];
+//        [self.navigationController presentModalViewController:_cpc animated:NO];
+        [self.view addSubview:_menuContentViewController.view];
     }
 }
 
@@ -430,11 +431,14 @@
                                             //the only object in meal/id/menu/
                                             NSDictionary* data = [[obj objectForKeyInObjects] objectAtIndex:0];
                                             _mealMenu = [MealMenu mealMenuWithData:data];
-                                            _menuContentViewController = [[MenuTableViewController alloc] initWithStyle:UITableViewStylePlain];
-                                            _menuContentViewController.menu = _mealMenu;
-                                            _cpc = [[ClosablePopoverViewController alloc] initWithContentViewController:_menuContentViewController];
                                             
-                                            [[OverlayViewController sharedOverlayViewController] presentModalViewController:_cpc animated:NO];
+                                            
+                                            _menuContentViewController = [[MenuViewController alloc] init];
+                                            _menuContentViewController.mealMenu = _mealMenu;
+                                            [self.view addSubview:_menuContentViewController.view];
+//                                            _cpc = [[ClosablePopoverViewController alloc] initWithContentViewController:_menuContentViewController];
+                                            
+//                                            [[OverlayViewController sharedOverlayViewController] presentModalViewController:_cpc animated:NO];
                                         }
                                         failure:^(void){
                                             [self updateMenuButton:menuButton withReadingStatus:NO];

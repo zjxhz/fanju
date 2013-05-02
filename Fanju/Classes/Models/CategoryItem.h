@@ -14,4 +14,6 @@
 
 -(CategoryItem*)initWithData:(NSDictionary*)data;
 +(CategoryItem*) itemWithData:(NSDictionary*)data;
++(CategoryItem*) dummyCategory;
+-(BOOL)isDummy;
 @end

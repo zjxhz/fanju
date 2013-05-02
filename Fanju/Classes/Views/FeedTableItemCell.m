@@ -56,7 +56,7 @@
 		[super setObject:object];
         OrderTableItem *item = object;
 
-        [_avatar setPathToNetworkImage:[item.orderInfo.customer smallAvatarFullUrl]];
+        [_avatar setPathToNetworkImage:[item.orderInfo.customer avatarFullUrl]];
         NSString* text = [NSString stringWithFormat: @"<b>%@</b>参加了%@", item.orderInfo.customer.name, item.orderInfo.meal.topic];
         _event.text =  [TTStyledText textFromXHTML:text lineBreaks:YES URLs:YES];
         _event.font = [UIFont systemFontOfSize:12];

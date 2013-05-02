@@ -10,7 +10,6 @@
 #import "MealListViewController.h"
 #import "MealInfo.h"
 #import "MealTableItem.h"
-#import "MealTableItemCell.h"
 #import "NetworkHandler.h"
 #import "Const.h"
 #import "AppDelegate.h"
@@ -26,6 +25,7 @@
 #import "UIViewController+MFSideMenu.h"
 #import "WidgetFactory.h"
 #import "RestKit/RestKit.h"
+#import "DateUtil.h"
 
 @interface MealListViewController()
 @property (nonatomic, strong) IBOutlet UIView* loginView;
@@ -181,7 +181,6 @@
                                                     [ds addMeal:[MealTableItem itemWithMealInfo:[MealInfo mealInfoWithData:dict]]];
                                                 }  
                                                 self.dataSource = ds;
-//                                                [self loadImagesForOnscreenRows];
                                                 if (isLoading) {
                                                     [self stopLoading];
                                                 }
@@ -198,51 +197,74 @@
     NSURL *modelURL = [[NSBundle mainBundle] URLForResource:@"Fanju" withExtension:@"momd"];
     NSManagedObjectModel *managedObjectModel = [[NSManagedObjectModel alloc] initWithContentsOfURL:modelURL];
     RKManagedObjectStore *managedObjectStore = [[RKManagedObjectStore alloc] initWithManagedObjectModel:managedObjectModel];
-    NSError *error = nil;
-    BOOL success = RKEnsureDirectoryExistsAtPath(RKApplicationDataDirectory(), &error);
-    if (! success) {
-        RKLogError(@"Failed to create Application Data Directory at path '%@': %@", RKApplicationDataDirectory(), error);
-    }
     NSString *path = [RKApplicationDataDirectory() stringByAppendingPathComponent:@"Fanju.sqlite"];
+    NSFileManager* fileMgr = [NSFileManager defaultManager];
+    [fileMgr removeItemAtPath:path error:nil];
+    [managedObjectStore createPersistentStoreCoordinator];
+    NSError* error = nil;
     NSPersistentStore *persistentStore = [managedObjectStore addSQLitePersistentStoreAtPath:path fromSeedDatabaseAtPath:nil withConfiguration:nil options:nil error:&error];
     if (! persistentStore) {
         RKLogError(@"Failed adding persistent store at path '%@': %@", path, error);
     }
     [managedObjectStore createManagedObjectContexts];
+    [RKManagedObjectStore setDefaultStore:managedObjectStore];
+    RKObjectManager *manager = [RKObjectManager managerWithBaseURL:[NSURL URLWithString:@"http://www.fanjoin.com"]];
+    manager.managedObjectStore = managedObjectStore;
+    [RKObjectManager setSharedManager:manager];
     
-    RKEntityMapping *mealMapping = [RKEntityMapping mappingForEntityForName:@"MealInfo" inManagedObjectStore:managedObjectStore];
-    [mealMapping addAttributeMappingsFromDictionary:@{ @"id": @"mID", @"topic": @"topic" }];
+    RKEntityMapping *userMapping = [RKEntityMapping mappingForEntityForName:@"User" inManagedObjectStore:managedObjectStore];
+    userMapping.identificationAttributes = @[@"uID"];
+    [userMapping addAttributeMappingsFromDictionary:@{
+     @"id": @"uID",
+     @"date_joined": @"dateJoined",
+     @"lat": @"latitude",
+     @"lng": @"longitude",
+     @"weibo_id": @"weiboID",
+     @"work_for":@"workFor",
+     @"updated_at": @"locationUpdatedAt"
+     }];
+    [RKObjectMapping addDefaultDateFormatterForString:LONG_TIME_FORMAT_STR inTimeZone:[NSTimeZone defaultTimeZone]];
+    [RKObjectMapping addDefaultDateFormatterForString:SHORT_TIME_FORMAT_STR inTimeZone:[NSTimeZone defaultTimeZone]];
     
+    [userMapping addAttributeMappingsFromArray:@[@"avatar", @"birthday", @"college", @"name", @"tel", @"email",
+     @"gender", @"industry", @"motto", @"occupation", @"username"]];
+    
+    RKEntityMapping *restaurantMapping = [RKEntityMapping mappingForEntityForName:@"Restaurant" inManagedObjectStore:managedObjectStore];
+    restaurantMapping.identificationAttributes = @[@"rID"];
+    [restaurantMapping addAttributeMappingsFromDictionary:@{@"id": @"rID"}];
+    [restaurantMapping addAttributeMappingsFromArray:@[@"address", @"latitude", @"longitude", @"name", @"tel"]];
+    
+    RKEntityMapping *mealMapping = [RKEntityMapping mappingForEntityForName:@"Meal" inManagedObjectStore:managedObjectStore];
+    mealMapping.identificationAttributes = @[@"mID"];
+    [mealMapping addAttributeMappingsFromDictionary:@{
+     @"id": @"mID",
+     @"actual_persons": @"actualPersons",
+     @"list_price": @"price",
+     @"max_persons": @"maxPersons",
+     @"photo": @"photoURL",
+     @"start_date": @"startDate",
+     @"start_time": @"startTime"}];
+    [mealMapping addAttributeMappingsFromArray:@[@"topic", @"introduction"]];
+    [mealMapping addPropertyMapping:[RKRelationshipMapping relationshipMappingFromKeyPath:@"restaurant" toKeyPath:@"restaurant" withMapping:restaurantMapping]];
+    [mealMapping addPropertyMapping:[RKRelationshipMapping relationshipMappingFromKeyPath:@"host" toKeyPath:@"host" withMapping:userMapping]];
+    [mealMapping addPropertyMapping:[RKRelationshipMapping relationshipMappingFromKeyPath:@"participants" toKeyPath:@"participants" withMapping:userMapping]];
+
     NSIndexSet *statusCodes = RKStatusCodeIndexSetForClass(RKStatusCodeClassSuccessful); // Anything in 2xx
-    RKResponseDescriptor *responseDescriptor = [RKResponseDescriptor responseDescriptorWithMapping:mealMapping pathPattern:nil keyPath:nil statusCodes:statusCodes];
-    
-    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"http://www.fanjoin.com/api/v1/meal/"]];
-    [request setValue:@"application/json" forHTTPHeaderField:@"content-type"];
+    RKResponseDescriptor *mealResponseDescriptor = [RKResponseDescriptor responseDescriptorWithMapping:mealMapping pathPattern:@"/api/v1/meal/" keyPath:@"objects" statusCodes:statusCodes];
+    RKResponseDescriptor *userResponseDescriptor = [RKResponseDescriptor responseDescriptorWithMapping:userMapping pathPattern:@"/api/v1/user/" keyPath:@"objects" statusCodes:statusCodes];
     
     
-//    RKObjectManager *manager = [RKObjectManager managerWithBaseURL:[NSURL URLWithString:@"http://www.fanjoin.com/api/v1"]];
-//    manager.managedObjectStore = managedObjectStore;
-//    [manager getObjectsAtPath:@"/meal/"
-//                   parameters:@{@"format":@"json"}
-//                      success:^(RKObjectRequestOperation *operation, RKMappingResult *mappingResult) {
-//                          NSLog(@"fetched results from /meal/");
-//    }
-//                      failure:^(RKObjectRequestOperation *operation, NSError *error) {
-//                          NSLog(@"failed from /meal/");
-//    }];
-    
-    
-    RKManagedObjectRequestOperation *operation = [[RKManagedObjectRequestOperation alloc] initWithRequest:request responseDescriptors:@[responseDescriptor]];
-    operation.managedObjectContext = managedObjectStore.mainQueueManagedObjectContext;
-    operation.managedObjectCache = managedObjectStore.managedObjectCache;
-    [operation setCompletionBlockWithSuccess:^(RKObjectRequestOperation *operation, RKMappingResult *result) {
-        MealInfo *meal = [result firstObject];
-        NSLog(@"Mapped the meal: %@", meal);
-    } failure:^(RKObjectRequestOperation *operation, NSError *error) {
-        NSLog(@"Failed with error: %@", [error localizedDescription]);
+    [manager addResponseDescriptor:mealResponseDescriptor];
+    [manager addResponseDescriptor:userResponseDescriptor];
+    managedObjectStore.managedObjectCache = [[RKInMemoryManagedObjectCache alloc] initWithManagedObjectContext:managedObjectStore.persistentStoreManagedObjectContext];
+    [manager getObjectsAtPath:@"/api/v1/meal/"
+                   parameters:@{@"limit":@"0"}
+                      success:^(RKObjectRequestOperation *operation, RKMappingResult *mappingResult) {
+                          NSLog(@"fetched results from /meal/");
+    }
+                      failure:^(RKObjectRequestOperation *operation, NSError *error) {
+                          NSLog(@"failed from /meal/");
     }];
-    NSOperationQueue *operationQueue = [NSOperationQueue new];
-    [operationQueue addOperation:operation];
 }
 - (void) removeSideMenuBarButtonItem {
 //    self.navigationController.navigationItem.leftBarButtonItem.customView.hidden = YES;
@@ -312,99 +334,22 @@
 }
 
 
-#pragma mark -
-#pragma mark Table cell image support
 
-- (void)startIconDownload:(MealInfo *)mealInfo forIndexPath:(NSIndexPath *)indexPath
-{
-    ImageDownloader *iconDownloader = [imageDownloadsInProgress objectForKey:indexPath];
-    if (iconDownloader == nil && !mealInfo.finishLoadingAllImages)
-    {
-        NSLog(@"start downloading images for index path: (%d,%d)", indexPath.section, indexPath.row);
-        iconDownloader = [[ImageDownloader alloc] init];
-        iconDownloader.meal = mealInfo;
-        iconDownloader.indexPathInTableView = indexPath;
-        iconDownloader.delegate = self;
-        [imageDownloadsInProgress setObject:iconDownloader forKey:indexPath];
-        [iconDownloader startDownload];
-    }
-}
-
-// this method is used in case the user scrolled into a set of cells that don't have their app icons yet
-- (void)loadImagesForOnscreenRows
-{
-    NSArray *visiblePaths = [self.tableView indexPathsForVisibleRows];
-    for (NSIndexPath *indexPath in visiblePaths)
-    {
-        MealTableItem *item = [self.dataSource tableView:self.tableView objectForRowAtIndexPath:indexPath];
-        
-        if (!item.mealInfo.finishLoadingAllImages) // avoid the app icon download if the app already has an icon
-        {
-            [self startIconDownload:item.mealInfo forIndexPath:indexPath];
-        }
-    }
-    NSMutableArray* preloadedPaths = [NSMutableArray array];
-    NSIndexPath* lastIndexPath = [visiblePaths lastObject];
-    [preloadedPaths addObjectsFromArray:[self indexPathsUnder:lastIndexPath count:2]];
-    [self preloadImages:preloadedPaths];
-}
-
--(void)preloadImages:(NSArray*)indexPaths{
-    for (NSIndexPath* indexPath in indexPaths) {
-        MealTableItem* item = [self.dataSource tableView:self.tableView objectForRowAtIndexPath:indexPath];
-        [self preDownload:item.mealInfo.photoFullUrl];
-        for (UserProfile* participant in item.mealInfo.participants) {
-            [self preDownload:participant.smallAvatarFullUrl];
-        }
-    }
-}
-
--(void)preDownload:(NSString*)url{
-    TTURLRequest* request = [TTURLRequest requestWithURL:url delegate:self];
-    request.response = [[TTURLImageResponse alloc] init];
-    [request send];
-}
--(NSArray*)indexPathsUnder:(NSIndexPath*)indexPath count:(NSInteger)count{
-    NSMutableArray* indexPaths = [NSMutableArray array];
-    NSIndexPath* current = indexPath;
-    for(int i = 0; i < count; ++i){
-        if (current.row + 1 < [self.dataSource tableView:self.tableView numberOfRowsInSection:current.section]) {
-            current = [NSIndexPath indexPathForRow:current.row + 1 inSection:current.section];
-        } else if (current.section < [self.dataSource numberOfSectionsInTableView:self.tableView]){
-            current = [NSIndexPath indexPathForRow:0 inSection:current.section + 1];
-        } else{
-            break;
-        }
-        [indexPaths addObject:current];
-    }
-    return indexPaths;
-}
-
-- (void)mealImageDidLoad:(NSIndexPath*) indexPath withImage:(UIImage*)image{
-    ImageDownloader *imageDownloader = [imageDownloadsInProgress objectForKey:indexPath];
-    if (imageDownloader != nil)
-    {
-        MealTableItemCell *cell = (MealTableItemCell*)[self.tableView cellForRowAtIndexPath:imageDownloader.indexPathInTableView];
-        [cell setMealImage:image];
-    }
-}
-
-- (void)userSmallAvatarDidLoad:(NSIndexPath*) indexPath withImage:(UIImage*)image forUser:(UserProfile*)user{
-    ImageDownloader *imageDownloader = [imageDownloadsInProgress objectForKey:indexPath];
-    if (imageDownloader != nil)
-    {
-        MealTableItemCell *cell = (MealTableItemCell*)[self.tableView cellForRowAtIndexPath:imageDownloader.indexPathInTableView];
-        [cell setAvatar:image forUser:user];
-    }
-}
-
-- (void)didFinishLoad:(NSIndexPath*)indexPath{
-    ImageDownloader *imageDownloader = [imageDownloadsInProgress objectForKey:indexPath];
-    imageDownloader.meal.finishLoadingAllImages = YES;
-    UITableViewCell *cell = [self.tableView cellForRowAtIndexPath:imageDownloader.indexPathInTableView];
-    [cell setNeedsDisplay];
-    [imageDownloadsInProgress removeObjectForKey:indexPath];
-}
+//-(void)preloadImages:(NSArray*)indexPaths{
+//    for (NSIndexPath* indexPath in indexPaths) {
+//        MealTableItem* item = [self.dataSource tableView:self.tableView objectForRowAtIndexPath:indexPath];
+//        [self preDownload:item.mealInfo.photoFullUrl];
+//        for (UserProfile* participant in item.mealInfo.participants) {
+//            [self preDownload:participant.avatarFullUrl];
+//        }
+//    }
+//}
+//
+//-(void)preDownload:(NSString*)url{
+//    TTURLRequest* request = [TTURLRequest requestWithURL:url delegate:self];
+//    request.response = [[TTURLImageResponse alloc] init];
+//    [request send];
+//}
 
 #pragma mark -
 #pragma mark Deferred image loading (UIScrollViewDelegate)

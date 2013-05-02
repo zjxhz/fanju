@@ -61,11 +61,7 @@
 }
 
 +(NSString*)bestAvatarUrlForUser:(UserProfile*)user withFrame:(CGRect)frame{
-    if (frame.size.width < 100) {
-        return [user smallAvatarFullUrl];
-    } else {
-        return [user avatarFullUrl];
-    }
+    return [user avatarFullUrl];
 }
 
 @end

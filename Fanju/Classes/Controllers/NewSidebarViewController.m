@@ -261,12 +261,14 @@
         UIImageView* disclosure = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"side_disclosure_gray"]];
         cell.accessoryView = disclosure;
         cell.textLabel.frame = CGRectMake(18, 0, 100, 44);
+        UIImageView *bgColorView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"side_selected_bg"]];
+        [cell setSelectedBackgroundView:bgColorView];
+        cell.textLabel.highlightedTextColor = RGBCOLOR(150, 150, 150);
     }
     
     NSArray* sec = [_sectionItems objectAtIndex:indexPath.section];
     cell.textLabel.text = [sec objectAtIndex:indexPath.row];
-
-    cell.selectionStyle  = UITableViewCellSelectionStyleNone;
+//    cell.selectionStyle  = UITableViewCellSelectionStyleNone;
     cell.backgroundColor = [UIColor clearColor];
     return cell;
 }

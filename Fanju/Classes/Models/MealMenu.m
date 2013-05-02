@@ -26,7 +26,8 @@
             [_dishes addObject: [DishItem itemWithData:dict]];
         }
         _categories = [NSMutableArray array];
-        for (NSDictionary *dict in [data objectForKey:@"dishcategoryitem_set"]) {
+        NSArray* categoryData = [data objectForKey:@"dishcategoryitem_set"];
+        for (NSDictionary *dict in categoryData) {
             [_categories addObject: [CategoryItem itemWithData:dict]];
         }
     }
@@ -49,6 +50,15 @@
         }];
         _groupedDishes = [NSMutableArray array];
         NSMutableArray* group = [NSMutableArray array];
+        if (dishesAndCategories.count > 0 && [dishesAndCategories[0] isKindOfClass:[DishItem class]]) { //first one is dish, meaning it has no category
+            group = [NSMutableArray array];
+            [_groupedDishes addObject:group];
+//            if (_categories.count == 0) {
+                [_categories insertObject:[CategoryItem dummyCategory] atIndex:0];
+//            } else {
+//                
+//            }
+        }
         for (id obj in dishesAndCategories) {
             if ([obj isKindOfClass:[CategoryItem class]]) {
                 group = [NSMutableArray array];

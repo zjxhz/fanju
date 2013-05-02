@@ -33,7 +33,6 @@
 @property (nonatomic, copy) NSString* weiboID;
 @property (nonatomic, strong) UIImage* avatar;//used to store local image that is not uploaded
 @property (nonatomic, copy) NSMutableArray* photos;
-@property (nonatomic, copy) NSString* smallAvatarURL;
 @property (nonatomic, readonly) NSString* jabberID;
 @property (nonatomic, copy) NSString* industry; //行业
 + (UserProfile *)profileWithData:(NSDictionary *)data;
@@ -42,13 +41,11 @@
 - (BOOL)isFollowing:(UserProfile*)user;
 -(NSString*)tagsToString;
 -(NSString*)avatarFullUrl;
--(NSString*)smallAvatarFullUrl;
 //helper method that converts an UIImage object into the dict that can be used for uploading user image
 -(NSDictionary*)avatarDictForUploading:(UIImage*)image;
 -(UIImage*)genderImage;
 -(BOOL)hasCompletedRegistration;
 -(NSArray*)avatarAndPhotosFullUrls;
--(NSArray*)avatarAndPhotoThumbnailFullUrls;
 -(void)addPhoto:(UserPhoto*)photo;
 -(NSInteger)industryValue;
 +(NSInteger)industryValue:(NSString*)industry;

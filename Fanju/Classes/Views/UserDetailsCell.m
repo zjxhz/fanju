@@ -77,7 +77,7 @@
         avatarView.image = avatarBgImg;
         
         _avatar = [[NINetworkImageView alloc] initWithFrame:CGRectMake(4, 4, 62, 62)];
-        [_avatar setPathToNetworkImage:[_user smallAvatarFullUrl] forDisplaySize:CGSizeMake(62, 62)];
+        [_avatar setPathToNetworkImage:[_user avatarFullUrl] forDisplaySize:CGSizeMake(62, 62)];
         [avatarView addSubview:_avatar];
         [self.contentView addSubview:avatarView];
         

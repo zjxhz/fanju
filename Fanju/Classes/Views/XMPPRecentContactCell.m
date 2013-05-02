@@ -11,6 +11,8 @@
 #import "RecentContact.h"
 #import "DateUtil.h"
 #import "MKNumberBadgeView.h"
+#import "RKObjectManager.h"
+#import "RKManagedObjectStore.h"
 
 #define H_GAP 3
 #define V_GAP 3
@@ -61,43 +63,10 @@
         [super setObject:object];
         _object = object;
         RecentContact *item = object;
-        XMPPJID* contactJID = [XMPPJID jidWithString:item.contact];
-        
-        XMPPHandler* xmppHandler =[XMPPHandler sharedInstance];
-        XMPPUserCoreDataStorageObject *user = [xmppHandler.xmppRosterStorage userForJID:contactJID
-                                                                  xmppStream:xmppHandler.xmppStream
-                                                        managedObjectContext:xmppHandler.rosterManagedObjectContext];
-
-
-        self.detailTextLabel.text = item.message;
         _timeLabel.text = item.time ? [DateUtil userFriendlyStringFromDate:item.time] : @"";
-        if (!user) {
-            self.imageView.image = [UIImage imageNamed:@"anno"];
-            self.textLabel.text = nil;
-            self.detailTextLabel.text = nil;
-            [_numberBadge removeFromSuperview];
-        }
         
-        if (user.photo) {
-            self.imageView.image = user.photo;
-        } else {
-            NSData *photoData = [xmppHandler.xmppvCardAvatarModule photoDataForJID:user.jid];
-            if (photoData){
-                self.imageView.image = [UIImage imageWithData:photoData];
-            }
-            else {
-                [xmppHandler.xmppvCardTempModule fetchvCardTempForJID:contactJID useCache:NO];
-                self.imageView.image = [UIImage imageNamed:@"anno"];
-            }
-        }
-        
-        if (user.nickname) {
-            self.textLabel.text = user.nickname;
-        } else {
-            [xmppHandler.xmppvCardTempModule fetchvCardTempForJID:contactJID useCache:NO];
-            self.textLabel.text = @"";
-        }
-        
+        NSString* username = [item.contact componentsSeparatedByString:@"@"][0];
+        self.detailTextLabel.text = item.message;
         NSInteger unreadCount = [item.unread integerValue];
         if (unreadCount> 0) {
             _numberBadge.value = unreadCount;
@@ -105,12 +74,73 @@
         } else {
             [_numberBadge removeFromSuperview];
         }
-
+        RKManagedObjectStore* store = [RKObjectManager sharedManager].managedObjectStore;
+        NSManagedObjectContext* contex = store.mainQueueManagedObjectContext;
+        NSFetchRequest* fetchRequest = [[NSFetchRequest alloc] init];
+        fetchRequest.entity = [NSEntityDescription entityForName:@"User" inManagedObjectContext:contex];
+        fetchRequest.predicate = [NSPredicate predicateWithFormat:@"username=%@", username];
+        NSError* error = nil;
+        NSArray* objects = [contex executeFetchRequest:fetchRequest error:&error];
+        if (error) {
+            NSLog(@"failed to fetch user(%@) from coredata", username);
+        } else if(objects.count == 0){
+            NSLog(@"warn: no user(%@) found in core data", username);
+        } else {
+            NSManagedObject* obj = objects[0];
+            self.textLabel.text = [obj valueForKey:@"name"];
+//            self.imageView.image = [obj valueForKey:@"avatar"];
+        }
         
-
+//        [[RKObjectManager sharedManager]
+//    getObjectsAtPath:@"/api/v1/user/"
+//    parameters:@{@"username":username}
+//    success:^(RKObjectRequestOperation *operation, RKMappingResult *mappingResult) {
+//        NSManagedObject* obj = [mappingResult firstObject];
+//        NSString* name = [obj valueForKey:@"name"];
+//        self.textLabel.text = name;
+//    } failure:^(RKObjectRequestOperation *operation, NSError *error) {
+//        NSLog(@"");
+//    }];
+        
+        
+        
+//        XMPPJID* contactJID = [XMPPJID jidWithString:item.contact];
+//        
+//        XMPPHandler* xmppHandler =[XMPPHandler sharedInstance];
+//        XMPPUserCoreDataStorageObject *user = [xmppHandler.xmppRosterStorage userForJID:contactJID
+//                                                                  xmppStream:xmppHandler.xmppStream
+//                                                        managedObjectContext:xmppHandler.rosterManagedObjectContext];
+//
+//
+//        
+//        
+//        if (!user) {
+//            self.imageView.image = [UIImage imageNamed:@"anno"];
+//            self.textLabel.text = nil;
+//            self.detailTextLabel.text = nil;
+//            [_numberBadge removeFromSuperview];
+//        }
+//        
+//        if (user.photo) {
+//            self.imageView.image = user.photo;
+//        } else {
+//            NSData *photoData = [xmppHandler.xmppvCardAvatarModule photoDataForJID:user.jid];
+//            if (photoData){
+//                self.imageView.image = [UIImage imageWithData:photoData];
+//            }
+//            else {
+//                [xmppHandler.xmppvCardTempModule fetchvCardTempForJID:contactJID useCache:NO];
+//                self.imageView.image = [UIImage imageNamed:@"anno"];
+//            }
+//        }
+//        
+//        if (user.nickname) {
+//            self.textLabel.text = user.nickname;
+//        } else {
+//            [xmppHandler.xmppvCardTempModule fetchvCardTempForJID:contactJID useCache:NO];
+//            self.textLabel.text = @"";
+//        }
     }
-
-
 }
 
 @end

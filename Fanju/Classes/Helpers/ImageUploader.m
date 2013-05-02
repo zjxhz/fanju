@@ -142,12 +142,12 @@
     if(_imagePickerActions == actionSheet){
         if(!_pickerController){
             _pickerController = [[UIImagePickerController alloc] init];
-            _pickerController.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
         }
-
         if (buttonIndex == 0) {
             _pickerController.sourceType = UIImagePickerControllerSourceTypeCamera;
-        } else if (buttonIndex == 2){
+        } else if(buttonIndex == 1){
+            _pickerController.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
+        }else if (buttonIndex == 2){
             return;
         }
         _pickerController.delegate = self;

@@ -18,11 +18,11 @@ static NSDateFormatter *dateOnlyFormat;
 +(void)initialize{
     if (!DATE_FORMAT) {
         DATE_FORMAT = [[NSDateFormatter alloc] init];
-        [DATE_FORMAT setDateFormat:@"yyyy-MM-dd'T'HH:mm:ss"];
+        [DATE_FORMAT setDateFormat:LONG_TIME_FORMAT_STR];
     }
     if (!SHORT_DATE_FORMAT) {
         SHORT_DATE_FORMAT = [[NSDateFormatter alloc] init];
-        [SHORT_DATE_FORMAT setDateFormat:@"yyyy-MM-dd"];
+        [SHORT_DATE_FORMAT setDateFormat:SHORT_TIME_FORMAT_STR];
     }
     if(!timeOnlyFormat){
         timeOnlyFormat = [[NSDateFormatter alloc] init];

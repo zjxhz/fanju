@@ -780,7 +780,6 @@
 }
 -(void)didUploadAvatar:(UIImage*)image withData:(NSDictionary *)data{
     _user.avatarURL  = [data objectForKey:@"avatar"];
-    _user.smallAvatarURL = [data objectForKey:@"small_avatar"];
     _userDetailsCell.avatar.image = image;
     
     [_userDetailsCell.avatar setPathToNetworkImage:[_user avatarFullUrl]];

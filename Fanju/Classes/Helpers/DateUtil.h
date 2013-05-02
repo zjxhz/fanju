@@ -7,7 +7,8 @@
 //
 
 #import <Foundation/Foundation.h>
-
+#define LONG_TIME_FORMAT_STR @"yyyy-MM-dd'T'HH:mm:ss"
+#define SHORT_TIME_FORMAT_STR @"yyyy-MM-dd"
 @interface DateUtil : NSObject
 +(NSDate*) dateFromString:(NSString*)dateString;
 +(NSDate*) dateFromShortString:(NSString *)dateString;

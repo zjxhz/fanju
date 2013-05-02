@@ -68,7 +68,7 @@
             _avatar.frame = otherUserFrame;
         }
         
-        [_avatar setPathToNetworkImage:[fromUser smallAvatarFullUrl]];
+        [_avatar setPathToNetworkImage:[fromUser avatarFullUrl]];
         if (_message) {
             [_message removeFromSuperview];
         }

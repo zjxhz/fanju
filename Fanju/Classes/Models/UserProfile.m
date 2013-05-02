@@ -34,8 +34,7 @@
         _username = [data objectForKey:@"username"];
         _name = [ModelHelper stringValueForKey:@"name" inDictionary:data withDefaultValue:_username];
         _uID = [[data objectForKey:@"id"] intValue];
-        _avatarURL = [ModelHelper stringValueForKey:@"big_avatar" inDictionary:data];//TODO currently use big avatar only
-        _smallAvatarURL = [ModelHelper stringValueForKey:@"small_avatar" inDictionary:data];
+        _avatarURL = [ModelHelper stringValueForKey:@"big_avatar" inDictionary:data];
         _gender = [[data objectForKey:@"gender"] isKindOfClass:[NSNull class]] ?  -1 : [[data objectForKey:@"gender"] intValue];
         _birthday = [ModelHelper dateValueForKey:@"birthday" inDictionary:data];
         id obj = [data objectForKey:@"lng"];
@@ -140,7 +139,6 @@
     info.username = _username;
     info.uID = _uID;
     info.avatarURL = _avatarURL;
-    info.smallAvatarURL = _smallAvatarURL;
     info.gender = _gender;
     info.birthday = _birthday;
     info.coordinate = _coordinate;
@@ -199,17 +197,6 @@
     }
 }
 
--(NSString*)smallAvatarFullUrl{
-    if (_smallAvatarURL) {
-        if ([_smallAvatarURL hasPrefix:@"http:"]) {
-            return _smallAvatarURL;
-        } else {
-            return [NSString stringWithFormat:@"http://%@%@", EOHOST, _smallAvatarURL];
-        }
-    } else {
-        return nil;
-    }
-}
 
 -(void)addPhoto:(UserPhoto*)photo{
     if (!_photos) {
@@ -237,17 +224,6 @@
     return fullUrls;
 }
 
--(NSArray*)avatarAndPhotoThumbnailFullUrls{
-    NSMutableArray* fullUrls = [NSMutableArray array];
-    if (self.avatarURL) {
-        [fullUrls addObject:[self smallAvatarFullUrl]];
-    }
-    for (UserPhoto* photo in _photos) {
-        [fullUrls addObject:[NSString stringWithFormat:@"http://%@%@", EOHOST, photo.thumbnailUrl]];
-    }
-    return fullUrls;
-}
-
 -(NSDictionary*)avatarDictForUploading:(UIImage*)image{
     NSString* base64Img = [UIImageJPEGRepresentation(image, 1.0) base64EncodedString];
     NSString* fileName = [NSString stringWithFormat:@"%@_avatar.jpg", _username];
@@ -264,7 +240,6 @@
     [coder encodeObject:_username forKey:@"username"];
     [coder encodeInt:_uID forKey:@"uID"];
     [coder encodeObject:_avatarURL forKey:@"avatarURL"];
-    [coder encodeObject:_smallAvatarURL forKey:@"smallAvatarURL"];
     [coder encodeInt:_gender forKey:@"gender"];
     [coder encodeObject:_birthday forKey:@"birthday"];
     [coder encodeObject:_locationUpdatedTime forKey:@"locationUpdatedtime"];
@@ -293,7 +268,6 @@
         _username =  [coder decodeObjectForKey:@"username"];
         _uID =  [coder decodeIntForKey:@"uID"];
         _avatarURL =  [coder decodeObjectForKey:@"avatarURL"];
-        _smallAvatarURL = [coder decodeObjectForKey:@"smallAvatarURL"];
         _gender = [coder decodeIntForKey:@"gender"];
         _birthday = [coder decodeObjectForKey:@"birthday"];
         _motto = [coder decodeObjectForKey:@"motto"];

@@ -38,7 +38,7 @@
         [self startDownloadAvatars];
     }  else {
         for (UserProfile* user in self.meal.participants) {
-            if ([url isEqualToString:[user smallAvatarFullUrl]]){
+            if ([url isEqualToString:[user avatarFullUrl]]){
                 [self.delegate userSmallAvatarDidLoad:self.indexPathInTableView withImage:response.image forUser:user];
             }
         }
@@ -54,7 +54,7 @@
         [self.delegate mealImageDidLoad:self.indexPathInTableView withImage:response.image];
     } else {
         for (UserProfile* user in self.meal.participants) {
-            if ([url isEqualToString:[user smallAvatarFullUrl]]){
+            if ([url isEqualToString:[user avatarFullUrl]]){
                 [self.delegate userSmallAvatarDidLoad:self.indexPathInTableView withImage:response.image forUser:user];
             }
         }
@@ -66,7 +66,7 @@
 
 -(void)startDownloadAvatars{
     for (UserProfile* user in self.meal.participants) {
-        [self download:[user smallAvatarFullUrl]];
+        [self download:[user avatarFullUrl]];
     }
 }
 - (void) checkIfFinish{

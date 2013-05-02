@@ -156,7 +156,7 @@
 		// Set the data in various UI elements
 		[_username setText:item.profile.name];
         
-        [_avatar setPathToNetworkImage:[item.profile smallAvatarFullUrl] forDisplaySize:CGSizeMake(AVATAR_SIDE_LENGTH, AVATAR_SIDE_LENGTH)];
+        [_avatar setPathToNetworkImage:[item.profile avatarFullUrl] forDisplaySize:CGSizeMake(AVATAR_SIDE_LENGTH, AVATAR_SIDE_LENGTH)];
         _avatar.userInteractionEnabled = NO;
         
         NSMutableSet *myTagSet = [NSMutableSet setWithArray:_currentUser.tags];

@@ -218,7 +218,7 @@
 
 //-(void)configureCell:(UITableViewCell*)cell withUser:(UserProfile*)user{
 //    cell.textLabel.text = user.name;
-//    NSData* data =  [[TTURLCache sharedCache] dataForURL:[user smallAvatarFullUrl]];
+//    NSData* data =  [[TTURLCache sharedCache] dataForURL:[user avatarFullUrl]];
 //    UIImage* image = [UIImage imageWithData:data];
 //    if (image) {
 //        cell.imageView.image = image;

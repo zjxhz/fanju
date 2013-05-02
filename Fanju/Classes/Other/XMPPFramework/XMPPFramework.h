@@ -41,3 +41,5 @@
 
 //#import "XMPPMUC.h"
 //#import "XMPPRoomCoreDataStorage.h"
+
+#import "XMPPElement+Delay.h"

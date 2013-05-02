@@ -199,8 +199,8 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
     
     UserProfile* me = [Authentication sharedInstance].currentUser;
     _fetchRequest.predicate = [NSPredicate predicateWithFormat:@"(type == 'chat') AND \
-                     ( (receiver BEGINSWITH %@ AND sender BEGINSWITH %@) \
-                        OR (receiver BEGINSWITH %@ AND sender BEGINSWITH %@) )", _contactJIDStr, me.jabberID, me.jabberID, _contactJIDStr];
+                               ( (receiver BEGINSWITH %@ AND sender BEGINSWITH %@) \
+                               OR (receiver BEGINSWITH %@ AND sender BEGINSWITH %@) )", _contactJIDStr, me.jabberID, me.jabberID, _contactJIDStr];
     _fetchRequest.sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"time" ascending:NO]];
     _fetchRequest.fetchLimit = FETCH_LIMIT;
     _fetchOffset = FETCH_LIMIT;

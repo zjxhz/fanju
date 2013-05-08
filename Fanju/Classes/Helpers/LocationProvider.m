@@ -60,10 +60,10 @@
     self.lastLocation = newLocation;
     NSDate* updatedTime = [NSDate date];
     if ([updatedTime timeIntervalSinceDate:_lastLocationUpdatedTime] < 5) {
-        NSLog(@"updating too often, just ignore");
+        DDLogVerbose(@"updating too often, just ignore");
         return;
     } else {
-        NSLog(@"location updated at %@, previous updated at: %@", updatedTime, _lastLocationUpdatedTime );
+        DDLogVerbose(@"location updated at %@, previous updated at: %@", updatedTime, _lastLocationUpdatedTime );
         [self.locationDelegate finishObtainingLocation:newLocation];
     }
     _lastLocationUpdatedTime = [NSDate date];
@@ -76,7 +76,7 @@
 
 - (void)locationManager:(CLLocationManager *)manager didFailWithError:(NSError *)error {
 	[self.locationDelegate failedObtainingLocation];
-    NSLog(@"failed to obtain location with error: %@", error);
+    DDLogError(@"failed to obtain location with error: %@", error);
     [self.lm stopUpdatingLocation];
     if (update_failed_block) {
         update_failed_block();

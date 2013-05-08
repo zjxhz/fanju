@@ -134,7 +134,7 @@
                                             
                                         } failure:^{
                                             [_refreshControl endRefreshing];
-                                            NSLog(@"failed to load orders");
+                                            DDLogError(@"failed to load orders");
                                         }];
 }
 
@@ -172,7 +172,7 @@
 //                                            [self.tableView reloadData];
 //                                            
 //                                        } failure:^{
-//                                            NSLog(@"failed to load more orders");
+//                                            DDLogError(@"failed to load more orders");
 //#warning fail handling
 //                                        }];
 //}

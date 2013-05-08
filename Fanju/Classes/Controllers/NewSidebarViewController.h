@@ -11,7 +11,7 @@
 #import "MyMealsViewController.h"
 #import "UserListViewController.h"
 #import "SocialNetworkViewController.h"
-#import "RecentContactsViewController.h"
+#import "ConversationViewController.h"
 #import "NewUserDetailsViewController.h"
 #import "NotificationViewController.h"
 #import "MFSideMenu.h"
@@ -28,7 +28,7 @@
 @property(nonatomic, readonly) MyMealsViewController* myMealsViewController;
 @property(nonatomic, readonly) UserListViewController* userListViewController;
 //@property(nonatomic, readonly) SocialNetworkViewController* socialViewController;
-@property(nonatomic, readonly) RecentContactsViewController* recentContactsViewController;
+@property(nonatomic, readonly) ConversationViewController* conversationViewController;
 @property(nonatomic, readonly) NewUserDetailsViewController* userDetailsViewController;
 @property(nonatomic, readonly) NotificationViewController* notificationViewController;
 

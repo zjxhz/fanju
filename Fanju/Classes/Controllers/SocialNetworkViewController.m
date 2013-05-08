@@ -178,7 +178,7 @@
                                             }
                                             [self.tableView reloadData];
                                         } failure:^{
-                                            NSLog(@"failed to load more followings");
+                                            DDLogError(@"failed to load more followings");
 #warning fail handling
                                         }];
 }

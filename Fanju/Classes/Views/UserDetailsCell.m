@@ -172,7 +172,7 @@
 //                                                _nextMealTimeLabel.text = @"";
                                             }
                                         } failure:^{
-                                            NSLog(@"failed to fetch order for %@", _user);
+                                            DDLogError(@"failed to fetch order for %@", _user);
                                             _nextMealText.text = @"获取饭局失败";
                                             _nextMealView.alpha = 1;
 //                                            _nextMealTimeLabel.text = @"";

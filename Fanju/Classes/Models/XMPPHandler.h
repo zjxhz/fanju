@@ -11,7 +11,7 @@
 #import "EOMessage.h"
 #import "ChatHistoryCoreDataStorage.h"
 #import "Authentication.h"
-#define PUBSUB_SERVICE @"pubsub.fanjoin.com"
+#define PUBSUB_SERVICE [NSString stringWithFormat:@"pubsub.%@", XMPP_HOST]
 
 @interface XMPPHandler : NSObject<XMPPStreamDelegate>{
     XMPPReconnect* _xmppReconnect;

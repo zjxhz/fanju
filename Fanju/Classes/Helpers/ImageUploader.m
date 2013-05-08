@@ -73,7 +73,7 @@
             newSize = CGSizeMake(MAX_PHOTO_WIDTH, image.size.height * (MAX_PHOTO_WIDTH/ image.size.width));
         }
     }
-    NSLog(@"crop and resizing - cropRect:%@ ==> %@ -> %@",
+    DDLogVerbose(@"crop and resizing - cropRect:%@ ==> %@ -> %@",
           NSStringFromCGRect(cropRect),
           NSStringFromCGSize(image.size),
           NSStringFromCGSize(newSize));
@@ -110,7 +110,7 @@
         _hud.labelText = @"上传失败";
         [_hud hide:YES afterDelay:1];
         [_pickerController dismissModalViewControllerAnimated:YES];
-        NSLog(@"failed to upload images");
+        DDLogError(@"failed to upload images");
         [_delegate didFailUploadPhoto:image];
     } progress:^(NSInteger totalBytesLoaded, NSInteger totalBytesExpected) {
         _hud.progress = totalBytesLoaded * 1.0 / totalBytesExpected;
@@ -120,14 +120,14 @@
 -(void)doChangeAvatar:(UIImage*)image withName:(NSString*)filename{
     [[NetworkHandler getHandler] uploadImage:image withName:filename toURL:[NSString stringWithFormat:@"user/%d/avatar/", _user.uID]
                                      success:^(id obj) {
-                                         NSLog(@"avatar updated");
+                                         DDLogVerbose(@"avatar updated");
                                          [_hud hide:YES];
                                          NSDictionary* data = obj;
                                          [_delegate didUploadAvatar:image withData:data];
                                          [_viewController dismissModalViewControllerAnimated:YES];
                                          [[NSNotificationCenter defaultCenter] postNotificationName:AVATAR_UPDATED_NOTIFICATION object:[_user avatarFullUrl]];
                                      } failure:^{
-                                         NSLog(@"failed to update avatar");
+                                         DDLogError(@"failed to update avatar");
                                          _hud.labelText = @"上传失败";
                                          [_hud hide:YES afterDelay:1];
                                          [_delegate didFailUploadAvatar:image];

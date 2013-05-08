@@ -134,13 +134,13 @@ static int t = 0;
             request.httpMethod = @"PATCH";
         }
         else {
-            NSLog(@"Not supported method %d", method);
+            DDLogVerbose(@"Not supported method %d", method);
         }
         NSMutableString *logStr = [NSMutableString stringWithFormat:@"%@ %@",request.httpMethod, url];
         if (params) {
             [logStr appendFormat:@"?%@",paramStr];
         }
-        NSLog(logStr);
+        DDLogVerbose(logStr);
     }
     
     [request send];
@@ -160,7 +160,7 @@ static int t = 0;
     
     NSData* file = UIImageJPEGRepresentation(image, 1.0);
     [request addFile:file mimeType:@"image/jpeg" fileName:filename];
-    NSLog(@"uploading file...");
+    DDLogVerbose(@"uploading file...");
     
     [request send];
 }
@@ -188,9 +188,8 @@ static int t = 0;
         request.httpMethod = @"PATCH";
     }
     else {
-        NSLog(@"Not supported method %d", method);
+        DDLogVerbose(@"Not supported method %d", method);
     }
-    NSLog([NSMutableString stringWithFormat:@"%@ %@",request.httpMethod, url]);
     [request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
     [request send];
 }
@@ -201,7 +200,7 @@ static int t = 0;
     id obj = [data objectFromJSONData];//[parser objectWithData:data];
     if (data.length >0 && !obj) {
         NSString* html = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
-        NSLog(@"no json data found, probably error occured, html: %@", html);
+        DDLogVerbose(@"no json data found, probably error occured, html: %@", html);
     }
     if (self.success != NULL) {
         dispatch_async(dispatch_get_main_queue(), ^{
@@ -224,12 +223,12 @@ static int t = 0;
                 [SVProgressHUD dismissWithError:@"Network Error" afterDelay:1];
                 
                 NSData * data = [error.userInfo objectForKey:@"responsedata"];
-//                NSLog([[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding]) ;
+//                DDLogVerbose([[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding]) ;
                 NSString* html = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
                 
                 NSString* errorPage = [NSString stringWithFormat:@"%@/error.html", NSTemporaryDirectory()];
                 [html writeToFile:errorPage atomically:NO encoding:NSUTF8StringEncoding error:nil];
-                NSLog(@"Network Error: error page saved to %@", errorPage); 
+                DDLogError(@"Network Error: error page saved to %@", errorPage);
                 if (self.failure != NULL) {
                     self.failure();
                 }
@@ -246,13 +245,13 @@ static int t = 0;
  */
 - (void)request:(TTURLRequest*)request
 didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge*)challenge{
-    NSLog(@"received challenge: %@", challenge);
+    DDLogVerbose(@"received challenge: %@", challenge);
 }
 
 - (void)requestDidUploadData:(TTURLRequest*)request{
     if (self.upload_progress != NULL) {
         self.upload_progress(request.totalBytesLoaded, request.totalBytesExpected);
     }
-//    NSLog(@"uploading %d/%d: %.2f%%", request.totalBytesLoaded, request.totalBytesExpected, request.totalBytesLoaded * 100.0 / request.totalBytesExpected);
+//    DDLogVerbose(@"uploading %d/%d: %.2f%%", request.totalBytesLoaded, request.totalBytesExpected, request.totalBytesLoaded * 100.0 / request.totalBytesExpected);
 }
 @end

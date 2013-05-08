@@ -96,10 +96,10 @@
                                         success:^(id obj) {
                                             [SVProgressHUD showSuccessWithStatus:@"保存成功！"];
                                             [[Authentication sharedInstance] refreshUserInfo:^(id obj){
-                                                NSLog(@"user info refreshed");
+                                                DDLogVerbose(@"user info refreshed");
                                                 [self.delegate userProfileUpdated:obj];
                                             }failure:^(void){
-                                                NSLog(@"user info refresh failed");
+                                                DDLogVerbose(@"user info refresh failed");
                                             }];
                                             
                                         } failure:^{
@@ -338,10 +338,10 @@
     UIImage *croppedImage = [originalImage croppedImage:cropRect];
     UIImage *resizedImage = [croppedImage resizedImage:CGSizeMake(640, 640) imageOrientation:originalImage.imageOrientation];
 
-    NSLog(@"cropped rect: %@", NSStringFromCGRect(cropRect));
-    NSLog(@"original image size: %@", NSStringFromCGSize(originalImage.size));
-    NSLog(@"cropped image size: %@", NSStringFromCGSize(croppedImage.size));
-    NSLog(@"resized image size: %@", NSStringFromCGSize(resizedImage.size));
+    DDLogVerbose(@"cropped rect: %@", NSStringFromCGRect(cropRect));
+    DDLogVerbose(@"original image size: %@", NSStringFromCGSize(originalImage.size));
+    DDLogVerbose(@"cropped image size: %@", NSStringFromCGSize(croppedImage.size));
+    DDLogVerbose(@"resized image size: %@", NSStringFromCGSize(resizedImage.size));
     
     [self changeAvatarWithImage:resizedImage];
     

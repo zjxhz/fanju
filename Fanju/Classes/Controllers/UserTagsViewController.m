@@ -99,7 +99,7 @@
                                     cachePolicy:TTURLRequestCachePolicyNone
                                         success:^(id obj) {
                                             if ([[obj objectForKey:@"status"] isEqualToString:@"OK"]) {
-                                                NSLog(@"tags saved");
+                                                DDLogVerbose(@"tags saved");
                                                 [SVProgressHUD dismissWithSuccess:@"保存成功。"];
                                                 [user.tags removeAllObjects];
                                                 [user.tags addObjectsFromArray:tagsToSave];
@@ -108,7 +108,7 @@
                                                 [InfoUtil showError:obj];
                                             }
                                         } failure:^{
-                                            NSLog(@"failed to save settings");
+                                            DDLogError(@"failed to save settings");
                                             [SVProgressHUD dismissWithError:@"保存失败，请退出此页面重新刷新再试"];
                                         }];
 }

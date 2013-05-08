@@ -91,11 +91,11 @@
     assert(0);//not implemented
 //    [[NetworkHandler getHandler] uploadImage:_user.avatar toURL:[NSString stringWithFormat:@"user/%d/avatar/", _user.uID] 
 //                                         success:^(id obj) {
-//                                             NSLog(@"avatar updated");
+//                                             DDLogVerbose(@"avatar updated");
 //                                             [Authentication sharedInstance].delegate = self;
 //                                             [[Authentication sharedInstance] relogin];
 //                                         } failure:^{
-//                                             NSLog(@"failed to update avatar");
+//                                             DDLogError(@"failed to update avatar");
 //                                             [SVProgressHUD dismissWithError:@"头像上传失败"];
 //                                         }];
 }
@@ -143,7 +143,7 @@
     cropRect = [originalImage convertCropRect:cropRect];
     UIImage *croppedImage = [originalImage croppedImage:cropRect];
     UIImage *resizedImage = [croppedImage resizedImage:CGSizeMake(640, 640) imageOrientation:originalImage.imageOrientation];
-    NSLog(@"Cropping: %@ -> %@ -> %@", NSStringFromCGSize(originalImage.size), NSStringFromCGSize(croppedImage.size), NSStringFromCGSize(resizedImage.size));
+    DDLogVerbose(@"Cropping: %@ -> %@ -> %@", NSStringFromCGSize(originalImage.size), NSStringFromCGSize(croppedImage.size), NSStringFromCGSize(resizedImage.size));
 
     [self.view sendSubviewToBack:_photoView];
     _photoView.image = resizedImage;

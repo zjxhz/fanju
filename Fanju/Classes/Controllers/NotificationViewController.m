@@ -285,7 +285,7 @@
                                             mealDetail.mealInfo = meal;
                                             [self.navigationController pushViewController:mealDetail animated:YES];
                                         } failure:^{
-                                            NSLog(@"failed to get user  for id %d", mealID);
+                                            DDLogError(@"failed to get user  for id %d", mealID);
                                         }];
     
 
@@ -321,7 +321,7 @@
                                             detailViewController.user = user;
                                             [self.navigationController pushViewController:detailViewController animated:YES];
                                         } failure:^{
-                                            NSLog(@"failed to get user  for id %@", userID);
+                                            DDLogError(@"failed to get user  for id %@", userID);
                                         }];
 }
 

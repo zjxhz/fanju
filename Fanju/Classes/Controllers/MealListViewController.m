@@ -25,7 +25,7 @@
 #import "UIViewController+MFSideMenu.h"
 #import "WidgetFactory.h"
 #import "RestKit/RestKit.h"
-#import "DateUtil.h"
+
 
 @interface MealListViewController()
 @property (nonatomic, strong) IBOutlet UIView* loginView;
@@ -95,7 +95,7 @@
     // terminate all pending download connections
 //    NSArray *allDownloads = [imageDownloadsInProgress allValues];
 //    [allDownloads makeObjectsPerformSelector:@selector(cancelDownload)];
-    NSLog(@"low memory, check what we can do here");
+    DDLogVerbose(@"low memory, check what we can do here");
 #warning TODO check what we can do here
 }
 
@@ -194,76 +194,14 @@
 }
 
 -(void)restRequest{
-    NSURL *modelURL = [[NSBundle mainBundle] URLForResource:@"Fanju" withExtension:@"momd"];
-    NSManagedObjectModel *managedObjectModel = [[NSManagedObjectModel alloc] initWithContentsOfURL:modelURL];
-    RKManagedObjectStore *managedObjectStore = [[RKManagedObjectStore alloc] initWithManagedObjectModel:managedObjectModel];
-    NSString *path = [RKApplicationDataDirectory() stringByAppendingPathComponent:@"Fanju.sqlite"];
-    NSFileManager* fileMgr = [NSFileManager defaultManager];
-    [fileMgr removeItemAtPath:path error:nil];
-    [managedObjectStore createPersistentStoreCoordinator];
-    NSError* error = nil;
-    NSPersistentStore *persistentStore = [managedObjectStore addSQLitePersistentStoreAtPath:path fromSeedDatabaseAtPath:nil withConfiguration:nil options:nil error:&error];
-    if (! persistentStore) {
-        RKLogError(@"Failed adding persistent store at path '%@': %@", path, error);
-    }
-    [managedObjectStore createManagedObjectContexts];
-    [RKManagedObjectStore setDefaultStore:managedObjectStore];
-    RKObjectManager *manager = [RKObjectManager managerWithBaseURL:[NSURL URLWithString:@"http://www.fanjoin.com"]];
-    manager.managedObjectStore = managedObjectStore;
-    [RKObjectManager setSharedManager:manager];
-    
-    RKEntityMapping *userMapping = [RKEntityMapping mappingForEntityForName:@"User" inManagedObjectStore:managedObjectStore];
-    userMapping.identificationAttributes = @[@"uID"];
-    [userMapping addAttributeMappingsFromDictionary:@{
-     @"id": @"uID",
-     @"date_joined": @"dateJoined",
-     @"lat": @"latitude",
-     @"lng": @"longitude",
-     @"weibo_id": @"weiboID",
-     @"work_for":@"workFor",
-     @"updated_at": @"locationUpdatedAt"
-     }];
-    [RKObjectMapping addDefaultDateFormatterForString:LONG_TIME_FORMAT_STR inTimeZone:[NSTimeZone defaultTimeZone]];
-    [RKObjectMapping addDefaultDateFormatterForString:SHORT_TIME_FORMAT_STR inTimeZone:[NSTimeZone defaultTimeZone]];
-    
-    [userMapping addAttributeMappingsFromArray:@[@"avatar", @"birthday", @"college", @"name", @"tel", @"email",
-     @"gender", @"industry", @"motto", @"occupation", @"username"]];
-    
-    RKEntityMapping *restaurantMapping = [RKEntityMapping mappingForEntityForName:@"Restaurant" inManagedObjectStore:managedObjectStore];
-    restaurantMapping.identificationAttributes = @[@"rID"];
-    [restaurantMapping addAttributeMappingsFromDictionary:@{@"id": @"rID"}];
-    [restaurantMapping addAttributeMappingsFromArray:@[@"address", @"latitude", @"longitude", @"name", @"tel"]];
-    
-    RKEntityMapping *mealMapping = [RKEntityMapping mappingForEntityForName:@"Meal" inManagedObjectStore:managedObjectStore];
-    mealMapping.identificationAttributes = @[@"mID"];
-    [mealMapping addAttributeMappingsFromDictionary:@{
-     @"id": @"mID",
-     @"actual_persons": @"actualPersons",
-     @"list_price": @"price",
-     @"max_persons": @"maxPersons",
-     @"photo": @"photoURL",
-     @"start_date": @"startDate",
-     @"start_time": @"startTime"}];
-    [mealMapping addAttributeMappingsFromArray:@[@"topic", @"introduction"]];
-    [mealMapping addPropertyMapping:[RKRelationshipMapping relationshipMappingFromKeyPath:@"restaurant" toKeyPath:@"restaurant" withMapping:restaurantMapping]];
-    [mealMapping addPropertyMapping:[RKRelationshipMapping relationshipMappingFromKeyPath:@"host" toKeyPath:@"host" withMapping:userMapping]];
-    [mealMapping addPropertyMapping:[RKRelationshipMapping relationshipMappingFromKeyPath:@"participants" toKeyPath:@"participants" withMapping:userMapping]];
-
-    NSIndexSet *statusCodes = RKStatusCodeIndexSetForClass(RKStatusCodeClassSuccessful); // Anything in 2xx
-    RKResponseDescriptor *mealResponseDescriptor = [RKResponseDescriptor responseDescriptorWithMapping:mealMapping pathPattern:@"/api/v1/meal/" keyPath:@"objects" statusCodes:statusCodes];
-    RKResponseDescriptor *userResponseDescriptor = [RKResponseDescriptor responseDescriptorWithMapping:userMapping pathPattern:@"/api/v1/user/" keyPath:@"objects" statusCodes:statusCodes];
-    
-    
-    [manager addResponseDescriptor:mealResponseDescriptor];
-    [manager addResponseDescriptor:userResponseDescriptor];
-    managedObjectStore.managedObjectCache = [[RKInMemoryManagedObjectCache alloc] initWithManagedObjectContext:managedObjectStore.persistentStoreManagedObjectContext];
+    RKObjectManager* manager = [RKObjectManager sharedManager];
     [manager getObjectsAtPath:@"/api/v1/meal/"
                    parameters:@{@"limit":@"0"}
                       success:^(RKObjectRequestOperation *operation, RKMappingResult *mappingResult) {
-                          NSLog(@"fetched results from /meal/");
+                          DDLogVerbose(@"fetched results from /meal/");
     }
                       failure:^(RKObjectRequestOperation *operation, NSError *error) {
-                          NSLog(@"failed from /meal/");
+                          DDLogError(@"failed from /meal/");
     }];
 }
 - (void) removeSideMenuBarButtonItem {

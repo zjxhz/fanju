@@ -13,6 +13,9 @@
 #import "MTStatusBarOverlay.h"
 #import "XMPPElement+Delay.h"
 #import "RKObjectManager.h"
+#import "MessageService.h"
+#import "ArchivedMessageService.h"
+
 #define MAX_RETRIEVE 20
 
 
@@ -71,15 +74,16 @@ NSString * const EOUnreadNotificationCount = @"EOUnreadNotificationCount";
         _lastRetrievedTimes = [NSMutableDictionary dictionary];
     }
     _xmppStream.myJID = [XMPPJID jidWithString:_currentUser.jabberID];
-    _xmppStream.hostName = EOHOST;
+    _xmppStream.hostName = XMPP_HOST;
     NSError* error = nil;
     if (![_xmppStream connect:&error]) {
-        NSLog(@"Opps, I probably forgot something: %@", error);
+        DDLogVerbose(@"Opps, I probably forgot something: %@", error);
     } else {
-        NSLog(@"Probably connected?");
+        DDLogVerbose(@"Probably connected?");
     }
     [self loadRecentContacts];
     [self loadLatestNotificationDate];
+    [[MessageService service] setup];
 }
 
 -(void)loadLatestNotificationDate{
@@ -194,12 +198,12 @@ NSString * const EOUnreadNotificationCount = @"EOUnreadNotificationCount";
 }
 
 -(void)addContactToCoreData:(NSString*)contactJID{
-    NSString* username = [contactJID componentsSeparatedByString:@"@"][0];
-    [[RKObjectManager sharedManager] getObjectsAtPath:@"/api/v1/user/" parameters:@{@"username":username} success:^(RKObjectRequestOperation *operation, RKMappingResult *mappingResult) {
-        NSLog(@"successed fetching and adding user(%@) to core data", username);
-    } failure:^(RKObjectRequestOperation *operation, NSError *error) {
-        NSLog(@"failed to fetch and add user(%@) to core data", username);
-    }];
+//    NSString* username = [contactJID componentsSeparatedByString:@"@"][0];
+//    [[RKObjectManager sharedManager] getObjectsAtPath:@"/api/v1/user/" parameters:@{@"username":username} success:^(RKObjectRequestOperation *operation, RKMappingResult *mappingResult) {
+//        DDLogVerbose(@"successed fetching and adding user(%@) to core data", username);
+//    } failure:^(RKObjectRequestOperation *operation, NSError *error) {
+//        DDLogError(@"failed to fetch and add user(%@) to core data", username);
+//    }];
 }
 -(void)markMessagesReadFrom:(NSString*)contactJID{
     XMPPMessage* message = [[XMPPMessage alloc] init];
@@ -287,35 +291,37 @@ NSString * const EOUnreadNotificationCount = @"EOUnreadNotificationCount";
     NSError* error = nil;
     NSString* password = _currentUser.password ? _currentUser.password : [self sinaweibo].accessToken;
     if (![_xmppStream authenticateWithPassword:password error:&error]) {
-        NSLog(@"Opps, login to xmpp server failed: %@", error);
+        DDLogError(@"login to xmpp server failed: %@", error);
     } else {
-        NSLog(@"XMPP logged in");
+        DDLogVerbose(@"XMPP logged in");
         
     }
 }
 
 - (void)xmppStream:(XMPPStream *)sender didSendMessage:(XMPPMessage *)message{
-    NSLog(@"XMPP Message sent: %@", message);
-    if ([message isMessageWithBody]) {
-        NSString* strMessage = [[message elementForName:@"body"] stringValue];
-        [self saveMessage:message.fromStr receiver:message.toStr message:strMessage time:[NSDate date] hasRead:NO];
-    }
+//    DDLogVerbose(@"XMPP Message sent: %@", message);
+//    if ([message isMessageWithBody]) {
+//        NSString* strMessage = [[message elementForName:@"body"] stringValue];
+//        [self saveMessage:message.fromStr receiver:message.toStr message:strMessage time:[NSDate date] hasRead:NO];
+//    }
 }
 
 - (void)xmppStream:(XMPPStream *)sender didReceiveError:(NSXMLElement *)error{
-    NSLog(@"did received xmpp error: %@", error);
+    DDLogVerbose(@"did received xmpp error: %@", error);
 }
 
 - (void)xmppStreamDidAuthenticate:(XMPPStream *)sender{
     [self goOnline];
-    [self retrieveMessageHistory];
+//    [self retrieveMessageHistory];
+    [NSTimer scheduledTimerWithTimeInterval:3 target:self selector:@selector(retrieveMessageHistory) userInfo:nil repeats:NO];
 }
 
 -(void)retrieveMessageHistory{
-    NSDate* latest = [self latestMessageDate];
-    _messageRetrieveDate = [latest copy];
-    _lastRetrievedTimes = [NSMutableDictionary dictionary];
-    [self retrieveConversationsStartFrom:_messageRetrieveDate after:-1];
+    [[ArchivedMessageService shared] retrieveConversations];
+//    NSDate* latest = [self latestMessageDate];
+//    _messageRetrieveDate = [latest copy];
+//    _lastRetrievedTimes = [NSMutableDictionary dictionary];
+//    [self retrieveConversationsStartFrom:_messageRetrieveDate after:-1];
 }
 
 -(void)retrieveConversationsStartFrom:(NSDate*)date after:(NSInteger)index{
@@ -349,28 +355,28 @@ NSString * const EOUnreadNotificationCount = @"EOUnreadNotificationCount";
  }
 
 - (void)xmppStream:(XMPPStream *)sender didNotAuthenticate:(NSXMLElement *)error;{
-    NSLog(@"Opps, authentication failed: %@", error);
+    DDLogVerbose(@"Opps, authentication failed: %@", error);
 }
 
 - (void)xmppStream:(XMPPStream *)sender didReceiveMessage:(XMPPMessage *)message{
-    if ([message wasDelayed]) {
-        NSLog(@"ignoring offline messages as we are handling archived messages only");
-        return;
-    }
-    if ([message isChatMessageWithBody]){
-        NSLog(@"Received a chat message from %@", sender);
-        if (![self addSenderIfNeeded:message]) { // no need to add the user, already in roster
-            [self handleReceivedMessage:message];
-        };
-    } else {
-        NSXMLElement *event = [message elementForName:@"event"];
-        if (event) {
-            NSLog(@"Received notification");
-            [self handleReceivedNotification:message];
-        } else {
-            NSLog(@"WARN: unknow message: %@", message);
-        }
-    }
+//    if ([message wasDelayed]) {
+//        DDLogVerbose(@"ignoring offline messages as we are handling archived messages only");
+//        return;
+//    }
+//    if ([message isChatMessageWithBody]){
+//        DDLogVerbose(@"Received a chat message from %@", sender);
+//        if (![self addSenderIfNeeded:message]) { // no need to add the user, already in roster
+//            [self handleReceivedMessage:message];
+//        };
+//    } else {
+//        NSXMLElement *event = [message elementForName:@"event"];
+//        if (event) {
+//            DDLogVerbose(@"Received notification");
+//            [self handleReceivedNotification:message];
+//        } else {
+//            DDLogVerbose(@"WARN: unknow message: %@", message);
+//        }
+//    }
 }
 
 -(void)handleReceivedNotification:(XMPPMessage*)message{
@@ -388,7 +394,7 @@ NSString * const EOUnreadNotificationCount = @"EOUnreadNotificationCount";
     
     NSError* error;
     if(![_messageManagedObjectContext save:&error]){
-        NSLog(@"failed to save a message");
+        DDLogError(@"failed to save a message");
     } else {
         if ([message.time compare:_latestNotificationDate] > 0 ) {
             _latestNotificationDate = message.time;
@@ -433,7 +439,7 @@ NSString * const EOUnreadNotificationCount = @"EOUnreadNotificationCount";
     [self updateUnreadCount];
     NSError* error;
     if(![_messageManagedObjectContext save:&error]){
-        NSLog(@"failed to save a message");
+        DDLogError(@"failed to save a message");
     } else {
         [[NSNotificationCenter defaultCenter] postNotificationName:EOMessageDidSaveNotification
                                                         object:messageMO
@@ -450,7 +456,7 @@ NSString * const EOUnreadNotificationCount = @"EOUnreadNotificationCount";
         
         XMPPvCardTemp* vCard = [_xmppvCardTempModule fetchvCardTempForJID:jID];
         [_xmppRoster addUser:jID withNickname:vCard.nickname];
-        NSLog(@"got a message with no roster item, adding sender %@ with nickname: %@", jID, vCard.nickname);
+        DDLogVerbose(@"got a message with no roster item, adding sender %@ with nickname: %@", jID, vCard.nickname);
     }
 }
 
@@ -470,7 +476,7 @@ NSString * const EOUnreadNotificationCount = @"EOUnreadNotificationCount";
     if (!user) {
         XMPPvCardTemp* vCard = [_xmppvCardTempModule fetchvCardTempForJID:jID];
         [_xmppRoster addUser:jID withNickname:vCard.nickname];
-        NSLog(@"got a message with no roster item, adding sender %@ with nickname: %@", jID, vCard.nickname);
+        DDLogVerbose(@"got a message with no roster item, adding sender %@ with nickname: %@", jID, vCard.nickname);
         return YES;
     } else {
         return NO;
@@ -495,28 +501,28 @@ NSString * const EOUnreadNotificationCount = @"EOUnreadNotificationCount";
 //            }
 //            [_cachedMessages removeObjectsInArray:messagesGotUserInRoster];
 //        } else
-        if([child.name isEqual:@"list" ] && [child.xmlns isEqual:@"urn:xmpp:archive"] ){
-            for (NSXMLElement* element in child.children)  {
-                if ([element.name isEqual:@"chat"]) {
-                    NSLog(@"conversation with chat: %@", element);
-                    NSString* after = [element attributeStringValueForName:@"start"];
-                    NSTimeInterval interval = [[self.formatter dateFromString:after] timeIntervalSince1970] - 0.001; //1 millisec earlier so the oldest one can be retrieved
-                    [self retrieveMessagesWith:[element attributeStringValueForName:@"with"] after:interval retrievingFromList:YES];
-                }
-                 else if([element.name isEqual:@"set"] && [element.xmlns isEqual:@"http://jabber.org/protocol/rsm"]){
-                    NSInteger firstIndex = [[[element elementForName:@"first"] attributeStringValueForName:@"index"] integerValue];
-                    NSInteger last = [[element elementForName:@"last"] stringValueAsInt];
-                    NSInteger count = [[element elementForName:@"count"] stringValueAsInt];
-                    if (firstIndex + MAX_RETRIEVE < count) {
-                        [self retrieveConversationsStartFrom:_messageRetrieveDate after:last];
-                    } else {
-                        //no more to retrieve
-                    }
-                }
-            }
-        } else if([child.name isEqual:@"chat"] && [child.xmlns isEqual:@"urn:xmpp:archive"]){
-            [self handleRetrievedMessages:child after:[child attributeStringValueForName:@"start"]];
-        }
+//        if([child.name isEqual:@"list" ] && [child.xmlns isEqual:@"urn:xmpp:archive"] ){
+//            for (NSXMLElement* element in child.children)  {
+//                if ([element.name isEqual:@"chat"]) {
+//                    DDLogVerbose(@"conversation with chat: %@", element);
+//                    NSString* after = [element attributeStringValueForName:@"start"];
+//                    NSTimeInterval interval = [[self.formatter dateFromString:after] timeIntervalSince1970] - 0.001; //1 millisec earlier so the oldest one can be retrieved
+//                    [self retrieveMessagesWith:[element attributeStringValueForName:@"with"] after:interval retrievingFromList:YES];
+//                }
+//                 else if([element.name isEqual:@"set"] && [element.xmlns isEqual:@"http://jabber.org/protocol/rsm"]){
+//                    NSInteger firstIndex = [[[element elementForName:@"first"] attributeStringValueForName:@"index"] integerValue];
+//                    NSInteger last = [[element elementForName:@"last"] stringValueAsInt];
+//                    NSInteger count = [[element elementForName:@"count"] stringValueAsInt];
+//                    if (firstIndex + MAX_RETRIEVE < count) {
+//                        [self retrieveConversationsStartFrom:_messageRetrieveDate after:last];
+//                    } else {
+//                        //no more to retrieve
+//                    }
+//                }
+//            }
+//        } else if([child.name isEqual:@"chat"] && [child.xmlns isEqual:@"urn:xmpp:archive"]){
+//            [self handleRetrievedMessages:child after:[child attributeStringValueForName:@"start"]];
+//        }
     }
     
     return NO;
@@ -536,7 +542,7 @@ NSString * const EOUnreadNotificationCount = @"EOUnreadNotificationCount";
     NSDate* lastRetrievedTime = [_lastRetrievedTimes valueForKey:with];
     if (retrievingFromList && lastRetrievedTime && [retrieveDateAfter compare:lastRetrievedTime] == NSOrderedDescending) {
         //retrieving from list can have duplicated entries for the same person, so we only use the oldest time
-        NSLog(@"retrieving messages with %@, but the latest local messages are newer than the retrieve date %@, skip", with, retrieveDateAfter);
+        DDLogVerbose(@"retrieving messages with %@, but the latest local messages are newer than the retrieve date %@, skip", with, retrieveDateAfter);
         return;
     }
     double intervalInMilliSeconds = interval * 1000;
@@ -617,7 +623,7 @@ NSString * const EOUnreadNotificationCount = @"EOUnreadNotificationCount";
         if (messageMO) {
             NSError* error;
             if(![[self backgroundMessageManagedObjectContext] save:&error]){
-                NSLog(@"failed to save messages in background");
+                DDLogError(@"failed to save messages in background");
             }
             if ([with isEqual:PUBSUB_SERVICE]) {
                 dispatch_async(dispatch_get_main_queue(), ^{
@@ -654,7 +660,7 @@ NSString * const EOUnreadNotificationCount = @"EOUnreadNotificationCount";
         }
         NSInteger more = [[chatElement attributeStringValueForName:@"more"] integerValue];
         if (more > 0) {
-            NSLog(@"retrieving more messages after %@", endDate);
+            DDLogVerbose(@"retrieving more messages after %@", endDate);
             [self retrieveMessagesWith:with after:[endDate timeIntervalSince1970] retrievingFromList:NO];
         }
         [NSThread sleepForTimeInterval:0.1];//slow down the background saving as it might block GUIs
@@ -670,7 +676,7 @@ NSString * const EOUnreadNotificationCount = @"EOUnreadNotificationCount";
         if (contact){
             NSTimeInterval delta = [messageDate timeIntervalSinceDate:contact.time];
             if ((delta < 5 && [strMessage isEqual:contact.message]) || delta < 0) {
-                NSLog(@"ignoring message(%@ - at:%@) that is either too old or has same time(%@) and same content with the latest one", strMessage, messageDate, contact.time);
+                DDLogVerbose(@"ignoring message(%@ - at:%@) that is either too old or has same time(%@) and same content with the latest one", strMessage, messageDate, contact.time);
                 return NO;
             }
         }
@@ -701,7 +707,7 @@ NSString * const EOUnreadNotificationCount = @"EOUnreadNotificationCount";
     XMPPUserCoreDataStorageObject *user = [_xmppRosterStorage userForJID:jid xmppStream:_xmppStream managedObjectContext:_rosterManagedObjectContext];
     if (user) {
         [_xmppRoster setNickname:vCardTemp.nickname forUser:user.jid];
-        NSLog(@"setting nickname %@ for user %@", user.nickname, user.jid.user);
+        DDLogVerbose(@"setting nickname %@ for user %@", user.nickname, user.jid.user);
     }
 }
 
@@ -729,7 +735,7 @@ NSString * const EOUnreadNotificationCount = @"EOUnreadNotificationCount";
     
     [_recentContactsDict removeObjectForKey:jid];
     if(![context save:&error]){
-        NSLog(@"failed to delete messages for %@", jid);
+        DDLogError(@"failed to delete messages for %@", jid);
     }
     [self updateUnreadCount];
 

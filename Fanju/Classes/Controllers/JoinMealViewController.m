@@ -345,7 +345,7 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
 #pragma mark UIWebviewDelegate
 - (BOOL)webView:(UIWebView *)webView shouldStartLoadWithRequest:(NSURLRequest *)request navigationType:(UIWebViewNavigationType)navigationType{
     NSString* urlStr = request.URL.absoluteString;
-    NSLog(@"start loading %@", urlStr);
+    DDLogVerbose(@"start loading %@", urlStr);
     NSString* successURL = [NSString stringWithFormat:@"http://%@/meal/%d/order/", EOHOST, _mealInfo.mID];
     NSString* failedURL = [NSString stringWithFormat:@"http://%@/error/", EOHOST];
     if ([urlStr hasPrefix:successURL]) {

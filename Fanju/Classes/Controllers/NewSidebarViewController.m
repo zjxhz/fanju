@@ -42,8 +42,8 @@
 @synthesize userListViewController = _userListViewController;
 //@synthesize socialViewController = _socialViewController;
 @synthesize userDetailsViewController = _userDetailsViewController;
-@synthesize recentContactsViewController = _recentContactsViewController;
 @synthesize notificationViewController = _notificationViewController;
+@synthesize conversationViewController = _conversationViewController;
 
 +(NewSidebarViewController*) sideBar{
     static NewSidebarViewController* instance;
@@ -136,11 +136,11 @@
 //    return _socialViewController;
 //}
 
--(RecentContactsViewController*)recentContactsViewController{
-    if (!_recentContactsViewController) {
-        _recentContactsViewController = [[RecentContactsViewController alloc] init];
+-(ConversationViewController*)conversationViewController{
+    if (!_conversationViewController) {
+        _conversationViewController = [[ConversationViewController alloc] init];
     }
-    return _recentContactsViewController;
+    return _conversationViewController;
 }
 
 -(NewUserDetailsViewController*)userDetailsViewController{
@@ -297,7 +297,7 @@
 }
 
 -(void)showMessages{
-    [self showViewController:self.recentContactsViewController];
+    [self showViewController:self.conversationViewController];
 }
 
 -(void)showNotifications{
@@ -454,7 +454,7 @@
     _userListViewController = nil;
 //    _socialViewController = nil;
     _userDetailsViewController = nil;
-    _recentContactsViewController = nil;
+    _conversationViewController = nil;
 }
 
 - (void)unreadMsgUpdated:(NSNotification*)notif {

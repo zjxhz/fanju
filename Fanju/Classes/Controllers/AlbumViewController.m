@@ -150,7 +150,7 @@
                                             [[Authentication sharedInstance] synchronize];
                                             [_selectedIndexes removeAllObjects];
                                             [self buildUI];
-                                            NSLog(@"user photos deleted.");
+                                            DDLogVerbose(@"user photos deleted.");
                                         } failure:^{
                                             [SVProgressHUD dismissWithError:@"删除失败"];
                                         }];

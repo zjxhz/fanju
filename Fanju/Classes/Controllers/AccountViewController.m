@@ -7,7 +7,7 @@
 //
 
 #import "AccountViewController.h"
-
+#import "DDLog.h"
 @interface AccountViewController ()
 
 @end
@@ -46,8 +46,8 @@
 }
 
 -(void) viewWillAppear:(BOOL)animated{
-    NSLog(@"delegate class name: %@", NSStringFromClass([self.tableView.delegate class]));
-    NSLog(@"number of sections: %d,rows in section 0: %d", [self.dataSource numberOfSectionsInTableView:self.tableView], [self.dataSource tableView:self.tableView numberOfRowsInSection:0]);
+    DDLogVerbose(@"delegate class name: %@", NSStringFromClass([self.tableView.delegate class]));
+    DDLogVerbose(@"number of sections: %d,rows in section 0: %d", [self.dataSource numberOfSectionsInTableView:self.tableView], [self.dataSource tableView:self.tableView numberOfRowsInSection:0]);
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation

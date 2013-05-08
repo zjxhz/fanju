@@ -9,8 +9,9 @@
 #import <UIKit/UIKit.h>
 #import "UIBubbleTableViewDataSource.h"
 #import "UIBubbleTableViewCell.h"
-
+#import "User.h"
 
 @interface XMPPChatViewController2  : UIViewController <UIBubbleTableViewDataSource, UITextViewDelegate, UIGestureRecognizerDelegate, UIBubbleTableViewCellAvatarDelegate	>
--(id)initWithUserChatTo:(NSString*)contactJIDStr;
+-(id)initWithUserChatTo:(User*)with;
+@property(nonatomic, strong) UIImage* avatarSomeoneElse;
 @end

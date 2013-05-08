@@ -62,7 +62,7 @@
                                         success:^(id obj) {
                                             NSArray *orders = [obj objectForKeyInObjects];                                            
                                             if (orders && [orders count] > 1) {
-                                                NSLog(@"WARNING: possible duplicated orders found for meal(%d) and user(%d)", self.mealInfo.mID, currentUser.uID);
+                                                DDLogVerbose(@"WARNING: possible duplicated orders found for meal(%d) and user(%d)", self.mealInfo.mID, currentUser.uID);
                                             } else if (orders && [orders count] == 1){
                                                 NSDictionary* data = orders[0];
                                                 _myOrder = [OrderInfo orderInfoWithData:data];
@@ -83,12 +83,12 @@
                                                 _tabBar.hidden = NO;
                                             }];
                                         } failure:^{
-                                            NSLog(@"failed to get order status for id %@", _mealID);
+                                            DDLogError(@"failed to get order status for id %@", _mealID);
                                         }];
 }
 
 -(void)payForOrder:(id)sender{
-    NSLog(@"Not implemented yet");    
+    DDLogVerbose(@"Not implemented yet");    
 }
 
 -(void)viewOrder:(id)sender{
@@ -155,7 +155,7 @@
                                             self.mealInfo = meal;
                                             [self buildUI];
                                         } failure:^{
-                                            NSLog(@"failed to get meal for id %@", _mealID);
+                                            DDLogError(@"failed to get meal for id %@", _mealID);
                                             [SVProgressHUD dismissWithError:@"获取饭局失败"];
                                         }];
 
@@ -514,7 +514,7 @@
     [hostView addSubview:cost_label];
     [hostView addSubview:menuBtn];
     
-    NSLog(@"frame of meal: %@", NSStringFromCGRect(imgView.frame));
+    DDLogVerbose(@"frame of meal: %@", NSStringFromCGRect(imgView.frame));
     return hostView;
 }
 
@@ -591,7 +591,7 @@
 }
 
 -(void)sinaweibo:(SinaWeibo *)sinaweibo logInDidFailWithError:(NSError *)error{
-    NSLog(@"failed to login to sina weibo: %@", error.description);
+    DDLogError(@"failed to login to sina weibo: %@", error.description);
 }
 
 #pragma mark _
@@ -603,7 +603,7 @@
 
 - (void)sendView:(WBSendView *)view didFailWithError:(NSError *)error{
     [InfoUtil showErrorWithString:@"发送失败，请稍后重试"];
-    NSLog(@"send weibo message failed with error: %@", error.description);
+    DDLogVerbose(@"send weibo message failed with error: %@", error.description);
 }
 
 #pragma mark UserImageViewDelegate

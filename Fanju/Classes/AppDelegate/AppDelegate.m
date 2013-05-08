@@ -27,6 +27,14 @@
 #import "RKLog.h"
 #import "AlixPay.h"
 #import "DictHelper.h"
+#import "DDLog.h"
+#import "DDTTYLogger.h"
+#import "DDFileLogger.h"
+#import "DDASLLogger.h"
+#import "RestKit.h"
+#import "DateUtil.h"
+#import "FJLoggerFormatter.h"
+
 @interface AppDelegate() {
     UINavigationController* _navigationController;
 }
@@ -53,7 +61,7 @@
 {
     dispatch_async(dispatch_get_main_queue(), ^{
         extern CFAbsoluteTime StartTime;
-        NSLog(@"App finished launching in %f seconds", CFAbsoluteTimeGetCurrent() - StartTime);
+        DDLogVerbose(@"App finished launching in %f seconds", CFAbsoluteTimeGetCurrent() - StartTime);
     });
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     
@@ -87,8 +95,96 @@
     [self customNavigationBar];
     [self.window makeKeyAndVisible];
     [meal viewDidAppear:NO];
-    RKLogConfigureByName("*", RKLogLevelOff); //disable RK logs, for now, it's annoying 
+    [self configureLogger];
+    [self configureRestKit];
     return YES;
+}
+
+-(void)configureLogger{
+    RKLogConfigureByName("*", RKLogLevelOff); //disable RK logs, for now, it's annoying
+    id<DDLogFormatter> formatter = [[FJLoggerFormatter alloc] init];
+    [DDLog addLogger:[DDASLLogger sharedInstance]];
+    [DDLog addLogger:[DDTTYLogger sharedInstance]];
+    DDFileLogger* fileLogger = [[DDFileLogger alloc] init];
+    fileLogger.rollingFrequency = 60 * 60 * 24 * 7; // a week rolling
+    fileLogger.logFileManager.maximumNumberOfLogFiles = 4;// 4 weeks
+    [DDLog addLogger: fileLogger];
+    [[DDTTYLogger sharedInstance] setLogFormatter:formatter];
+    [[DDASLLogger sharedInstance] setLogFormatter:formatter];
+    [fileLogger setLogFormatter:formatter];
+    [[DDTTYLogger sharedInstance] setColorsEnabled:YES];
+    [[DDTTYLogger sharedInstance] setForegroundColor:[UIColor blueColor] backgroundColor:nil forFlag:LOG_FLAG_INFO];
+}
+
+-(void)configureRestKit{
+    NSURL *modelURL = [[NSBundle mainBundle] URLForResource:@"Fanju" withExtension:@"momd"];
+    NSManagedObjectModel *managedObjectModel = [[NSManagedObjectModel alloc] initWithContentsOfURL:modelURL];
+    RKManagedObjectStore *managedObjectStore = [[RKManagedObjectStore alloc] initWithManagedObjectModel:managedObjectModel];
+    NSString *path = [RKApplicationDataDirectory() stringByAppendingPathComponent:@"Fanju.sqlite"];
+//    NSFileManager* fileMgr = [NSFileManager defaultManager];
+//    [fileMgr removeItemAtPath:path error:nil];
+    [managedObjectStore createPersistentStoreCoordinator];
+    NSError* error = nil;
+    NSPersistentStore *persistentStore = [managedObjectStore addSQLitePersistentStoreAtPath:path fromSeedDatabaseAtPath:nil withConfiguration:nil options:nil error:&error];
+    if (! persistentStore) {
+        DDLogError(@"Failed adding persistent store at path '%@': %@", path, error);
+    }
+    [managedObjectStore createManagedObjectContexts];
+    [RKManagedObjectStore setDefaultStore:managedObjectStore];
+//    NSURL* baseURL = [[NSURL alloc] initWithScheme:@"http" host:@"EOHOST" path:@"/api/v1"];
+//    baseURL.port = 8000;
+    NSString* baseURL = [NSString stringWithFormat:@"http://%@/api/v1/", EOHOST];
+    RKObjectManager *manager = [RKObjectManager managerWithBaseURL:[NSURL URLWithString:baseURL]];
+    manager.managedObjectStore = managedObjectStore;
+    [RKObjectManager setSharedManager:manager];
+    
+    RKEntityMapping *userMapping = [RKEntityMapping mappingForEntityForName:@"User" inManagedObjectStore:managedObjectStore];
+    userMapping.identificationAttributes = @[@"uID"];
+    [userMapping addAttributeMappingsFromDictionary:@{
+     @"id": @"uID",
+     @"date_joined": @"dateJoined", //interval is used when you use scalar properties in core data 下同
+     @"lat": @"latitude",
+     @"lng": @"longitude",
+     @"weibo_id": @"weiboID",
+     @"work_for":@"workFor",
+     @"updated_at": @"locationUpdatedAt",
+     @"birthday": @"birthday"
+     }];
+    [RKObjectMapping addDefaultDateFormatterForString:LONG_TIME_FORMAT_STR inTimeZone:[NSTimeZone defaultTimeZone]];
+    [RKObjectMapping addDefaultDateFormatterForString:SHORT_TIME_FORMAT_STR inTimeZone:[NSTimeZone defaultTimeZone]];
+    
+    [userMapping addAttributeMappingsFromArray:@[@"avatar", @"college", @"name", @"tel", @"email",
+     @"gender", @"industry", @"motto", @"occupation", @"username"]];
+    
+    RKEntityMapping *restaurantMapping = [RKEntityMapping mappingForEntityForName:@"Restaurant" inManagedObjectStore:managedObjectStore];
+    restaurantMapping.identificationAttributes = @[@"rID"];
+    [restaurantMapping addAttributeMappingsFromDictionary:@{@"id": @"rID"}];
+    [restaurantMapping addAttributeMappingsFromArray:@[@"address", @"latitude", @"longitude", @"name", @"tel"]];
+    
+    RKEntityMapping *mealMapping = [RKEntityMapping mappingForEntityForName:@"Meal" inManagedObjectStore:managedObjectStore];
+    mealMapping.identificationAttributes = @[@"mID"];
+    [mealMapping addAttributeMappingsFromDictionary:@{
+     @"id": @"mID",
+     @"actual_persons": @"actualPersons",
+     @"list_price": @"price",
+     @"max_persons": @"maxPersons",
+     @"photo": @"photoURL",
+     @"start_date": @"startDate",
+     @"start_time": @"startTime"}];
+    [mealMapping addAttributeMappingsFromArray:@[@"topic", @"introduction"]];
+    [mealMapping addPropertyMapping:[RKRelationshipMapping relationshipMappingFromKeyPath:@"restaurant" toKeyPath:@"restaurant" withMapping:restaurantMapping]];
+    [mealMapping addPropertyMapping:[RKRelationshipMapping relationshipMappingFromKeyPath:@"host" toKeyPath:@"host" withMapping:userMapping]];
+    [mealMapping addPropertyMapping:[RKRelationshipMapping relationshipMappingFromKeyPath:@"participants" toKeyPath:@"participants" withMapping:userMapping]];
+    
+    NSIndexSet *statusCodes = RKStatusCodeIndexSetForClass(RKStatusCodeClassSuccessful); // Anything in 2xx
+    RKResponseDescriptor *mealResponseDescriptor = [RKResponseDescriptor responseDescriptorWithMapping:mealMapping pathPattern:@"meal/" keyPath:@"objects" statusCodes:statusCodes];
+    RKResponseDescriptor *userResponseDescriptor = [RKResponseDescriptor responseDescriptorWithMapping:userMapping pathPattern:@"user/" keyPath:@"objects" statusCodes:statusCodes];
+    
+    
+    [manager addResponseDescriptor:mealResponseDescriptor];
+    [manager addResponseDescriptor:userResponseDescriptor];
+//    managedObjectStore.managedObjectCache = [[RKInMemoryManagedObjectCache alloc] initWithManagedObjectContext:managedObjectStore.persistentStoreManagedObjectContext];
+
 }
 
 -(void)initSinaweibo{
@@ -137,15 +233,15 @@
             NSArray* params = @[[DictHelper dictWithKey:@"alipay_result" andValue:result.resultString],
                                 [DictHelper dictWithKey:@"sign" andValue:result.signString]];
             [[NetworkHandler getHandler] requestFromURL:url method:POST parameters:params cachePolicy:TTURLRequestCachePolicyNone success:^(id obj) {
-                NSLog(@"result: %@", obj);
+                DDLogVerbose(@"result: %@", obj);
                 [[NSNotificationCenter defaultCenter] postNotificationName:ALIPAY_PAY_RESULT object:obj userInfo:nil];
             } failure:^{
-                NSLog(@"failed to pay");
+                DDLogError(@"failed to pay");
                 NSDictionary* dic = @{@"status": @"NOK", @"message":@"支付已经成功，但是同步服务器产生了网络错误，请联系客服"};
                 [[NSNotificationCenter defaultCenter] postNotificationName:ALIPAY_PAY_RESULT object:dic userInfo:nil];
             }];
         } else {
-            NSLog(@"alixpay failed with status message: %@", result.statusMessage);
+            DDLogVerbose(@"alixpay failed with status message: %@", result.statusMessage);
             NSDictionary* dic = @{@"status": @"NOK", @"message":result.statusMessage};
             [[NSNotificationCenter defaultCenter] postNotificationName:ALIPAY_PAY_RESULT object:dic userInfo:nil];
         }
@@ -177,7 +273,7 @@
              
              abort() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development. 
              */
-            NSLog(@"Unresolved error %@, %@", error, [error userInfo]);
+            DDLogVerbose(@"Unresolved error %@, %@", error, [error userInfo]);
             abort();
         } 
     }
@@ -267,7 +363,7 @@
          Lightweight migration will only work for a limited set of schema changes; consult "Core Data Model Versioning and Data Migration Programming Guide" for details.
          
          */
-        NSLog(@"Unresolved error %@, %@", error, [error userInfo]);
+        DDLogVerbose(@"Unresolved error %@, %@", error, [error userInfo]);
         abort();
     }    
     
@@ -276,20 +372,20 @@
 
 
 - (void)applicationDidEnterBackground:(UIApplication *)application{
-    NSLog(@"enter to background"); //TODO is this needed? it seems entering background cannot receive messages
+    DDLogVerbose(@"enter to background"); //TODO is this needed? it seems entering background cannot receive messages
 	if ([XMPPHandler sharedInstance].xmppStream) {
         [[XMPPHandler sharedInstance].xmppStream disconnect];
     }
 }
 
 -(void)applicationWillEnterForeground:(UIApplication *)application{
-    NSLog(@"entering to foreground");
+    DDLogVerbose(@"entering to foreground");
 	if ([XMPPHandler sharedInstance].xmppStream) {
         NSError* error = nil;
         if (![[XMPPHandler sharedInstance].xmppStream connect:&error]) {
-            NSLog(@"Opps, I probably forgot something: %@", error);
+            DDLogVerbose(@"Opps, I probably forgot something: %@", error);
         } else {
-            NSLog(@"Probably connected?");
+            DDLogVerbose(@"Probably connected?");
         }
     }
 }
@@ -305,11 +401,11 @@
 
 -(void)application:(UIApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken{
     self.apnsToken = [[[deviceToken description] stringByTrimmingCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@"<>"]] stringByReplacingOccurrencesOfString:@" " withString:@""];
-    NSLog(@"registered token: %@", self.apnsToken);
+    DDLogVerbose(@"registered token: %@", self.apnsToken);
     
 }
 
 -(void)application:(UIApplication *)application didFailToRegisterForRemoteNotificationsWithError:(NSError *)error{
-    NSLog(@"error in registration. Error: %@", error);
+    DDLogVerbose(@"error in registration. Error: %@", error);
 }
 @end

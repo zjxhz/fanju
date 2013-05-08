@@ -153,7 +153,7 @@
         mealInfo = mealInvitation.meal;
         
         NSString *invitationString = mealInfo.type == THEMES ? NSLocalizedString(@"GatheringInvitation", nil) : NSLocalizedString(@"DatingInvitation", nil);
-        NSLog(@"type is: %d, THEMES is: %d", mealInfo.type, THEMES);
+        DDLogVerbose(@"type is: %d, THEMES is: %d", mealInfo.type, THEMES);
         NSString* timePast = [DateUtil humanReadableIntervals:(-[mealInvitation.timestamp timeIntervalSinceNow])];
         [_fromLabel setText:[NSString stringWithFormat:invitationString, mealInvitation.from.username, timePast]];
 

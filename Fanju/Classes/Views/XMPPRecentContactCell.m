@@ -82,9 +82,9 @@
         NSError* error = nil;
         NSArray* objects = [contex executeFetchRequest:fetchRequest error:&error];
         if (error) {
-            NSLog(@"failed to fetch user(%@) from coredata", username);
+            DDLogError(@"failed to fetch user(%@) from coredata", username);
         } else if(objects.count == 0){
-            NSLog(@"warn: no user(%@) found in core data", username);
+            DDLogWarn(@"no user(%@) found in core data", username);
         } else {
             NSManagedObject* obj = objects[0];
             self.textLabel.text = [obj valueForKey:@"name"];
@@ -99,7 +99,7 @@
 //        NSString* name = [obj valueForKey:@"name"];
 //        self.textLabel.text = name;
 //    } failure:^(RKObjectRequestOperation *operation, NSError *error) {
-//        NSLog(@"");
+//        DDLogVerbose(@"");
 //    }];
         
         

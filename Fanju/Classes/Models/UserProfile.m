@@ -303,7 +303,7 @@
 
 -(NSString*)jabberID{
     NSString* user = [_username stringByReplacingOccurrencesOfString:@"@" withString:@"\\40"];
-    return [NSString stringWithFormat:@"%@%@", user, @"@fanjoin.com"];
+    return [NSString stringWithFormat:@"%@@%@", user, XMPP_HOST];
    
 }
 

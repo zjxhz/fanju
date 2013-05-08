@@ -13,8 +13,9 @@
 #define LOGGED_USER_PROFILE @"LOGGED_USER_PROFILE"
 
 //#define EOHOST [[NSUserDefaults standardUserDefaults] objectForKey:@"HOST"] ? [[NSUserDefaults standardUserDefaults] objectForKey:@"HOST"] : @"www.fanjoin.com"
-#define EOHOST @"www.fanjoin.com"
-//#define EOHOST @"localhost:8000"
+//#define EOHOST @"www.fanjoin.com"
+#define XMPP_HOST @"wayne.local"
+#define EOHOST @"localhost:8000"
 //#define EOHOST @"www.ifunjoin.com:8001"
 #define HTTPS @"http" // use http for https in development
 #define APP_SCHEME @"Fanju"

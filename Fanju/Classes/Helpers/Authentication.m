@@ -14,6 +14,7 @@
 #import "AppDelegate.h"
 #import "DictHelper.h"
 #import "NewSidebarViewController.h"
+#import "UserService.h"
 
 NSString * const EODidLoginNotification = @"EODidLoginNotification";
 NSString * const EODidLogoutNotification = @"EODidLogoutNotification";
@@ -79,7 +80,7 @@ NSString * const EODidLogoutNotification = @"EODidLogoutNotification";
                                                     NSMutableDictionary* dict = [NSMutableDictionary dictionaryWithDictionary:obj];
                                                     [dict setValue:password forKey:@"password"];
                                                     [self userDidLoginWithData:dict];
-                                                    NSLog(@"user logged in");
+                                                    DDLogVerbose(@"user logged in");
                                                 } else {
                                                     [self.delegate userFailedToLogInWithError:[obj objectForKey:@"info"]];
                                                     [self logout];
@@ -99,10 +100,10 @@ NSString * const EODidLogoutNotification = @"EODidLogoutNotification";
 //should be deleted by logging out
 -(void)relogin{
     if (_currentUser && _currentUser.username && _currentUser.password) {
-        NSLog(@"logging in with username and password");
+        DDLogVerbose(@"logging in with username and password");
         [[Authentication sharedInstance] loginWithUserName:_currentUser.username password:_currentUser.password];
     } else if([[self sinaweibo] isLoggedIn]) {
-        NSLog(@"weibo logged in, continue to log in as an app user");
+        DDLogVerbose(@"weibo logged in, continue to log in as an app user");
         [self logInToApp];
     } else{
         //not logged in either as an app user or weibo user, logout to clear data
@@ -115,6 +116,12 @@ NSString * const EODidLogoutNotification = @"EODidLogoutNotification";
 }
 
 -(void) userDidLoginWithData:(NSDictionary*)data{
+    NSString* username = data[@"username"];
+    [[UserService shared] getOrFetchUserWithUsername:username success:^(User *user) {
+        DDLogVerbose(@"fetched logged in user and stored to core data");
+    } failure:^{
+        NSAssert(NO, @"failed to fetch logged in user info with username: %@", username);
+    }];
     _currentUser = [UserProfile profileWithData:data];
     [self registerToken];
     [[XMPPHandler sharedInstance] setup];
@@ -127,17 +134,17 @@ NSString * const EODidLogoutNotification = @"EODidLogoutNotification";
 
 -(void)registerToken{
     AppDelegate *appDelegate = (AppDelegate*)[UIApplication sharedApplication].delegate;
-    NSLog(@"updating token to server...");
+    DDLogVerbose(@"updating token to server...");
     if (appDelegate.apnsToken) {
         NSDictionary *dict = @{@"apns_token":appDelegate.apnsToken};
         [[NetworkHandler getHandler] sendJSonRequest:[NSString stringWithFormat:@"%@://%@/api/v1/user/%d/", HTTPS, EOHOST, _currentUser.uID]
                                               method:PATCH
                                           jsonObject:dict
                                              success:^(id obj) {
-                                                 NSLog(@"update token %@ for uid: %d", appDelegate.apnsToken, _currentUser.uID);
+                                                 DDLogVerbose(@"update token %@ for uid: %d", appDelegate.apnsToken, _currentUser.uID);
                                                  appDelegate.apnsToken = nil;
                                              } failure:^{
-                                                  NSLog(@"failed to update token %@ for uid: %d", appDelegate.apnsToken, _currentUser.uID);
+                                                  DDLogError(@"failed to update token %@ for uid: %d", appDelegate.apnsToken, _currentUser.uID);
                                              }];
 
     }
@@ -151,13 +158,13 @@ NSString * const EODidLogoutNotification = @"EODidLogoutNotification";
     [[NetworkHandler getHandler] requestFromURL:[NSString stringWithFormat:@"http://%@/api/v1/logout/", EOHOST]
                                          method:POST
                                         success:^(id obj) {
-                                            NSLog(@"logged out from fanjoin.com");
+                                            DDLogVerbose(@"logged out");
                                         } failure:^{
-                                            NSLog(@"failed to logout from server");
+                                            DDLogError(@"failed to logout from server");
                                         }];
     //remove cookie
     for (NSHTTPCookie *cookie in [[NSHTTPCookieStorage sharedHTTPCookieStorage] cookies]) {
-        NSLog(@"%@", cookie.domain);
+        DDLogVerbose(@"%@", cookie.domain);
         if ([cookie.domain isEqualToString:EOHOST]) {
             [[NSHTTPCookieStorage sharedHTTPCookieStorage] deleteCookie:cookie];
         }
@@ -167,7 +174,7 @@ NSString * const EODidLogoutNotification = @"EODidLogoutNotification";
         [[self sinaweibo]  logOut];
     }
     
-    NSLog(@"user logged out");
+    DDLogVerbose(@"user logged out");
     [self.delegate userDidLogout:_currentUser];
     
 }
@@ -197,7 +204,7 @@ NSString * const EODidLogoutNotification = @"EODidLogoutNotification";
 #pragma mark _
 #pragma mark - SinaWeibo Delegate
 - (void)sinaweiboDidLogIn:(SinaWeibo *)sinaweibo{
-    NSLog(@"logged in ok using weibo account, continue to log in as an ordinary user...");
+    DDLogInfo(@"logged in ok using weibo account, continue to log in as an ordinary user...");
     if ([self.delegate respondsToSelector:@selector(sinaweiboDidLogin:)]) {
         [self.delegate sinaweiboDidLogin:sinaweibo];
     }
@@ -207,11 +214,11 @@ NSString * const EODidLogoutNotification = @"EODidLogoutNotification";
 
 -(void)sinaweibo:(SinaWeibo *)sinaweibo logInDidFailWithError:(NSError *)error{
     [self.delegate userFailedToLogInWithError:[NSString stringWithFormat:@"登陆微博失败：%@", error.description]];
-    NSLog(@"failed to login to sina weibo: %@", error.description);
+    DDLogWarn(@"failed to login to sina weibo: %@", error.description);
 }
 
 -(void)sinaweiboDidLogOut:(SinaWeibo *)sinaweibo{
-    NSLog(@"sinaweiboDidLogout");
+    DDLogVerbose(@"sinaweiboDidLogout");
     [self removeAuthData];
 }
 
@@ -269,7 +276,7 @@ NSString * const EODidLogoutNotification = @"EODidLogoutNotification";
 
 #pragma mark LocationProviderDelegate
 -(void)finishObtainingLocation:(CLLocation*)location {
-    NSLog(@"obtained location: %@", location);
+    DDLogVerbose(@"obtained location: %@", location);
     if (_currentUser) {
         _currentUser.coordinate = location.coordinate;
         _currentUser.locationUpdatedTime = [[NSDate alloc] init];    
@@ -283,15 +290,15 @@ NSString * const EODidLogoutNotification = @"EODidLogoutNotification";
                                          parameters:params
                                         cachePolicy:TTURLRequestCachePolicyNoCache
                                             success:^(id obj) {
-                                                NSLog(@"location stored to server");
+                                                DDLogVerbose(@"location stored to server");
                                             }
                                             failure:^{
-                                                NSLog(@"Warning: failed to store user location to the server.");
+                                                DDLogVerbose(@"Warning: failed to store user location to the server.");
                                             }];
     }
 }
 
 -(void)failedObtainingLocation {
-    NSLog(@"location obtain failed");
+    DDLogVerbose(@"location obtain failed");
 }
 @end

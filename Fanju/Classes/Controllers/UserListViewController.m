@@ -91,7 +91,7 @@
                                     cachePolicy:TTURLRequestCachePolicyNone
                                         success:^(id obj) {
                                             if ([[obj objectForKey:@"status"] isEqualToString:@"OK"]) {
-                                                NSLog(@"tag added");
+                                                DDLogVerbose(@"tag added");
                                                 _hud = [MBProgressHUD showHUDAddedTo:self.view animated:NO];
                                                 _hud.mode = MBProgressHUDModeText;
                                                 _hud.labelText = @"已添加到我的兴趣";
@@ -105,7 +105,7 @@
                                                 [SVProgressHUD dismissWithSuccess:@"添加失败"];
                                             }
                                         } failure:^{
-                                            NSLog(@"failed to save settings");
+                                            DDLogError(@"failed to save settings");
                                             [SVProgressHUD dismissWithError:@"添加失败"];
                                         }];
 
@@ -150,7 +150,7 @@
     if (_filter) {
         urlWithFilter = [NSString stringWithFormat:@"%@&%@", self.baseURL, _filter];
     }
-    NSLog(@"loading users from url: %@", urlWithFilter);
+    DDLogVerbose(@"loading users from url: %@", urlWithFilter);
     [[NetworkHandler getHandler] requestFromURL:urlWithFilter
                                          method:GET
                                     cachePolicy:TTURLRequestCachePolicyNone 
@@ -220,7 +220,7 @@
                                             }
                                             [self.tableView reloadData];
                                         } failure:^{
-                                            NSLog(@"failed to load more orders");
+                                            DDLogError(@"failed to load more orders");
 #warning fail handling
                                         }];
 }
@@ -328,7 +328,7 @@
 - (void)pullToRefresh {
     if (_upadateLocationBeforeLoadUsers) {
         [[LocationProvider sharedProvider] updateLocationWithSuccess:^(CLLocation *location) {
-            NSLog(@"load users for lat and lng: %f, %f", location.coordinate.latitude,  location.coordinate.longitude );
+            DDLogVerbose(@"load users for lat and lng: %f, %f", location.coordinate.latitude,  location.coordinate.longitude );
             NSString* newFilter = [NSString stringWithFormat:@"lat=%f&lng=%f", location.coordinate.latitude,
                                    location.coordinate.longitude];
             if (_filter) {
@@ -340,10 +340,10 @@
             } else {
                 _filter = newFilter;
             }
-            NSLog(@"load users with filter %@", _filter);
+            DDLogVerbose(@"load users with filter %@", _filter);
             [self loadUsers];
         } orFailed:^{
-            NSLog(@"failed to update location, just load users for current location");
+            DDLogError(@"failed to update location, just load users for current location");
             [self loadUsers];
         }];
     } else {

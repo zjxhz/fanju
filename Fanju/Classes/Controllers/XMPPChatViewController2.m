@@ -17,6 +17,11 @@
 #import "NSDictionary+ParseHelper.h"
 #import "ODRefreshControl.h"
 #import "SVProgressHUD.h"
+#import "RestKit.h"
+#import "UserService.h"
+#import "UserMessage.h"
+#import "MessageService.h"
+
 #define kChatBarHeight1                      40
 #define kChatBarHeight4                      94
 #define TEXT_VIEW_X                          7   // 40  (with CameraButton)
@@ -38,25 +43,27 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
     UIButton *_sendButton;
     CGFloat _previousTextViewContentHeight;
     UIImageView *_messageInputBar;
-    NSString* _contactJIDStr;
+    User* _user;
     UIBubbleTableView *_bubbleTable;
     NSMutableArray *_bubbleData;
     CGFloat _keyboardHeight;
     UserProfile* _profile;
-    XMPPUserCoreDataStorageObject *_contactXMPPUser;
     ODRefreshControl* _refreshControl;
     NSFetchRequest *_fetchRequest;
     NSInteger _fetchOffset;
+    NSManagedObjectContext* _context;
 }
 
 @end
 
 @implementation XMPPChatViewController2
 
--(id)initWithUserChatTo:(NSString*)contactJIDStr{
+-(id)initWithUserChatTo:(User*)with{
     if (self = [self init]) {
-        _contactJIDStr = contactJIDStr;
+        _user = with;
         _bubbleData = [NSMutableArray array];
+        RKManagedObjectStore* store = [RKObjectManager sharedManager].managedObjectStore;
+        _context = store.mainQueueManagedObjectContext;
     }
     return self;
 }
@@ -83,37 +90,37 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    [self loadUserProfile];
+//    [self loadUserProfile];
     [self requestMessages];
     [self createMessageInputBar];
     UIGestureRecognizer *reg = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(viewTapped:)];
     reg.delegate = self;
     [self.view addGestureRecognizer:reg];
     [[NSNotificationCenter defaultCenter] postNotificationName:EOCurrentContact
-                                                        object:_contactJIDStr
+                                                        object:_user
                                                       userInfo:nil];
 }
 
--(void)loadUserProfile{
-    NSString* url = [NSString stringWithFormat:@"http://%@/api/v1/user/?format=json&user__username=%@", EOHOST, [self username]];
-    [[NetworkHandler getHandler] requestFromURL:url
-                                         method:GET
-                                    cachePolicy:TTURLRequestCachePolicyNone
-                                        success:^(id obj) {
-                                            NSArray *users = [obj objectForKeyInObjects];
-                                            if (users.count == 1) {
-                                                _profile = [UserProfile profileWithData:[users objectAtIndex:0]];
-                                            } else {
-                                                NSLog(@"获取数据失败");
-                                            }
-                                        } failure:^{
-                                            NSLog(@"获取数据失败");
-                                        }];
-}
+//-(void)loadUserProfile{
+//    NSString* url = [NSString stringWithFormat:@"http://%@/api/v1/user/?format=json&user__username=%@", EOHOST, [self username]];
+//    [[NetworkHandler getHandler] requestFromURL:url
+//                                         method:GET
+//                                    cachePolicy:TTURLRequestCachePolicyNone
+//                                        success:^(id obj) {
+//                                            NSArray *users = [obj objectForKeyInObjects];
+//                                            if (users.count == 1) {
+//                                                _profile = [UserProfile profileWithData:[users objectAtIndex:0]];
+//                                            } else {
+//                                                DDLogVerbose(@"获取数据失败");
+//                                            }
+//                                        } failure:^{
+//                                            DDLogVerbose(@"获取数据失败");
+//                                        }];
+//}
 
--(NSString*)username{
-    return [[_contactJIDStr componentsSeparatedByString:@"@"] objectAtIndex:0];
-}
+//-(NSString*)username{
+//    return [[_contactJIDStr componentsSeparatedByString:@"@"] objectAtIndex:0];
+//}
 
 -(void) createMessageInputBar{
     self.view.frame = CGRectMake(0, 0, self.view.frame.size.width, self.view.frame.size.height-kChatBarHeight1);
@@ -193,23 +200,20 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
 }
 
 -(void) requestMessages{
-    NSManagedObjectContext* context = [XMPPHandler sharedInstance].messageManagedObjectContext;
     _fetchRequest = [[NSFetchRequest alloc] init];
-    _fetchRequest.entity = [NSEntityDescription entityForName:@"EOMessage" inManagedObjectContext:context];
+    _fetchRequest.entity = [NSEntityDescription entityForName:@"UserMessage" inManagedObjectContext:_context];
     
-    UserProfile* me = [Authentication sharedInstance].currentUser;
-    _fetchRequest.predicate = [NSPredicate predicateWithFormat:@"(type == 'chat') AND \
-                               ( (receiver BEGINSWITH %@ AND sender BEGINSWITH %@) \
-                               OR (receiver BEGINSWITH %@ AND sender BEGINSWITH %@) )", _contactJIDStr, me.jabberID, me.jabberID, _contactJIDStr];
+    User* me = [UserService shared].loggedInUser;
+    _fetchRequest.predicate = [NSPredicate predicateWithFormat:@"owner.uID = %@ AND with.uID= %@", me.uID, _user.uID];
     _fetchRequest.sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"time" ascending:NO]];
     _fetchRequest.fetchLimit = FETCH_LIMIT;
     _fetchOffset = FETCH_LIMIT;
     NSError* error;
-    NSArray* objects = [context executeFetchRequest:_fetchRequest error:&error];
+    NSArray* objects = [_context executeFetchRequest:_fetchRequest error:&error];
     [self insertMessageBubbles:objects];
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(messageDidSave:)
-                                                 name:EOMessageDidSaveNotification
+                                                 name:MessageDidSaveNotification
                                                object:nil];
     
 }
@@ -232,34 +236,16 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
 
 
 -(void)insertMessageBubbles:(NSArray*)messages{
-    for (EOMessage *message in messages) {
+    for (UserMessage *message in messages) {
         [_bubbleData insertObject:[self bubbleFromMessage:message] atIndex:0];
     }
     [_bubbleTable reloadData];
 }
 
--(NSBubbleData*)bubbleFromMessage:(EOMessage*)message{
-    NSBubbleType bubbleType = [message.sender isEqualToString:_contactJIDStr] ? BubbleTypeSomeoneElse : BubbleTypeMine;   
+-(NSBubbleData*)bubbleFromMessage:(UserMessage*)message{
+    NSBubbleType bubbleType = message.incoming ? BubbleTypeSomeoneElse : BubbleTypeMine;
     NSBubbleData *bubble = [NSBubbleData dataWithText:message.message date:message.time type:bubbleType];
-    XMPPJID* contactJID = [XMPPJID jidWithString:message.sender];
-    XMPPHandler* xmppHandler =[XMPPHandler sharedInstance];
-    if (bubbleType  == BubbleTypeSomeoneElse) {
-        if (!_contactXMPPUser) {
-            _contactXMPPUser =[xmppHandler.xmppRosterStorage userForJID:contactJID
-                                                                xmppStream:xmppHandler.xmppStream
-                                                      managedObjectContext:xmppHandler.rosterManagedObjectContext];
-        }
-        if (_contactXMPPUser.photo) {
-            bubble.avatar = _contactXMPPUser.photo;
-        } else {
-            NSData *photoData = [xmppHandler.xmppvCardAvatarModule photoDataForJID:_contactXMPPUser.jid];
-            if (photoData){
-                bubble.avatar =  [UIImage imageWithData:photoData];
-            } else {
-                [xmppHandler.xmppvCardTempModule fetchvCardTempForJID:contactJID useCache:NO];
-            }
-        }
-    }
+    bubble.avatar = _avatarSomeoneElse;
     return bubble;
 }
 
@@ -274,19 +260,18 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
     NSString* message = _textView.text;
     _textView.text = nil;
     [self textViewDidChange:_textView];
-    [self sendMessage:message To:_contactJIDStr];
+    [self sendMessage:message To:_user];
 }
 
--(void)sendMessage:(NSString*)message To:(NSString*)to{
-    [[XMPPHandler sharedInstance] addUserToRosterIfNeeded:[XMPPJID jidWithString:to] ];
-    NSLog(@"sending message: %@", message);
+-(void)sendMessage:(NSString*)message To:(User*)to{
+    DDLogVerbose(@"sending message: %@", message);
     NSString* messageStr = message;
     NSXMLElement *body = [NSXMLElement elementWithName:@"body"];
     [body setStringValue:messageStr];
     NSXMLElement *messageElement = [NSXMLElement elementWithName:@"message"];
     UserProfile* me = [Authentication sharedInstance].currentUser;
     [messageElement addAttributeWithName:@"from" stringValue:me.jabberID];
-    [messageElement addAttributeWithName:@"to" stringValue:to];
+    [messageElement addAttributeWithName:@"to" stringValue:[UserService jidForUser:_user]];
     [messageElement addAttributeWithName:@"type" stringValue:@"chat"];
     [messageElement addChild:body];
     [[XMPPHandler sharedInstance].xmppStream sendElement:messageElement];
@@ -353,7 +338,7 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
     // Change height of _tableView & messageInputBar to match textView's content height.
     CGFloat textViewContentHeight = textView.contentSize.height;
     CGFloat changeInHeight = textViewContentHeight - _previousTextViewContentHeight;
-    //    NSLog(@"textViewContentHeight: %f", textViewContentHeight);
+    //    DDLogVerbose(@"textViewContentHeight: %f", textViewContentHeight);
     
     if (textViewContentHeight+changeInHeight > kChatBarHeight4+2) {
         changeInHeight = kChatBarHeight4+2-_previousTextViewContentHeight;
@@ -405,9 +390,9 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
 
 
 -(void)messageDidSave:(NSNotification*)notif {
-    EOMessage* messageMO = notif.object;
-    UserProfile* me = [Authentication sharedInstance].currentUser;
-    if (![messageMO.sender isEqualToString:me.jabberID] && ![messageMO.sender isEqualToString:_contactJIDStr]) {
+    UserMessage* messageMO = notif.object;
+    User* me = [UserService shared].loggedInUser;
+    if (![messageMO.owner isEqual:me]) {
         return; //not for this conversation
     }
 
@@ -450,7 +435,7 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
     if (_profile) {
         newDeail.user = _profile;
     } else {
-        [newDeail setUsername:[self username]];
+//        [newDeail setUsername:[self username]];
     }
 
     [self.navigationController pushViewController:newDeail animated:YES];

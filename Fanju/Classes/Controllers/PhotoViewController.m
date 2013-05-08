@@ -176,13 +176,13 @@
     if([self isURLForCurrentPage:request.urlPath]){
         _hud.progress = request.totalBytesDownloaded * 1.0 / request.totalContentLength;
     }
-    NSLog(@"downloading %d/%d: %.2f%% from: %@", request.totalBytesDownloaded, request.totalContentLength, request.totalBytesDownloaded * 100.0 / request.totalContentLength, request.urlPath);
+    DDLogVerbose(@"downloading %d/%d: %.2f%% from: %@", request.totalBytesDownloaded, request.totalContentLength, request.totalBytesDownloaded * 100.0 / request.totalContentLength, request.urlPath);
 }
 
 - (void)request:(TTURLRequest*)request didFailLoadWithError:(NSError*)error{
     _hud.labelText = @"下载失败，请稍后再试";
     [_hud hide:YES afterDelay:2];
-    NSLog(@"failed to load image from %@", request.urlPath);
+    DDLogError(@"failed to load image from %@", request.urlPath);
 }
 
 -(void)viewTapped:(id)sender{

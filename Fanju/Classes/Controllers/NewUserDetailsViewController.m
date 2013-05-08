@@ -94,7 +94,7 @@
                                             self.user = user;
                                             [self buildUI];
                                         } failure:^{
-                                            NSLog(@"failed to get user  for id %@", _userID);
+                                            DDLogError(@"failed to get user  for id %@", _userID);
                                             [SVProgressHUD dismissWithError:@"获取饭局失败"];
                                         }];
 }
@@ -151,12 +151,12 @@
                                         cachePolicy:TTURLRequestCachePolicyNone
                                             success:^(id obj) {
                                                 if ([[obj objectForKey:@"status"] isEqualToString:@"OK"]) {
-                                                    NSLog(@"you visited %@ and s/he now knows it", _user);
+                                                    DDLogVerbose(@"you visited %@ and s/he now knows it", _user);
                                                 } else {
-                                                    NSLog(@"failed to tell %@ that you visited her/him", _user);
+                                                    DDLogError(@"failed to tell %@ that you visited her/him", _user);
                                                 }
                                             } failure:^{
-                                                NSLog(@"failed to tell %@ that you visited her/him", _user);
+                                                DDLogError(@"failed to tell %@ that you visited her/him", _user);
                                             }];
     }
 }
@@ -397,7 +397,7 @@
                                             [self.tableView reloadData];
                                             [self.tableView setNeedsDisplay];
                                         } failure:^{
-                                            NSLog(@"failed to fetch comments");
+                                            DDLogError(@"failed to fetch comments");
                                             [self.tableView setNeedsDisplay];
                                             _loadingComments = NO;
                                         }];
@@ -574,7 +574,7 @@
     if ([self isViewForMyself]) {
         [self addPhoto:nil];
     } else {
-        NSLog(@"not implemented");
+        DDLogVerbose(@"not implemented");
     }
 }
 
@@ -639,9 +639,9 @@
                                           method:PATCH
                                       jsonObject:paramDict
                                          success:^(id obj) {
-                                             NSLog(@"motto updated");
+                                             DDLogVerbose(@"motto updated");
                                          } failure:^{
-                                             NSLog(@"failed to update motto to %@", value);
+                                             DDLogError(@"failed to update motto to %@", value);
                                              [SVProgressHUD dismissWithError:@"更新签名失败"];
                                          }];
 }
@@ -661,7 +661,7 @@
                                             if ([[obj objectForKey:@"status"] isEqualToString:@"OK"]) {
                                                 [SVProgressHUD dismissWithSuccess:@"发送成功"];
                                                 if (messageOrComment) {
-                                                    NSLog(@"message sent");
+                                                    DDLogVerbose(@"message sent");
                                                 } else {
                                                     [SVProgressHUD showSuccessWithStatus:[obj objectForKey:@"info"]];
                                                     [_commentItems addObject:[CommentTableItem itemFromUser:[Authentication sharedInstance].currentUser withComment:text]];
@@ -710,7 +710,7 @@
                                             [[Authentication sharedInstance] synchronize];
                                             [_photoCell deleteUserPhoto:photo atIndex:_selectedIndex];
                                             [self.tableView reloadData];
-                                            NSLog(@"user photo %d delete.", photo.pID);
+                                            DDLogVerbose(@"user photo %d delete.", photo.pID);
                                         } failure:^{
                                             [SVProgressHUD dismissWithError:@"删除失败"];
                                         }]; 

@@ -83,7 +83,7 @@ const NSInteger MOST_POPULAR_TAG_COUNT = 5;
                                             }
                                             self.dataSource = ds;
                                         } failure:^{
-                                            NSLog(@"failed to fetch user tags.");
+                                            DDLogError(@"failed to fetch user tags.");
                                             [SVProgressHUD dismissWithError:@"获取数据失败"];
                                         }];
 }
@@ -125,7 +125,7 @@ const NSInteger MOST_POPULAR_TAG_COUNT = 5;
                                             }
                                             [self.tableView reloadData];
                                         } failure:^{
-                                            NSLog(@"failed to load more followings");
+                                            DDLogError(@"failed to load more followings");
 #warning fail handling
                                         }];
 }
@@ -177,7 +177,7 @@ const NSInteger MOST_POPULAR_TAG_COUNT = 5;
                                     cachePolicy:TTURLRequestCachePolicyNone
                                         success:^(id obj) {
                                             if ([[obj objectForKey:@"status"] isEqualToString:@"OK"]) {
-                                                NSLog(@"tags saved");
+                                                DDLogVerbose(@"tags saved");
                                                 [SVProgressHUD dismissWithSuccess:@"保存成功。"];
                                                 [_user.tags removeAllObjects];
                                                 [_user.tags addObjectsFromArray:_selectedTags];
@@ -186,7 +186,7 @@ const NSInteger MOST_POPULAR_TAG_COUNT = 5;
                                                 [InfoUtil showError:obj];
                                             }
                                         } failure:^{
-                                            NSLog(@"failed to save settings");
+                                            DDLogError(@"failed to save settings");
                                             [SVProgressHUD dismissWithError:@"保存失败"];
                                         }];
 }

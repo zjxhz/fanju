@@ -9,6 +9,7 @@
 #import <Foundation/Foundation.h>
 #import <Three20/Three20.h>
 #import "UserProfile.h"
+#import "User.h"
 #import "Const.h"
 #import "UserImageView.h"
 typedef enum {
@@ -22,5 +23,6 @@ AvatarSize;
 +(UserImageView*) avatarForUser:(UserProfile*)user frame:(CGRect)frame delegate:(id<UserImageViewDelegate>)delegate;
 +(UserImageView*) avatarForUser:(UserProfile*)user frame:(CGRect)frame;
 +(UserImageView*) defaultAvatarWithFrame:(CGRect)frame;
-+(UserImageView*)avatarWithBg:(UserProfile*)user;
++(UserImageView*)avatarWithBg:(User*)user;
++(UserImageView*)avatarWithBg:(User*)user big:(BOOL)big;
 @end

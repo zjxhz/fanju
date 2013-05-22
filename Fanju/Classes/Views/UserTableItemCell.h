@@ -10,7 +10,7 @@
 #import <Three20/Three20.h>
 #import "UserImageView.h"
 
-@interface UserTableItemCell : TTTableLinkedItemCell
+@interface UserTableItemCell : TTTableViewCell
 @property(nonatomic, readonly)   UserImageView *avatar;
 @property(nonatomic, strong) UIButton *numberOfSameTagsButton;
 @end

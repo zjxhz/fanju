@@ -38,8 +38,6 @@
         _contex = store.mainQueueManagedObjectContext;
         _fetchRequest = [[NSFetchRequest alloc] init];
         _fetchRequest.entity = [NSEntityDescription entityForName:@"Conversation" inManagedObjectContext:_contex];
-        self.view.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"bg"]];
-        self.tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
     }
     return self;
 }
@@ -47,7 +45,8 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    [super viewDidLoad];
+    self.view.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"bg"]];
+    self.tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
     self.navigationItem.rightBarButtonItem = [[WidgetFactory sharedFactory] normalBarButtonItemWithTitle:@"编辑" target:self action:@selector(editTable:)];
     [self requestMessages];
 }
@@ -62,6 +61,7 @@
 //                                             selector:@selector(messageDidDelete:)
 //                                                 name:MessageDidDeleteNotification
 //                                               object:nil];
+    [[MessageService service] updateUnreadCount];
 //    [[XMPPHandler sharedInstance] updateUnreadCount]; //manually update the unread count so that unread count on the side bar looks same with what is showing here
 }
 
@@ -85,11 +85,11 @@
 {
     Conversation* conversation = _conversations[indexPath.row];
     static NSString *CellIdentifier = @"SimpleUserEventCell";
-    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
-    if (!cell) {
+    UITableViewCell *cell = nil;//[tableView dequeueReusableCellWithIdentifier:CellIdentifier];
+//    if (!cell) {
         UIViewController* temp = [[UIViewController alloc] initWithNibName:CellIdentifier bundle:nil];
         cell = (UITableViewCell*)temp.view;
-    }
+//    }
     SimpleUserEventCell* eventCell = (SimpleUserEventCell*)cell;
     User* with = conversation.with;
     eventCell.name.text = with.name;
@@ -101,6 +101,20 @@
     eventCell.avatar.layer.cornerRadius = 5;
     eventCell.avatar.layer.masksToBounds = YES;
     cell.selectionStyle = UITableViewCellSelectionStyleNone;
+    UIImage* xiaoxi = [UIImage imageNamed:@"xiaoxi"];
+    if ([conversation.unread integerValue] > 0) {
+        UIButton* unreadButton = [UIButton buttonWithType:UIButtonTypeCustom];
+        [unreadButton setBackgroundImage:xiaoxi forState:UIControlStateNormal];
+        unreadButton.frame = CGRectMake(250, 8, xiaoxi.size.width, xiaoxi.size.height);
+        [unreadButton setTitle:[NSString stringWithFormat:@"%d", [conversation.unread integerValue] ] forState:UIControlStateNormal];
+        unreadButton.titleLabel.textColor = [UIColor whiteColor];
+        unreadButton.titleLabel.font = [UIFont systemFontOfSize:12];
+        unreadButton.layer.shadowColor = [UIColor blackColor].CGColor;
+        unreadButton.layer.shadowOpacity = 0.5;
+        unreadButton.layer.shadowOffset = CGSizeMake(0, 1);
+        unreadButton.userInteractionEnabled = NO;
+        [cell.contentView addSubview:unreadButton];
+    }    
     return cell;
 }
 
@@ -133,14 +147,17 @@
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
     Conversation* conversation = _conversations[indexPath.row];
-    XMPPChatViewController2 *chat =[[XMPPChatViewController2 alloc] initWithUserChatTo:conversation.with];
-//    item.unread = 0; //open the chat dialog mark all messages as read
-//    [[XMPPHandler sharedInstance] markMessagesReadFrom:item.contact];
-//    [[XMPPHandler sharedInstance] updateUnreadCount];
+    XMPPChatViewController2 *chat =[[XMPPChatViewController2 alloc] initWithConversation:conversation];
+    conversation.unread = [NSNumber numberWithInteger:0];
+    [[MessageService service] markMessagesReadFrom:conversation.with];
+    [[MessageService service] updateUnreadCount];
 //    [[XMPPHandler sharedInstance] retrieveMessagesWith:item.contact after:[item.time timeIntervalSince1970] retrievingFromList:NO];
-//    NSError *error = nil;
-//    [[XMPPHandler sharedInstance].messageManagedObjectContext save:&error];
-//    [self refresh];
+    NSError *error = nil;
+    if(![_contex saveToPersistentStore:&error]){
+        DDLogError(@"failed to save updated unread count for conversation: %@", conversation);
+    }
+    
+    [self reloadData];
     SimpleUserEventCell* eventCell = (SimpleUserEventCell*)[self tableView:self.tableView cellForRowAtIndexPath:indexPath];
     chat.avatarSomeoneElse = eventCell.avatar.image;
     [self.navigationController pushViewController:chat animated:YES];
@@ -148,9 +165,9 @@
 
 
 - (void)tableView: (UITableView *)tableView commitEditingStyle: (UITableViewCellEditingStyle)editingStyle forRowAtIndexPath: (NSIndexPath *)indexPath {
-//    Conversation *c = _conversations[indexPath.row];
-//    [_conversations removeObjectAtIndex:indexPath.row];
-//    [[MessageService service] deleteConversation];
-//    [tableView reloadData];
+    Conversation *c = _conversations[indexPath.row];
+    [_conversations removeObjectAtIndex:indexPath.row];
+    [[MessageService service] deleteConversation:c];
+    [tableView reloadData];
 }
 @end

@@ -49,7 +49,6 @@
 @end
 
 extern NSString* const EOMessageDidSaveNotification;
-extern NSString* const EONotificationDidSaveNotification;
 extern NSString * const EOMessageDidDeleteNotification;
 extern NSString* const EOCurrentContact;
 extern NSString* const EOUnreadMessageCount;

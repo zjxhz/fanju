@@ -12,6 +12,7 @@
 #import "Location.h"
 #import "MealDetailViewController.h"
 #import "MapHelper.h"
+#import "Restaurant.h"
 
 @interface OrderDetailsViewController ()
 
@@ -40,7 +41,7 @@
     _mapView.layer.borderColor = [UIColor grayColor].CGColor;
 }
 
--(void)setOrder:(OrderInfo *)order{
+-(void)setOrder:(Order *)order{
     _order = order;
     _meal = _order.meal;
 }
@@ -48,10 +49,10 @@
 -(void)buildUI{
     _topic.text = _meal.topic;
     _codeLabel.text = _order.code;
-    _numerOfPersons.text = [NSString stringWithFormat:@"（供%d人使用）", _order.numerOfPersons];
-    _time.text = _meal.timeText;
+    _numerOfPersons.text = [NSString stringWithFormat:@"（供%@人使用）", _order.numberOfPersons];
+    _time.text = [MealService dateTextOfMeal:_meal];
     _restaurant.text = [NSString stringWithFormat:@"%@ %@", _meal.restaurant.name, _meal.restaurant.address];
-    [_mealImage setPathToNetworkImage:[_meal photoFullUrl] forDisplaySize:CGSizeMake(72, 72) contentMode:UIViewContentModeScaleAspectFill];
+    [_mealImage setPathToNetworkImage:[URLService absoluteURL:_meal.photoURL] forDisplaySize:CGSizeMake(72, 72) contentMode:UIViewContentModeScaleAspectFill];
 //    _mealImage.userInteractionEnabled = YES;
     UITapGestureRecognizer* tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(showMealDetails:)];
     tap.delegate = self;
@@ -69,7 +70,7 @@
         span.latitudeDelta=0.01;
         span.longitudeDelta=0.01;
         
-        CLLocationCoordinate2D location = _meal.restaurant.coordinate;
+        CLLocationCoordinate2D location = [self coordinate:_meal.restaurant];
         
         region.span=span;
         region.center=location;
@@ -77,14 +78,21 @@
         [_mapView setRegion:region animated:TRUE];
         [_mapView regionThatFits:region];
         _mapView.delegate = self;
-        Location* annotation = [[Location alloc] initWithName:_meal.restaurant.name address:_meal.restaurant.address coordinate:_meal.restaurant.coordinate];
+        Location* annotation = [[Location alloc] initWithName:_meal.restaurant.name address:_meal.restaurant.address coordinate:[self coordinate:_meal.restaurant]];
         [_mapView addAnnotation:annotation];
     }
 }
 
+-(CLLocationCoordinate2D)coordinate:(Restaurant*)restaurant{
+    CLLocationCoordinate2D location;
+    location.latitude = [restaurant.latitude floatValue];
+    location.longitude = [restaurant.longitude floatValue];
+    return location;
+}
+
 -(IBAction)showMealDetails:(id)sender{
     MealDetailViewController *detail = [[MealDetailViewController alloc] init];
-    detail.mealInfo = _meal;
+    detail.meal = _meal;
     [self.navigationController pushViewController:detail animated:YES];
 
 }
@@ -120,9 +128,8 @@
 
 
 -(void)launchRoute {
-    RestaurantInfo* restaurant = self.order.meal.restaurant;
-    CLLocationCoordinate2D coordinate =
-    CLLocationCoordinate2DMake(restaurant.coordinate.latitude, restaurant.coordinate.longitude);
+    Restaurant* restaurant = self.order.meal.restaurant;
+    CLLocationCoordinate2D coordinate = [self coordinate:restaurant];
     [MapHelper launchRouteTo:coordinate withName:restaurant.name];
 }
 @end

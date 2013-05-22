@@ -31,15 +31,15 @@
 #import "OrderDetailsViewController.h"
 #import "JoinMealViewController.h"
 #import "NewSidebarViewController.h"
+#import "UserService.h"
+#import "Restaurant.h"
+#import "Order.h"
 
 @implementation MealDetailViewController{
     MealDetailsViewDelegate* _mealDetailsViewDelegate;
     OrderInfo* _myOrder;
+    NSArray* _participants;
 }
-
-@synthesize mealInfo = _mealInfo;
-@synthesize tabBar = _tabBar;
-
 -(id)init{
     if (self = [super init]) {
         _mealDetailsViewDelegate = [[MealDetailsViewDelegate alloc] init];
@@ -55,23 +55,24 @@
 }
 
 -(void)requestOrderStatus{
-    UserProfile* currentUser = [[Authentication sharedInstance] currentUser];
-    [[NetworkHandler getHandler] requestFromURL:[NSString stringWithFormat:@"http://%@/api/v1/order/?&meal__id=%d&customer__id=%d&status=2&format=json", EOHOST, self.mealInfo.mID, currentUser.uID]
+    User* loggedInUser = [UserService service].loggedInUser;
+    [[NetworkHandler getHandler] requestFromURL:[NSString stringWithFormat:@"http://%@/api/v1/order/?&meal__id=%@&customer__id=%@&status=2&format=json", EOHOST, self.meal.mID, loggedInUser.uID]
                                          method:GET
                                     cachePolicy:TTURLRequestCachePolicyNone
                                         success:^(id obj) {
                                             NSArray *orders = [obj objectForKeyInObjects];                                            
                                             if (orders && [orders count] > 1) {
-                                                DDLogVerbose(@"WARNING: possible duplicated orders found for meal(%d) and user(%d)", self.mealInfo.mID, currentUser.uID);
+                                                DDLogVerbose(@"WARNING: possible duplicated orders found for meal(%@) and user(%@)", self.meal.mID, loggedInUser.uID);
                                             } else if (orders && [orders count] == 1){
                                                 NSDictionary* data = orders[0];
                                                 _myOrder = [OrderInfo orderInfoWithData:data];
                                                 [_joinButton setTitle:@"已支付，查看订单" forState:UIControlStateNormal];
                                                 [_joinButton addTarget:self action:@selector(viewOrder:) forControlEvents:UIControlEventTouchDown];
                                             } else {
-                                                if([self.mealInfo.time compare:[NSDate date]] == NSOrderedAscending){
+                                                NSDate* time = [MealService dateOfMeal:_meal];
+                                                if([time compare:[NSDate date]] == NSOrderedAscending){
                                                     [_joinButton setTitle:@"已结束" forState:UIControlStateNormal];
-                                                }  else if (self.mealInfo.actualPersons >= self.mealInfo.maxPersons) {
+                                                }  else if (self.meal.actualPersons >= self.meal.maxPersons) {
                                                     [_joinButton setTitle:@"卖光了" forState:UIControlStateNormal];
                                                     [_joinButton removeTarget:self action:@selector(joinMeal:) forControlEvents:UIControlEventTouchDown];
                                                 } else {
@@ -138,31 +139,12 @@
 -(void)viewDidLoad
 {
     [super viewDidLoad];
-    if (self.mealInfo) {
-        [self buildUI];
-    } else if(self.mealID){
-        [self requetMealDetails];
-    }
+    [self buildUI];
 }
 
--(void)requetMealDetails{
-    [[NetworkHandler getHandler] requestFromURL:[NSString stringWithFormat:@"http://%@/api/v1/meal/%@/?format=json", EOHOST, _mealID]
-                                        method:GET
-                                cachePolicy:TTURLRequestCachePolicyNetwork
-                                        success:^(id obj) {
-                                            NSDictionary* dic = obj;
-                                            MealInfo* meal = [MealInfo mealInfoWithData:dic];
-                                            self.mealInfo = meal;
-                                            [self buildUI];
-                                        } failure:^{
-                                            DDLogError(@"failed to get meal for id %@", _mealID);
-                                            [SVProgressHUD dismissWithError:@"获取饭局失败"];
-                                        }];
-
-}
 -(void)buildUI{
     self.tableView.showsVerticalScrollIndicator = NO;
-    self.navigationItem.titleView = [[WidgetFactory sharedFactory]titleViewWithTitle:_mealInfo.topic];
+    self.navigationItem.titleView = [[WidgetFactory sharedFactory]titleViewWithTitle:_meal.topic];
     self.navigationItem.rightBarButtonItem = [[WidgetFactory sharedFactory]normalBarButtonItemWithTitle:@"分享" target:self action:@selector(onShareClicked:)];
     
     self.tableView.separatorColor = [UIColor clearColor];
@@ -189,9 +171,6 @@
     
     TTSectionedDataSource* ds = [[TTSectionedDataSource alloc] initWithItems:items sections:sections];
     self.dataSource = ds;
-    if (!_mealInfo) {
-        [self requestDataFromServer];
-    };
 }
 
 -(void)viewWillAppear:(BOOL)animated{
@@ -205,17 +184,15 @@
 
 -(void)finishOrder:(id)sender{
     JoinMealViewController* vc = [[JoinMealViewController alloc] init];
-    vc.mealInfo = self.mealInfo;
-    vc.numberOfPersons = _unfinishedOrder.numerOfPersons;
+    vc.meal = self.meal;
+    vc.numberOfPersons = [_unfinishedOrder.numberOfPersons integerValue];
     [self.navigationController pushViewController:vc animated:YES];
 }
 
 -(void)viewDidAppear:(BOOL)animated{
     [super viewDidAppear:animated];
     CGRect frame = self.tableView.frame;
-    frame.origin.x = 0;
-    frame.origin.y = 0;
-    frame.size.height = 480 - 20 - 44 - TAB_BAR_HEIGHT; //- status, nav, tab
+    frame.size.height = self.view.frame.size.height - TAB_BAR_HEIGHT; 
     self.tableView.frame = frame;
 }
 
@@ -235,35 +212,6 @@
     [[ds.items objectAtIndex:lastSection] removeLastObject]; 
     NSIndexPath *path = [NSIndexPath indexPathForRow:0 inSection:lastSection];
     [self.tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:path] withRowAnimation:UITableViewRowAnimationNone];
-
-}
-
-- (void) requestDataFromServer{
-    TTSectionedDataSource *ds = self.dataSource;    
-    [[NetworkHandler getHandler] requestFromURL:[NSString stringWithFormat:@"http://%@/api/v1/meal/%d/comments/?format=json", EOHOST, self.mealInfo.mID]
-                                         method:GET
-                                    cachePolicy:TTURLRequestCachePolicyNetwork
-                                        success:^(id obj) {   
-                                            NSArray* comments = [obj objectForKeyInObjects];
-                                            if (comments && [comments count] > 0) {   
-                                                [self removeLoadingView];
-                                                int lastSectionIndex = (ds.items.count - 1);
-                                                NSMutableArray* lastSection =  [ds.items objectAtIndex:lastSectionIndex];
-                                                for (NSDictionary *dict in comments) {
-                                                    MealComment *comment = [[MealComment alloc] initWithData:dict];
-                                                    [lastSection addObject:[self createCommentView:comment]];
-                                                } 
-                                                
-                                                [self.tableView reloadData];                                               
-//                                                NSIndexSet *updatedSections = [NSIndexSet indexSetWithIndex:lastSectionIndex];	 
-//                                                [self.tableView reloadSections:updatedSections withRowAnimation:UITableViewRowAnimationNone];
-                                            }
-                                            else {
-                                                _loadingOrNoCommentsLabel.text = NSLocalizedString(@"NoComments", nil);
-                                            }
-                                        } failure:^{
-                                            //TODO what if failed?	
-                                        }];
 
 }
 
@@ -287,7 +235,8 @@
     return commentsView;
 }
 - (void) initDetailsView{
-    _detailsView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, DETAILS_VIEW_HEIGHT)];
+    CGFloat height = self.view.frame.size.height - TAB_BAR_HEIGHT - DISH_VIEW_HEIGHT;
+    _detailsView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, height)];
     _detailsView.backgroundColor = [UIColor clearColor];
     _detailsView.backgroundColor = [UIColor clearColor];
     
@@ -304,7 +253,7 @@
     [_detailsView addSubview:jianjie];
     
     x = jianjie.frame.size.width + jianjie.frame.origin.x;
-    UILabel* topicLabel = [self createRightLabel:CGPointMake(x, y) width:INTRO_WIDTH maxHeight:INTRO_HEIGHT text:_mealInfo.intro lines:4];
+    UILabel* topicLabel = [self createRightLabel:CGPointMake(x, y) width:INTRO_WIDTH maxHeight:INTRO_HEIGHT text:_meal.introduction lines:4];
     
     [_detailsView addSubview:topicLabel];
     
@@ -321,7 +270,7 @@
     [_detailsView addSubview:time];
     
     x = time.frame.origin.x + time.frame.size.width;
-    UILabel* timeLabel = [self createRightLabel:CGPointMake(x, y) width:INTRO_WIDTH maxHeight:12 text:[_mealInfo timeText] lines:1];
+    UILabel* timeLabel = [self createRightLabel:CGPointMake(x, y) width:INTRO_WIDTH maxHeight:12 text:[MealService dateTextOfMeal:_meal] lines:1];
     [_detailsView addSubview:timeLabel];
     
     //address
@@ -337,7 +286,7 @@
     [_detailsView addSubview:address];
     
     x = address.frame.origin.x + address.frame.size.width;
-    NSString *addressStr = [NSString stringWithFormat:@"%@ %@", self.mealInfo.restaurant.address, self.mealInfo.restaurant.name];
+    NSString *addressStr = [NSString stringWithFormat:@"%@ %@", self.meal.restaurant.address, self.meal.restaurant.name];
     UILabel* addressLabel = [self createRightLabel:CGPointMake(x, y) width:ADDRESS_WIDTH maxHeight:ADDRESS_HEIGHT text:addressStr lines:2];
     [_detailsView addSubview:addressLabel];
     
@@ -385,9 +334,6 @@
 -(UILabel*)createRightLabel:(CGPoint)origin width:(CGFloat)width maxHeight:(CGFloat)maxHeight text:(NSString*)text lines:(NSInteger)lines{
     UIFont* textFont = [UIFont systemFontOfSize:12];
     UIColor* rightTextColor = RGBCOLOR(80, 80, 80);
-//    CGSize size = [_mealInfo.topic sizeWithFont:textFont constrainedToSize:CGSizeMake(width, maxHeight)];//sizeWithFont:textFont forWidth:width lineBreakMode:NSLineBreakByWordWrapping];
-//    CGFloat height = size.height > maxHeight ? maxHeight : size.height;
-//    UILabel* label = [[UILabel alloc] initWithFrame:CGRectMake(origin.x, origin.y, TOPIC_WIDTH, height)];
     UILabel* label = [[UILabel alloc] initWithFrame:CGRectMake(origin.x, origin.y, width, 0)];
     label.font = textFont;
     label.textColor = rightTextColor;
@@ -423,7 +369,7 @@
 
 -(void)fetchMenu:(id)sender{
     TTButton* menuButton = sender;
-    [[NetworkHandler getHandler] requestFromURL:[NSString stringWithFormat:@"http://%@/api/v1/meal/%d/menu/", EOHOST, self.mealInfo.mID]
+    [[NetworkHandler getHandler] requestFromURL:[NSString stringWithFormat:@"http://%@/api/v1/meal/%@/menu/", EOHOST, self.meal.mID]
                                          method:GET
                                     cachePolicy:TTURLRequestCachePolicyNone
                                         success:^(id obj){
@@ -436,12 +382,10 @@
                                             _menuContentViewController = [[MenuViewController alloc] init];
                                             _menuContentViewController.mealMenu = _mealMenu;
                                             [self.view addSubview:_menuContentViewController.view];
-//                                            _cpc = [[ClosablePopoverViewController alloc] initWithContentViewController:_menuContentViewController];
-                                            
-//                                            [[OverlayViewController sharedOverlayViewController] presentModalViewController:_cpc animated:NO];
                                         }
                                         failure:^(void){
                                             [self updateMenuButton:menuButton withReadingStatus:NO];
+                                            DDLogError(@"failed to fetch menu");
                                             [SVProgressHUD dismissWithError:@"获取菜单失败"];
                                         }];
 
@@ -449,38 +393,47 @@
 }
 
 -(void) rebuildParticipantsView {
-    if (_participants != nil) {
-        [_participants removeFromSuperview];
+    if (_participantsView != nil) {
+        [_participantsView removeFromSuperview];
     }
     NSInteger y = _numberOfPersons.frame.origin.y + _numberOfPersons.frame.size.height + 8;
-    _participants = [[UIScrollView alloc] initWithFrame:CGRectMake(9, y, 320 - 9, 68)];
-    _participants.showsHorizontalScrollIndicator = NO;
-    _participants.backgroundColor = [UIColor clearColor];
-    _participants.contentSize = CGSizeMake( (PARTICIPANTS_WIDTH + PARTICIPANTS_GAP ) * _mealInfo.participants.count, PARTICIPANTS_HEIGHT);
-    for (int i = 0; i < self.mealInfo.participants.count; i++) {
+    _participantsView = [[UIScrollView alloc] initWithFrame:CGRectMake(9, y, 320 - 9, 68)];
+    _participantsView.showsHorizontalScrollIndicator = NO;
+    _participantsView.backgroundColor = [UIColor clearColor];
+    _participantsView.contentSize = CGSizeMake( (PARTICIPANTS_WIDTH + PARTICIPANTS_GAP ) * _meal.participants.count, PARTICIPANTS_HEIGHT);
+    _participants = [_meal.participants allObjects];
+    for (int i = 0; i < _participants.count; i++) {
         UIImage* photo_bg = [UIImage imageNamed:@"p_photo_bg"];
         UIView* contentView = [[UIView alloc] initWithFrame:CGRectMake((photo_bg.size.width + PARTICIPANTS_GAP) * i , 0, PARTICIPANTS_WIDTH, photo_bg.size.height)];
-        UIImageView* photo_bg_view = [[UIImageView alloc] initWithImage:photo_bg];
-        [contentView addSubview:photo_bg_view];
-        UserProfile *user = [self.mealInfo.participants objectAtIndex:i];
-        UIImageView *avatarView = [AvatarFactory avatarForUser:user frame:CGRectMake(3.5, 3.5, 46, 46) delegate:self withCornerRadius:NO];
+        User *user = [_participants objectAtIndex:i];
+        UIImageView *avatarView = [AvatarFactory avatarWithBg:user];
+        avatarView.frame = CGRectMake(0, 0, 53, 53);
+        avatarView.tag = i;
+        UIGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(avatarTapped:)];
+        avatarView.userInteractionEnabled = YES;
+        [avatarView addGestureRecognizer:tap];
         [contentView addSubview:avatarView];
-        [_participants addSubview:contentView];
+        [_participantsView addSubview:contentView];
     }
-    [_detailsView addSubview:_participants];
-    CGRect frame = _detailsView.frame;
-    frame.size.height = _participants.frame.origin.y + _participants.frame.size.height;
-    _detailsView.frame = frame;
+    [_detailsView addSubview:_participantsView];
+}
+
+-(void)avatarTapped:(UITapGestureRecognizer*)tap{
+    UIView* view = tap.view;
+    NSInteger tag = view.tag;
+    UserDetailsViewController* userDetails = [[UserDetailsViewController alloc] init];
+    userDetails.user = _participants[tag];
+    [self.navigationController pushViewController:userDetails animated:YES];
 }
 
 -(void) updateNumberOfParticipants{
-     _numberOfPersons.text = [NSString stringWithFormat:@"%d/%d", _mealInfo.actualPersons, _mealInfo.maxPersons];
+     _numberOfPersons.text = [NSString stringWithFormat:@"%@/%@", _meal.actualPersons, _meal.maxPersons];
     [_numberOfPersons sizeToFit];
 }
 
 - (void) mapButtonClicked:(id)sender{
-    MapViewController* map = [[MapViewController alloc] initWithTitle:_mealInfo.restaurant.name];
-    map.info = _mealInfo.restaurant;
+    MapViewController* map = [[MapViewController alloc] initWithTitle:_meal.restaurant.name];
+    map.restaurant = _meal.restaurant;
     [self.navigationController pushViewController:map animated:YES];
 }
 
@@ -489,14 +442,15 @@
     NINetworkImageView *imgView = [[NINetworkImageView alloc] initWithFrame:CGRectMake(0, 0, DISH_VIEW_WIDTH, DISH_VIEW_HEIGHT)];
 
     [imgView setContentMode:UIViewContentModeScaleAspectFill];
-    [imgView setPathToNetworkImage:self.mealInfo.photoFullUrl forDisplaySize:CGSizeMake(DISH_VIEW_WIDTH, DISH_VIEW_HEIGHT)];
+    [imgView setPathToNetworkImage:[URLService  absoluteURL:_meal.photoURL] forDisplaySize:CGSizeMake(DISH_VIEW_WIDTH, DISH_VIEW_HEIGHT)];
     UIImage* cost_bg = [UIImage imageNamed:@"renjun_mon"];
     UIImageView* cost_view = [[UIImageView alloc] initWithImage:cost_bg];
     cost_view.frame = CGRectMake(9, 0, cost_bg.size.width, cost_bg.size.height);
     UILabel* cost_label = [[UILabel alloc] initWithFrame:CGRectMake(21, 1.5, 60, 20)];
     cost_label.backgroundColor = [UIColor clearColor];
     cost_label.textColor = RGBCOLOR(220, 220, 220);
-    cost_label.text = [NSString stringWithFormat:@"人均：¥%.0f", _mealInfo.price];
+
+    cost_label.text = [NSString stringWithFormat:@"人均：¥%.0f", [_meal.price floatValue]];
     cost_label.font = [UIFont systemFontOfSize:12];
     
     UIImage* menu = [UIImage imageNamed:@"caishi_bth"];
@@ -529,17 +483,9 @@
         [delegate showLogin];
     } else {
         JoinMealViewController* vc = [[JoinMealViewController alloc] init];
-        vc.mealInfo = self.mealInfo;
+        vc.meal = self.meal;
         [self.navigationController pushViewController:vc animated:YES];
     }
-}
-
--(void) orderCeatedWithUser:(UserProfile *)user numberOfPersons:(NSInteger)num_persons{
-    UserProfile *me = [Authentication sharedInstance].currentUser;
-    [self.mealInfo join:me withTotalNumberOfPersons:num_persons];
-    [self updateNumberOfParticipants];
-    [self rebuildParticipantsView];
-    [self requestOrderStatus];
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
@@ -578,8 +524,8 @@
 }
 
 -(void) sendWeiBo{
-    NSString *defaultMessage = [NSString stringWithFormat:@"我发现了一个有意思的饭局：%@ http://www.fanjoin.com", self.mealInfo.topic];
-    WBSendView *sendView = [[WBSendView alloc] initWithAppKey:WEIBO_APP_KEY appSecret:WEIBO_APP_SECRET text:defaultMessage image:[[TTURLCache sharedCache] imageForURL:[NSString stringWithFormat:@"http://%@%@", EOHOST, self.mealInfo.photoURL]]];
+    NSString *defaultMessage = [NSString stringWithFormat:@"我发现了一个有意思的饭局：%@ http://www.fanjoin.com", self.meal.topic];
+    WBSendView *sendView = [[WBSendView alloc] initWithAppKey:WEIBO_APP_KEY appSecret:WEIBO_APP_SECRET text:defaultMessage image:[[TTURLCache sharedCache] imageForURL:[NSString stringWithFormat:@"http://%@%@", EOHOST, self.meal.photoURL]]];
     sendView.delegate = self;
     sendView.backgroundColor = [UIColor whiteColor];
     [sendView show:YES];

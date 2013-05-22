@@ -37,7 +37,10 @@ static NSDateFormatter *_dateFormatter;
         _time = [DateUtil dateFromString:t];
         _maxPersons = [[data objectForKey:@"max_persons"] intValue];
         _actualPersons = [[data objectForKey:@"actual_persons"] intValue];
-        _host = [UserProfile profileWithData:[data objectForKey:@"host"]];
+        id hostData = [data objectForKey:@"host"];
+        if (![hostData isKindOfClass:[NSNull class]] ) {
+            _host = [UserProfile profileWithData:[data objectForKey:@"host"]];
+        }
         _participants = [[NSMutableArray alloc] init];
         _likes = [[NSMutableArray alloc] init];
         _photoURL = [data objectForKey:@"photo"];

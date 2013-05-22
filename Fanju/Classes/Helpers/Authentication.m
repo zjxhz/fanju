@@ -80,12 +80,14 @@ NSString * const EODidLogoutNotification = @"EODidLogoutNotification";
                                                     NSMutableDictionary* dict = [NSMutableDictionary dictionaryWithDictionary:obj];
                                                     [dict setValue:password forKey:@"password"];
                                                     [self userDidLoginWithData:dict];
-                                                    DDLogVerbose(@"user logged in");
+                                                    DDLogInfo(@"%@ logged in with password", username);
                                                 } else {
+                                                    DDLogWarn(@"%@ failed to logged in with incorrect password, logout now", username);
                                                     [self.delegate userFailedToLogInWithError:[obj objectForKey:@"info"]];
                                                     [self logout];
                                                 }
                                             } else {
+                                                DDLogError(@"%@ logged in failed due to unknown reason, logout now", username);
                                                 [self.delegate userFailedToLogInWithError:@"登录失败"];
                                                 [self logout];
                                             }
@@ -117,19 +119,21 @@ NSString * const EODidLogoutNotification = @"EODidLogoutNotification";
 
 -(void) userDidLoginWithData:(NSDictionary*)data{
     NSString* username = data[@"username"];
-    [[UserService shared] getOrFetchUserWithUsername:username success:^(User *user) {
+    [[UserService service] fetchUser:username success:^(User *user) {
+        [UserService service].loggedInUser = user;
         DDLogVerbose(@"fetched logged in user and stored to core data");
+        [[RelationshipService service]fetchFollowingsForUser:user];
+        [[XMPPHandler sharedInstance] setup];
+        _currentUser = [UserProfile profileWithData:data];
+        [self registerToken];
+        [self synchronize];
+        [self.delegate userDidLogIn:_currentUser];
+        if(![_currentUser hasCompletedRegistration]){
+            //        [[NewSidebarViewController sideBar] showRegistrationWizard]; disable for now
+        }
     } failure:^{
         NSAssert(NO, @"failed to fetch logged in user info with username: %@", username);
     }];
-    _currentUser = [UserProfile profileWithData:data];
-    [self registerToken];
-    [[XMPPHandler sharedInstance] setup];
-    [self synchronize];
-    [self.delegate userDidLogIn:_currentUser];
-    if(![_currentUser hasCompletedRegistration]){
-//        [[NewSidebarViewController sideBar] showRegistrationWizard]; disable for now
-    }
 }
 
 -(void)registerToken{

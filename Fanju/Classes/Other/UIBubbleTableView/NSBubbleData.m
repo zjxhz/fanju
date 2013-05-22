@@ -20,6 +20,7 @@
 @synthesize view = _view;
 @synthesize insets = _insets;
 @synthesize avatar = _avatar;
+@synthesize avatarURL = _avatarURL;
 
 #pragma mark - Lifecycle
 

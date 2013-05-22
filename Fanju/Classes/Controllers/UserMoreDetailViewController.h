@@ -18,14 +18,14 @@
 @protocol UserDetailSaveDelegate <NSObject>
 
 @optional
--(void)userProfileUpdated:(UserProfile*)newProfile;
+-(void)userProfileUpdated:(User*)user;
 
 @end
 
 @interface UserMoreDetailViewController : UITableViewController<CellTextEditorDelegate,AgeAndConstellationDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, TagViewControllerDelegate, IndustryAndOccupationViewControllerDelegate>
-@property(nonatomic, weak) UserProfile* profile;
+@property(nonatomic, strong) User* user;
 @property(nonatomic, weak) id<UserDetailSaveDelegate> delegate;
 
-- (id)initWithStyle:(UITableViewStyle)style editable:(BOOL)editable;
+- (id)initWithStyle:(UITableViewStyle)style;
 
 @end

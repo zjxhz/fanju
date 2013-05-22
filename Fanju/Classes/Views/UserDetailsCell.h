@@ -7,11 +7,11 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "UserProfile.h"
+#import "User.h"
 #import "NINetworkImageView.h"
 
 @interface UserDetailsCell : UITableViewCell
-- (id)initWithUser:(UserProfile*)user;
+-(id)initWithUser:(User*)user;
 @property(nonatomic,readonly) CGFloat cellHeight;
 -(void) requestNextMeal;
 @property(nonatomic, readonly) NINetworkImageView* avatar;

@@ -11,15 +11,16 @@
 #import "PullRefreshTableViewController.h"
 #import "Authentication.h"
 #import "ImageDownloader.h"
+#import "ODRefreshControl.h"
 
-@interface MealListViewController : PullRefreshTableViewController <UITableViewDelegate, AuthenticationDelegate, ImageDownloaderDelegate, UIScrollViewDelegate>{
+@interface MealListViewController : TTTableViewController <UITableViewDelegate, AuthenticationDelegate, UIScrollViewDelegate>{
     UIView *_thisWeek;
     UIView *_afterThisWeek;
     NSMutableDictionary* imageDownloadsInProgress;
+    ODRefreshControl* _refreshControl;
 }
--(IBAction)loginWithEmail:(id)sender;
+//-(IBAction)loginWithEmail:(id)sender;
 -(IBAction)loginWithWeibo:(id)sender;
--(IBAction)loginWithQQ:(id)sender;
--(IBAction)register:(id)sender;
--(void)reload;
+//-(IBAction)loginWithQQ:(id)sender;
+//-(IBAction)register:(id)sender;
 @end

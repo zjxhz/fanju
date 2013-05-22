@@ -10,11 +10,12 @@
 #import "LoadMoreTableItem.h"
 #import "LoadMoreTableItemCell.h"
 #import "MealThumbnailTableItemCell.h"
+#import "Order.h"
 
 @implementation OrderListDataSource
 
 - (Class)tableView:(UITableView*)tableView cellClassForObject:(id) object {
-	if ([object isKindOfClass:[OrderInfo class]]) {
+	if ([object isKindOfClass:[Order class]]) {
 		return [MealThumbnailTableItemCell class];
 	} else if ([object isKindOfClass:[LoadMoreTableItem class]]){
         return [LoadMoreTableItemCell class];
@@ -24,22 +25,22 @@
 	     cellClassForObject:object];
 }
 
--(void)addOrder:(OrderInfo*)orderInfo{
-    if (orderInfo.status == 1) {
+-(void)addOrder:(Order*)order{
+    if ([order.status integerValue]  == 1) {
         if (!_payingOrders) {
             _payingOrders = [NSMutableArray array];
         }
-        [_payingOrders addObject:orderInfo];
-    } else if ([orderInfo.meal.time timeIntervalSinceNow] < 0){
+        [_payingOrders addObject:order];
+    } else if ([[MealService dateOfMeal:order.meal] timeIntervalSinceNow] < 0){
         if (!_passedOrders) {
             _passedOrders = [NSMutableArray array];
         }
-        [_passedOrders addObject:orderInfo];
+        [_passedOrders addObject:order];
     } else {
         if (!_upcomingOrders){
             _upcomingOrders = [NSMutableArray array];
         }
-        [_upcomingOrders addObject:orderInfo];
+        [_upcomingOrders addObject:order];
     }
 }
 

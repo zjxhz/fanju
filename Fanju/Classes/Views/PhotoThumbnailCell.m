@@ -11,6 +11,7 @@
 #import "AvatarFactory.h"
 #import "PhotoViewController.h"
 #import "Authentication.h"
+#import "URLService.h"
 
 #define PHOTO_BG_WIDTH 70
 #define PHOTO_BG_HEIGHT PHOTO_BG_WIDTH
@@ -22,11 +23,12 @@
     NSMutableArray* _imageViews;
     NSMutableArray* _contentViews;
     UIScrollView* _scrollView;
+    NSArray* _photos;
 }
 @end
 
 @implementation PhotoThumbnailCell
-- (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier withUser:(UserProfile*)user editable:(BOOL)editable
+- (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier withUser:(User*)user editable:(BOOL)editable
 {
     self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
     if (self) {
@@ -37,7 +39,7 @@
     return self;
 }
 
--(void)setUser:(UserProfile *)user{
+-(void)setUser:(User *)user{
     if (user == _user) {
         return;
     }
@@ -52,18 +54,18 @@
 -(void)buildUI{   
     _imageViews = [NSMutableArray array];
     _contentViews = [NSMutableArray array];
-    NSArray* photos = [_user photos];
+    _photos = [_user.photos allObjects];
     _scrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(3, 0, 320 - 3, 70)];
     _scrollView.showsHorizontalScrollIndicator = NO;
     _scrollView.backgroundColor = [UIColor clearColor];
-    [self resetContentSize:photos.count];
-    if (photos.count == 0) {
+    [self resetContentSize:_photos.count];
+    if (_photos.count == 0) {
         [self addAddOrRequestPhotoButton];
     } else if([[Authentication sharedInstance].currentUser isEqual:_user] && _user.photos.count < 15){
         [self addAddOrRequestPhotoButton];
     }
-    for (int i = 0; i < photos.count; ++i) {
-        [self addPhoto:[_user.photos objectAtIndex:i] atIndex:i];
+    for (int i = 0; i < _photos.count; ++i) {
+        [self addPhoto:[_photos objectAtIndex:i] atIndex:i];
     }
     [self.contentView addSubview:_scrollView];
 }
@@ -92,14 +94,14 @@
     _scrollView.contentSize = CGSizeMake( (PHOTO_BG_WIDTH + PHOTO_BG_GAP) * count, 70);
 }
 
--(void)addPhoto:(UserPhoto*)photo atIndex:(NSInteger)index{
+-(void)addPhoto:(Photo*)photo atIndex:(NSInteger)index{
     UIImage* photoBG = [UIImage imageNamed:@"avatar_bg_big"];
     UIView* contentView = [[UIView alloc] initWithFrame:[self frameAtIndex:index]];
     UIImageView *bgView = [[UIImageView alloc] initWithImage:photoBG];
     [contentView addSubview:bgView];
     NINetworkImageView* photoView = [[NINetworkImageView alloc] initWithFrame:CGRectMake(4, 4, PHOTO_WIDTH, PHOTO_HEIGHT)];
     photoView.contentMode = UIViewContentModeScaleAspectFill;
-    [photoView setPathToNetworkImage:photo.thumbnailFullUrl forDisplaySize:CGSizeMake(PHOTO_WIDTH, PHOTO_HEIGHT)];
+    [photoView setPathToNetworkImage:[URLService  absoluteURL:photo.thumbnailURL] forDisplaySize:CGSizeMake(PHOTO_WIDTH, PHOTO_HEIGHT)];
     [contentView addSubview:photoView];
     [_scrollView addSubview:contentView];
     photoView.userInteractionEnabled = YES;
@@ -109,13 +111,13 @@
     [_contentViews addObject:contentView];
 }
 
--(void)addUploadedPhoto:(UserPhoto*)photo withLocalImage:(UIImage*)localImage{
+-(void)addUploadedPhoto:(Photo*)photo withLocalImage:(UIImage*)localImage{
     [self addPhoto:photo atIndex:_contentViews.count];
     [self resetContentSize:_imageViews.count];
     [self layoutSubviews];
 }
 
--(void)deleteUserPhoto:(UserPhoto*)photo atIndex:(NSInteger)index{
+-(void)deleteUserPhoto:(Photo*)photo atIndex:(NSInteger)index{
     UIView *contentView = [_contentViews objectAtIndex:index]; 
     UIView *imgView = [_imageViews objectAtIndex:index];
     [contentView removeFromSuperview];
@@ -155,6 +157,6 @@
         [allImages addObject:iv.image];
     }
 
-    [self.delegate didSelectUserPhoto:[_user.photos objectAtIndex:index] withAllPhotos:allImages atIndex:index];
+    [self.delegate didSelectUserPhoto:[_photos objectAtIndex:index] withAllPhotos:allImages atIndex:index];
 }
 @end

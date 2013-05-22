@@ -14,8 +14,9 @@
 
 //#define EOHOST [[NSUserDefaults standardUserDefaults] objectForKey:@"HOST"] ? [[NSUserDefaults standardUserDefaults] objectForKey:@"HOST"] : @"www.fanjoin.com"
 //#define EOHOST @"www.fanjoin.com"
-#define XMPP_HOST @"wayne.local"
+//#define XMPP_HOST @"fanjoin.com"
 #define EOHOST @"localhost:8000"
+#define XMPP_HOST @"wayne.local"
 //#define EOHOST @"www.ifunjoin.com:8001"
 #define HTTPS @"http" // use http for https in development
 #define APP_SCHEME @"Fanju"
@@ -32,4 +33,5 @@
 #define EOUnreadCount @"EOUnreadCount"
 #define LAST_MESSAGE_RETRIEVE_TIME @"LAST_MESSAGE_RETRIEVE_TIME"
 #define ALIPAY_PAY_RESULT @"ALIPAY_PAY_SUCCESS"
+#define NOTIFICATION_USER_UPDATE @"NOTIFICATION_USER_UPDATE"
 #endif

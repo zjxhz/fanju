@@ -8,15 +8,15 @@
 
 #import <Three20/Three20.h>
 #import "MealTableItem.h"
+#import "Meal.h"
 
-//TODO extends from TTSectionedDataSource
-@interface MealListDataSource : TTListDataSource{
+@interface MealListDataSource : TTTableViewDataSource{
     NSMutableArray *_mealsForThisWeek;
     NSMutableArray *_mealsAfterThisWeek;
 }
 
 
-- (void) addMeal:(MealTableItem*)meal;
+- (void) addMeal:(Meal*)meal;
 - (NSInteger) numberOfMealsForThisWeek;
 - (NSInteger) numberOfMealsAfterThisWeek;
 

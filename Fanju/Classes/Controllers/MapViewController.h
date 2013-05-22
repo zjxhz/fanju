@@ -9,10 +9,10 @@
 #import <Foundation/Foundation.h>
 #import <Three20/Three20.h>
 #import <MapKit/MapKit.h>
-#import "RestaurantInfo.h"
+#import "Restaurant.h"
 
 @interface MapViewController : TTViewController <MKMapViewDelegate>
-@property (nonatomic, strong) RestaurantInfo* info;
+@property (nonatomic, strong) Restaurant* restaurant;
 -(id)initWithTitle:(NSString*)title;
 
 @end

@@ -13,14 +13,16 @@
 #import "Authentication.h"
 #import "SVProgressHUD.h"
 #import "DictHelper.h"
+#import "UserService.h"
+#import "Photo.h"
+#import "RestKit.h"
+#import "URLService.h"
 
 #define PHOTO_BG_WIDTH 105
 #define PHOTO_BG_HEIGHT PHOTO_BG_WIDTH
 #define PHOTO_WIDTH 95
 #define PHOTO_HEIGHT PHOTO_WIDTH
 #define PHOTO_BG_GAP 1
-#define SCROLL_VIEW_HEIGHT_WITHOUT_TABBAR 416
-#define SCROLL_VIEW_HEIGHT_WITH_TABBAR 367
 #define TABBAR_HEIGHT 49
 @interface AlbumViewController (){
     UIScrollView* _scrollView;
@@ -32,6 +34,8 @@
     UIButton* _deleteButton;
     ImageUploader* _uploader;
     UIButton* _addButton;
+    NSMutableArray* _photos;
+    NSManagedObjectContext* _mainQueueContext;
 }
 
 @end
@@ -42,7 +46,8 @@
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
-        // Custom initialization
+        RKManagedObjectStore* store = [RKObjectManager sharedManager].managedObjectStore;
+        _mainQueueContext = store.mainQueueManagedObjectContext;
     }
     return self;
 }
@@ -51,10 +56,10 @@
 {
     [super viewDidLoad];
     self.title = [NSString stringWithFormat:@"%@的相册", _user.name];
-    if ([[Authentication sharedInstance].currentUser isEqual:_user]) {
+    if ([[UserService service].loggedInUser isEqual:_user]) {
         self.navigationItem.rightBarButtonItem = [[WidgetFactory sharedFactory]normalBarButtonItemWithTitle:@"编辑" target:self action:@selector(edit:)];
     }
-    _scrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, 0, 320, SCROLL_VIEW_HEIGHT_WITHOUT_TABBAR)];
+    _scrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, 0, 320, [self heightForScrollView:NO])];
     _scrollView.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"bg"]];
     _scrollView.showsHorizontalScrollIndicator = NO;
     _scrollView.showsVerticalScrollIndicator = NO;
@@ -85,7 +90,7 @@
 }
 
 -(void)removeTabBar{
-    _scrollView.frame = CGRectMake(0, 0, 320, SCROLL_VIEW_HEIGHT_WITHOUT_TABBAR);
+    _scrollView.frame = CGRectMake(0, 0, 320, [self heightForScrollView:NO]);
     [UIView animateWithDuration:0.5
                      animations:^{
         CGRect frame = _tabBar.frame;
@@ -122,7 +127,7 @@
         CGPoint offset = _scrollView.contentOffset;
         _scrollView.contentOffset = CGPointMake(offset.x, offset.y + TABBAR_HEIGHT);
     } completion:^(BOOL finished) {
-        _scrollView.frame = CGRectMake(0, 0, 320, SCROLL_VIEW_HEIGHT_WITH_TABBAR);
+        _scrollView.frame = CGRectMake(0, 0, 320, [self heightForScrollView:YES]);
     }];
 }
 
@@ -132,9 +137,9 @@
     NSMutableArray* photosToBeDeleted = [NSMutableArray array];
     for (NSNumber* indexNumber in _selectedIndexes) {
         NSInteger index = [indexNumber integerValue];
-        UserPhoto* photo = _user.photos[index];
+        Photo* photo = _photos[index];
         [photosToBeDeleted addObject:photo];
-        [photoIDsStr appendFormat:@"%d,", photo.pID];
+        [photoIDsStr appendFormat:@"%@,", photo.pID];
     }
     NSArray* params = @[[DictHelper dictWithKey:@"deleted_ids" andValue:photoIDsStr]];
     [photoIDsStr deleteCharactersInRange:NSMakeRange(photoIDsStr.length - 1, 1)];
@@ -144,8 +149,9 @@
                                     cachePolicy:TTURLRequestCachePolicyNoCache
                                         success:^(id obj) {
                                             [SVProgressHUD dismissWithSuccess:@"删除成功"];
-                                            for (UserPhoto* photo in photosToBeDeleted) {
-                                                [_user.photos removeObject:photo];
+                                            for (Photo* photo in photosToBeDeleted) {
+                                                [_photos removeObject:photo];
+                                                [_mainQueueContext deleteObject:photo];
                                             }
                                             [[Authentication sharedInstance] synchronize];
                                             [_selectedIndexes removeAllObjects];
@@ -170,12 +176,12 @@
 -(void)buildUI{
     [_contentViews makeObjectsPerformSelector:@selector(removeFromSuperview)];
     [_addButton removeFromSuperview];
-    NSArray* photos = [_user photos];
+    _photos =  [[_user.photos allObjects] mutableCopy];
     _photoViews = [NSMutableArray array];
     _contentViews = [NSMutableArray array];
 
-    for (int i = 0; i < photos.count; ++i) {
-        [self addPhoto:[_user.photos objectAtIndex:i] atIndex:i];
+    for (int i = 0; i < _photos.count; ++i) {
+        [self addPhoto:[_photos objectAtIndex:i] atIndex:i];
     }
     [self addAddButtonIfNeeded];
     [self updateDeleteButton];
@@ -207,7 +213,7 @@
     if (!_uploader) {
         _uploader = [[ImageUploader alloc] initWithViewController:self delegate:self];
     }
-    [_uploader uploadImageForUser:_user option:PHOTO];
+    [_uploader uploadPhoto];
 }
 -(void)updateDeleteButton{
     if (_editing && _selectedIndexes.count > 0) {
@@ -221,14 +227,14 @@
     }
 }
 
--(void)addPhoto:(UserPhoto*)photo atIndex:(NSInteger)index{
+-(void)addPhoto:(Photo*)photo atIndex:(NSInteger)index{
     UIImage* photoBG = [UIImage imageNamed:@"album_photo_bg"];
     UIView* contentView = [[UIView alloc] initWithFrame:[self frameAtIndex:index]];
     UIImageView *bgView = [[UIImageView alloc] initWithImage:photoBG];
     [contentView addSubview:bgView];
     NINetworkImageView* photoView = [[NINetworkImageView alloc] initWithFrame:CGRectMake(5, 5, PHOTO_WIDTH, PHOTO_HEIGHT)];
     photoView.contentMode = UIViewContentModeScaleAspectFill;
-    [photoView setPathToNetworkImage:photo.thumbnailFullUrl forDisplaySize:CGSizeMake(PHOTO_WIDTH, PHOTO_HEIGHT)];
+    [photoView setPathToNetworkImage:[URLService  absoluteURL:photo.thumbnailURL] forDisplaySize:CGSizeMake(PHOTO_WIDTH, PHOTO_HEIGHT)];
     [contentView addSubview:photoView];
     [_scrollView addSubview:contentView];
     [_photoViews addObject:photoView];
@@ -264,7 +270,7 @@
         [self updateDeleteButton];
     } else{
         if (index < _user.photos.count) {
-            PhotoViewController* vc = [[PhotoViewController alloc] initWithPhotos:[self allPhotos] atIndex:index withBigPhotoUrls:[_user photosFullUrls]];
+            PhotoViewController* vc = [[PhotoViewController alloc] initWithPhotos:[self allPhotos] atIndex:index withBigPhotoUrls:[UserService photosUrlsForUser:_user]];
             vc.title = [NSString stringWithFormat:@"%@的照片", _user.name];
             [self.navigationController pushViewController:vc animated:YES];
         }
@@ -287,10 +293,16 @@
     return photos;
 }
 
+-(CGFloat)heightForScrollView:(BOOL)withTabBar{
+    CGFloat height = self.view.frame.size.height;
+    if (withTabBar) {
+        height -= TABBAR_HEIGHT;
+    }
+    return height;
+}
 #pragma mark ImageUploaderDelegate
--(void)didUploadPhoto:(UIImage*)image withData:(NSDictionary*)data{
-    UserPhoto* photo = [[UserPhoto alloc] initWithData:data];
-    [_user addPhoto:photo];
+-(void)didUploadPhoto:(Photo*)photo image:(UIImage*)image{
+    [_photos addObject:photo];
     [[Authentication sharedInstance] relogin]; 
     [_selectedIndexes removeAllObjects];
     [self buildUI];

@@ -9,6 +9,11 @@
 #import <Foundation/Foundation.h>
 
 @interface ArchivedMessageService : NSObject
-+(ArchivedMessageService*)shared;
++(ArchivedMessageService*)service;
 -(void)retrieveConversations;
+-(void)setup;
+-(void)tearDown;
+
+@property(nonatomic, readonly) BOOL retrievingConversations; //TODO received messages while retrieving
+
 @end

@@ -17,12 +17,12 @@
 #import "AvatarFactory.h"
 #import "UIImage+Utilities.h"
 #import "NewTagViewController.h"
+#import "DateUtil.h"
+#import "ImageUploader.h"
 
 @interface UserMoreDetailViewController (){
     NSArray *_sectionItems;
     BOOL _editingMode;
-#warning remove _editable as this view is always editable
-    BOOL _editable;
     NSDate* _birthday; //birthday is saved separately as it can not simply saved as section data
     UserImageView *_avatarView;
     UIImage* _uploadedImage;
@@ -33,28 +33,21 @@
 @end
 
 @implementation UserMoreDetailViewController
-@synthesize profile = _profile;
 
-- (id)initWithStyle:(UITableViewStyle)style editable:(BOOL)editable
+- (id)initWithStyle:(UITableViewStyle)style
 {
     self = [super initWithStyle:style];
     if (self) {
         _editingMode = YES;
-        _editable = editable;
     }
     return self;
-}
-
-- (id)initWithStyle:(UITableViewStyle)style {
-    return [self initWithStyle:style editable:YES];
 }
 
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    if (_editable) {
-        self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemSave target:self action:@selector(editOrSave:)];
-    }
+    self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemSave target:self action:@selector(editOrSave:)];
+    
     self.tableView.delegate = self;
 }
 
@@ -107,25 +100,25 @@
                                         }];
 }
 
--(void)setProfile:(UserProfile *)profile{
-    _profile = profile;
-    _birthday = profile.birthday;
-    NSArray *sectionItems0 = @[[NSMutableArray arrayWithObjects:@"名字", _profile.name, nil],
-                              [NSMutableArray arrayWithObjects:@"个人签名", _profile.motto, nil]];
+-(void)setUser:(User *)user{
+    _user = user;
+    _birthday = _user.birthday;
+    NSArray *sectionItems0 = @[[NSMutableArray arrayWithObjects:@"名字", _user.name, nil],
+                              [NSMutableArray arrayWithObjects:@"个人签名", _user.motto, nil]];
     
     NSString* updated = @"未知时间";
-    if (_profile.locationUpdatedTime) {
-        NSTimeInterval interval = [_profile.locationUpdatedTime timeIntervalSinceNow] > 0 ? 0 : -[_profile.locationUpdatedTime timeIntervalSinceNow];
+    if (_user.locationUpdatedAt) {
+        NSTimeInterval interval = [_user.locationUpdatedAt timeIntervalSinceNow] > 0 ? 0 : -[_user.locationUpdatedAt timeIntervalSinceNow];
         updated = [DateUtil humanReadableIntervals: interval];
     }
-    NSString *distance = [NSString stringWithFormat:@"%@ | %@", [DistanceUtil distanceToMe:_profile], updated];
+    NSString *distance = [NSString stringWithFormat:@"%@ | %@", [DistanceUtil distanceFrom:_user], updated];
     
     NSString *relation = nil;
-    UserProfile *me = [[Authentication sharedInstance] currentUser];
-    if([me isEqual:_profile]){
+    User* logggedInUser = [UserService service].loggedInUser;
+    if([logggedInUser isEqual:_user]){
         relation = @"自己";
-    } else if ([me isFollowing:_profile]) {
-        relation = @"关注";
+//    } else if ([logggedInUser isFollowing:_user]) {
+//        relation = @"关注"; //TODO
     } else {
         relation = @"陌生人";
     }
@@ -136,17 +129,17 @@
     
     NSArray *sectionItems2 = @[
                               [NSMutableArray arrayWithObjects:@"性别", @"      ", nil],//quick and dirty fix, spaces to make sure there is room for the gender icon 
-                              [NSMutableArray arrayWithObjects:@"年龄", [NSString stringWithFormat:@"%d", [_profile age]], nil], 
-                              [NSMutableArray arrayWithObjects:@"星座", [_profile constellation], nil],//todo how to calculate? 
-                              [NSMutableArray arrayWithObjects:@"注册日期",  [DateUtil longStringFromDate:_profile.dateJoined], nil]];
-    NSArray *sectionItems3 = @[[NSMutableArray arrayWithObjects:@"新浪微博", _profile.weiboID ? @"已绑定" : @"未绑定", nil]];
+                              [NSMutableArray arrayWithObjects:@"年龄", [NSString stringWithFormat:@"%d", [DateUtil ageFromBirthday:_user.birthday]], nil],
+                               [NSMutableArray arrayWithObjects:@"星座", [DateUtil constellationFromBirthday:_user.birthday], nil],//todo how to calculate?
+                              [NSMutableArray arrayWithObjects:@"注册日期",  [DateUtil longStringFromDate:_user.dateJoined], nil] ];
+    NSArray *sectionItems3 = @[[NSMutableArray arrayWithObjects:@"新浪微博", _user.weiboID ? @"已绑定" : @"未绑定", nil]];
    
-    _industry = _profile.industry;
-    _occupation = _profile.occupation;
-    NSArray *sectionItems4 = @[[@[@"爱好和特点", [_profile tagsToString]] mutableCopy],
+    _industry = _user.industry;
+    _occupation = _user.occupation;
+    NSArray *sectionItems4 = @[[@[@"爱好和特点", @"TODO"] mutableCopy],
                               [@[@"职业",  [NSString stringWithFormat:@"%@\n%@",_industry, _occupation]] mutableCopy],
-                              [@[@"公司", _profile.workFor ? _profile.workFor : @""] mutableCopy],
-                              [@[@"学校", _profile.college ? _profile.college : @""] mutableCopy]];
+                              [@[@"公司", _user.workFor ? _user.workFor : @""] mutableCopy],
+                              [@[@"学校", _user.college ? _user.college : @""] mutableCopy]];
     
     _sectionItems = @[sectionItems0, //placeholder for section 0
                       sectionItems1,
@@ -227,12 +220,12 @@
     cell.textLabel.text = [row objectAtIndex:0];
     cell.detailTextLabel.text = [row objectAtIndex:1];
     if (indexPath.section == 2 && indexPath.row == 0) {
-        UIImageView *icon = [[UIImageView alloc] initWithImage:_profile.genderImage];
+        UIImageView *icon = [[UIImageView alloc] initWithImage:[UserService genderImageForUser:_user]];
         icon.frame = CGRectMake(5, 5, icon.frame.size.width, icon.frame.size.height);
         [cell.detailTextLabel addSubview:icon];
     } else if (indexPath.section == 4 ){
         if (indexPath.row == 0) {
-            cell.detailTextLabel.text = [_profile tagsToString];
+            cell.detailTextLabel.text = @"TODO";
         }
     }
     if ([self isCellEditableAtIndexPath:indexPath] && _editingMode) {
@@ -266,12 +259,12 @@
     CellTextEditorViewController* cellTextEditor;;
     if ([self isCellEditableAtIndexPath:indexPath] && _editingMode) {
         if (indexPath.section == 2) {
-            aac = [[AgeAndConstellationViewController alloc] initWithBirthday:_profile.birthday];
+            aac = [[AgeAndConstellationViewController alloc] initWithBirthday:_user.birthday];
             aac.delegate = self;
             [self.navigationController pushViewController:aac animated:YES];
         } else if (indexPath.section == 4 && indexPath.row == 0){
             tagC = [[NewTagViewController alloc] initWithStyle:UITableViewStyleGrouped];
-            tagC.user = self.profile;
+            tagC.user = self.user;
             tagC.delegate = self;
             tagC.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCancel target:self action:@selector(dismissTagViewController:)];
             UINavigationController *navigationController = [[UINavigationController alloc] initWithRootViewController:tagC];
@@ -348,6 +341,8 @@
 }
 
 -(void)changeAvatarWithImage:(UIImage*)image{
+    ImageUploader* uploader = [[ImageUploader alloc] initWithViewController:self delegate:self];
+    [uploader uploadAvatar];
     UserProfile* currentUser = [[Authentication sharedInstance] currentUser];       
     NSDictionary* dict = [NSDictionary dictionaryWithObjectsAndKeys:[currentUser avatarDictForUploading:image], @"avatar", nil];
     [SVProgressHUD showWithStatus:@"上传中…"];
@@ -356,7 +351,7 @@
                                       jsonObject:dict
                                          success:^(id obj) {
                                              [[Authentication sharedInstance] refreshUserInfo:^(id obj){
-                                                 _profile = [[Authentication sharedInstance] currentUser];
+//                                                 _profile = [[Authentication sharedInstance] currentUser];
                                                  _uploadedImage = image;
                                                  [SVProgressHUD showSuccessWithStatus:@"上传成功"];
                                                  [self.tableView reloadData];
@@ -382,7 +377,7 @@
 -(void)tagsSaved:(NSArray*)newTags forUser:(UserProfile*)user{
     [self.tableView reloadData];
     [self.navigationController dismissModalViewControllerAnimated:YES];
-    [self.delegate userProfileUpdated:_profile];
+    [self.delegate userProfileUpdated:_user];
 }
 
 #pragma mark IndustryAndOccupationViewControllerDelegate

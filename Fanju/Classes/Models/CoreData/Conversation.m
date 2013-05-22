@@ -2,12 +2,13 @@
 //  Conversation.m
 //  Fanju
 //
-//  Created by Xu Huanze on 5/6/13.
+//  Created by Xu Huanze on 5/17/13.
 //  Copyright (c) 2013 Wayne. All rights reserved.
 //
 
 #import "Conversation.h"
 #import "User.h"
+#import "UserMessage.h"
 
 
 @implementation Conversation
@@ -16,6 +17,7 @@
 @dynamic message;
 @dynamic time;
 @dynamic unread;
+@dynamic messages;
 @dynamic owner;
 @dynamic with;
 

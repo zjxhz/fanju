@@ -15,12 +15,13 @@
 #import "RKObjectManager.h"
 #import "MessageService.h"
 #import "ArchivedMessageService.h"
+#import "UserService.h"
+#import "NotificationService.h"
 
 #define MAX_RETRIEVE 20
 
 
 NSString * const EOMessageDidSaveNotification = @"EOMessageDidSaveNotification";
-NSString * const EONotificationDidSaveNotification = @"EONotificationDidSaveNotification";
 NSString * const EOMessageDidDeleteNotification = @"EOMessageDidDeleteNotification";
 NSString * const EOCurrentContact = @"EOCurrentContact";
 NSString * const EOUnreadMessageCount = @"EOUnreadMessageCount";
@@ -82,8 +83,11 @@ NSString * const EOUnreadNotificationCount = @"EOUnreadNotificationCount";
         DDLogVerbose(@"Probably connected?");
     }
     [self loadRecentContacts];
+    [[UserService service] setup];
     [self loadLatestNotificationDate];
     [[MessageService service] setup];
+    [[ArchivedMessageService service] setup];
+    [[NotificationService service] setup];
 }
 
 -(void)loadLatestNotificationDate{
@@ -262,6 +266,11 @@ NSString * const EOUnreadNotificationCount = @"EOUnreadNotificationCount";
 
 -(void)tearDown{
     [[NSNotificationCenter defaultCenter] removeObserver:self];
+    [[NotificationService service] tearDown];
+    [[MessageService service] tearDown];
+    [[ArchivedMessageService service] tearDown];
+    [[UserService service] tearDown];
+    
     [_xmppStream removeDelegate:self];
     [_xmppRoster removeDelegate:self];
     [_xmppvCardTempModule removeDelegate:self];
@@ -278,7 +287,8 @@ NSString * const EOUnreadNotificationCount = @"EOUnreadNotificationCount";
     _xmppRosterStorage = nil;
     _xmppvCardTempModule = nil;
     _xmppvCardAvatarModule = nil;
-    _messageCoreDataStorage = nil;   
+    _messageCoreDataStorage = nil;
+
 }
 
 - (SinaWeibo *)sinaweibo{
@@ -317,7 +327,7 @@ NSString * const EOUnreadNotificationCount = @"EOUnreadNotificationCount";
 }
 
 -(void)retrieveMessageHistory{
-    [[ArchivedMessageService shared] retrieveConversations];
+    [[ArchivedMessageService service] retrieveConversations];
 //    NSDate* latest = [self latestMessageDate];
 //    _messageRetrieveDate = [latest copy];
 //    _lastRetrievedTimes = [NSMutableDictionary dictionary];
@@ -399,9 +409,9 @@ NSString * const EOUnreadNotificationCount = @"EOUnreadNotificationCount";
         if ([message.time compare:_latestNotificationDate] > 0 ) {
             _latestNotificationDate = message.time;
         }
-        [[NSNotificationCenter defaultCenter] postNotificationName:EONotificationDidSaveNotification
-                                                            object:message
-                                                          userInfo:nil];
+//        [[NSNotificationCenter defaultCenter] postNotificationName:EONotificationDidSaveNotification
+//                                                            object:message
+//                                                          userInfo:nil];
         _unreadNotifCount++;
         [[NSNotificationCenter defaultCenter] postNotificationName:EOUnreadNotificationCount
                                                             object:[NSNumber numberWithInteger:_unreadNotifCount]
@@ -485,7 +495,7 @@ NSString * const EOUnreadNotificationCount = @"EOUnreadNotificationCount";
 
 - (BOOL)xmppStream:(XMPPStream *)sender didReceiveIQ:(XMPPIQ *)iq{
     if ([iq.type isEqualToString:@"result"] ){
-        NSXMLElement *child = [iq childElement];
+//        NSXMLElement *child = [iq childElement];
 //        if([[iq attributeStringValueForName:@"id"] rangeOfString:@"roster"].location != NSNotFound ) {
 //            NSMutableArray* messagesGotUserInRoster = [NSMutableArray array];
 //            for (XMPPMessage* message in _cachedMessages) {
@@ -611,9 +621,9 @@ NSString * const EOUnreadNotificationCount = @"EOUnreadNotificationCount";
                     messageMO.payload = [self payloadFrom:event];
                     _unreadNotifCount++;
                     dispatch_async(dispatch_get_main_queue(), ^{
-                        [[NSNotificationCenter defaultCenter] postNotificationName:EONotificationDidSaveNotification
-                                                                            object:messageMO
-                                                                          userInfo:nil];
+//                        [[NSNotificationCenter defaultCenter] postNotificationName:EONotificationDidSaveNotification
+//                                                                            object:messageMO
+//                                                                          userInfo:nil];
                     });
                 } else {
                     messageMO = [self insertMessage:from receiver:to message:strMessage time:messageDate inContext:[self backgroundMessageManagedObjectContext]];

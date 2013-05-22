@@ -22,6 +22,9 @@
 #import "UserHeaderCell.h"
 #import "SideMealCell.h"
 #import "SideCell.h"
+#import "NotificationService.h"
+#import "UserService.h"
+#import "URLService.h"
 
 #define SIDEBAR_HEADER_HEIGHT 22
 #define CELL_HEIGHT 44
@@ -31,6 +34,7 @@
     MKNumberBadgeView* _unreadMsgBadge;
     MKNumberBadgeView* _unreadNotifBadge;
     UIViewController* _lastViewController;
+    BOOL _avatarLoaded;
 }
 
 @end
@@ -40,7 +44,6 @@
 @synthesize mealListViewController = _mealListViewController;
 @synthesize myMealsViewController = _myMealsViewController;
 @synthesize userListViewController = _userListViewController;
-//@synthesize socialViewController = _socialViewController;
 @synthesize userDetailsViewController = _userDetailsViewController;
 @synthesize notificationViewController = _notificationViewController;
 @synthesize conversationViewController = _conversationViewController;
@@ -79,7 +82,7 @@
                                                    object:nil];
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(unreadNotifUpdated:)
-                                                     name:EOUnreadNotificationCount object:nil];
+                                                     name:UnreadNotificationCount object:nil];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(avatarUpdated:) name:AVATAR_UPDATED_NOTIFICATION object:nil];
         self.tableView.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"side_bg"]];
         
@@ -129,13 +132,6 @@
     return _userListViewController;
 }
 
-//-(SocialNetworkViewController*)socialViewController{
-//    if (!_socialViewController) {
-//        _socialViewController = [[SocialNetworkViewController alloc] init];
-//    }
-//    return _socialViewController;
-//}
-
 -(ConversationViewController*)conversationViewController{
     if (!_conversationViewController) {
         _conversationViewController = [[ConversationViewController alloc] init];
@@ -143,9 +139,9 @@
     return _conversationViewController;
 }
 
--(NewUserDetailsViewController*)userDetailsViewController{
+-(UserDetailsViewController*)userDetailsViewController{
     if (!_userDetailsViewController) {
-        _userDetailsViewController = [[NewUserDetailsViewController alloc] initWithStyle:UITableViewStylePlain];
+        _userDetailsViewController = [[UserDetailsViewController alloc] initWithStyle:UITableViewStylePlain];
     }
     return _userDetailsViewController;
 }
@@ -155,6 +151,15 @@
         _notificationViewController = [[NotificationViewController alloc] initWithStyle:UITableViewStylePlain];;
     }
     return _notificationViewController;
+}
+
+-(void)viewDidLoad{
+    [super viewDidLoad];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(userUpdated:) name:NOTIFICATION_USER_UPDATE object:nil];
+}
+
+-(void)userUpdated:(NSNotification*)notif{
+    [self.tableView reloadData];
 }
 
 -(void)viewDidAppear:(BOOL)animated{
@@ -182,7 +187,12 @@
     UITableViewCell* cell;
     UIViewController* temp;
     NSString* CellIdentifier;
-    UserProfile* me = [Authentication sharedInstance].currentUser;
+    User* loggedInUser = nil;
+   
+    if ([[UserService service] isLoggedIn]){
+         loggedInUser = [UserService service].loggedInUser;
+    }
+
     switch (indexPath.section) {
         case 0:
             if(indexPath.row == 0) {
@@ -205,7 +215,7 @@
                     [headerCell.notificationImageView addGestureRecognizer:notificationTap];
                 }
                 UserHeaderCell* headerCell = (UserHeaderCell*)cell;
-                headerCell.nameLabel.text = me.name;
+                headerCell.nameLabel.text = loggedInUser.name;
                 UIImage* noNewMessageImageBg = [UIImage imageNamed:@"side_button"];
                 UIImage* newMessageAvailableBg = [UIImage imageNamed:@"side_button_new"];
                 UIColor* noNewMessageColor = RGBCOLOR(150, 150, 150);
@@ -220,7 +230,7 @@
                     headerCell.messageLabel.textColor = newMessageAvailableColor;
                     headerCell.unreadMessageCountLabel.textColor = newMessageAvailableColor;
                 }
-                NSInteger unreadNotifCount = [XMPPHandler sharedInstance].unreadNotifCount;
+                NSInteger unreadNotifCount = [NotificationService service].unreadNotifCount;
                 if (unreadNotifCount == 0) {
                     headerCell.notificationImageView.image = noNewMessageImageBg;
                     headerCell.notificationLabel.textColor = noNewMessageColor;
@@ -232,7 +242,8 @@
                 }
                 headerCell.unreadMessageCountLabel.text = [NSString stringWithFormat:@"%d", _unreadMessageCount];
                 headerCell.unreadNotificationLabel.text = [NSString stringWithFormat:@"%d", unreadNotifCount];
-                [avatarView setPathToNetworkImage:[me avatarFullUrl] forDisplaySize:CGSizeMake(40, 40) contentMode:UIViewContentModeScaleAspectFill];
+                avatarView.delegate = self;
+                [avatarView setPathToNetworkImage:[URLService  absoluteURL:loggedInUser.avatar] forDisplaySize:CGSizeMake(40, 40) contentMode:UIViewContentModeScaleAspectFill];
                 return cell;
             } else  if(indexPath.row == 1){
                 CellIdentifier = @"SideMealCell";
@@ -302,6 +313,7 @@
 
 -(void)showNotifications{
     [self showViewController:self.notificationViewController];
+//    [self showMealList]; ///////FIXME TODO
 }
 
 - (void)showRegistrationWizard{
@@ -341,16 +353,17 @@
     }
     
     UIViewController *controller = self.mealListViewController;
+    NSString *userID = [[UserService service].loggedInUser.uID stringValue];
     switch (indexPath.section) {
         case 0:
             switch (indexPath.row) {
                 case 0:
                     controller = self.userDetailsViewController;
-                    self.userDetailsViewController.user = [Authentication sharedInstance].currentUser;
+                    self.userDetailsViewController.user = [UserService service].loggedInUser;
                     break;
                 case 3:
                     controller = self.userListViewController;
-                    ((UserListViewController*)controller).baseURL = [NSString stringWithFormat:@"%@://%@/api/v1/user/%d/following/?format=json", HTTPS, EOHOST, [Authentication sharedInstance].currentUser.uID];
+                    ((UserListViewController*)controller).baseURL = [NSString stringWithFormat:@"user/%@/following/", userID];
                     controller.title = @"我的关注";
                 default:
                     break;
@@ -360,11 +373,11 @@
             controller = self.userListViewController;
             switch (indexPath.row) {
                 case 0:
-                    ((UserListViewController*)controller).baseURL = [NSString stringWithFormat:@"%@://%@/api/v1/user/%d/recommendations/?format=json", HTTPS, EOHOST, [Authentication sharedInstance].currentUser.uID];
+                    ((UserListViewController*)controller).baseURL = [NSString stringWithFormat:@"user/%@/recommendations/", userID];
                     controller.title = @"志趣相投";
                     break;
                 case 1:
-                    ((UserListViewController*)controller).baseURL = [NSString stringWithFormat:@"%@://%@/api/v1/user/%d/users_nearby/?format=json", HTTPS, EOHOST, [Authentication sharedInstance].currentUser.uID];
+                    ((UserListViewController*)controller).baseURL = [NSString stringWithFormat:@"user/%@/users_nearby/", userID];
                     controller.title = @"附近朋友";
                     break;
                 case 2:
@@ -452,9 +465,9 @@
 - (void)didLogout:(NSNotification*)notif {
     _myMealsViewController = nil;;
     _userListViewController = nil;
-//    _socialViewController = nil;
     _userDetailsViewController = nil;
     _conversationViewController = nil;
+    _avatarLoaded = NO;
 }
 
 - (void)unreadMsgUpdated:(NSNotification*)notif {
@@ -462,7 +475,8 @@
     [self.tableView reloadData];
     [[NSUserDefaults standardUserDefaults] setInteger:_unreadMessageCount forKey:UNREAD_MESSAGE_COUNT];
     [[NSUserDefaults standardUserDefaults] synchronize];
-    [self notifyUnreadCount];
+    NSInteger unreadCount = _unreadMessageCount + [NotificationService service].unreadNotifCount;
+    [self notifyUnreadCount:unreadCount];
 }
 
 - (void)unreadNotifUpdated:(NSNotification*)notif {
@@ -470,21 +484,18 @@
     if (_lastViewController == self.notificationViewController && self.sideMenu.navigationController.viewControllers.count == 1) {
         //notification view is being displayed
         unreadNotifCount = 0;
-        [XMPPHandler sharedInstance].unreadNotifCount = 0;
-        [[XMPPHandler sharedInstance] markMessagesReadFrom:PUBSUB_SERVICE];
+        [[NotificationService service] markAllNotificationsRead];
     } 
 
     [self.tableView reloadData];
-    [[NSUserDefaults standardUserDefaults] setInteger:unreadNotifCount forKey:UNREAD_NOTIFICATION_COUNT];
-    [[NSUserDefaults standardUserDefaults] synchronize];
-    
-    [self notifyUnreadCount];
+    [self notifyUnreadCount:unreadNotifCount + _unreadMessageCount];
 }
 
--(void)notifyUnreadCount{
+-(void)notifyUnreadCount:(NSInteger)unreadCount{
     [[NSNotificationCenter defaultCenter] postNotificationName:EOUnreadCount
-                                                        object:[NSNumber numberWithInteger:[XMPPHandler sharedInstance].unreadNotifCount + _unreadMessageCount]
+                                                        object:[NSNumber numberWithInteger:unreadCount]
                                                       userInfo:nil];
+    [UIApplication sharedApplication].applicationIconBadgeNumber = unreadCount;
 }
 
 #pragma mark UIGestureRecognizerDelegate
@@ -494,6 +505,14 @@
 
 -(void)avatarUpdated:(NSNotification*)notif {
     [self.tableView reloadData];
+}
+
+#pragma mark NINetworkImageViewDelegate
+- (void)networkImageView:(NINetworkImageView *)imageView didLoadImage:(UIImage *)image{
+    if (!_avatarLoaded) {
+        [self.tableView reloadData];
+        _avatarLoaded = YES;
+    }
 }
 
 @end

@@ -12,10 +12,10 @@
 #import "CustomUserFilterViewController.h"
 #import "PullRefreshTableViewController.h"
 #import "LocationProvider.h"
+#import "Tag.h"
 
-@interface UserListViewController : PullRefreshTableViewController<UIActionSheetDelegate, CustomUserFilterViewControllerDelegate, UIScrollViewDelegate, UITableViewDelegate>{
-    LoadMoreTableItem *_loadMore;
-    NSString* _filter;
+@interface UserListViewController : TTTableViewController<UIActionSheetDelegate, CustomUserFilterViewControllerDelegate, UIScrollViewDelegate, UITableViewDelegate>{
+    NSDictionary* _filter;
     CustomUserFilterViewController* _customUserFilterViewController;
 }
 
@@ -23,9 +23,6 @@
 @property(nonatomic) BOOL hideNumberOfSameTags;
 @property(nonatomic) BOOL hideFilterButton;
 @property(nonatomic) BOOL showAddTagButton;
-@property(nonatomic, strong) UserTag* tag;
-
-+(UserListViewController*)recommendedUserListViewController;
-+(UserListViewController*)nearbyUserListViewController;
+@property(nonatomic, strong) Tag* tag;
     
 @end

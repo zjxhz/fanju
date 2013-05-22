@@ -17,6 +17,7 @@
 #import "UserMessage.h"
 #import "RestKit.h"
 #import "UserService.h"
+#import "NotificationService.h"
 
 NSString * const LAST_SUCCESSFUL_RETRIEVE_DATE = @"LAST_SUCCESSFUL_RETRIEVE_DATE";
 #define MAX_RETRIEVE 20
@@ -26,10 +27,10 @@ NSString * const LAST_SUCCESSFUL_RETRIEVE_DATE = @"LAST_SUCCESSFUL_RETRIEVE_DATE
     NSMutableArray* _unhanldedConversations;
     NSDateFormatter* _formatter;
     XMPPStream* _xmppStream;
-    BOOL _retrievingConversations;
     NSManagedObjectContext* _mainQueueContext;
+    User* _currentContact;
 }
-+(ArchivedMessageService*)shared{
++(ArchivedMessageService*)service{
     static dispatch_once_t onceToken;
     static ArchivedMessageService* instance = nil;
     dispatch_once(&onceToken,^{
@@ -40,20 +41,31 @@ NSString * const LAST_SUCCESSFUL_RETRIEVE_DATE = @"LAST_SUCCESSFUL_RETRIEVE_DATE
 
 -(id)init{
     if (self = [super init]) {
-        _xmppStream = [XMPPHandler sharedInstance].xmppStream;
-        [_xmppStream addDelegate:self delegateQueue:dispatch_get_main_queue()];
         RKManagedObjectStore* store = [RKObjectManager sharedManager].managedObjectStore;
         _mainQueueContext = store.mainQueueManagedObjectContext;
         _unhanldedConversations = [NSMutableArray array];
-        _lastSuccessfulRetrieveDate = [self lastSuccessfulRetrieveDate];
-        DDLogInfo(@"init lastSuccessfulRetrieveDate value: %@", _lastSuccessfulRetrieveDate);
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(currentConversationChanged:)
+                                                     name:CurrentConversation
+                                                   object:nil];
     }
     return self;
 }
 
+-(void)setup{
+    _xmppStream = [XMPPHandler sharedInstance].xmppStream;
+    [_xmppStream addDelegate:self delegateQueue:dispatch_get_main_queue()];
+    _lastSuccessfulRetrieveDate = [self lastSuccessfulRetrieveDate];
+    DDLogInfo(@"init lastSuccessfulRetrieveDate value: %@", _lastSuccessfulRetrieveDate);
+}
 
+-(void)tearDown{
+    [_xmppStream removeDelegate:self];
+    _unhanldedConversations = [NSMutableArray array];
+    _lastSuccessfulRetrieveDate = nil;
+}
 -(void)retrieveConversations{
-    _retrievingConversations = YES;
+    _retrievingConversations = YES; //TODO
     [self retrieveConversationsStartFrom:_lastSuccessfulRetrieveDate after:-1];
 }
 
@@ -101,30 +113,34 @@ NSString * const LAST_SUCCESSFUL_RETRIEVE_DATE = @"LAST_SUCCESSFUL_RETRIEVE_DATE
     if (_lastSuccessfulRetrieveDate) {
         return _lastSuccessfulRetrieveDate;
     }
-//    _lastSuccessfulRetrieveDate = [[NSUserDefaults standardUserDefaults] valueForKey:LAST_SUCCESSFUL_RETRIEVE_DATE];
-//    if(!_lastSuccessfulRetrieveDate){
-//        _lastSuccessfulRetrieveDate = [self latestMessageDate];
-//    }
-//
+    
+    _lastSuccessfulRetrieveDate = [[NSUserDefaults standardUserDefaults] valueForKey:[self lastRetriveDateKey]];
     if(!_lastSuccessfulRetrieveDate){
-        _lastSuccessfulRetrieveDate = [self twoWeeksAgo];
+        _lastSuccessfulRetrieveDate = [self latestMessageDate];
+    }
+
+    if(!_lastSuccessfulRetrieveDate){
+        _lastSuccessfulRetrieveDate = [self yesterday];
     }
 
     return _lastSuccessfulRetrieveDate;
 }
 
+-(NSString*)lastRetriveDateKey{
+    return [NSString stringWithFormat:@"%@_%@", [UserService service].loggedInUser, LAST_SUCCESSFUL_RETRIEVE_DATE];
+}
+
 -(void)setLastSuccessfulRetrieveDate:(NSDate*)date{
     DDLogInfo(@"Updating last successful retriving date to: %@", date);
     _lastSuccessfulRetrieveDate = [date copy];
-//    NSData* data = [NSKeyedArchiver archivedDataWithRootObject:_lastSuccessfulRetrieveDate];
-    [[NSUserDefaults standardUserDefaults] setObject:_lastSuccessfulRetrieveDate forKey:LAST_SUCCESSFUL_RETRIEVE_DATE];
+    [[NSUserDefaults standardUserDefaults] setObject:_lastSuccessfulRetrieveDate forKey:[self lastRetriveDateKey]];
     [[NSUserDefaults standardUserDefaults] synchronize];    
 }
 
--(NSDate*)twoWeeksAgo{
+-(NSDate*)yesterday{
     NSCalendar *cal = [NSCalendar currentCalendar];
     NSDateComponents *components = [cal components:( NSEraCalendarUnit | NSYearCalendarUnit | NSMonthCalendarUnit | NSDayCalendarUnit) fromDate:[[NSDate alloc] init]];
-    [components setDay:([components day] - 14)];
+    [components setDay:([components day] - 1)];
     return [cal dateFromComponents:components];
 }
 
@@ -173,31 +189,49 @@ NSString * const LAST_SUCCESSFUL_RETRIEVE_DATE = @"LAST_SUCCESSFUL_RETRIEVE_DATE
 
 -(void)retrieveMessages{
     for (NSString* unhandledConversation in _unhanldedConversations) {
-        Conversation* localConversation = [self localConversationWith:unhandledConversation];
-        NSDate* afterDate = nil;
-        if (!localConversation) {
-            DDLogWarn(@"Messages from new contact %@, retriving messages only 2 weeks ago, maybe we can let user to decide if he wants retrive more",
-                      unhandledConversation);
-            afterDate = [self twoWeeksAgo];
-        } else {
-            afterDate = localConversation.time;
-        }
+        NSDate* afterDate = [self latestConversationDateWith:unhandledConversation];
+        
         void (^block)(void) = ^(void){
             DDLogInfo(@"retriving messages with %@ after: %@", unhandledConversation, afterDate);
             [self retrieveMessagesWith:unhandledConversation after:[afterDate timeIntervalSince1970]];
         };
-        User* user = [[UserService shared] userWithJID:unhandledConversation];
-        if (!user) {
-            [[UserService shared] getOrFetchUserWithJID:unhandledConversation success:^(User *user) {
-                block();
-            } failure:^{
-                DDLogError(@"failed to fetch user with jid: %@, some archived message may be missing", unhandledConversation);
-            }];
-        } else {
+        if ([unhandledConversation isEqual:PUBSUB_SERVICE]) {
             block();
+        } else {
+            User* user = [[UserService service] userWithJID:unhandledConversation];
+            if (!user) {
+                [[UserService service] getOrFetchUserWithJID:unhandledConversation success:^(User *user) {
+                    block();
+                } failure:^{
+                    DDLogError(@"failed to fetch user with jid: %@, some archived message may be missing", unhandledConversation);
+                }];
+            } else {
+                block();
+            }
         }
-        
     }
+}
+
+-(NSDate*)latestConversationDateWith:(NSString*)with{
+    NSDate* afterDate = nil;
+    if ([with isEqual:PUBSUB_SERVICE]) {
+        afterDate = [NotificationService service].latestNotificationDate;
+        if (!afterDate) {
+            DDLogInfo(@"no local notification found");
+            afterDate = [self yesterday];
+        }
+    } else {
+        Conversation* localConversation = [self localConversationWith:with];
+        
+        if (!localConversation) {
+            DDLogInfo(@"Messages from new contact %@",
+                      with);
+            afterDate = [self yesterday];
+        } else {
+            afterDate = localConversation.time;
+        }
+    }
+    return afterDate;
 }
 
 -(Conversation*)localConversationWith:(NSString*)with{
@@ -211,7 +245,6 @@ NSString * const LAST_SUCCESSFUL_RETRIEVE_DATE = @"LAST_SUCCESSFUL_RETRIEVE_DATE
 }
 
 -(void)retrieveMessagesWith:(NSString*)with after:(NSTimeInterval)interval{
-
     double intervalInMilliSeconds = interval * 1000;
     NSXMLElement *retrieve = [NSXMLElement elementWithName:@"retrieve" xmlns:@"urn:xmpp:archive"];
 	[retrieve addAttributeWithName:@"with" stringValue:with];
@@ -229,54 +262,54 @@ NSString * const LAST_SUCCESSFUL_RETRIEVE_DATE = @"LAST_SUCCESSFUL_RETRIEVE_DATE
     [_xmppStream sendElement:iq];
 }
 
+
 -(void)handleRetrievedMessages:(NSXMLElement*)chatElement after:(NSString*)after{
 //    dispatch_async(_background_queue, ^(void){
     UserMessage* messageObject = nil;
     NSDate* date = [self.formatter dateFromString:after];
     NSDate* endDate = [self.formatter dateFromString:[chatElement attributeStringValueForName:@"end"]];
     NSString* with = [XMPPJID jidWithString:[chatElement attributeStringValueForName:@"with"]].bare;
+    User* owner = [UserService service].loggedInUser;
+    User* withUser = nil;
+    Conversation* conversation = nil;
+    if (![with isEqual:PUBSUB_SERVICE]) {
+        withUser = [[UserService service] userWithJID:with];
+        conversation = [[MessageService service] getOrCreateConversation:owner with:withUser];
+        NSAssert(withUser, @"with user not found in core data, must be coding error");
+    }
+
     NSInteger unread = 0;
+    NSDate* messageDate = nil;
     for (int i = 0; i < chatElement.children.count; ++i) {
         NSXMLElement* element = chatElement.children[i];
+        NSInteger seconds = [[element attributeStringValueForName:@"secs"] integerValue];
+        if (i < chatElement.children.count -1 ) {
+            messageDate = [date dateByAddingTimeInterval:seconds];
+        } else { //last message time must be accurate(in ms), others are in seconds
+            messageDate = endDate;
+        }
+        BOOL read = [element attributeBoolValueForName:@"isRead"];
         if ([with isEqual:PUBSUB_SERVICE]){
-//            NSXMLElement* bodyElement = [element elementForName:@"body"] ;
-//            NSXMLElement *event = [[NSXMLElement alloc] initWithXMLString:[bodyElement stringValue] error:nil];
-//            messageMO = [NSEntityDescription insertNewObjectForEntityForName:@"EOMessage" inManagedObjectContext:[self backgroundMessageManagedObjectContext]];
-//            messageMO.time = messageDate;
-//            messageMO.node = [self nodeNameFrom:event];
-//            messageMO.payload = [self payloadFrom:event];
-//            _unreadNotifCount++;
-//            dispatch_async(dispatch_get_main_queue(), ^{
-//                [[NSNotificationCenter defaultCenter] postNotificationName:EONotificationDidSaveNotification
-//                                                                    object:messageMO
-//                                                                  userInfo:nil];
-//            });
+            NSXMLElement* bodyElement = [element elementForName:@"body"] ;
+            NSXMLElement *event = [[NSXMLElement alloc] initWithXMLString:[bodyElement stringValue] error:nil];
+//            NSString* pubid = [element attributeStringValueForName:@""] TODO add pubid
+            [[NotificationService service] handleArchivedNotificatoin:event atTime:messageDate read:read];
         } else {
             NSString* strMessage = [[element elementForName:@"body"] stringValue];
-            NSDate* messageDate = nil;
-            NSInteger seconds = [[element attributeStringValueForName:@"secs"] integerValue];
-            if (i < chatElement.children.count -1 ) {
-                messageDate = [date dateByAddingTimeInterval:seconds];
-            } else { //last message time must be accurate(in ms), others are in seconds
-                messageDate = endDate;
-            }
-            
             if ([self isValidMessage:with messageDate:messageDate message:strMessage]) {
+                DDLogVerbose(@"inserting message: %@ with %@ at %@", strMessage, with, messageDate);
                 messageObject = [NSEntityDescription insertNewObjectForEntityForName:@"UserMessage" inManagedObjectContext:_mainQueueContext];
                 if ([element.name isEqual:@"to"] ) {
                     messageObject.incoming = [NSNumber numberWithBool:NO];
                 } else if([element.name isEqual:@"from"]){
                     messageObject.incoming = [NSNumber numberWithBool:YES];
                 }
-                BOOL read = [element attributeBoolValueForName:@"isRead"];
+
                 messageObject.time = messageDate;
                 messageObject.message = strMessage;
                 messageObject.read = [NSNumber numberWithBool:read];
-                User* withUser = [[UserService shared] userWithJID:with];
-                messageObject.owner = [UserService shared].loggedInUser;
-                NSAssert(withUser, @"with user not found in core data, must be coding error");
-                messageObject.with = withUser;
-                if (!read && ![self isMessageFromCurrentConversation:messageObject]) {
+                messageObject.conversation = conversation;
+                if (!read && ![self isMessageFromCurrentConversation:messageObject] && [messageObject.incoming boolValue]) {
                     unread++;
                 }
 
@@ -284,18 +317,14 @@ NSString * const LAST_SUCCESSFUL_RETRIEVE_DATE = @"LAST_SUCCESSFUL_RETRIEVE_DATE
         }
     }
     if (messageObject) {
-        NSError* error = nil;
-        if(![_mainQueueContext saveToPersistentStore:&error]){
-            DDLogError(@"failed to save a retrived message: %@", error);
-        }
-        if ([with isEqual:PUBSUB_SERVICE]) {
-//            dispatch_async(dispatch_get_main_queue(), ^{
-//                [[NSNotificationCenter defaultCenter] postNotificationName:EOUnreadNotificationCount
-//                                                                    object:[NSNumber numberWithInteger:_unreadNotifCount]
-//                                                                  userInfo:nil];
-//            });
-        } else {
-            [[MessageService service] updateConversation:messageObject unreadCount:unread];
+        if (![with isEqual:PUBSUB_SERVICE])  {
+            [[MessageService service] updateConversation:conversation withMessage:messageObject unreadCount:unread];
+            NSError* error = nil;
+            if(![_mainQueueContext saveToPersistentStore:&error]){
+                DDLogError(@"failed to save retrived messages: %@", error);
+            } else {
+                DDLogInfo(@"saved archived messages with conversation: %@", conversation);
+            }
 //            dispatch_async(dispatch_get_main_queue(), ^{
                 [[NSNotificationCenter defaultCenter] postNotificationName:MessageDidSaveNotification
                                                                     object:messageObject
@@ -315,15 +344,20 @@ NSString * const LAST_SUCCESSFUL_RETRIEVE_DATE = @"LAST_SUCCESSFUL_RETRIEVE_DATE
 }
 
 -(BOOL)isMessageFromCurrentConversation:(UserMessage*)message{
-    return NO; //TODO
+    return [message.conversation.with isEqual:_currentContact];
 }
+
+-(void)currentConversationChanged:(NSNotification*)notif{
+    _currentContact = notif.object;
+}
+
 //valid messages should not older than the local ones, nor should them be duplicated
 -(BOOL)isValidMessage:(NSString*)with messageDate:(NSDate*)messageDate message:(NSString*)strMessage{
     if ([with isEqual:PUBSUB_SERVICE]) {
         return NO;//!_latestNotificationDate || [messageDate compare:_latestNotificationDate] > 0;
     } else {
         Conversation* conversation = [self localConversationWith:with];
-        if (conversation){
+        if (conversation && conversation.time){
             NSDate* localConversationTime = conversation.time;
             NSTimeInterval delta = [messageDate timeIntervalSinceDate:localConversationTime];
             if ( delta < 0 || [strMessage isEqual:conversation.message]) {

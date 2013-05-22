@@ -20,7 +20,6 @@
 
 @implementation MapViewController
 @synthesize myMapView = _myMapView;
-@synthesize info = _info;
 
 - (void)loadView {
     [super loadView];
@@ -55,17 +54,22 @@
         MKCoordinateSpan span; 
         span.latitudeDelta=0.1;
         span.longitudeDelta=0.1; 
-        
-        CLLocationCoordinate2D location = self.info.coordinate;         
-        
+
         region.span=span; 
-        region.center=location; 
+        region.center=[self coordinate];
         
         [self.myMapView setRegion:region animated:TRUE]; 
         [self.myMapView regionThatFits:region];
-        Location* annotation = [[Location alloc] initWithName:self.info.name address:self.info.address coordinate:self.info.coordinate];
+        Location* annotation = [[Location alloc] initWithName:_restaurant.name address:_restaurant.address coordinate:[self coordinate]];
         [self.myMapView addAnnotation:annotation];
     }
+}
+
+-(CLLocationCoordinate2D)coordinate{
+    CLLocationCoordinate2D location;
+    location.latitude = [_restaurant.latitude floatValue];
+    location.longitude = [_restaurant.longitude floatValue];
+    return location;
 }
 
 #pragma mark MKMapViewDelegate
@@ -86,8 +90,6 @@
 }
 
 -(void)launchRoute {
-    CLLocationCoordinate2D coordinate =
-    CLLocationCoordinate2DMake(self.info.coordinate.latitude, self.info.coordinate.longitude);
-    [MapHelper launchRouteTo:coordinate withName:self.info.name];
+    [MapHelper launchRouteTo:[self coordinate] withName:_restaurant.name];
 }
 @end

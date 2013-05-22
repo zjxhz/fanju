@@ -24,10 +24,11 @@
 #import "OrderListDataSource.h"
 #import "ODRefreshControl.h"
 #import "MealDetailViewController.h"
+#import "Order.h"
 
 @interface MyInvitationsDataSource : TTListDataSource 
-
 @end
+
 
 @implementation MyInvitationsDataSource
 
@@ -42,6 +43,12 @@
 }
 @end
 
+@interface MyMealsViewController()
+@property(nonatomic, strong) RKPaginator* paginator;
+@property(nonatomic, strong)    LoadMoreTableItem *loadMore;
+@property(nonatomic, strong) ODRefreshControl* refreshControl;
+@end
+
 @implementation MyMealsViewController{
     ODRefreshControl* _refreshControl;
 }
@@ -50,10 +57,11 @@
 - (id) init{
     if (self = [super init]) {        
         self.title = @"我的饭局";
-        self.tabBarItem = [[UITabBarItem alloc] initWithTitle:self.title image:[UIImage imageNamed:@"messages.png"] tag:0]; 
+        self.tabBarItem = [[UITabBarItem alloc] initWithTitle:self.title image:[UIImage imageNamed:@"messages.png"] tag:0];
     }
     return self;
 }
+
 - (void)loadView {
     [super loadView];
     AppDelegate *delegate = (AppDelegate*)[UIApplication sharedApplication].delegate;
@@ -104,78 +112,51 @@
 //        seg.selectedIndexes = [NSIndexSet indexSetWithIndex:0];
 //    }
 }
--(void) loadOrders{
-    int userID = [Authentication sharedInstance].currentUser.uID;
-    NSString* baseURL = [NSString stringWithFormat:@"http://%@/api/v1/user/%d/order/?format=json", EOHOST, userID] ;
-    [[NetworkHandler getHandler] requestFromURL:baseURL method:GET cachePolicy:TTURLRequestCachePolicyNetwork
-                                        success:^(id obj) {
-                                            NSDictionary *result = obj;
-                                            NSArray *orders = [result objectForKeyInObjects];
-                                            
-                                            OrderListDataSource *ds = [[OrderListDataSource alloc] init];
-                                            
-                                            for (NSDictionary *dict in orders) {
-                                                [ds addOrder:[OrderInfo orderInfoWithData:dict]];
-                                            }     
-                                            NSInteger offset = [result offset];
-                                            NSInteger totalCount = [result totalCount];
-                                            NSInteger limit = [result limit];
-                                            
-                                            if (limit != 0 && totalCount > limit) {
-                                                _loadMore  = [[LoadMoreTableItem alloc] init] ;
-                                                _loadMore.offset = offset;
-                                                _loadMore.amount = totalCount;
-                                                _loadMore.limit = limit;
-                                                _loadMore.baseURL = baseURL;
-//                                                [ds.items addObject:_loadMore];
-                                            }
-                                            self.dataSource = ds;
-                                            [_refreshControl endRefreshing];
-                                            
-                                        } failure:^{
-                                            [_refreshControl endRefreshing];
-                                            DDLogError(@"failed to load orders");
-                                        }];
+
+-(void)loadOrders{
+    [self loadOrders:NO];
 }
 
-//-(void) loadMoreOrders{
-//    if (![_loadMore hasMore]) {
-//        return;
-//    } 
-//    [[NetworkHandler getHandler] requestFromURL:[_loadMore nextPageURL]
-//                                         method:GET 
-//                                    cachePolicy:TTURLRequestCachePolicyNetwork
-//                                        success:^(id obj) {
-//                                            //load data
-//                                            NSDictionary* result = obj;
-//                                            NSArray *orders = [obj objectForKeyInObjects];
-//                                            OrderListDataSource *ds = self.dataSource;
-//                                            NSMutableArray * indexPaths = [NSMutableArray array];
-//                                            for (int i = 0; i < orders.count; ++i) {
-//                                                NSDictionary *dict = [orders objectAtIndex:i];
-//                                                [ds.items insertObject:[OrderTableItem itemWithOrderInfo:[OrderInfo orderInfoWithData:dict]] atIndex:(ds.items.count - 1)];
-//                                                NSIndexPath *indexPath = [NSIndexPath indexPathForRow:ds.items.count - 1 inSection:0];
-//                                                [indexPaths addObject:indexPath];
-//                                            }
-//                                            [self.tableView insertRowsAtIndexPaths:indexPaths withRowAnimation:UITableViewRowAnimationTop];
-//                                            
-//                                            
-//                                            //update load more text and decide if it should be removed
-//                                             _loadMore.loading = NO;
-////                                            [self reloadLastRow];
-//                                            _loadMore.offset = [result offset];
-//                                            if (![_loadMore hasMore])  {
-//                                                [ds.items removeLastObject];
-//                                                NSArray *rowToDelete = [NSArray arrayWithObject:[NSIndexPath indexPathForRow:(ds.items.count - 1) inSection:0]];
-//                                                [self.tableView  deleteRowsAtIndexPaths:rowToDelete withRowAnimation:UITableViewRowAnimationAutomatic];
-//                                            }
-//                                            [self.tableView reloadData];
-//                                            
-//                                        } failure:^{
-//                                            DDLogError(@"failed to load more orders");
-//#warning fail handling
-//                                        }];
-//}
+-(void) loadOrders:(BOOL)nextPage{
+    RKObjectManager *manager = [RKObjectManager sharedManager];
+    __weak typeof(self) weakSelf = self;
+    OrderListDataSource *ds;
+    User* loggedInUser = [UserService service].loggedInUser;
+    NSString* requestWithPagination = [NSString stringWithFormat:@"user/%@/order/?page=:currentPage&limit=:perPage", loggedInUser.uID];
+    if (!nextPage) {
+        _paginator = [manager paginatorWithPathPattern:requestWithPagination];
+        ds = [[OrderListDataSource alloc] init];
+        self.dataSource = ds;
+    } else {
+        ds = self.dataSource;
+    }
+    [_paginator setCompletionBlockWithSuccess:^(RKPaginator *paginator, NSArray *objects, NSUInteger page) {
+        for (Order *order in objects) {
+            [ds addOrder:order];
+        }
+
+        [weakSelf.refreshControl endRefreshing];
+//        id lastItem = [ds.items lastObject];
+//        if ([lastItem isKindOfClass:[LoadMoreTableItem class]]) {
+//            [ds.items removeLastObject];
+//        }
+//        [ds.items addObjectsFromArray:objects];
+//        if ([weakSelf.paginator hasNextPage]) {
+//            weakSelf.loadMore = [[LoadMoreTableItem alloc] init];
+//            [ds.items addObject:weakSelf.loadMore];
+//        }
+        [weakSelf refresh];
+    } failure:^(RKPaginator *paginator, NSError *error) {
+        [weakSelf.refreshControl endRefreshing];
+        DDLogError(@"failed to load users: %@", error);
+    }];
+    _paginator.perPage = 100;
+    if (nextPage) {
+        [_paginator loadNextPage];
+    } else {
+        [_paginator loadPage:1]; //page starts from 1
+    }
+}
 
 - (void)loadInvitationsWithOffset:(NSInteger)offset{
     int userID = [Authentication sharedInstance].currentUser.uID;
@@ -200,7 +181,7 @@
     _payingOrdersHeader = [self createHeader:@"30分钟内未支付的饭局"];
     _upcomingOrdersHeader = [self createHeader:@"最近的饭局"];
     _passedOrdersHeader = [self createHeader:@"已经结束的饭局"];
-    [self loadOrders];
+    [self loadOrders:NO];
 }
 
 
@@ -276,13 +257,13 @@
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath{
     id obj = [self.dataSource tableView:tableView objectForRowAtIndexPath:indexPath];
-    if ([obj isKindOfClass:[OrderInfo class]]) {
+    if ([obj isKindOfClass:[Order class]]) {
         
-        OrderInfo* order = obj;
-        if (order.status == 1) {//unpaid
+        Order* order = obj;
+        if ([order.status integerValue] == 1) {//unpaid
             MealDetailViewController* mealVC = [[MealDetailViewController alloc] init];
             mealVC.unfinishedOrder = order;
-            mealVC.mealInfo = order.meal;
+            mealVC.meal = order.meal;
             [self.navigationController pushViewController:mealVC animated:YES];
         } else {
             OrderDetailsViewController *details = [[OrderDetailsViewController alloc] initWithNibName:@"OrderDetailsViewController" bundle:nil];

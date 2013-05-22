@@ -9,10 +9,11 @@
 #import <Three20UI/Three20UI.h>
 #import "UserProfile.h"
 #import "NewTagViewController.h"
+#import "User.h"
 
 @interface UserTagsViewController : TTTableViewController<UITableViewDelegate, TagViewControllerDelegate>
-@property(nonatomic, strong) UserProfile* user;
+@property(nonatomic, strong) User* user;
 @property id<TagViewControllerDelegate> tagDelegate;
-- (id)initWithUser:(UserProfile*)user;
+- (id)initWithUser:(User*)user;
 
 @end

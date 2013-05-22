@@ -41,6 +41,7 @@ static int t = 0;
         if(handler.available) {
             avail = handler;
             avail.available = NO;
+            DDLogVerbose(@"fetching NetworkHandler from the pool: %@", avail);
             break;
         }
     }
@@ -50,6 +51,7 @@ static int t = 0;
         avail.tag = t++;
         avail.available = NO;
         [pool addObject:avail];
+        DDLogVerbose(@"creating a new NetworkHandler: %@", avail);
     }
     
     return avail;
@@ -93,19 +95,13 @@ static int t = 0;
            cachePolicy:(TTURLRequestCachePolicy)policy
                success:(retrieved_t)success 
                failure:(retrieve_failed_t)failure {
-
-//    CallbackBlocks* blocks = [[RequestBlockPair alloc] init];
-//    blocks.success = success;
-//    blocks.failed = failure;
-//    blocks.url = url;
-    
     self.success = [success copy];
     self.failure = [failure copy];
     
     TTURLRequest* request = [TTURLRequest requestWithURL:url 
                                                 delegate:self];
     
-    request.cachePolicy = policy; //TTURLRequestCachePolicyLocal;
+    request.cachePolicy = policy; 
     request.response = [[TTURLDataResponse alloc] init];
     NSMutableString *paramStr = [[NSMutableString alloc] init];
     if (method == GET) {
@@ -140,6 +136,7 @@ static int t = 0;
         if (params) {
             [logStr appendFormat:@"?%@",paramStr];
         }
+        
         DDLogVerbose(logStr);
     }
     
@@ -196,6 +193,7 @@ static int t = 0;
 
 #pragma mark TTURLRequestDelegate
 - (void)requestDidFinishLoad:(TTURLRequest*)request {
+    DDLogVerbose(@"request did finish load for NetworkHandler: %@", self);
     NSData *data = [(TTURLDataResponse*)request.response data];
     id obj = [data objectFromJSONData];//[parser objectWithData:data];
     if (data.length >0 && !obj) {
@@ -204,40 +202,29 @@ static int t = 0;
     }
     if (self.success != NULL) {
         dispatch_async(dispatch_get_main_queue(), ^{
-            self.success(obj);            
+            self.success(obj);
+            self.available = YES;
         });
     }
-    self.available = YES;
+
 }
 
 - (void)request:(TTURLRequest*)request didFailLoadWithError:(NSError*)error {
-//    if(error.code == 401){
-//        AppDelegate *appDelegate = (AppDelegate*)[UIApplication sharedApplication].delegate;
-//        [appDelegate showLogin];
-//    }  else {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            if(error.code == 401){
-                AppDelegate *appDelegate = (AppDelegate*)[UIApplication sharedApplication].delegate;
-                [appDelegate showLogin];
-            } else {
-                [SVProgressHUD dismissWithError:@"Network Error" afterDelay:1];
-                
-                NSData * data = [error.userInfo objectForKey:@"responsedata"];
+    dispatch_async(dispatch_get_main_queue(), ^{
+            NSData * data = [error.userInfo objectForKey:@"responsedata"];
 //                DDLogVerbose([[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding]) ;
-                NSString* html = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
-                
-                NSString* errorPage = [NSString stringWithFormat:@"%@/error.html", NSTemporaryDirectory()];
-                [html writeToFile:errorPage atomically:NO encoding:NSUTF8StringEncoding error:nil];
-                DDLogError(@"Network Error: error page saved to %@", errorPage);
-                if (self.failure != NULL) {
-                    self.failure();
-                }
+            NSString* html = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+            
+            NSString* errorPage = [NSString stringWithFormat:@"%@/error.html", NSTemporaryDirectory()];
+            [html writeToFile:errorPage atomically:NO encoding:NSUTF8StringEncoding error:nil];
+            DDLogError(@"Network Error: error page saved to %@", errorPage);
+            if (self.failure != NULL) {
+                self.failure();
             }
-                
+            self.available = YES;
         });
-//    }
     
-    self.available = YES;
+
 }
 
 /**

@@ -160,7 +160,7 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
         if (indexPath.row == 0) {
             _priceCell = [self getOrCreateCell:@"PriceCell"];
             cell = _priceCell;
-            _priceCell.priceLabel.text = [NSString stringWithFormat:@"%.2f元/人", _mealInfo.price];
+            _priceCell.priceLabel.text = [NSString stringWithFormat:@"%.2f元/人", [_meal.price floatValue]];
         } else if(indexPath.row == 1) {
             if (!_numberCell) {
                 UIViewController* temp = [[UIViewController alloc] initWithNibName:@"NumberOfParticipantsCell" bundle:nil];
@@ -185,7 +185,7 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
         } else if (indexPath.row == 2 ){
             _totalPriceCell = [self getOrCreateCell:@"TotalPriceCell"];
             cell = _totalPriceCell;
-            _totalPriceCell.totalPriceLabel.text = [NSString stringWithFormat:@"%.2f元", _numberOfPersons * _mealInfo.price];
+            _totalPriceCell.totalPriceLabel.text = [NSString stringWithFormat:@"%.2f元", _numberOfPersons * [_meal.price floatValue]];
         }
     } else {
         _mobileCell = [self getOrCreateCell:@"MobileNumberCell"];
@@ -210,7 +210,7 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
 }
 
 -(void)add:(id)sender{
-    if (_numberOfPersons < _mealInfo.maxPersons - _mealInfo.actualPersons) {
+    if (_numberOfPersons < [_meal.maxPersons integerValue] -  [_meal.actualPersons integerValue]) {
         _numberOfPersons++;
         [_tableView reloadData];
     }
@@ -249,7 +249,7 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
 
 -(IBAction)joinMeal:(id)sender{
     [_confirmButton setEnabled:NO];
-    NSString *mealID = [NSString stringWithFormat:@"%d", self.mealInfo.mID];
+    NSString *mealID = [NSString stringWithFormat:@"%@", self.meal.mID];
     NSString *numberOfPerson = [NSString stringWithFormat:@"%d", _numberOfPersons];
     NSArray *params = @[[DictHelper dictWithKey:@"meal_id" andValue:mealID],
                         [DictHelper dictWithKey:@"num_persons" andValue:numberOfPerson]];
@@ -287,8 +287,8 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
         UIWebView* webView = [[UIWebView alloc] init];
         UIViewController* vc = [[UIViewController alloc] init];
         vc.view = webView;
-        NSURL* url = [NSURL URLWithString:[NSString stringWithFormat:@"http://%@/meal/%d/", EOHOST, _mealInfo.mID]];
-        NSString* params = [NSString stringWithFormat:@"meal_id=%d&num_persons=%d", _mealInfo.mID, _numberOfPersons];
+        NSURL* url = [NSURL URLWithString:[NSString stringWithFormat:@"http://%@/meal/%@/", EOHOST, _meal.mID]];
+        NSString* params = [NSString stringWithFormat:@"meal_id=%@&num_persons=%d", _meal.mID, _numberOfPersons];
         NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:url];
         [request setHTTPMethod:@"POST"];
         [request setHTTPBody:[params dataUsingEncoding:NSUTF8StringEncoding]];
@@ -346,7 +346,7 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
 - (BOOL)webView:(UIWebView *)webView shouldStartLoadWithRequest:(NSURLRequest *)request navigationType:(UIWebViewNavigationType)navigationType{
     NSString* urlStr = request.URL.absoluteString;
     DDLogVerbose(@"start loading %@", urlStr);
-    NSString* successURL = [NSString stringWithFormat:@"http://%@/meal/%d/order/", EOHOST, _mealInfo.mID];
+    NSString* successURL = [NSString stringWithFormat:@"http://%@/meal/%@/order/", EOHOST, _meal.mID];
     NSString* failedURL = [NSString stringWithFormat:@"http://%@/error/", EOHOST];
     if ([urlStr hasPrefix:successURL]) {
         NSArray* components = [urlStr componentsSeparatedByString:@"/"];

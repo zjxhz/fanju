@@ -14,5 +14,7 @@
     #import <CoreData/CoreData.h>
     #import "Three20/Three20.h"
     #import "DDLog.h"
+    #import "RestKit.h"
+    #import "Service.h"
 static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 #endif

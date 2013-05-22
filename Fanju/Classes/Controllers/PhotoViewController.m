@@ -12,7 +12,6 @@
 #import "MBProgressHUD.h"
 
 #define SCROLL_VIEW_CONENT_WIDTH 320
-#define SCROLL_VIEW_CONENT_HEIGHT 480
 
 @interface PhotoViewController (){
 //    UIView* _zoomViewForScrollView;
@@ -45,9 +44,14 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    self.view.backgroundColor = [UIColor blackColor];
+    self.wantsFullScreenLayout = YES;
+    [self viewInFullScreen:YES];
+    _fullScreen = YES;
+    CGFloat height = [[UIScreen mainScreen] applicationFrame].size.height;
     UIGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(viewTapped:)];
     [self.view addGestureRecognizer:tap];
-    _scrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, 0, SCROLL_VIEW_CONENT_WIDTH, SCROLL_VIEW_CONENT_HEIGHT)];
+    _scrollView = [[UIScrollView alloc] initWithFrame:[[UIScreen mainScreen] applicationFrame]];
     _scrollView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
 	_scrollView.autoresizesSubviews = YES;
     [_scrollView setMaximumZoomScale:2.0];
@@ -67,7 +71,7 @@
         UIViewContentMode mode = UIViewContentModeScaleAspectFit;
         if (image) {
             [_loadedURLs addObject:currentURL];
-            imageFrame = CGRectMake(0, 0, SCROLL_VIEW_CONENT_WIDTH, SCROLL_VIEW_CONENT_HEIGHT);
+            imageFrame = [[UIScreen mainScreen] applicationFrame];
             CGFloat radio = image.size.height / image.size.width;
             if (radio > 1.3 && radio < 2) {
                 mode = UIViewContentModeScaleAspectFill;
@@ -78,7 +82,7 @@
             CGFloat imageY = (SCROLL_VIEW_CONENT_WIDTH - image.size.height) / 2;
             imageFrame = CGRectMake(imageX, imageY, image.size.width, image.size.height);
         }
-        ImageScrollView* imageScrollView = [[ImageScrollView alloc] initWithFrame:CGRectMake(xOrigin, 0, SCROLL_VIEW_CONENT_WIDTH, SCROLL_VIEW_CONENT_HEIGHT) image:image contentMode:mode];
+        ImageScrollView* imageScrollView = [[ImageScrollView alloc] initWithFrame:CGRectMake(xOrigin, 0, SCROLL_VIEW_CONENT_WIDTH, height) image:image contentMode:mode];
         imageScrollView.backgroundColor = [UIColor blackColor];
         imageScrollView.imageView.frame = imageFrame;
         
@@ -86,16 +90,13 @@
         [_scrollView addSubview:imageScrollView];
     }
     
-    _scrollView.contentSize = CGSizeMake(_photoSource.numberOfPhotos * SCROLL_VIEW_CONENT_WIDTH, SCROLL_VIEW_CONENT_HEIGHT);
+    _scrollView.contentSize = CGSizeMake(_photoSource.numberOfPhotos * SCROLL_VIEW_CONENT_WIDTH, height);
     _scrollView.contentOffset = CGPointMake(_initialIndex * SCROLL_VIEW_CONENT_WIDTH, 0 );
     [self.view addSubview:_scrollView];
 }
 
 -(void)viewWillAppear:(BOOL)animated{
     [super viewWillAppear:animated];
-    self.wantsFullScreenLayout = YES;
-    [self viewInFullScreen:YES];
-    _fullScreen = YES;
     self.navigationController.navigationBar.translucent = YES;
     [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleBlackTranslucent];
     [self.navigationController.view setNeedsLayout];
@@ -160,7 +161,7 @@
 
 - (void)setBigPhoto:(UIImage*)image  atIndex:(int)index {
     UIImageView* imageView = [_imageViews objectAtIndex:index];
-    imageView.frame = CGRectMake(0, 0, SCROLL_VIEW_CONENT_WIDTH, SCROLL_VIEW_CONENT_HEIGHT);
+    imageView.frame = [[UIScreen mainScreen] applicationFrame];
     CGFloat radio = image.size.height / image.size.width;
     if (radio > 1.3 && radio < 2) {
         imageView.contentMode = UIViewContentModeScaleAspectFill;

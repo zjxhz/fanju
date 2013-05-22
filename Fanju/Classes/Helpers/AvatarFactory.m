@@ -8,6 +8,7 @@
 
 #import "AvatarFactory.h"
 #import "UserImageView.h"
+#import "URLService.h"
 
 @implementation AvatarFactory
 +(UserImageView*) avatarForUser:(UserProfile*)user frame:(CGRect)frame delegate:(id<UserImageViewDelegate>)delegate{
@@ -38,14 +39,23 @@
     return userImgView;
 }
 
-+(UserImageView*)avatarWithBg:(UserProfile*)user{
-    UIImage* bg = [UIImage imageNamed:@"p_photo_bg"];
++(UserImageView*)avatarWithBg:(User*)user{
+    return [AvatarFactory avatarWithBg:user big:NO];
+}
+
++(UserImageView*)avatarWithBg:(User*)user big:(BOOL)big{
+    UIImage* bg = nil;
+    if (big) {
+        bg = [UIImage imageNamed:@"avatar_bg_big"];
+    } else {
+        bg = [UIImage imageNamed:@"p_photo_bg"];
+    }
     UserImageView* view = [[UserImageView alloc] initWithImage:bg];
-    CGFloat inset = 3;
+    CGFloat inset = big ? 5 : 3;
     CGRect avatarFrame = CGRectMake(inset, inset, bg.size.width - inset * 2, bg.size.height - inset * 2);
     NINetworkImageView* avatar = [[NINetworkImageView alloc] initWithFrame:avatarFrame];
     avatar.contentMode = UIViewContentModeScaleAspectFill;
-    [avatar setPathToNetworkImage:user.avatarFullUrl];
+    [avatar setPathToNetworkImage:[URLService absoluteURL:user.avatar]];
     [view addSubview:avatar];
     return  view;
 }

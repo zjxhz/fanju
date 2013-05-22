@@ -8,6 +8,9 @@
 
 #import <Foundation/Foundation.h>
 #import "UserProfile.h"
+#import "User.h"
+
 @interface DistanceUtil : NSObject
 +(NSString*) distanceToMe:(UserProfile*)user;
++(NSString*)distanceFrom:(User*)user;
 @end

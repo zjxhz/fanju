@@ -7,12 +7,15 @@
 //
 
 #import "MealCell.h"
-#import "MealInfo.h"
+#import "Meal.h"
 #import "MealTableItem.h"
 #import "AvatarFactory.h"
+#import "Restaurant.h"
+#import "MealService.h"
+#import "URLService.h"
 
 @implementation MealCell{
-    MealInfo* _mealInfo;
+    Meal* _mealInfo;
     NSMutableArray* _participants;
 }
 
@@ -38,22 +41,28 @@
 
 -(void)prepareForReuse{
     [super prepareForReuse];
+    _costLabel.text = nil;
+    _addressLabel.text = nil;
     _mealView.image = nil;
+    _topicLabel.text = nil;
+    _timeLabel.text = nil;
     [_participants makeObjectsPerformSelector:@selector(removeFromSuperview)];
 }
 
 - (void)setObject:(id)object {
     [super setObject:object];
-    MealTableItem* item = object;
-    _mealInfo = item.mealInfo;
+    _mealInfo = object;
+    if (!_mealInfo) {
+        return;
+    }
     _costLabel.text = [NSString stringWithFormat:NSLocalizedString(@"AverageCost", nil),
-                       _mealInfo.price, (_mealInfo.maxPersons - _mealInfo.actualPersons)];
+                       [_mealInfo.price floatValue], ([_mealInfo.maxPersons integerValue] - [_mealInfo.actualPersons integerValue])];
     _addressLabel.text = _mealInfo.restaurant.name;
     _topicLabel.text = _mealInfo.topic;
-    _timeLabel.text = _mealInfo.timeText;
+    _timeLabel.text = [MealService dateTextOfMeal:_mealInfo];
     NSInteger i = 0;
-    [_mealView setPathToNetworkImage:_mealInfo.photoFullUrl];
-    for (UserProfile* participant in _mealInfo.participants) {
+    [_mealView setPathToNetworkImage:[URLService  absoluteURL:_mealInfo.photoURL] ];
+    for (User* participant in _mealInfo.participants) {
         if (i >= 5) {
             break;
         }

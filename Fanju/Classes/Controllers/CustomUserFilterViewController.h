@@ -11,7 +11,7 @@
 
 @protocol CustomUserFilterViewControllerDelegate
 @optional
--(void)filterSelected:(NSString*)filter;
+-(void)filterSelected:(NSDictionary*)filter;
 @end
 
 

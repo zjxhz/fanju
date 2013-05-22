@@ -21,6 +21,7 @@
 #import "UserService.h"
 #import "UserMessage.h"
 #import "MessageService.h"
+#import "Conversation.h"
 
 #define kChatBarHeight1                      40
 #define kChatBarHeight4                      94
@@ -43,7 +44,7 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
     UIButton *_sendButton;
     CGFloat _previousTextViewContentHeight;
     UIImageView *_messageInputBar;
-    User* _user;
+    Conversation* _conversation;
     UIBubbleTableView *_bubbleTable;
     NSMutableArray *_bubbleData;
     CGFloat _keyboardHeight;
@@ -58,9 +59,9 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
 
 @implementation XMPPChatViewController2
 
--(id)initWithUserChatTo:(User*)with{
+-(id)initWithConversation:(Conversation*)conversation{
     if (self = [self init]) {
-        _user = with;
+        _conversation = conversation;
         _bubbleData = [NSMutableArray array];
         RKManagedObjectStore* store = [RKObjectManager sharedManager].managedObjectStore;
         _context = store.mainQueueManagedObjectContext;
@@ -96,8 +97,8 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
     UIGestureRecognizer *reg = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(viewTapped:)];
     reg.delegate = self;
     [self.view addGestureRecognizer:reg];
-    [[NSNotificationCenter defaultCenter] postNotificationName:EOCurrentContact
-                                                        object:_user
+    [[NSNotificationCenter defaultCenter] postNotificationName:CurrentConversation
+                                                        object:_conversation.with
                                                       userInfo:nil];
 }
 
@@ -190,7 +191,7 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
 - (void)viewWillDisappear:(BOOL)animated {
     [super viewWillAppear:animated];
     UIKeyboardNotificationsUnobserve(); // as soon as possible
-    [[NSNotificationCenter defaultCenter] postNotificationName:EOCurrentContact
+    [[NSNotificationCenter defaultCenter] postNotificationName:CurrentConversation
                                                         object:nil
                                                       userInfo:nil];
 }
@@ -203,13 +204,12 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
     _fetchRequest = [[NSFetchRequest alloc] init];
     _fetchRequest.entity = [NSEntityDescription entityForName:@"UserMessage" inManagedObjectContext:_context];
     
-    User* me = [UserService shared].loggedInUser;
-    _fetchRequest.predicate = [NSPredicate predicateWithFormat:@"owner.uID = %@ AND with.uID= %@", me.uID, _user.uID];
+    _fetchRequest.predicate = [NSPredicate predicateWithFormat:@"conversation = %@", _conversation];
     _fetchRequest.sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"time" ascending:NO]];
     _fetchRequest.fetchLimit = FETCH_LIMIT;
-    _fetchOffset = FETCH_LIMIT;
     NSError* error;
     NSArray* objects = [_context executeFetchRequest:_fetchRequest error:&error];
+    _fetchOffset = FETCH_LIMIT;
     [self insertMessageBubbles:objects];
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(messageDidSave:)
@@ -219,19 +219,17 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
 }
 
 -(void)loadEarlierMessages:(id)sender{
-    NSManagedObjectContext* context = [XMPPHandler sharedInstance].messageManagedObjectContext;
+    //delayed so it looks like refreshing
+    [NSTimer scheduledTimerWithTimeInterval:1 target:self selector:@selector(doLoadEarlierMessages) userInfo:nil repeats:NO];
+}
+
+-(void)doLoadEarlierMessages{
     _fetchRequest.fetchOffset = _fetchOffset;
     _fetchRequest.fetchLimit = FETCH_LIMIT;
-    NSArray* objects = [context executeFetchRequest:_fetchRequest error:nil];
+    NSArray* objects = [_context executeFetchRequest:_fetchRequest error:nil];
     [self insertMessageBubbles:objects];
     _fetchOffset += objects.count;
     [_refreshControl endRefreshing];
-    if (objects.count == 0) {
-        [SVProgressHUD dismissWithSuccess:@"已无更早消息"];
-    } else {
-        
-//        _bubbleTable scrollToRowAtIndexPath:<#(NSIndexPath *)#> atScrollPosition:<#(UITableViewScrollPosition)#> animated:<#(BOOL)#>
-    }
 }
 
 
@@ -243,9 +241,10 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
 }
 
 -(NSBubbleData*)bubbleFromMessage:(UserMessage*)message{
-    NSBubbleType bubbleType = message.incoming ? BubbleTypeSomeoneElse : BubbleTypeMine;
+    NSBubbleType bubbleType = [message.incoming boolValue] ? BubbleTypeSomeoneElse : BubbleTypeMine;
     NSBubbleData *bubble = [NSBubbleData dataWithText:message.message date:message.time type:bubbleType];
     bubble.avatar = _avatarSomeoneElse;
+    bubble.avatarURL = [URLService absoluteURL:_conversation.with.avatar];
     return bubble;
 }
 
@@ -260,7 +259,7 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
     NSString* message = _textView.text;
     _textView.text = nil;
     [self textViewDidChange:_textView];
-    [self sendMessage:message To:_user];
+    [self sendMessage:message To:_conversation.with];
 }
 
 -(void)sendMessage:(NSString*)message To:(User*)to{
@@ -271,7 +270,7 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
     NSXMLElement *messageElement = [NSXMLElement elementWithName:@"message"];
     UserProfile* me = [Authentication sharedInstance].currentUser;
     [messageElement addAttributeWithName:@"from" stringValue:me.jabberID];
-    [messageElement addAttributeWithName:@"to" stringValue:[UserService jidForUser:_user]];
+    [messageElement addAttributeWithName:@"to" stringValue:[UserService jidForUser:_conversation.with]];
     [messageElement addAttributeWithName:@"type" stringValue:@"chat"];
     [messageElement addChild:body];
     [[XMPPHandler sharedInstance].xmppStream sendElement:messageElement];
@@ -391,8 +390,8 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
 
 -(void)messageDidSave:(NSNotification*)notif {
     UserMessage* messageMO = notif.object;
-    User* me = [UserService shared].loggedInUser;
-    if (![messageMO.owner isEqual:me]) {
+    User* me = [UserService service].loggedInUser;
+    if (![messageMO.conversation.owner isEqual:me]) {
         return; //not for this conversation
     }
 

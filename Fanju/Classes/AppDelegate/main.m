@@ -11,7 +11,7 @@
 #import "AppDelegate.h"
 
 CFAbsoluteTime StartTime;
-NSInteger unreadCount;
+NSInteger UnreadCount;
 
 int main(int argc, char *argv[])
 {

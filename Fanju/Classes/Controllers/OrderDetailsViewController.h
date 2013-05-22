@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
 //
 #import "MealInfo.h"
-#import "OrderInfo.h"
+#import "Order.h"
 #import "NINetworkImageView.h"
 #import <MapKit/MapKit.h>
 
@@ -17,9 +17,9 @@
 @property (weak, nonatomic) IBOutlet UILabel *time;
 @property (weak, nonatomic) IBOutlet UIImageView *mealBg;
 @property (strong, nonatomic) NINetworkImageView *mealImage;
-@property (weak, nonatomic) MealInfo* meal;
+@property (weak, nonatomic) Meal* meal;
 @property (weak, nonatomic) IBOutlet UILabel* codeLabel;
 @property (weak, nonatomic) IBOutlet UILabel* numerOfPersons;
 @property(nonatomic, nonatomic) IBOutlet MKMapView* mapView;
-@property (nonatomic, weak) OrderInfo* order;
+@property (nonatomic, weak) Order* order;
 @end

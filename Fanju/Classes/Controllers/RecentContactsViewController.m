@@ -62,20 +62,20 @@
 }
 
 - (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath*)indexPath {
-    id<TTTableViewDataSource> dataSource = (id<TTTableViewDataSource>)tableView.dataSource;
-    id object = [dataSource tableView:tableView objectForRowAtIndexPath:indexPath];
-    if ([object isKindOfClass:[RecentContact class]]) {
-        RecentContact *item = object;
-        XMPPChatViewController2 *chat =[[XMPPChatViewController2 alloc] initWithUserChatTo:item.contact];
-        item.unread = 0; //open the chat dialog mark all messages as read
-        [[XMPPHandler sharedInstance] markMessagesReadFrom:item.contact];
-        [[XMPPHandler sharedInstance] updateUnreadCount];
-        [[XMPPHandler sharedInstance] retrieveMessagesWith:item.contact after:[item.time timeIntervalSince1970] retrievingFromList:NO];
-        NSError *error = nil;
-        [[XMPPHandler sharedInstance].messageManagedObjectContext save:&error];
-        [self refresh];
-        [self.navigationController pushViewController:chat animated:YES];
-    }
+//    id<TTTableViewDataSource> dataSource = (id<TTTableViewDataSource>)tableView.dataSource;
+//    id object = [dataSource tableView:tableView objectForRowAtIndexPath:indexPath];
+//    if ([object isKindOfClass:[RecentContact class]]) {
+//        RecentContact *item = object;
+//        XMPPChatViewController2 *chat =[[XMPPChatViewController2 alloc] initWithConversation:conv];
+//        item.unread = 0; //open the chat dialog mark all messages as read
+//        [[XMPPHandler sharedInstance] markMessagesReadFrom:item.contact];
+//        [[XMPPHandler sharedInstance] updateUnreadCount];
+//        [[XMPPHandler sharedInstance] retrieveMessagesWith:item.contact after:[item.time timeIntervalSince1970] retrievingFromList:NO];
+//        NSError *error = nil;
+//        [[XMPPHandler sharedInstance].messageManagedObjectContext save:&error];
+//        [self refresh];
+//        [self.navigationController pushViewController:chat animated:YES];
+//    }
 }
 
 

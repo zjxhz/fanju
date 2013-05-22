@@ -10,10 +10,12 @@
 #import "UIImage+Utilities.h"
 #import "MBProgressHUD.h"
 #import "NetworkHandler.h"
-#import "UserProfile.h"
 #import "Const.h"
 #import "UIImage+Resize.h"
-
+#import "URLService.h"
+#import "UserService.h"
+#import "RestKit.h"
+#import "Photo.h"
 #define LARGE_AVATAR_LENGTH 220
 #define MAX_PHOTO_HEIGHT 1920
 #define MAX_PHOTO_WIDTH 1280
@@ -21,20 +23,26 @@
 @implementation ImageUploader{
     UIActionSheet* _imagePickerActions;
     MBProgressHUD* _hud;
-    UserProfile* _user;
     UIImagePickerController *_pickerController;
     UIViewController* _viewController;
+    NSManagedObjectContext* _mainQueueContext;
 }
 -(id)initWithViewController:(UIViewController*)viewController delegate:(id<ImageUploaderDelegate>)delegate{
     self = [super init];
     _viewController = viewController;
     self.delegate = delegate;
+    RKManagedObjectStore* store = [RKObjectManager sharedManager].managedObjectStore;
+    _mainQueueContext = store.mainQueueManagedObjectContext;
     return self;
 }
 
--(void)uploadImageForUser:(UserProfile*)user option:(ImageUploaderOption)option{
-    _user = user;
-    self.option = option;
+-(void)uploadAvatar{
+    self.option = AVATAR;
+    [self presentImagePicker];
+}
+
+-(void)uploadPhoto{
+    self.option = PHOTO;
     [self presentImagePicker];
 }
 
@@ -85,7 +93,8 @@
     
     _hud = [MBProgressHUD showHUDAddedTo:picker.view animated:YES];
 	_hud.mode = MBProgressHUDModeAnnularDeterminate;
-    NSString* filename  = [NSString stringWithFormat:@"%d_%@_%.0f.jpg", _user.uID, _option == AVATAR ? @"a" : @"p", [[NSDate date] timeIntervalSince1970] * 1000 ];
+    NSString* userID = [[UserService service].loggedInUser.uID stringValue];
+    NSString* filename  = [NSString stringWithFormat:@"%@_%@_%.0f.jpg", userID, _option == AVATAR ? @"a" : @"p", [[NSDate date] timeIntervalSince1970] * 1000 ];
     if (_option == AVATAR) {
         [self doChangeAvatar:image withName:filename];
     } else {
@@ -95,10 +104,18 @@
 
 
 -(void)doAddPhoto:(UIImage*) image withName:(NSString*)filename{
-    [[NetworkHandler getHandler] uploadImage:image withName:filename toURL:[NSString stringWithFormat:@"user/%d/photos/", _user.uID] success:^(id obj){
+    NSString* userID = [[UserService service].loggedInUser.uID stringValue];
+    [[NetworkHandler getHandler] uploadImage:image withName:filename toURL:[NSString stringWithFormat:@"user/%@/photos/", userID] success:^(id obj){
         NSDictionary* result = obj;
         if ([[result objectForKey:@"status"] isEqualToString:@"OK"]) {
-            [_delegate didUploadPhoto:image withData:result];
+            //TODO maybe mapper should be used
+            Photo* photo = [NSEntityDescription insertNewObjectForEntityForName:@"Photo" inManagedObjectContext:_mainQueueContext];
+            photo.url = result[@"large"];
+            photo.pID = result[@"id"];
+            photo.thumbnailURL = result[@"thumbnail"];
+            photo.user = [UserService service].loggedInUser;
+            [_mainQueueContext saveToPersistentStore:nil];
+            [_delegate didUploadPhoto:photo image:image];
         }
         else {
             _hud.labelText = @"上传失败";
@@ -118,14 +135,16 @@
 }
 
 -(void)doChangeAvatar:(UIImage*)image withName:(NSString*)filename{
-    [[NetworkHandler getHandler] uploadImage:image withName:filename toURL:[NSString stringWithFormat:@"user/%d/avatar/", _user.uID]
+    NSString* userID = [[UserService service].loggedInUser.uID stringValue];
+    [[NetworkHandler getHandler] uploadImage:image withName:filename toURL:[NSString stringWithFormat:@"user/%@/avatar/", userID]
                                      success:^(id obj) {
                                          DDLogVerbose(@"avatar updated");
                                          [_hud hide:YES];
                                          NSDictionary* data = obj;
                                          [_delegate didUploadAvatar:image withData:data];
                                          [_viewController dismissModalViewControllerAnimated:YES];
-                                         [[NSNotificationCenter defaultCenter] postNotificationName:AVATAR_UPDATED_NOTIFICATION object:[_user avatarFullUrl]];
+                                         NSString* big_avatar = data[@"big_avatar"];
+                                         [[NSNotificationCenter defaultCenter] postNotificationName:AVATAR_UPDATED_NOTIFICATION object:[URLService  absoluteURL:big_avatar]];
                                      } failure:^{
                                          DDLogError(@"failed to update avatar");
                                          _hud.labelText = @"上传失败";
@@ -136,6 +155,8 @@
                                          _hud.progress = totalBytesLoaded * 1.0 / totalBytesExpected;
                                      }];
 }
+
+
 
 #pragma mark UIActionSheetDelegate
 - (void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex{

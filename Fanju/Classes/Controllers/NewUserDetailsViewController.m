@@ -33,6 +33,7 @@
 #import "UserInfoCell.h"
 #import "UserSocialCell.h"
 #import "AlbumViewController.h"
+#import "MessageService.h"
 
 #define TAG_MSG @"发消息"
 #define TAG_COMMENT @"发评论"
@@ -69,8 +70,8 @@
 }
 
 -(void)edit:(id)sender{
-    UserMoreDetailViewController* more = [[UserMoreDetailViewController alloc] initWithStyle:UITableViewStyleGrouped editable:YES];
-    more.profile = _user;
+    UserMoreDetailViewController* more = [[UserMoreDetailViewController alloc] initWithStyle:UITableViewStyleGrouped];
+    more.user = _user;
     more.delegate = self;
     [self.navigationController pushViewController:more animated:YES];
 }
@@ -163,7 +164,7 @@
 
 // what we have is just a username here, so query the user info from network first
 -(void)setUsername:(NSString*)username{
-    NSString* url = [NSString stringWithFormat:@"http://%@/api/v1/user/?format=json&user__username=%@", EOHOST, username];
+    NSString* url = [NSString stringWithFormat:@"http://%@/api/v1/user/?format=json&username=%@", EOHOST, username];
     [[NetworkHandler getHandler] requestFromURL:url
                                          method:GET
                                     cachePolicy:TTURLRequestCachePolicyNone
@@ -251,8 +252,9 @@
 }
 
 - (void)sendMsg:(id)sender {
-    XMPPChatViewController2* c = [[XMPPChatViewController2 alloc] initWithUserChatTo:_user.jabberID];
-    [self.navigationController pushViewController:c animated:YES];
+    NSAssert(NO, @"TODO");
+//    XMPPChatViewController2* c = [[XMPPChatViewController2 alloc] initWithUserChatTo:_user.jabberID];
+//    [self.navigationController pushViewController:c animated:YES];
 }
 
 -(void) updateFollowOrNotButton{
@@ -354,7 +356,7 @@
     if (!_imageUploader) {
         _imageUploader = [[ImageUploader alloc] initWithViewController:self delegate:self];
     }
-    [_imageUploader uploadImageForUser:_user option:AVATAR];
+    [_imageUploader uploadAvatar];
 }
 
 
@@ -367,7 +369,7 @@
     if (!_imageUploader) {
         _imageUploader = [[ImageUploader alloc] initWithViewController:self delegate:self];
     }
-    [_imageUploader uploadImageForUser:_user option:PHOTO];
+    [_imageUploader uploadPhoto];
 }
 
 

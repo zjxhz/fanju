@@ -19,7 +19,7 @@
     AKSegmentedControl* _time;
     UILabel* _timeHelperLabel;
     UIButton* _okButton;
-    NSString* _filter;
+    NSMutableDictionary* _filter;
 }
 
 @end
@@ -151,7 +151,7 @@
 
 
 -(IBAction)confirm:(id)sender{
-    _filter = nil;
+    _filter = [NSMutableDictionary dictionary];
     int minutes = 0;
     NSInteger selectedIndex = _time.selectedIndexes.firstIndex;
     switch (selectedIndex) {
@@ -168,16 +168,11 @@
             break;
     }
     if (minutes != 0) {
-        _filter = [NSString stringWithFormat:@"seen_within_minutes=%d", minutes];
+        _filter[@"seen_within_minutes"]=[NSNumber numberWithInteger:minutes];
     }
     
     if(_gender.selectedIndexes.firstIndex > 0){
-        if (_filter) {
-            _filter = [NSString stringWithFormat:@"%@&", _filter];
-        } else {
-            _filter = @"";
-        }
-        _filter =  [NSString stringWithFormat:@"%@gender=%d", _filter, _gender.selectedIndexes.firstIndex -1];
+        _filter[@"gender"]= [NSNumber numberWithInteger:_gender.selectedIndexes.firstIndex - 1];
     }
     [self dismissViewControllerAnimated:YES completion:^(void){
         [TTURLRequestQueue mainQueue].suspended = NO;

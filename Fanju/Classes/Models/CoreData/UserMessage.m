@@ -2,12 +2,12 @@
 //  UserMessage.m
 //  Fanju
 //
-//  Created by Xu Huanze on 5/6/13.
+//  Created by Xu Huanze on 5/22/13.
 //  Copyright (c) 2013 Wayne. All rights reserved.
 //
 
 #import "UserMessage.h"
-#import "User.h"
+#import "Conversation.h"
 
 
 @implementation UserMessage
@@ -16,7 +16,7 @@
 @dynamic message;
 @dynamic read;
 @dynamic time;
-@dynamic owner;
-@dynamic with;
+@dynamic mID;
+@dynamic conversation;
 
 @end

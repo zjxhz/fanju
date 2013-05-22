@@ -22,10 +22,10 @@
 #import "MealDetailsViewDelegate.h"
 #import "OrderInfo.h"
 #import "MenuViewController.h"
+#import "Meal.h"
 
 #define MAP_HEIGHT 175
 #define TAB_BAR_HEIGHT 49
-#define HOST_VIEW_HEIGHT 58
 #define DISH_VIEW_HEIGHT 140
 #define DISH_VIEW_WIDTH 320
 #define H_GAP 7
@@ -48,12 +48,13 @@
 #define PARTICIPANTS_WIDTH 53
 #define PARTICIPANTS_HEIGHT PARTICIPANTS_WIDTH
 #define PARTICIPANTS_GAP 2
+
 @interface MealDetailViewController : TTTableViewController <MKMapViewDelegate, ShareToDelegate, SinaWeiboDelegate, WBSendViewDelegate, UserImageViewDelegate>{
     UIView *_detailsView;
     UIButton* _mapButton;
     UILabel *_introduction;
     UILabel *_numberOfPersons;
-    UIScrollView *_participants;
+    UIScrollView *_participantsView;
     Location *_location;
     UILabel* _loadingOrNoCommentsLabel;
     UIView* _normalTabBar;
@@ -69,8 +70,8 @@
     ClosablePopoverViewController *_cpc;
 }
 @property(nonatomic, strong) NSString* mealID;
-@property (nonatomic, strong) MealInfo *mealInfo;
+@property (nonatomic, strong) Meal *meal;
 @property (nonatomic, readonly)  UIView* tabBar;
-@property (nonatomic, strong) OrderInfo* unfinishedOrder;
+@property (nonatomic, strong) Order* unfinishedOrder;
 
 @end

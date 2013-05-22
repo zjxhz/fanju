@@ -8,7 +8,6 @@
 //
 
 #import "MealListViewController.h"
-#import "MealInfo.h"
 #import "MealTableItem.h"
 #import "NetworkHandler.h"
 #import "Const.h"
@@ -25,7 +24,9 @@
 #import "UIViewController+MFSideMenu.h"
 #import "WidgetFactory.h"
 #import "RestKit/RestKit.h"
-
+#import "DDAlertPrompt.h"
+#import "NewSidebarViewController.h"
+#import "UserService.h"
 
 @interface MealListViewController()
 @property (nonatomic, strong) IBOutlet UIView* loginView;
@@ -66,6 +67,8 @@
     AppDelegate *delegate = (AppDelegate*)[UIApplication sharedApplication].delegate;
     self.tableView.backgroundColor = [UIColor colorWithPatternImage:delegate.bgImage];
     self.tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
+    _refreshControl = [[ODRefreshControl alloc] initInScrollView:self.tableView];
+    [_refreshControl addTarget:self action:@selector(requestDataFromServer) forControlEvents:UIControlEventValueChanged];
 }
 
 
@@ -91,12 +94,7 @@
 - (void)didReceiveMemoryWarning
 {
     [super didReceiveMemoryWarning];
-    
-    // terminate all pending download connections
-//    NSArray *allDownloads = [imageDownloadsInProgress allValues];
-//    [allDownloads makeObjectsPerformSelector:@selector(cancelDownload)];
-    DDLogVerbose(@"low memory, check what we can do here");
-#warning TODO check what we can do here
+    DDLogWarn(@"low memory, check what we can do here");
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -156,58 +154,61 @@
 }
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
-    if ([[Authentication sharedInstance] isLoggedIn]) {
+    if ([[UserService service] isLoggedIn]) {
         MealDetailViewController *detail = [[MealDetailViewController alloc] init];
-        MealTableItem *item = [self.dataSource tableView:self.tableView objectForRowAtIndexPath:indexPath];
-        detail.mealInfo = item.mealInfo;
+        Meal *meal = [self.dataSource tableView:self.tableView objectForRowAtIndexPath:indexPath];
+        detail.meal = meal;
         [self.navigationController pushViewController:detail animated:YES];
     }
 }
 
--(void)reload{
-    [self requestDataFromServer];
-}
+
 - (void) requestDataFromServer{
-//    [self restRequest];
-    [[NetworkHandler getHandler] requestFromURL:[NSString stringWithFormat:@"http://%@/api/v1/meal/?format=json&limit=0", EOHOST]
-                                         method:GET
-                                    cachePolicy:TTURLRequestCachePolicyNetwork
-                                        success:^(id obj) {
-                                            NSArray *meals = [obj objectForKeyInObjects];
-                                            if (meals && [meals count] > 0) {
-                                                MealListDataSource *ds = [[MealListDataSource alloc] init];
-                                                
-                                                for (NSDictionary *dict in meals) {
-                                                    [ds addMeal:[MealTableItem itemWithMealInfo:[MealInfo mealInfoWithData:dict]]];
-                                                }  
-                                                self.dataSource = ds;
-                                                if (isLoading) {
-                                                    [self stopLoading];
-                                                }
-                                            }
-                                        } failure:^{
-                                            if (isLoading) {
-                                                [self stopLoading];
-                                            }
-                                            [SVProgressHUD dismissWithError:@"获取饭局列表失败"];
-                                        }];
+    [self restRequest];
+//    NetworkHandler *hanlder = [NetworkHandler getHandler];
+//    [hanlder requestFromURL:[NSString stringWithFormat:@"http://%@/api/v1/meal/?format=json&limit=0", EOHOST]
+//                                         method:GET
+//                                    cachePolicy:TTURLRequestCachePolicyNone
+//                                        success:^(id obj) {
+//                                            NSArray *meals = [obj objectForKeyInObjects];
+//                                            if (meals && [meals count] > 0) {
+//                                                MealListDataSource *ds = [[MealListDataSource alloc] init];
+//                                                
+//                                                for (NSDictionary *dict in meals) {
+//                                                    [ds addMeal:[MealTableItem itemWithMealInfo:[MealInfo mealInfoWithData:dict]]];
+//                                                }  
+//                                                self.dataSource = ds;
+//                                                if (isLoading) {
+//                                                    [self stopLoading];
+//                                                }
+//                                            }
+//                                        } failure:^{
+//                                            if (isLoading) {
+//                                                [self stopLoading];
+//                                            }
+//                                            [SVProgressHUD dismissWithError:@"获取饭局列表失败"];
+//                                        }];
 }
 
 -(void)restRequest{
     RKObjectManager* manager = [RKObjectManager sharedManager];
-    [manager getObjectsAtPath:@"/api/v1/meal/"
+    [manager getObjectsAtPath:@"meal/"
                    parameters:@{@"limit":@"0"}
                       success:^(RKObjectRequestOperation *operation, RKMappingResult *mappingResult) {
                           DDLogVerbose(@"fetched results from /meal/");
-    }
+                          MealListDataSource *ds = [[MealListDataSource alloc] init];
+                          for (Meal* meal in mappingResult.array) {
+                              [ds addMeal:meal];
+                          }
+                          self.dataSource = ds;
+                          [_refreshControl endRefreshing];
+                        }
                       failure:^(RKObjectRequestOperation *operation, NSError *error) {
+                          [_refreshControl endRefreshing];
                           DDLogError(@"failed from /meal/");
-    }];
+                      }];
 }
 - (void) removeSideMenuBarButtonItem {
-//    self.navigationController.navigationItem.leftBarButtonItem.customView.hidden = YES;
-//    [self.navigationController.navigationItem.leftBarButtonItem.customView removeFromSuperview];
-//    [self.navigationItem setLeftBarButtonItem:nil animated:NO];
     self.navigationItem.leftBarButtonItem = nil;
 }
 
@@ -219,12 +220,32 @@
 
 -(IBAction)loginWithWeibo:(id)sender{
     [Authentication sharedInstance].delegate = self;
-    if ([EOHOST hasPrefix:@"localhost"] || [EOHOST hasPrefix:@"www.ifunjoin"]) { //quick hack as it's not possible to login as weibo user on localhost
-        [[Authentication sharedInstance] loginWithUserName:@"xuaxu" password:@"qqqqqq"];
+    if (![EOHOST isEqual:@"www.fanjoin.com"]) { //quick hack as it's not possible to login as weibo user on localhost
+        DDAlertPrompt *loginPrompt = [[DDAlertPrompt alloc] initWithTitle:@"登录(开发服务器)" delegate:self cancelButtonTitle:@"取消" otherButtonTitle:@"确定"];
+        [loginPrompt show];
         return;
     }
     [[Authentication sharedInstance] loginAsSinaWeiboUser:self];
 }
+
+- (void)didPresentAlertView:(UIAlertView *)alertView {
+	if ([alertView isKindOfClass:[DDAlertPrompt class]]) {
+		DDAlertPrompt *loginPrompt = (DDAlertPrompt *)alertView;
+		[loginPrompt.plainTextField becomeFirstResponder];
+		[loginPrompt setNeedsLayout];
+	}
+}
+
+- (void)alertView:(UIAlertView *)alertView willDismissWithButtonIndex:(NSInteger)buttonIndex {
+	if (buttonIndex == [alertView cancelButtonIndex]) {
+	} else {
+		if ([alertView isKindOfClass:[DDAlertPrompt class]]) {
+            DDAlertPrompt *loginPrompt = (DDAlertPrompt *)alertView;
+            [[Authentication sharedInstance] loginWithUserName:loginPrompt.plainTextField.text password:loginPrompt.secretTextField.text];
+		}
+	}
+}
+
 
 -(IBAction)loginWithQQ:(id)sender{
     
@@ -248,7 +269,10 @@
 }
 -(void)userFailedToLogInWithError:(NSString*)error{
     self.tableView.frame = self.view.frame;
+    UIAlertView* alert = [[UIAlertView alloc] initWithTitle:@"登录失败" message:@"请检查用户名密码" delegate:nil cancelButtonTitle:@"确定" otherButtonTitles: nil];
+    [alert show];
 }
+
 -(void)userDidLogout:(UserProfile*)user{
     //do nothing as logout has been handled by notifications
 }
@@ -261,6 +285,7 @@
     if (self.isViewLoaded && self.view.window) {
         [SVProgressHUD dismiss];
     }
+    
 }
 
 - (void)didLogout:(NSNotification*)notif {

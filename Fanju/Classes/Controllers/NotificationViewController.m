@@ -12,22 +12,37 @@
 #import "NSDictionary+ParseHelper.h"
 #import "NINetworkImageView.h"
 #import "XMPPHandler.h"
-#import "FollowerEvent.h"
 #import "DateUtil.h"
 #import "NewUserDetailsViewController.h"
-#import "JoinMealEvent.h"
 #import "MealDetailViewController.h"
-#import "VisitorEvent.h"
-#import "EventFactory.h"
 #import "MealEventCell.h"
-#import "PhotoUploadedEvent.h"
 #import "UploadPhotoEventCell.h"
 #import "SimpleUserEventCell.h"
 #import "WidgetFactory.h"
 #import "SVProgressHUD.h"
+#import "NotificationService.h"
+#import "RestKit.h"
+#import "UserService.h"
+#import "Notification.h"
+#import "PhotoNotification.h"
+#import "MealNotification.h"
+#import "Meal.h"
+#import "MealService.h"
+#import "URLService.h"
+#import "Photo.h"
+#import "UserDetailsViewController.h"
+#import "LoadMoreTableItem.h"
+#import "LoadMoreTableItemCell.h"
+
+#define FETCH_LIMIT 20
 
 @interface NotificationViewController (){
     NSMutableArray* _notifications;
+    NSManagedObjectContext* _contex;
+    NSFetchRequest* _fetchRequest;
+    NSInteger _fetchOffset;
+    LoadMoreTableItem* _loadMoreItem;
+    NSInteger _notificationTotalCount;
 }
 
 @end
@@ -39,9 +54,12 @@
     self = [super initWithStyle:style];
     if (self) {
         _notifications = [NSMutableArray array];
+        RKManagedObjectStore* store = [RKObjectManager sharedManager].managedObjectStore;
+        _contex = store.mainQueueManagedObjectContext;
         self.navigationItem.titleView = [[WidgetFactory sharedFactory] titleViewWithTitle:@"通知"];
         self.view.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"bg"]];
         self.tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
+
     }
     return self;
 }
@@ -49,7 +67,7 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    [self requestEvents];
+    [self requestNotifications];
 }
 
 -(void)viewDidAppear:(BOOL)animated{
@@ -57,26 +75,33 @@
     [[NSNotificationCenter defaultCenter] postNotificationName:EOUnreadNotificationCount
                                                         object:[NSNumber numberWithInteger:0]
                                                       userInfo:nil];
-    [[XMPPHandler sharedInstance] markMessagesReadFrom:PUBSUB_SERVICE];
+    [[NotificationService service] markAllNotificationsRead];
 }
 
--(void) requestEvents{
-    NSFetchRequest *req = [[NSFetchRequest alloc] init];
-    NSManagedObjectContext* context = [XMPPHandler sharedInstance].messageManagedObjectContext;
-    req.entity = [NSEntityDescription entityForName:@"EOMessage" inManagedObjectContext:context];
-    req.predicate = [NSPredicate predicateWithFormat:@"node != ''"];
-    NSSortDescriptor *sortByTime = [[NSSortDescriptor alloc] initWithKey:@"time" ascending:NO];
-    req.sortDescriptors = @[sortByTime];
-    
+-(void) requestNotifications{
+    _fetchRequest = [[NSFetchRequest alloc] init];
+    _fetchRequest.entity = [NSEntityDescription entityForName:@"Notification" inManagedObjectContext:_contex];
+    _fetchRequest.includesSubentities = YES;
+    _fetchRequest.predicate = [NSPredicate predicateWithFormat:@"owner == %@", [UserService service].loggedInUser];
+    NSSortDescriptor *sortByTime = [[NSSortDescriptor alloc] initWithKey:@"time" ascending:NO];//时间降序，最新的在前
+    _fetchRequest.sortDescriptors = @[sortByTime];
     NSError* error;
-    NSArray* objects = [context executeFetchRequest:req error:&error];
-    for (EOMessage* message in objects) {
-        [self createAndInsertEvent:message append:YES];
+    _notificationTotalCount = [_contex countForFetchRequest:_fetchRequest error:&error];
+    if(_notificationTotalCount == NSNotFound) {
+        DDLogError(@"failed to count notification count: %@", error);
     }
-    
+    _fetchRequest.fetchLimit = FETCH_LIMIT;
+    NSArray* objects = [_contex executeFetchRequest:_fetchRequest error:&error];
+
+    for (Notification* notification in objects) {
+        [self createAndInsertNotification:notification append:YES];
+    }
+    _fetchOffset += objects.count;
+    [self setOrNullifyLoadMore];
+    [self.tableView reloadData];
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(notificationDidSave:)
-                                                 name:EONotificationDidSaveNotification
+                                                 name:NotificationDidSaveNotification
                                                object:nil];
 //    [[NSNotificationCenter defaultCenter] addObserver:self
 //                                             selector:@selector(messageDidDelete:)
@@ -85,22 +110,26 @@
 //    [[XMPPHandler sharedInstance] updateUnreadCount]; //manually update the unread count so that unread count on the side bar looks same with what is showing here TODO update unread count
 }
 
--(void)createAndInsertEvent:(EOMessage*)message append:(BOOL)append{
-    id event = [[EventFactory sharedFactory] createEvent:message];    
-    if (event) {
-        if (append) {
-            [_notifications addObject:event];
-        } else {
-            [_notifications insertObject:event atIndex:0];
-        }
-        [self.tableView reloadData];
+-(void)setOrNullifyLoadMore{
+    if (_notificationTotalCount > _fetchOffset) {
+        _loadMoreItem = [[LoadMoreTableItem alloc] init];
+    } else {
+        _loadMoreItem = nil;
     }
+}
+-(void)createAndInsertNotification:(Notification*)notification append:(BOOL)append{
+    if (append) {
+        [_notifications addObject:notification];
+    } else {
+        [_notifications insertObject:notification atIndex:0];
+    }
+    [self.tableView reloadData];
 }
 
 
 -(void)notificationDidSave:(NSNotification*)notif{
-    EOMessage* message = notif.object;
-    [self createAndInsertEvent:message append:NO];
+    Notification* notification = notif.object;
+    [self createAndInsertNotification:notification append:NO];
 }
 
 #pragma mark - Table view data source
@@ -112,25 +141,36 @@
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    return _notifications.count;
+    return _notifications.count + (_loadMoreItem != nil);
+}
+
+-(void)insertNotifications:(NSArray*)notifications{
+    for (Notification *notification in notifications) {
+        [self createAndInsertNotification:notification append:NO];//TODO insert a bunch of data
+    }
+    [self.tableView reloadData];
 }
 
 -(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath{
-    EventBase* event = [_notifications objectAtIndex:indexPath.row];
-    if ([event isKindOfClass:[PhotoUploadedEvent class]] || [event isKindOfClass:[JoinMealEvent class]]) {
+    if (indexPath.row == _notifications.count) {
+        return 50;
+    }
+    Notification* notification = [_notifications objectAtIndex:indexPath.row];
+    if ([notification isKindOfClass:[PhotoNotification class]] || [notification isKindOfClass:[MealNotification class]]) {
         return 75;
     }
     return 55;
 }
-- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
-{
-    
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath{
     UITableViewCell *cell = nil;
-    EventBase* event = [_notifications objectAtIndex:indexPath.row];
+    if (indexPath.row == _notifications.count) {
+        return [[LoadMoreTableItemCell alloc] init];
+    }
     
     
-    
-    if ([event isKindOfClass:[JoinMealEvent class]]) {
+    Notification* notification = [_notifications objectAtIndex:indexPath.row];
+    if ([notification isKindOfClass:[MealNotification class]]) {
         NSString* CellIdentifier = @"MealEventCell";
         cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
         if (!cell) {
@@ -138,17 +178,10 @@
             cell = (UITableViewCell*)temp.view;
         }
         MealEventCell* mealEventCell = (MealEventCell*)cell;
-        CGRect frame = mealEventCell.avatar.frame;
-        JoinMealEvent* je = (JoinMealEvent*)event;
-        [mealEventCell.avatar setPathToNetworkImage:je.avatar forDisplaySize:frame.size contentMode:UIViewContentModeScaleAspectFill];
-        mealEventCell.avatar.layer.cornerRadius = 5;
-        mealEventCell.avatar.layer.masksToBounds = YES;
-        mealEventCell.name.text = je.userName;
-        mealEventCell.event.text = je.eventDescription;
-        mealEventCell.topic.text = je.mealTopic;
-        mealEventCell.time.text = [DateUtil userFriendlyStringFromDate:je.time];
-        [mealEventCell.mealImage setPathToNetworkImage:je.mealPhoto forDisplaySize:mealEventCell.mealImage.frame.size contentMode:UIViewContentModeScaleAspectFill];
-    } else if([event isKindOfClass:[PhotoUploadedEvent class]]){
+        MealNotification* mn = (MealNotification*)notification;
+        mealEventCell.topic.text = mn.meal.topic;
+        [mealEventCell.mealImage setPathToNetworkImage:[URLService absoluteURL:mn.meal.photoURL] forDisplaySize:mealEventCell.mealImage.frame.size contentMode:UIViewContentModeScaleAspectFill];
+    } else if([notification isKindOfClass:[PhotoNotification class]]){
         NSString* CellIdentifier = @"UploadPhotoEventCell";
         cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
         if (!cell) {
@@ -156,19 +189,12 @@
             cell = (UITableViewCell*)temp.view;
         }
         UploadPhotoEventCell* photoEventCell = (UploadPhotoEventCell*)cell;
-        CGRect frame = photoEventCell.avatar.frame;
-        PhotoUploadedEvent* pu = (PhotoUploadedEvent*)event;
-        [photoEventCell.avatar setPathToNetworkImage:pu.avatar forDisplaySize:frame.size contentMode:UIViewContentModeScaleAspectFill];
-        photoEventCell.avatar.layer.cornerRadius = 5;
-        photoEventCell.avatar.layer.masksToBounds = YES;
-        photoEventCell.name.text = pu.userName;
-        photoEventCell.event.text = pu.eventDescription;
-        photoEventCell.time.text = [DateUtil userFriendlyStringFromDate:pu.time];
-        [photoEventCell.photo setPathToNetworkImage:pu.photo forDisplaySize:photoEventCell.photo.frame.size ];
+        PhotoNotification* pn = (PhotoNotification*)notification;
+        [photoEventCell.photo setPathToNetworkImage:[URLService  absoluteURL:pn.photo.thumbnailURL] forDisplaySize:photoEventCell.photo.frame.size ];
         photoEventCell.clipsToBounds = YES;
         float degrees = 30; //the value in degrees
         photoEventCell.photo.transform = CGAffineTransformMakeRotation(degrees * M_PI/180.0);
-    } else if([event isKindOfClass:[SimpleUserEvent class]]) {
+    } else if([notification isKindOfClass:[Notification class]]) {
         NSString* CellIdentifier = @"SimpleUserEventCell";
         cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
         if (!cell) {
@@ -177,59 +203,25 @@
         }
     }
     
-    if ([event isKindOfClass:[SimpleUserEvent class]]) {
+    if ([notification isKindOfClass:[Notification class]]) {
         SimpleUserEventCell* eventCell = (SimpleUserEventCell*)cell;
-        SimpleUserEvent* userEvent = (SimpleUserEvent*)event;
-        [self configureSimpleUserEventCell:eventCell forEvent:userEvent];
+        [self configureSimpleUserEventCell:eventCell forEvent:notification];
     }
-    
-    
-//    UILabel* timeLabel = (UILabel* )cell.accessoryView;
-//    timeLabel.text = [DateUtil userFriendlyStringFromDate:event.time];
-    
-//    if ([event isKindOfClass:[SimpleUserEvent class]]) {
-//        SimpleUserEvent* se = (FollowerEvent*)event;
-//        if (!se.user) {
-//            se.user = [self loadUserFromCache:se.userID];
-//        }
-//        
-//        if (se.user) {
-//            [self configureCell:cell withUser:se.user];
-//            cell.detailTextLabel.text = se.eventDescription;
-//        } else {
-//            [self configureLoadingCell:cell];
-//        }
-//    }
     cell.selectionStyle = UITableViewCellSelectionStyleNone;
     
     return cell;
 }
 
--(void)configureSimpleUserEventCell:(SimpleUserEventCell*)userEventCell forEvent:(SimpleUserEvent*)event{
+-(void)configureSimpleUserEventCell:(SimpleUserEventCell*)userEventCell forEvent:(Notification*)notification{
     CGRect frame = userEventCell.avatar.frame;
-    SimpleUserEvent* sue = (SimpleUserEvent*)event;
-    [userEventCell.avatar setPathToNetworkImage:sue.avatar forDisplaySize:frame.size contentMode:UIViewContentModeScaleAspectFill];
+    [userEventCell.avatar setPathToNetworkImage:[UserService avatarURLForUser:notification.user] forDisplaySize:frame.size contentMode:UIViewContentModeScaleAspectFill];
     userEventCell.avatar.layer.cornerRadius = 5;
     userEventCell.avatar.layer.masksToBounds = YES;
-    userEventCell.name.text = sue.userName;
-    userEventCell.event.text = sue.eventDescription;
-    userEventCell.time.text = [DateUtil userFriendlyStringFromDate:sue.time];
+    userEventCell.name.text = notification.user.name;
+    userEventCell.event.text = notification.eventDescription;
+    userEventCell.time.text = [DateUtil userFriendlyStringFromDate:notification.time];
 }
 
-//-(void)configureCell:(UITableViewCell*)cell withUser:(UserProfile*)user{
-//    cell.textLabel.text = user.name;
-//    NSData* data =  [[TTURLCache sharedCache] dataForURL:[user avatarFullUrl]];
-//    UIImage* image = [UIImage imageWithData:data];
-//    if (image) {
-//        cell.imageView.image = image;
-//    }
-//}
-//
-//-(void)configureLoadingCell:(UITableViewCell*)cell{
-//    cell.textLabel.text = @"正在加载……";
-//    cell.detailTextLabel.text = @"";
-//    cell.imageView.image = [UIImage imageNamed:@"anno"];
-//}
 
 /*
 // Override to support conditional editing of the table view.
@@ -259,70 +251,68 @@
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    id event = [_notifications objectAtIndex:indexPath.row];
-    if([event isKindOfClass:[JoinMealEvent class]]){
-        JoinMealEvent* je = (JoinMealEvent*)event;
-        if (je.mealID) {
-            [self pushMealDetailsView:je.mealID];
+    if (indexPath.row == _notifications.count) {
+        if (_loadMoreItem.loading) {
+            return;
         }
-    } else if ([event isKindOfClass:[SimpleUserEvent class]]) {
-        SimpleUserEvent* se = event;
-        if (se.userID) {
-            [self pushUserDetails:se.userID];
-        }
-        
+        _loadMoreItem.loading = YES;
+        [self.tableView reloadData];
+        [self loadEarlierNotifications];
+        return;
+    }
+    id notif = [_notifications objectAtIndex:indexPath.row];
+    if([notif isKindOfClass:[MealNotification class]]){
+        MealDetailViewController *mealDetail = [[MealDetailViewController alloc] init];
+        MealNotification* mn = notif;
+        mealDetail.meal = mn.meal;
+        [self.navigationController pushViewController:mealDetail animated:YES];
+    } else if ([notif isKindOfClass:[Notification class]]) {
+        Notification* notification = notif;
+        UserDetailsViewController* details = [[UserDetailsViewController alloc] init];
+        details.user = notification.user;
+        [self.navigationController pushViewController:details animated:YES];
     } 
 }
 
--(void)pushMealDetailsView:(NSInteger)mealID{
-    MealDetailViewController *mealDetail = [[MealDetailViewController alloc] init];
-    [[NetworkHandler getHandler] requestFromURL:[NSString stringWithFormat:@"http://%@/api/v1/meal/%d/?format=json", EOHOST, mealID]
-                                         method:GET
-                                    cachePolicy:TTURLRequestCachePolicyDefault
-                                        success:^(id obj) {
-                                            NSDictionary* dic = obj;
-                                            MealInfo* meal = [MealInfo mealInfoWithData:dic];
-                                            mealDetail.mealInfo = meal;
-                                            [self.navigationController pushViewController:mealDetail animated:YES];
-                                        } failure:^{
-                                            DDLogError(@"failed to get user  for id %d", mealID);
-                                        }];
-    
 
+-(void)loadEarlierNotifications{
+    _fetchRequest.fetchOffset = _fetchOffset;
+    NSError* error;
+    _fetchRequest.fetchLimit = FETCH_LIMIT;
+    
+    NSArray* objects = [_contex executeFetchRequest:_fetchRequest error:&error];
+    for (Notification* notification in objects) {
+        [self createAndInsertNotification:notification append:YES];
+    }
+    _fetchOffset += objects.count;
+    [self setOrNullifyLoadMore];
 }
+
+//
+//-(void)reloadLastRow{
+//    UserListDataSource *ds = self.dataSource;
+//    NSArray *lastRow = [NSArray arrayWithObject:[NSIndexPath indexPathForRow:(ds.items.count - 1) inSection:0]];
+//    [self.tableView reloadRowsAtIndexPaths:lastRow withRowAnimation:UITableViewRowAnimationAutomatic];
+//}
+
 #pragma mark - UIGestureRecognizerDelegate
 - (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldReceiveTouch:(UITouch *)touch{
     return [touch.view isKindOfClass:[UIImageView class]];
 }
 
 -(void)avatarTapped:(UITapGestureRecognizer *)tap {
-    if (UIGestureRecognizerStateEnded == tap.state) {
-        CGPoint p = [tap locationInView:tap.view];
-        NSIndexPath* indexPath = [self.tableView indexPathForRowAtPoint:p];
-        id event = [_notifications objectAtIndex:indexPath.row];
-        if ([event isKindOfClass:[SimpleUserEvent class]]) {
-            SimpleUserEvent* se = event;
-            [self pushUserDetails:se.userID];
-        } else if([event isKindOfClass:[JoinMealEvent class]]){
-            JoinMealEvent* je = (JoinMealEvent*)event;
-            [self pushUserDetails:je.participantID];
-        }
-    }
-}
-
--(void)pushUserDetails:(NSString*)userID{
-    [[NetworkHandler getHandler] requestFromURL:[NSString stringWithFormat:@"http://%@/api/v1/user/%@/?format=json", EOHOST, userID]
-                                         method:GET
-                                    cachePolicy:TTURLRequestCachePolicyDefault
-                                        success:^(id obj) {
-                                            NSDictionary* dic = obj;
-                                            UserProfile* user = [UserProfile profileWithData:dic];
-                                            NewUserDetailsViewController* detailViewController = [[NewUserDetailsViewController alloc] initWithStyle:UITableViewStylePlain];
-                                            detailViewController.user = user;
-                                            [self.navigationController pushViewController:detailViewController animated:YES];
-                                        } failure:^{
-                                            DDLogError(@"failed to get user  for id %@", userID);
-                                        }];
+//    if (UIGestureRecognizerStateEnded == tap.state) {
+//        CGPoint p = [tap locationInView:tap.view];
+//        NSIndexPath* indexPath = [self.tableView indexPathForRowAtPoint:p];
+//        id event = [_notifications objectAtIndex:indexPath.row];
+//        if ([event isKindOfClass:[SimpleUserEvent class]]) {
+//            SimpleUserEvent* se = event;
+//            [self pushUserDetails:se.userID];
+//        } else if([event isKindOfClass:[JoinMealEvent class]]){
+//            JoinMealEvent* je = (JoinMealEvent*)event;
+//            [self pushUserDetails:je.participantID];
+//        }
+//    }
 }
 
 @end

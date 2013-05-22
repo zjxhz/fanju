@@ -7,11 +7,13 @@
 //
 
 #import "TTSectionedDataSource.h"
-#import "OrderInfo.h"
+#import "Order.h"
+#import "LoadMoreTableItem.h"
 
 @interface OrderListDataSource : TTTableViewDataSource
 @property(nonatomic, readonly) NSMutableArray* payingOrders;
 @property(nonatomic, readonly) NSMutableArray* upcomingOrders;
 @property(nonatomic, readonly) NSMutableArray* passedOrders;
--(void)addOrder:(OrderInfo*)orderInfo;
+-(void)addOrder:(Order*)orderInfo;
+@property(nonatomic, strong) LoadMoreTableItem* loadMoreItem;
 @end

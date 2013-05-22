@@ -8,6 +8,7 @@
 
 #import "UserListDataSource.h"
 #import "UserTableItem.h"
+#import "User.h"
 #import "UserTableItemCell.h"
 #import "LoadMoreTableItem.h"
 #import "LoadMoreTableItemCell.h"
@@ -15,7 +16,7 @@
 
 - (Class)tableView:(UITableView*)tableView cellClassForObject:(id) object {
     
-	if ([object isKindOfClass:[UserTableItem class]]) {  
+	if ([object isKindOfClass:[User class]]) {
 		return [UserTableItemCell class];  
 	} else if([object isKindOfClass:[LoadMoreTableItem class]]){
         return [LoadMoreTableItemCell class];

@@ -23,7 +23,7 @@
 
 @implementation UserTagsViewController
 
-- (id)initWithUser:(UserProfile*)user{
+- (id)initWithUser:(User*)user{
     if(self = [super initWithStyle:UITableViewStylePlain]){
         self.user = user;
         _selectedTags = [NSMutableArray array];

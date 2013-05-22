@@ -2,12 +2,15 @@
 //  User.m
 //  Fanju
 //
-//  Created by Xu Huanze on 5/6/13.
+//  Created by Xu Huanze on 5/21/13.
 //  Copyright (c) 2013 Wayne. All rights reserved.
 //
 
 #import "User.h"
+#import "Meal.h"
+#import "Order.h"
 #import "Photo.h"
+#import "Relationship.h"
 #import "Tag.h"
 
 
@@ -31,7 +34,11 @@
 @dynamic username;
 @dynamic weiboID;
 @dynamic workFor;
+@dynamic meals;
+@dynamic orders;
 @dynamic photos;
 @dynamic tags;
+@dynamic followings;
+@dynamic followers;
 
 @end

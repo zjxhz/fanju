@@ -10,13 +10,12 @@
 #import "MealListViewController.h"
 #import "MyMealsViewController.h"
 #import "UserListViewController.h"
-#import "SocialNetworkViewController.h"
 #import "ConversationViewController.h"
-#import "NewUserDetailsViewController.h"
+#import "UserDetailsViewController.h"
 #import "NotificationViewController.h"
 #import "MFSideMenu.h"
 
-@interface NewSidebarViewController : UITableViewController <UITableViewDataSource, UITableViewDelegate, UIGestureRecognizerDelegate>{
+@interface NewSidebarViewController : UITableViewController <UITableViewDataSource, UITableViewDelegate, UIGestureRecognizerDelegate, NINetworkImageViewDelegate>{
     NSArray *_sections;
     NSArray *_sectionItems;
     UIView* _header1;
@@ -27,9 +26,8 @@
 @property(nonatomic, strong) MealListViewController* mealListViewController;
 @property(nonatomic, readonly) MyMealsViewController* myMealsViewController;
 @property(nonatomic, readonly) UserListViewController* userListViewController;
-//@property(nonatomic, readonly) SocialNetworkViewController* socialViewController;
 @property(nonatomic, readonly) ConversationViewController* conversationViewController;
-@property(nonatomic, readonly) NewUserDetailsViewController* userDetailsViewController;
+@property(nonatomic, readonly) UserDetailsViewController* userDetailsViewController;
 @property(nonatomic, readonly) NotificationViewController* notificationViewController;
 
 +(NewSidebarViewController*) sideBar;

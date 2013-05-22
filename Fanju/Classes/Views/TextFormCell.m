@@ -17,7 +17,7 @@
         // Adding the text field
         textField = [[UITextField alloc] initWithFrame:CGRectZero];
         textField.clearsOnBeginEditing = NO;
-        textField.textAlignment = UITextAlignmentLeft;
+        textField.textAlignment = UITextAlignmentRight;
         textField.returnKeyType = UIReturnKeyDone;
         [self.contentView addSubview:textField];
     }

@@ -11,46 +11,45 @@
 #import "Const.h"
 #import "CustomUserFilterViewController.h"
 #import "NetworkHandler.h"
-#import "NewUserDetailsViewController.h"
+#import "UserDetailsViewController.h"
 #import "SVProgressHUD.h"
 #import "UserListDataSource.h"
 #import "UserListViewController.h"
-#import "UserProfile.h"
 #import "UserTableItem.h"
 #import "UserTableItemCell.h"
 #import "LocationProvider.h"
 #import "WidgetFactory.h"
 #import "DictHelper.h"
 #import "MBProgressHUD.h"
+#import "ODRefreshControl.h"
+#import "LoadMoreTableItem.h"
 
 @interface UserListViewController(){
-    BOOL _upadateLocationBeforeLoadUsers;
     MBProgressHUD* _hud;
 }
-
+@property(nonatomic, strong) ODRefreshControl* refreshControl;
+@property(nonatomic) BOOL upadateLocationBeforeLoadUsers;
+@property(nonatomic, strong) RKPaginator* paginator;
+@property(nonatomic, strong)    LoadMoreTableItem *loadMore;
 @end
 
 
-@implementation UserListViewController
+@implementation UserListViewController{
+    NSManagedObjectContext* _mainQueueContext;
+}
 @synthesize baseURL = _baseURL;
-
-+(UserListViewController*)recommendedUserListViewController{
-    UserListViewController *c = [[UserListViewController alloc] initWithStyle:UITableViewStylePlain];
-    c.baseURL = [NSString stringWithFormat:@"%@://%@/api/v1/user/%d/recommendations/?format=json", HTTPS, EOHOST, [Authentication sharedInstance].currentUser.uID];
-    return c;
-}
-
-+(UserListViewController*)nearbyUserListViewController{
-    UserListViewController *c = [[UserListViewController alloc] initWithStyle:UITableViewStylePlain];
-    c.baseURL = [NSString stringWithFormat:@"%@://%@/api/v1/user/%d/users_nearby/?format=json", HTTPS, EOHOST, [Authentication sharedInstance].currentUser.uID];
-    return c;
-}
 
 - (id)initWithStyle:(UITableViewStyle)style {
     self = [super initWithStyle:style];
 //    self.tableView.separatorColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"separator"]];
     self.tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
     self.tableView.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"bg"]];
+    _refreshControl = [[ODRefreshControl alloc] initInScrollView:self.tableView];
+    [_refreshControl addTarget:self action:@selector(loadUsersWithNewLocation) forControlEvents:UIControlEventValueChanged];
+    UserListDataSource *ds = [[UserListDataSource alloc] init];
+    self.dataSource = ds;
+    RKManagedObjectStore* store = [RKObjectManager sharedManager].managedObjectStore;
+    _mainQueueContext = store.mainQueueManagedObjectContext;
     return self;
 }
 
@@ -60,7 +59,7 @@
         self.navigationItem.rightBarButtonItem = [[WidgetFactory sharedFactory]normalBarButtonItemWithTitle:@"筛选" target:self action:@selector(filter:)];
     }
 
-    if (_showAddTagButton && ![[Authentication sharedInstance].currentUser.tags containsObject:_tag]) {
+    if (_showAddTagButton && ![[UserService service].loggedInUser.tags containsObject:_tag]) {
         self.toolbarItems = [self createToolbarItems];
         [self.navigationController setToolbarHidden:NO];
     }
@@ -82,9 +81,9 @@
 }
 
 -(void)addTagToMine:(id)sender{
-    UserProfile* user = [Authentication sharedInstance].currentUser;
+    User* user = [UserService service].loggedInUser;
     NSArray* params = @[[DictHelper dictWithKey:@"tag" andValue:_tag.name]];
-    NSString *requestStr = [NSString stringWithFormat:@"%@://%@/api/v1/user/%d/tags/?format=json", HTTPS, EOHOST, user.uID];
+    NSString *requestStr = [NSString stringWithFormat:@"%@://%@/api/v1/user/%@/tags/?format=json", HTTPS, EOHOST, user.uID];
     [[NetworkHandler getHandler] requestFromURL:requestStr
                                          method:POST
                                      parameters:params
@@ -96,7 +95,10 @@
                                                 _hud.mode = MBProgressHUDModeText;
                                                 _hud.labelText = @"已添加到我的兴趣";
                                                 [NSTimer scheduledTimerWithTimeInterval:1.5 target:self selector:@selector(dismissHUD) userInfo:nil repeats:NO];
-                                                [user.tags addObject:_tag];
+                                                
+                                                [user addTagsObject:_tag];
+                                                
+                                                [_mainQueueContext saveToPersistentStore:nil];
                                                 [[Authentication sharedInstance] relogin];
                                                 [self.navigationController.toolbar setHidden:YES];
                                                 self.view.frame = CGRectMake(0, 0, 320, 416);
@@ -146,95 +148,71 @@
 }
 
 -(void)loadUsers{
-    NSString* urlWithFilter = _baseURL;
-    if (_filter) {
-        urlWithFilter = [NSString stringWithFormat:@"%@&%@", self.baseURL, _filter];
+    [self loadUsers:NO];
+}
+
+-(void)loadUsers:(BOOL)nextPage{
+    RKObjectManager *manager = [RKObjectManager sharedManager];
+    __weak typeof(self) weakSelf = self;
+    NSString* requestWithPagination = [NSString stringWithFormat:@"%@?page=:currentPage&limit=:perPage%@", _baseURL, [self filerToString]];
+    if (!nextPage) {
+        _paginator = [manager paginatorWithPathPattern:requestWithPagination];
     }
-    DDLogVerbose(@"loading users from url: %@", urlWithFilter);
-    [[NetworkHandler getHandler] requestFromURL:urlWithFilter
-                                         method:GET
-                                    cachePolicy:TTURLRequestCachePolicyNone 
-                                        success:^(id obj) {
-                                            NSDictionary* result = obj;
-                                            NSArray *users = [obj objectForKeyInObjects];
-                                            UserListDataSource *ds = [[UserListDataSource alloc] init];
-              
-                                            for (NSDictionary *dict in users) {
-                                                UserProfile *profile = [UserProfile profileWithData:dict];
-                                                if (profile) {                                                           
-                                                    [ds.items addObject:[UserTableItem itemWithProfile:profile withAddButton:YES]];
-                                                }
-                                            }
-                                            
-                                            _loadMore = [[LoadMoreTableItem alloc] initWithResult:result fromBaseURL:urlWithFilter];
-                                            if ([_loadMore hasMore]) {
-                                                 [ds.items addObject:_loadMore];
-                                            }
-                                            
-                                            self.dataSource = ds;
-                                            if (isLoading) {
-                                                [self stopLoading];
-                                            }
-                                            _upadateLocationBeforeLoadUsers = YES;
-                                        } failure:^{
-                                            if (isLoading) {
-                                                [self stopLoading];
-                                            }
-                                            [SVProgressHUD dismissWithError:@"获取数据失败"];
-                                            _upadateLocationBeforeLoadUsers = YES;
-                                        }];
-
+    [_paginator setCompletionBlockWithSuccess:^(RKPaginator *paginator, NSArray *objects, NSUInteger page) {
+        UserListDataSource *ds = weakSelf.dataSource;
+        id lastItem = [ds.items lastObject];
+        if ([lastItem isKindOfClass:[LoadMoreTableItem class]]) {
+            [ds.items removeLastObject];
+        }
+        [ds.items addObjectsFromArray:objects];
+        [weakSelf.refreshControl endRefreshing];
+        weakSelf.upadateLocationBeforeLoadUsers = YES;
+        if ([weakSelf.paginator hasNextPage]) {
+            weakSelf.loadMore = [[LoadMoreTableItem alloc] init];
+            [ds.items addObject:weakSelf.loadMore];
+        }
+        [weakSelf refresh];
+    } failure:^(RKPaginator *paginator, NSError *error) {
+        [weakSelf.refreshControl endRefreshing];
+        DDLogError(@"failed to load users: %@", error);
+        weakSelf.upadateLocationBeforeLoadUsers = YES;
+    }];
+    _paginator.perPage = 20;
+    if (nextPage) {
+        [_paginator loadNextPage];
+    } else {
+        [_paginator loadPage:1]; //page starts from 1
+    }
 }
 
-
--(void) loadMoreUsers{
-    if (![_loadMore hasMore]) {
-        return;
-    } 
-    [[NetworkHandler getHandler] requestFromURL:[_loadMore nextPageURL]
-                                         method:GET 
-                                    cachePolicy:TTURLRequestCachePolicyNetwork
-                                        success:^(id obj) {
-                                            //load data
-                                            NSDictionary* result = obj;
-                                            NSArray *users = [obj objectForKeyInObjects];
-                                            UserListDataSource *ds = self.dataSource;
-                                            NSMutableArray * indexPaths = [NSMutableArray array];
-                                            for (int i = 0; i < users.count; ++i) {
-                                                NSDictionary *dict = [users objectAtIndex:i];
-                                                
-                                                UserProfile *profile = [UserProfile profileWithData:dict];
-                                                [ds.items insertObject:[UserTableItem itemWithProfile:profile withAddButton:YES] atIndex:(ds.items.count - 1)];
-                                                NSIndexPath *indexPath = [NSIndexPath indexPathForRow:ds.items.count - 1 inSection:0];
-                                                [indexPaths addObject:indexPath];
-                                            }
-                                            [self.tableView insertRowsAtIndexPaths:indexPaths withRowAnimation:UITableViewRowAnimationTop];
-                                            
-                                            //update load more text and decide if it should be removed
-                                            _loadMore.loading = NO;
-                                            _loadMore.offset = [result offset];
-                                            if (![_loadMore hasMore])  {
-                                                [ds.items removeLastObject];
-                                                NSArray *rowToDelete = [NSArray arrayWithObject:[NSIndexPath indexPathForRow:(ds.items.count - 1) inSection:0]];
-                                                [self.tableView  deleteRowsAtIndexPaths:rowToDelete withRowAnimation:UITableViewRowAnimationAutomatic];
-                                            }
-                                            [self.tableView reloadData];
-                                        } failure:^{
-                                            DDLogError(@"failed to load more orders");
-#warning fail handling
-                                        }];
+-(NSString*)filerToString{
+    NSMutableString* str = [[NSMutableString alloc] init];
+    for (NSString* key in _filter) {
+        [str appendFormat:@"&%@=%@", key, _filter[key]];
+    }
+    return str;
 }
 
--(void)setFilter:(NSString*)newFilter{
+-(void)removeAll{
+    UserListDataSource *ds = self.dataSource;
+    [ds.items removeAllObjects];
+    [self refresh];
+}
+
+-(void)setFilter:(NSDictionary*)newFilter{
+    [self removeAll];
     _upadateLocationBeforeLoadUsers = NO;
     _filter = newFilter;
-    [self startLoading];
+    [_refreshControl beginRefreshing];
+    [self loadUsers];
 }
 
 -(void)setBaseURL:(NSString *)baseURL{
+    [self removeAll];
     _upadateLocationBeforeLoadUsers = NO;
     _baseURL = baseURL;
-    [self startLoading];
+    [_refreshControl beginRefreshing];
+    [self loadUsers];
 }
 
 - (id<UITableViewDelegate>)createDelegate {
@@ -254,10 +232,10 @@
 - (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath*)indexPath {
     id<TTTableViewDataSource> dataSource = (id<TTTableViewDataSource>)tableView.dataSource;
     id object = [dataSource tableView:tableView objectForRowAtIndexPath:indexPath];
-    if ([object isKindOfClass:[UserTableItem class]]) {
-        UserTableItem *item = object;
-        NewUserDetailsViewController *newDeail = [[NewUserDetailsViewController alloc] initWithStyle:UITableViewStylePlain];
-        newDeail.user = item.profile;
+    if ([object isKindOfClass:[User class]]) {
+        User *user = object;
+        UserDetailsViewController *newDeail = [[UserDetailsViewController alloc] initWithStyle:UITableViewStylePlain];
+        newDeail.user = user;
         [self.navigationController pushViewController:newDeail animated:YES];
     } else if ([object isKindOfClass:[LoadMoreTableItem class]]){
         if (_loadMore.loading) {
@@ -265,7 +243,7 @@
         }
         _loadMore.loading = YES;
         [self reloadLastRow];
-        [self loadMoreUsers];
+        [self loadUsers:YES];
     }
 }
 
@@ -285,17 +263,17 @@
 }
 #pragma mark UIActionSheetDelegate
 - (void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex{
-    NSString* newFilter =  nil;
+    NSMutableDictionary* newFilter =  [NSMutableDictionary dictionary];
     UINavigationController *nav;
     switch (buttonIndex) {
         case 0:
             newFilter = nil;
             break;
         case 1:
-            newFilter = @"gender=0";
+            newFilter[@"gender"]=[NSNumber numberWithInteger:0];
             break;
         case 2:
-            newFilter = @"gender=1";
+            newFilter[@"gender"]=[NSNumber numberWithInteger:1];
             break;
         case 3:
             if (!_customUserFilterViewController) {
@@ -319,28 +297,20 @@
 }
 
 #pragma mark CustomUserFilterViewControllerDelegate
--(void)filterSelected:(NSString *)filter{
+-(void)filterSelected:(NSDictionary *)filter{
     [self setFilter:filter];
 }
 
-#pragma mark -
-#pragma mark PullRefreshTableViewController
-- (void)pullToRefresh {
+- (void)loadUsersWithNewLocation {
     if (_upadateLocationBeforeLoadUsers) {
         [[LocationProvider sharedProvider] updateLocationWithSuccess:^(CLLocation *location) {
             DDLogVerbose(@"load users for lat and lng: %f, %f", location.coordinate.latitude,  location.coordinate.longitude );
-            NSString* newFilter = [NSString stringWithFormat:@"lat=%f&lng=%f", location.coordinate.latitude,
-                                   location.coordinate.longitude];
-            if (_filter) {
-                NSUInteger latFilterLoc = [_filter rangeOfString:@"lat="].location;
-                if (latFilterLoc != NSNotFound) {
-                    _filter = [_filter substringFromIndex:latFilterLoc];
-                }
-                _filter = [NSString stringWithFormat:@"%@&%@", _filter, newFilter];
-            } else {
-                _filter = newFilter;
-            }
+            NSMutableDictionary* newFilter = [NSMutableDictionary dictionary];
+            newFilter[@"lat"]= [NSString stringWithFormat:@"%f", location.coordinate.latitude];
+            newFilter[@"lng"]= [NSString stringWithFormat:@"%f", location.coordinate.longitude];
             DDLogVerbose(@"load users with filter %@", _filter);
+            _filter = newFilter;
+            [self removeAll];
             [self loadUsers];
         } orFailed:^{
             DDLogError(@"failed to update location, just load users for current location");

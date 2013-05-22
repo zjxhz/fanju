@@ -10,8 +10,9 @@
 #import "Const.h"
 #import <QuartzCore/QuartzCore.h>
 #import "Three20/Three20.h"
-
-extern NSInteger unreadCount;
+#import "MessageService.h"
+#import "NotificationService.h"
+extern NSInteger UnreadCount;
 
 @implementation UIViewController (MFSideMenu)
 
@@ -51,15 +52,17 @@ extern NSInteger unreadCount;
 
     [customView addSubview:button];
     CGFloat viewWidth = buttonImage.size.width;
-    unreadCount = [[NSUserDefaults standardUserDefaults] integerForKey:UNREAD_MESSAGE_COUNT] + [[NSUserDefaults standardUserDefaults] integerForKey:UNREAD_NOTIFICATION_COUNT];
-    if (unreadCount) {
+    if (UnreadCount == 0) {
+        UnreadCount = [NotificationService service].unreadNotifCount + [MessageService service].unreadMessageCount;
+    }
+    if (UnreadCount) {
         UIImage* xiaoxi = [UIImage imageNamed:@"xiaoxi"];
         CGFloat x = buttonImage.size.width;
         CGFloat y = (buttonImage.size.height - xiaoxi.size.height) / 2;
         UIButton* unreadButton = [UIButton buttonWithType:UIButtonTypeCustom];
         [unreadButton setBackgroundImage:xiaoxi forState:UIControlStateNormal];
         unreadButton.frame = CGRectMake(x, y, xiaoxi.size.width, xiaoxi.size.height);
-        [unreadButton setTitle:[NSString stringWithFormat:@"%d", unreadCount] forState:UIControlStateNormal];
+        [unreadButton setTitle:[NSString stringWithFormat:@"%d", UnreadCount] forState:UIControlStateNormal];
         unreadButton.titleLabel.textColor = [UIColor whiteColor];
         unreadButton.titleLabel.font = [UIFont systemFontOfSize:12];
         unreadButton.layer.shadowColor = RGBACOLOR(0, 0, 0, 0.5).CGColor;
@@ -82,7 +85,7 @@ extern NSInteger unreadCount;
 }
 
 -(void)unreadDidUpdate:(NSNotification*)notif{
-    unreadCount = [notif.object integerValue];
+    UnreadCount = [notif.object integerValue];
     [self setupSideMenuBarButtonItem];
     
 }

@@ -7,9 +7,9 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "UserProfile.h"
+#import "User.h"
 #import "ImageUploader.h"
 
 @interface AlbumViewController : UIViewController<ImageUploaderDelegate>
-@property(nonatomic, strong) UserProfile* user;
+@property(nonatomic, strong) User* user;
 @end

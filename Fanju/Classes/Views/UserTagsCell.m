@@ -1,5 +1,5 @@
 //
-//  UserTagsCell.m
+//  TagsCell.m
 //  EasyOrder
 //
 //  Created by 浣泽 徐 on 9/4/12.
@@ -8,13 +8,12 @@
 
 #import "UserTagsCell.h"
 #import "Authentication.h"
-#import "UserProfile.h"
 #import "Three20/Three20.h"
 #import "QuartzCore/QuartzCore.h"
 #import "UserListViewController.h"
 #import "NetworkHandler.h"
 #import "WidgetFactory.h"
-
+#import "Tag.h"
 //#define MAX_VISIBLE_TAGS 5
 #define TAG_GAP 10
 #define FONT_SIZE 14	
@@ -37,9 +36,9 @@
     return self;
 }
 
--(UIImage*)bgImageForTag:(UserTag*)tag atFirst:(BOOL)first{
-    UserProfile* me = [Authentication sharedInstance].currentUser;
-    BOOL common = [me.tags containsObject:tag];
+-(UIImage*)bgImageForTag:(Tag*)tag atFirst:(BOOL)first{
+    User* loggedInUser = [UserService service].loggedInUser;
+    BOOL common = [loggedInUser.tags containsObject:tag];
     UIImage* tag_bg0 = [UIImage imageNamed:@"tag_bg0"];
     UIImage* tag_bg = [UIImage imageNamed:@"tag_bg"];
     UIImage* tag_bg0_normal = [UIImage imageNamed:@"tag_bg0_normal"];
@@ -59,11 +58,11 @@
     _tags = tags;
     [_frameTagDic removeAllObjects];
     [self removeTagsFromView];
-    UserProfile* me = [Authentication sharedInstance].currentUser;
+    User* loggedInUser = [UserService service].loggedInUser;
     _tags = [_tags sortedArrayUsingComparator:^NSComparisonResult(id obj1, id obj2) {
-        if ([me.tags containsObject: obj1]) {
+        if ([loggedInUser.tags containsObject: obj1]) {
             return -1;
-        } else if ([me.tags containsObject:obj2]){
+        } else if ([loggedInUser.tags containsObject:obj2]){
             return 1;
         }
         return 0;
@@ -72,7 +71,7 @@
     CGFloat x = TAG_GAP;
     CGFloat y = 8;
     for(int i = 0; i < _tags.count; ++i){
-        UserTag* tag = _tags[i];
+        Tag* tag = _tags[i];
         UIImage* bg = [self bgImageForTag:tag atFirst:i == 0];
         CGFloat tagWidth = bg.size.width;
         if (tag.name.length > 3) {
@@ -116,16 +115,16 @@
     for (NSValue* value in [_frameTagDic allKeys]) {
         CGRect frame = [value CGRectValue];
         if (CGRectContainsPoint(frame, point)) {
-            UserTag* tag =  _frameTagDic[value];
+            Tag* tag =  _frameTagDic[value];
             [self showUsersWithTag:tag];
             break;
         }
     }
 }
 
--(void)showUsersWithTag:(UserTag*)tag{
+-(void)showUsersWithTag:(Tag*)tag{
     UserListViewController* ul = [[UserListViewController alloc] initWithStyle:UITableViewStylePlain];
-    ul.baseURL = [NSString stringWithFormat:@"http://%@/api/v1/usertag/%d/users/?format=json", EOHOST, tag.uID];
+    ul.baseURL = [NSString stringWithFormat:@"usertag/%@/users/", tag.tID];
     ul.title = tag.name;
     ul.tag = tag;
     ul.showAddTagButton = YES;

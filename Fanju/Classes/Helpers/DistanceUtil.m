@@ -8,7 +8,9 @@
 
 #import "DistanceUtil.h"
 #import "Authentication.h"
-#define UNKNOWN_DISTANCE  @"距离未知"
+#import "User.h"
+#import "UserService.h"
+#define UNKNOWN_DISTANCE  @"非常遥远"
 
 @implementation DistanceUtil
 +(NSString*) distanceToMe:(UserProfile*)user{
@@ -23,6 +25,17 @@
     return [DistanceUtil getUserFriendlyDistance:distanceMeters]; 
 }
 
++(NSString*)distanceFrom:(User*)user{
+    User *me = [UserService service].loggedInUser;
+    CLLocation *myLocation = [DistanceUtil locationOfUser:me];
+    CLLocation *userLocation = [DistanceUtil locationOfUser:user];
+    double distanceMeters = [userLocation distanceFromLocation:myLocation];
+    return [DistanceUtil getUserFriendlyDistance:distanceMeters];
+}
+
++(CLLocation*)locationOfUser:(User*)user{
+    return [[CLLocation alloc] initWithLatitude:[user.latitude floatValue] longitude:[user.longitude floatValue]];
+}
 +(NSString*)getUserFriendlyDistance:(double)meters{
     return [NSString stringWithFormat:@"%.2fkm", meters/1000];
 }

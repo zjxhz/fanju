@@ -33,7 +33,8 @@
     UILabel *_motto;
     UIImage *_maleImg;
     UIImage *_femaleImg;
-    UserProfile* _currentUser;
+    User* _currentUser;
+    User* _user;
     
 }
 @end
@@ -45,8 +46,7 @@
     
 	if (self = [super initWithStyle:UITableViewCellStyleValue2
                     reuseIdentifier:identifier]) {
-		_item = nil;
-        _currentUser = [Authentication sharedInstance].currentUser;
+        _currentUser = [UserService service].loggedInUser;
         
         UIView *infoView = [[UIView alloc] initWithFrame:CGRectMake(INFO_FRAME_X, 0, 320 - INFO_FRAME_X, CELL_HEIGHT)];
         [self.contentView addSubview:infoView];
@@ -99,34 +99,6 @@
 	return self;
 }
 
-- (void)addFollowing {
-    [SVProgressHUD setStatus:@"请稍候…"];
-    int uid = ((UserTableItem *)_item).profile.uID;
-    int myID = [Authentication sharedInstance].currentUser.uID;
-    NSArray *params = [NSArray arrayWithObject:[NSDictionary dictionaryWithObjectsAndKeys:[NSString stringWithFormat:@"%d", uid], @"value", @"user_id", @"key", nil]];
-    http_method_t method = POST;
-    NSString* url = [NSString stringWithFormat:@"%@://%@/api/v1/user/%d/following/", HTTPS, EOHOST, myID];
-
-    [[NetworkHandler getHandler] requestFromURL:url
-                                         method:method
-                                     parameters:params
-                                    cachePolicy:TTURLRequestCachePolicyNone
-                                        success:^(id obj) {
-                                            if ([[obj objectForKey:@"status"] isEqualToString:@"OK"]) {
-                                                [SVProgressHUD dismissWithSuccess:[obj objectForKey:@"info"]];
-                                                NSString* followingUserID = [NSString stringWithFormat:@"%d",uid];
-                                                [[Authentication sharedInstance].currentUser.followings addObject:followingUserID];
-                                                [[Authentication sharedInstance] synchronize];
-                                                
-                                            } else {
-                                                [SVProgressHUD dismissWithError:[obj objectForKey:@"info"]];
-                                            }
-                                        } failure:^{
-                                            [SVProgressHUD dismissWithError:BLAME_NETWORK_ERROR_MESSAGE];
-                                        }];
-}
-
-
 #pragma mark -
 #pragma mark UIView
 
@@ -143,44 +115,39 @@
 
 #pragma mark -
 #pragma mark TTTableViewCell
-
-- (id)object {
-	return _item;  
-}
-
 - (void)setObject:(id)object {
-	if (_item != object) {
+	if (_user != object) {
 		[super setObject:object];
-        UserTableItem *item = object;
-        
+        _user = object;
 		// Set the data in various UI elements
-		[_username setText:item.profile.name];
+		[_username setText:_user.name];
         
-        [_avatar setPathToNetworkImage:[item.profile avatarFullUrl] forDisplaySize:CGSizeMake(AVATAR_SIDE_LENGTH, AVATAR_SIDE_LENGTH)];
+        [_avatar setPathToNetworkImage:[URLService absoluteURL:_user.avatar] forDisplaySize:CGSizeMake(AVATAR_SIDE_LENGTH, AVATAR_SIDE_LENGTH)];
         _avatar.userInteractionEnabled = NO;
         
-        NSMutableSet *myTagSet = [NSMutableSet setWithArray:_currentUser.tags];
-        NSMutableSet *otherTagSet = [NSMutableSet setWithArray:item.profile.tags];
+        NSMutableSet *myTagSet = [_currentUser.tags mutableCopy];;
+        NSMutableSet *otherTagSet = [_user.tags mutableCopy];
         [myTagSet intersectSet:otherTagSet];
         
         [_numberOfSameTagsButton setTitle:[NSString stringWithFormat:@"%d个共同爱好", myTagSet.count] forState:UIControlStateNormal];
-        [_gender setTitle:[NSString stringWithFormat:@"%d",[item.profile age]] forState:UIControlStateNormal];
-        NSInteger offset = [item.profile age] > 9 ? 9 : 7;
+        NSInteger age = [DateUtil ageFromBirthday:_user.birthday];
+        [_gender setTitle:[NSString stringWithFormat:@"%d", age] forState:UIControlStateNormal];
+        NSInteger offset = age > 9 ? 9 : 7;
         _gender.contentEdgeInsets = UIEdgeInsetsMake(0, offset, 0, 0);
-        if (item.profile.gender == 0) {
+        if ([_user.gender integerValue] == 0) {
             [_gender setBackgroundImage:_maleImg forState:UIControlStateNormal];
         } else {
             [_gender setBackgroundImage:_femaleImg forState:UIControlStateNormal];
-        } //TODO user with no age and no gender set
+        } 
         
-        NSString* updated = @"未知时间";
-        if (item.profile.locationUpdatedTime) {
-            NSTimeInterval interval = [item.profile.locationUpdatedTime timeIntervalSinceNow] > 0 ? 0 : -[item.profile.locationUpdatedTime timeIntervalSinceNow];
+        NSString* updated = @"很久以前";
+        if (_user.locationUpdatedAt) {
+            NSTimeInterval interval = [_user.locationUpdatedAt timeIntervalSinceNow] > 0 ? 0 : -[_user.locationUpdatedAt timeIntervalSinceNow];
             updated = [DateUtil humanReadableIntervals: interval];
         }
-        _distance.text = [NSString stringWithFormat:@"%@ | %@", [DistanceUtil distanceToMe:item.profile], updated];
+        _distance.text = [NSString stringWithFormat:@"%@ | %@", [DistanceUtil distanceFrom:_user], updated];
         [_distance sizeToFit];
-        _motto.text = item.profile.motto;
+        _motto.text = _user.motto;
 	}
 }
 @end

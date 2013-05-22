@@ -8,10 +8,10 @@
 
 #import <Foundation/Foundation.h>
 #import <Three20/Three20.h>
-#import "OrderInfo.h"
+#import "Order.h"
 
 @interface MealThumbnailTableItemCell : TTTableViewCell{
-    OrderInfo* _orderInfo;
+    Order* _orderInfo;
     
 }
 

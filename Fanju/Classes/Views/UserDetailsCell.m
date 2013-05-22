@@ -15,9 +15,10 @@
 #import "Authentication.h"
 #import "DateUtil.h"
 #import "DistanceUtil.h"
+#import "URLService.h"
 
 @interface UserDetailsCell(){
-    UserProfile* _user;
+    User* _user;
     UIImageView* _nextMealView;
     UILabel* _nextMealLabel;
     UITextField* _nextMealText;
@@ -25,7 +26,7 @@
 @end
 @implementation UserDetailsCell
 
-- (id)initWithUser:(UserProfile*)user{
+- (id)initWithUser:(User*)user{
     self = [super init];
     if (self) {
         _user = user;
@@ -77,14 +78,14 @@
         avatarView.image = avatarBgImg;
         
         _avatar = [[NINetworkImageView alloc] initWithFrame:CGRectMake(4, 4, 62, 62)];
-        [_avatar setPathToNetworkImage:[_user avatarFullUrl] forDisplaySize:CGSizeMake(62, 62)];
+        [_avatar setPathToNetworkImage:[URLService absoluteURL:_user.avatar] forDisplaySize:CGSizeMake(62, 62)];
         [avatarView addSubview:_avatar];
         [self.contentView addSubview:avatarView];
         
         UIImage* male = [UIImage imageNamed:@"male_details"];
         UIImage* female = [UIImage imageNamed:@"female_details"];
         UIImageView* gender = [[UIImageView alloc] initWithFrame:CGRectMake(81, 156, male.size.width, male.size.height)];
-        if (_user.gender == 0) {
+        if ([_user.gender integerValue] == 0) {
             gender.image = male;
         } else {
             gender.image = female;
@@ -96,7 +97,7 @@
         age.textColor = [UIColor whiteColor];
         age.layer.shadowColor = RGBACOLOR(0, 0, 0, 0.2).CGColor;
         age.layer.shadowOffset = CGSizeMake(0, -1);
-        age.text = [NSString stringWithFormat:@"%d", _user.age];
+        age.text = [NSString stringWithFormat:@"%d", [DateUtil ageFromBirthday:_user.birthday]];
         [age sizeToFit];
         [gender addSubview:age];
         [self.contentView addSubview:gender];
@@ -109,8 +110,8 @@
             [self.contentView addSubview:iconView];
             
             NSString* updated  = nil;
-            if (_user.locationUpdatedTime) {
-                NSTimeInterval interval = [_user.locationUpdatedTime timeIntervalSinceNow] > 0 ? 0 : -[_user.locationUpdatedTime timeIntervalSinceNow];
+            if (_user.locationUpdatedAt) {
+                NSTimeInterval interval = [_user.locationUpdatedAt timeIntervalSinceNow] > 0 ? 0 : -[_user.locationUpdatedAt timeIntervalSinceNow];
                 updated = [DateUtil humanReadableIntervals: interval];
             }
             
@@ -118,7 +119,7 @@
             distanceLabel.font = [UIFont systemFontOfSize:12];
             distanceLabel.textColor = RGBCOLOR(150, 150, 150);
             distanceLabel.backgroundColor = [UIColor clearColor];
-            distanceLabel.text =  [DistanceUtil distanceToMe:_user];
+            distanceLabel.text =  [DistanceUtil distanceFrom:_user];
             [self.contentView addSubview:distanceLabel];
 
             UILabel* updatedLabel = [[UILabel alloc] initWithFrame:CGRectMake(267, 159, 60, 12)];
@@ -152,7 +153,7 @@
 
 
 -(void) requestNextMeal{
-    NSString* url = [NSString stringWithFormat:@"http://%@/api/v1/user/%d/meal/", EOHOST, _user.uID];
+    NSString* url = [NSString stringWithFormat:@"http://%@/api/v1/user/%@/meal/", EOHOST, _user.uID];
     //use a new instance of network handler as there might be simultaneous reqeusts on the user details view 
     [[NetworkHandler getHandler] requestFromURL:url method:GET cachePolicy:TTURLRequestCachePolicyDefault
                                         success:^(id obj) {

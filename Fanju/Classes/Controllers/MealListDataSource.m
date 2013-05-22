@@ -8,39 +8,26 @@
 
 #import "MealListDataSource.h"
 #import "MealCell.h"
+#import "Meal.h"
+#import "MealService.h"
 
 @implementation MealListDataSource
-
-- (id)init{
-    return [self initWithItems:[[NSMutableArray alloc]init]] ;
-}
-- (id)initWithItems:(NSArray*)items {
-	self = [super init];
-    if (self) {
-        _items = [items mutableCopy];
-        [self groupMeals];
+-(id)init{
+    if (self = [super init]) {
+        _mealsForThisWeek = [NSMutableArray array];
+        _mealsAfterThisWeek = [NSMutableArray array];
     }
     return self;
 }
 
 - (Class)tableView:(UITableView*)tableView cellClassForObject:(id) object {
     
-	if ([object isKindOfClass:[MealTableItem class]]) {  
+	if ([object isKindOfClass:[Meal class]]) {
 		return [MealCell class];
 	}
     
 	return [super tableView:tableView
 	     cellClassForObject:object];
-}
-
-//Group meals by weeks, i.e. this week and after this week
--(void) groupMeals{
-    _mealsForThisWeek = [[NSMutableArray alloc] init];
-    _mealsAfterThisWeek = [[NSMutableArray alloc] init];
-    for(NSObject *obj in _items){
-        MealTableItem *meal = (MealTableItem *)obj;
-        [self addMeal:meal];
-    }
 }
 
 - (NSInteger) numberOfMealsForThisWeek{
@@ -64,17 +51,20 @@
 }
 
 
-- (void)addMeal:(MealTableItem*)meal{
-    if([meal.mealInfo.time timeIntervalSinceNow] < 0 ){
-//        DDLogVerbose(@"ignore out of dated meal at: %@", meal.mealInfo.time);
+- (void)addMeal:(Meal*)meal{
+    NSDate* time = [MealService dateOfMeal:meal];
+    if([time timeIntervalSinceNow] < 0 ){
+        DDLogVerbose(@"ignore out of dated meal at: %@", time);
         return;
     }
-    if([self isWithinThisWeek:meal.mealInfo.time]){
+    if([self isWithinThisWeek:time]){
         [_mealsForThisWeek addObject:meal];
-        [_mealsForThisWeek sortUsingSelector:@selector(compare:)];
+        DDLogVerbose(@"added a meal to this week: %@", time);
+//        [_mealsForThisWeek sortUsingSelector:@selector(compare:)]; //assuming they are already sorted
     } else {
         [_mealsAfterThisWeek addObject:meal];
-        [_mealsAfterThisWeek sortUsingSelector:@selector(compare:)];
+        DDLogVerbose(@"added a meal to next week: %@", time);
+//        [_mealsAfterThisWeek sortUsingSelector:@selector(compare:)];
     }
 }
 

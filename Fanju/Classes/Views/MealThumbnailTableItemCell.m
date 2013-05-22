@@ -12,7 +12,7 @@
 #import "DateUtil.h"
 #import "AvatarFactory.h"
 #import "NINetworkImageView.h"
-#import "OrderInfo.h"
+#import "Restaurant.h"
 
 #define CELL_HEIGHT 125
 #define THUMBNAIL_LENGTH 107
@@ -132,11 +132,23 @@
     return _orderInfo;
 }
 
+-(void)prepareForReuse{
+    _imgView.image = nil;
+    _topicLabel.text = nil;
+    _timeLabel.text = nil;
+    _addressLabel.text = nil;
+    _codeTextLabel.text = nil;
+    _numberOfPersonLabel.text = nil;
+}
+
 - (void)setObject:(id)object {
     [super setObject:object];
-    MealInfo *mealInfo = nil;
+    if (object == nil) {
+        return;
+    }
+    Meal *mealInfo = nil;
     MealInvitation *mealInvitation = nil;
-    if ([object isKindOfClass:[OrderInfo class]]) {
+    if ([object isKindOfClass:[Order class]]) {
         _orderInfo = object;
         mealInfo = _orderInfo.meal;
     } else if([object isKindOfClass:[MealInvitationTableItem class]]) {
@@ -145,21 +157,10 @@
         mealInfo = mealInvitation.meal;
     } 
     
-    if (mealInvitation) {
-//            NSString *invitationString = mealInfo.type == THEMES ? NSLocalizedString(@"GatheringInvitation", nil) : NSLocalizedString(@"DatingInvitation", nil);
-//
-//            NSString* timePast = [DateUtil humanReadableIntervals:[mealInvitation.timestamp timeIntervalSinceNow]];
-//            [_fromLabel setText:[NSString stringWithFormat:invitationString, mealInvitation.from.username, timePast]];
-//            _imgView.frame = CGRectMake(2, 22, 120, 111);
-        
-    } else {
-//            _fromLabel = nil;
-        
-    }
     // Set the data in various UI elements
-    [_imgView setPathToNetworkImage:[mealInfo photoFullUrl] forDisplaySize:CGSizeMake(THUMBNAIL_LENGTH, THUMBNAIL_LENGTH) contentMode:UIViewContentModeScaleAspectFill];
+    [_imgView setPathToNetworkImage:[URLService  absoluteURL:mealInfo.photoURL] forDisplaySize:CGSizeMake(THUMBNAIL_LENGTH, THUMBNAIL_LENGTH) contentMode:UIViewContentModeScaleAspectFill];
     [_topicLabel setText:mealInfo.topic];
-    [_timeLabel setText:[mealInfo timeText]];
+    [_timeLabel setText:[MealService dateTextOfMeal:mealInfo]];
     [_timeLabel sizeToFit];
     _addressLabel.text = [NSString stringWithFormat:@"%@ %@", mealInfo.restaurant.name, mealInfo.restaurant.address];
 //        [_addressLabel sizeToFit];
@@ -170,7 +171,7 @@
     }
     
 //        [_codeTextLabel sizeToFit];
-    _numberOfPersonLabel.text = [NSString stringWithFormat:@"限%d人", _orderInfo.numerOfPersons];
+    _numberOfPersonLabel.text = [NSString stringWithFormat:@"限%@人", _orderInfo.numberOfPersons];
     [_numberOfPersonLabel sizeToFit];
 }
 

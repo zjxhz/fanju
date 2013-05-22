@@ -2,14 +2,14 @@
 //  UserMessage.h
 //  Fanju
 //
-//  Created by Xu Huanze on 5/6/13.
+//  Created by Xu Huanze on 5/22/13.
 //  Copyright (c) 2013 Wayne. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>
 #import <CoreData/CoreData.h>
 
-@class User;
+@class Conversation;
 
 @interface UserMessage : NSManagedObject
 
@@ -17,7 +17,7 @@
 @property (nonatomic, retain) NSString * message;
 @property (nonatomic, retain) NSNumber * read;
 @property (nonatomic, retain) NSDate * time;
-@property (nonatomic, retain) User *owner;
-@property (nonatomic, retain) User *with;
+@property (nonatomic, retain) NSString * mID;
+@property (nonatomic, retain) Conversation *conversation;
 
 @end

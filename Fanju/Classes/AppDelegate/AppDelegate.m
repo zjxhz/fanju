@@ -16,7 +16,6 @@
 #import "RestaurantInfo.h"
 #import "MealListViewController.h"
 #import "MyMealsViewController.h"
-#import "SocialNetworkViewController.h"
 #import "AccountViewController.h"
 #import "MFSideMenu.h"
 #import "Authentication.h"
@@ -34,7 +33,7 @@
 #import "RestKit.h"
 #import "DateUtil.h"
 #import "FJLoggerFormatter.h"
-
+#import "UINavigationController+MFSideMenu.h"
 @interface AppDelegate() {
     UINavigationController* _navigationController;
 }
@@ -63,22 +62,19 @@
         extern CFAbsoluteTime StartTime;
         DDLogVerbose(@"App finished launching in %f seconds", CFAbsoluteTimeGetCurrent() - StartTime);
     });
+    [self configureLogger];
+    [[RestKitService service] setup];
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     
 
-//    [TTStyleSheet setGlobalStyleSheet:[[MyCustomStylesheet alloc] init]]; 
-    MealListViewController *meal = [[MealListViewController alloc] initWithNibName:@"MealListViewController" bundle:nil];
-    _navigationController = [[UINavigationController alloc] initWithRootViewController:meal];
-    NewSidebarViewController *sideMenuViewController = [NewSidebarViewController sideBar];
-    sideMenuViewController.mealListViewController = meal;
+
     
     [[LocationProvider sharedProvider] obtainCurrentLocation:[Authentication sharedInstance]];
     [[TTURLRequestQueue mainQueue] setMaxContentLength:0];
+    MealListViewController *meal = [[MealListViewController alloc] initWithNibName:@"MealListViewController" bundle:nil];
+    [self configureSideMenu:meal];
     
-    // make sure to display the navigation controller before calling this
-    MFSideMenu* sideMenu = [MFSideMenu menuWithNavigationController:_navigationController leftSideMenuController:sideMenuViewController rightSideMenuController:nil panMode:0];//no pan
-    sideMenuViewController.sideMenu = sideMenu;
-    
+
     UIRemoteNotificationType allowedNotifications = UIRemoteNotificationTypeAlert |  UIRemoteNotificationTypeBadge | UIRemoteNotificationTypeSound;
     [[UIApplication sharedApplication] registerForRemoteNotificationTypes:allowedNotifications];
     
@@ -86,18 +82,30 @@
         [Crittercism enableWithAppID:@"50ac205641ae503e5c000004"];
     }
 
-    
     [self initSinaweibo];
-    [[Authentication sharedInstance] relogin];
-    
     self.window.rootViewController = _navigationController;
     [_navigationController.view addSubview:[OverlayViewController sharedOverlayViewController].view];
     [self customNavigationBar];
     [self.window makeKeyAndVisible];
     [meal viewDidAppear:NO];
-    [self configureLogger];
-    [self configureRestKit];
+    [[Authentication sharedInstance] relogin];
     return YES;
+}
+
+-(void)configureSideMenu:(MealListViewController*)mealListViewController{
+    _navigationController = [[UINavigationController alloc] initWithRootViewController:mealListViewController];
+    // make sure to display the navigation controller before calling this
+    NewSidebarViewController *sideMenuViewController = [NewSidebarViewController sideBar];
+    sideMenuViewController.mealListViewController = mealListViewController;
+    MFSideMenu* sideMenu = [MFSideMenu menuWithNavigationController:_navigationController leftSideMenuController:sideMenuViewController rightSideMenuController:nil panMode:0];//no pan
+    sideMenuViewController.sideMenu = sideMenu;
+    MFSideMenuStateEventBlock b = ^(MFSideMenuStateEvent event){
+        if (event == MFSideMenuStateEventMenuDidOpen) {
+        [sideMenuViewController.tableView reloadData];
+        }
+
+    };
+    sideMenu.menuStateEventBlock = b;
 }
 
 -(void)configureLogger{
@@ -114,77 +122,6 @@
     [fileLogger setLogFormatter:formatter];
     [[DDTTYLogger sharedInstance] setColorsEnabled:YES];
     [[DDTTYLogger sharedInstance] setForegroundColor:[UIColor blueColor] backgroundColor:nil forFlag:LOG_FLAG_INFO];
-}
-
--(void)configureRestKit{
-    NSURL *modelURL = [[NSBundle mainBundle] URLForResource:@"Fanju" withExtension:@"momd"];
-    NSManagedObjectModel *managedObjectModel = [[NSManagedObjectModel alloc] initWithContentsOfURL:modelURL];
-    RKManagedObjectStore *managedObjectStore = [[RKManagedObjectStore alloc] initWithManagedObjectModel:managedObjectModel];
-    NSString *path = [RKApplicationDataDirectory() stringByAppendingPathComponent:@"Fanju.sqlite"];
-//    NSFileManager* fileMgr = [NSFileManager defaultManager];
-//    [fileMgr removeItemAtPath:path error:nil];
-    [managedObjectStore createPersistentStoreCoordinator];
-    NSError* error = nil;
-    NSPersistentStore *persistentStore = [managedObjectStore addSQLitePersistentStoreAtPath:path fromSeedDatabaseAtPath:nil withConfiguration:nil options:nil error:&error];
-    if (! persistentStore) {
-        DDLogError(@"Failed adding persistent store at path '%@': %@", path, error);
-    }
-    [managedObjectStore createManagedObjectContexts];
-    [RKManagedObjectStore setDefaultStore:managedObjectStore];
-//    NSURL* baseURL = [[NSURL alloc] initWithScheme:@"http" host:@"EOHOST" path:@"/api/v1"];
-//    baseURL.port = 8000;
-    NSString* baseURL = [NSString stringWithFormat:@"http://%@/api/v1/", EOHOST];
-    RKObjectManager *manager = [RKObjectManager managerWithBaseURL:[NSURL URLWithString:baseURL]];
-    manager.managedObjectStore = managedObjectStore;
-    [RKObjectManager setSharedManager:manager];
-    
-    RKEntityMapping *userMapping = [RKEntityMapping mappingForEntityForName:@"User" inManagedObjectStore:managedObjectStore];
-    userMapping.identificationAttributes = @[@"uID"];
-    [userMapping addAttributeMappingsFromDictionary:@{
-     @"id": @"uID",
-     @"date_joined": @"dateJoined", //interval is used when you use scalar properties in core data 下同
-     @"lat": @"latitude",
-     @"lng": @"longitude",
-     @"weibo_id": @"weiboID",
-     @"work_for":@"workFor",
-     @"updated_at": @"locationUpdatedAt",
-     @"birthday": @"birthday"
-     }];
-    [RKObjectMapping addDefaultDateFormatterForString:LONG_TIME_FORMAT_STR inTimeZone:[NSTimeZone defaultTimeZone]];
-    [RKObjectMapping addDefaultDateFormatterForString:SHORT_TIME_FORMAT_STR inTimeZone:[NSTimeZone defaultTimeZone]];
-    
-    [userMapping addAttributeMappingsFromArray:@[@"avatar", @"college", @"name", @"tel", @"email",
-     @"gender", @"industry", @"motto", @"occupation", @"username"]];
-    
-    RKEntityMapping *restaurantMapping = [RKEntityMapping mappingForEntityForName:@"Restaurant" inManagedObjectStore:managedObjectStore];
-    restaurantMapping.identificationAttributes = @[@"rID"];
-    [restaurantMapping addAttributeMappingsFromDictionary:@{@"id": @"rID"}];
-    [restaurantMapping addAttributeMappingsFromArray:@[@"address", @"latitude", @"longitude", @"name", @"tel"]];
-    
-    RKEntityMapping *mealMapping = [RKEntityMapping mappingForEntityForName:@"Meal" inManagedObjectStore:managedObjectStore];
-    mealMapping.identificationAttributes = @[@"mID"];
-    [mealMapping addAttributeMappingsFromDictionary:@{
-     @"id": @"mID",
-     @"actual_persons": @"actualPersons",
-     @"list_price": @"price",
-     @"max_persons": @"maxPersons",
-     @"photo": @"photoURL",
-     @"start_date": @"startDate",
-     @"start_time": @"startTime"}];
-    [mealMapping addAttributeMappingsFromArray:@[@"topic", @"introduction"]];
-    [mealMapping addPropertyMapping:[RKRelationshipMapping relationshipMappingFromKeyPath:@"restaurant" toKeyPath:@"restaurant" withMapping:restaurantMapping]];
-    [mealMapping addPropertyMapping:[RKRelationshipMapping relationshipMappingFromKeyPath:@"host" toKeyPath:@"host" withMapping:userMapping]];
-    [mealMapping addPropertyMapping:[RKRelationshipMapping relationshipMappingFromKeyPath:@"participants" toKeyPath:@"participants" withMapping:userMapping]];
-    
-    NSIndexSet *statusCodes = RKStatusCodeIndexSetForClass(RKStatusCodeClassSuccessful); // Anything in 2xx
-    RKResponseDescriptor *mealResponseDescriptor = [RKResponseDescriptor responseDescriptorWithMapping:mealMapping pathPattern:@"meal/" keyPath:@"objects" statusCodes:statusCodes];
-    RKResponseDescriptor *userResponseDescriptor = [RKResponseDescriptor responseDescriptorWithMapping:userMapping pathPattern:@"user/" keyPath:@"objects" statusCodes:statusCodes];
-    
-    
-    [manager addResponseDescriptor:mealResponseDescriptor];
-    [manager addResponseDescriptor:userResponseDescriptor];
-//    managedObjectStore.managedObjectCache = [[RKInMemoryManagedObjectCache alloc] initWithManagedObjectContext:managedObjectStore.persistentStoreManagedObjectContext];
-
 }
 
 -(void)initSinaweibo{

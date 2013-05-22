@@ -7,7 +7,8 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "UserProfile.h"
+#import "User.h"
+#import "Photo.h"
 
 typedef enum{
     AVATAR, PHOTO
@@ -16,7 +17,7 @@ ImageUploaderOption;
 
 @protocol ImageUploaderDelegate <NSObject>
 @optional
--(void)didUploadPhoto:(UIImage*)image withData:(NSDictionary*)data;
+-(void)didUploadPhoto:(Photo*)photo image:(UIImage*)image;
 -(void)didFailUploadPhoto:(UIImage*)image;
 -(void)didUploadAvatar:(UIImage*)image  withData:(NSDictionary*)data;
 -(void)didFailUploadAvatar:(UIImage*)image;
@@ -25,8 +26,8 @@ ImageUploaderOption;
 
 @interface ImageUploader : NSObject<UIImagePickerControllerDelegate, UIActionSheetDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate>
 -(id)initWithViewController:(UIViewController*)viewController delegate:(id<ImageUploaderDelegate>)delegate;
--(void)uploadImageForUser:(UserProfile*)user option:(ImageUploaderOption)option;
-
+-(void)uploadAvatar;
+-(void)uploadPhoto;
 @property(nonatomic) ImageUploaderOption option;
 @property(nonatomic, weak) id<ImageUploaderDelegate> delegate;
 @end

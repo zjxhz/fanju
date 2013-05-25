@@ -21,7 +21,6 @@
 #import "InfoUtil.h"
 #import "WBSendView.h"
 #import "Authentication.h"
-#import "NewUserDetailsViewController.h"
 #import "SpeechBubble.h"
 #import "ClosablePopoverViewController.h"
 #import "OverlayViewController.h"
@@ -37,7 +36,7 @@
 
 @implementation MealDetailViewController{
     MealDetailsViewDelegate* _mealDetailsViewDelegate;
-    OrderInfo* _myOrder;
+    Order* _myOrder;
     NSArray* _participants;
 }
 -(id)init{
@@ -56,40 +55,35 @@
 
 -(void)requestOrderStatus{
     User* loggedInUser = [UserService service].loggedInUser;
-    [[NetworkHandler getHandler] requestFromURL:[NSString stringWithFormat:@"http://%@/api/v1/order/?&meal__id=%@&customer__id=%@&status=2&format=json", EOHOST, self.meal.mID, loggedInUser.uID]
-                                         method:GET
-                                    cachePolicy:TTURLRequestCachePolicyNone
-                                        success:^(id obj) {
-                                            NSArray *orders = [obj objectForKeyInObjects];                                            
-                                            if (orders && [orders count] > 1) {
-                                                DDLogVerbose(@"WARNING: possible duplicated orders found for meal(%@) and user(%@)", self.meal.mID, loggedInUser.uID);
-                                            } else if (orders && [orders count] == 1){
-                                                NSDictionary* data = orders[0];
-                                                _myOrder = [OrderInfo orderInfoWithData:data];
-                                                [_joinButton setTitle:@"已支付，查看订单" forState:UIControlStateNormal];
-                                                [_joinButton addTarget:self action:@selector(viewOrder:) forControlEvents:UIControlEventTouchDown];
-                                            } else {
-                                                NSDate* time = [MealService dateOfMeal:_meal];
-                                                if([time compare:[NSDate date]] == NSOrderedAscending){
-                                                    [_joinButton setTitle:@"已结束" forState:UIControlStateNormal];
-                                                }  else if (self.meal.actualPersons >= self.meal.maxPersons) {
-                                                    [_joinButton setTitle:@"卖光了" forState:UIControlStateNormal];
-                                                    [_joinButton removeTarget:self action:@selector(joinMeal:) forControlEvents:UIControlEventTouchDown];
-                                                } else {
-                                                    [_joinButton setTitle:@"参加饭局" forState:UIControlStateNormal];
-                                                    [_joinButton addTarget:self action:@selector(joinMeal:) forControlEvents:UIControlEventTouchDown];
-                                                }
-                                            }
-                                            [UIView animateWithDuration:0.9 animations:^{
-                                                _tabBar.hidden = NO;
-                                            }];
-                                        } failure:^{
-                                            DDLogError(@"failed to get order status for id %@", _mealID);
-                                        }];
-}
-
--(void)payForOrder:(id)sender{
-    DDLogVerbose(@"Not implemented yet");    
+    RKObjectManager* manager = [RKObjectManager sharedManager];
+    NSDictionary* params = @{@"meal__id":self.meal.mID, @"status": @"2"};
+    [manager getObjectsAtPath:@"order/" parameters:params success:^(RKObjectRequestOperation *operation, RKMappingResult *mappingResult) {
+        NSArray* orders = mappingResult.array;
+        if ( [orders count] >= 1) {
+            if (orders.count > 1) {
+                DDLogError(@"duplicated orders found for meal(%@) and user(%@)", self.meal.mID, loggedInUser.uID);
+            }
+            _myOrder = orders[0];
+            [_joinButton setTitle:@"已支付，查看订单" forState:UIControlStateNormal];
+            [_joinButton addTarget:self action:@selector(viewOrder:) forControlEvents:UIControlEventTouchDown];
+        } else {
+            NSDate* time = [MealService dateOfMeal:_meal];
+            if([time compare:[NSDate date]] == NSOrderedAscending){
+                [_joinButton setTitle:@"已结束" forState:UIControlStateNormal];
+            }  else if ([self.meal.actualPersons integerValue] >= [self.meal.maxPersons integerValue]) {
+                [_joinButton setTitle:@"卖光了" forState:UIControlStateNormal];
+                [_joinButton removeTarget:self action:@selector(joinMeal:) forControlEvents:UIControlEventTouchDown];
+            } else {
+                [_joinButton setTitle:@"参加饭局" forState:UIControlStateNormal];
+                [_joinButton addTarget:self action:@selector(joinMeal:) forControlEvents:UIControlEventTouchDown];
+            }
+        }
+        [UIView animateWithDuration:0.9 animations:^{
+            _tabBar.hidden = NO;
+        }];
+    } failure:^(RKObjectRequestOperation *operation, NSError *error) {
+        DDLogError(@"failed to get order status for id %@", _mealID);
+    }];
 }
 
 -(void)viewOrder:(id)sender{
@@ -235,9 +229,7 @@
     return commentsView;
 }
 - (void) initDetailsView{
-    CGFloat height = self.view.frame.size.height - TAB_BAR_HEIGHT - DISH_VIEW_HEIGHT;
-    _detailsView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, height)];
-    _detailsView.backgroundColor = [UIColor clearColor];
+    _detailsView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, 0)];
     _detailsView.backgroundColor = [UIColor clearColor];
     
     //introduction
@@ -397,7 +389,7 @@
         [_participantsView removeFromSuperview];
     }
     NSInteger y = _numberOfPersons.frame.origin.y + _numberOfPersons.frame.size.height + 8;
-    _participantsView = [[UIScrollView alloc] initWithFrame:CGRectMake(9, y, 320 - 9, 68)];
+    _participantsView = [[UIScrollView alloc] initWithFrame:CGRectMake(9, y, 320 - 9, PARTICIPANTS_VIEW_HEIGHT)];
     _participantsView.showsHorizontalScrollIndicator = NO;
     _participantsView.backgroundColor = [UIColor clearColor];
     _participantsView.contentSize = CGSizeMake( (PARTICIPANTS_WIDTH + PARTICIPANTS_GAP ) * _meal.participants.count, PARTICIPANTS_HEIGHT);
@@ -416,6 +408,9 @@
         [_participantsView addSubview:contentView];
     }
     [_detailsView addSubview:_participantsView];
+    CGRect frame = _detailsView.frame;
+    frame.size.height  = y + PARTICIPANTS_VIEW_HEIGHT;
+    _detailsView.frame = frame;
 }
 
 -(void)avatarTapped:(UITapGestureRecognizer*)tap{
@@ -550,14 +545,6 @@
 - (void)sendView:(WBSendView *)view didFailWithError:(NSError *)error{
     [InfoUtil showErrorWithString:@"发送失败，请稍后重试"];
     DDLogVerbose(@"send weibo message failed with error: %@", error.description);
-}
-
-#pragma mark UserImageViewDelegate
--(void)userImageTapped:(UserProfile*)user{
-    NewUserDetailsViewController *detailVC = [[NewUserDetailsViewController alloc] initWithStyle:UITableViewStylePlain];
-    detailVC.userID = [NSString stringWithFormat:@"%d", user.uID];//do not set user object here as it does not contain full information
-    [self.navigationController pushViewController:detailVC
-                                         animated:YES];
 }
 
 #pragma mark NSObject

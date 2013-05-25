@@ -34,8 +34,10 @@
     UIButton* _deleteButton;
     ImageUploader* _uploader;
     UIButton* _addButton;
-    NSMutableArray* _photos;
+    NSArray* _photos;
     NSManagedObjectContext* _mainQueueContext;
+    BOOL _tabBarVisible;
+    BOOL _addButtonVisible;
 }
 
 @end
@@ -48,24 +50,28 @@
     if (self) {
         RKManagedObjectStore* store = [RKObjectManager sharedManager].managedObjectStore;
         _mainQueueContext = store.mainQueueManagedObjectContext;
+        self.navigationItem.titleView = [[WidgetFactory sharedFactory] titleViewWithTitle:@"相册"];
+        _scrollView = [[UIScrollView alloc] initWithFrame:CGRectZero];
+        _scrollView.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"bg"]];
+        _scrollView.showsHorizontalScrollIndicator = NO;
+        _scrollView.showsVerticalScrollIndicator = NO;
+        [self.view addSubview:_scrollView];
+        UITapGestureRecognizer *tp = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(viewTapped:)];
+        [_scrollView addGestureRecognizer:tp];
+        _addButton = [[UIButton alloc] initWithFrame:CGRectZero];
+        [_addButton setBackgroundImage:[UIImage imageNamed:@"album_add_photo"] forState:UIControlStateNormal];
+        [_addButton addTarget:self action:@selector(addPhoto:) forControlEvents:UIControlEventTouchUpInside];
+
     }
     return self;
 }
 
-- (void)viewDidLoad
-{
-    [super viewDidLoad];
-    self.title = [NSString stringWithFormat:@"%@的相册", _user.name];
+-(void)setUser:(User *)user{
+    _user = user;
     if ([[UserService service].loggedInUser isEqual:_user]) {
         self.navigationItem.rightBarButtonItem = [[WidgetFactory sharedFactory]normalBarButtonItemWithTitle:@"编辑" target:self action:@selector(edit:)];
     }
-    _scrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, 0, 320, [self heightForScrollView:NO])];
-    _scrollView.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"bg"]];
-    _scrollView.showsHorizontalScrollIndicator = NO;
-    _scrollView.showsVerticalScrollIndicator = NO;
-    [self.view addSubview:_scrollView];
-    UITapGestureRecognizer *tp = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(viewTapped:)];
-    [_scrollView addGestureRecognizer:tp];
+    [self buildUI];
 }
 
 -(void)edit:(id)sender{
@@ -90,7 +96,6 @@
 }
 
 -(void)removeTabBar{
-    _scrollView.frame = CGRectMake(0, 0, 320, [self heightForScrollView:NO]);
     [UIView animateWithDuration:0.5
                      animations:^{
         CGRect frame = _tabBar.frame;
@@ -103,6 +108,8 @@
         }
         _scrollView.contentOffset = CGPointMake(offset.x, y);
     } completion:^(BOOL finished) {
+        _tabBarVisible = NO;
+        [self resetScrollViewFrame];
         [_tabBar removeFromSuperview];
     }];
 }
@@ -114,8 +121,6 @@
     [_deleteButton setTitle:@"删除" forState:UIControlStateNormal];
     [self updateDeleteButton];
     _tabBar = [[WidgetFactory sharedFactory] tabBarInView:self.view withButton:_deleteButton];
-    
-    
 
     [self.view addSubview:_tabBar];
     __block CGRect frame = _tabBar.frame;
@@ -127,7 +132,8 @@
         CGPoint offset = _scrollView.contentOffset;
         _scrollView.contentOffset = CGPointMake(offset.x, offset.y + TABBAR_HEIGHT);
     } completion:^(BOOL finished) {
-        _scrollView.frame = CGRectMake(0, 0, 320, [self heightForScrollView:YES]);
+        _tabBarVisible = YES;
+        [self resetScrollViewFrame];
     }];
 }
 
@@ -149,11 +155,14 @@
                                     cachePolicy:TTURLRequestCachePolicyNoCache
                                         success:^(id obj) {
                                             [SVProgressHUD dismissWithSuccess:@"删除成功"];
+                                            [_user removePhotos:[[NSSet alloc] initWithArray:photosToBeDeleted]];
                                             for (Photo* photo in photosToBeDeleted) {
-                                                [_photos removeObject:photo];
                                                 [_mainQueueContext deleteObject:photo];
                                             }
-                                            [[Authentication sharedInstance] synchronize];
+                                            NSError* error;
+                                            if(![_mainQueueContext saveToPersistentStore:&error]){
+                                                DDLogError(@"failed to save deleted photos");
+                                            }
                                             [_selectedIndexes removeAllObjects];
                                             [self buildUI];
                                             DDLogVerbose(@"user photos deleted.");
@@ -162,24 +171,22 @@
                                         }];
 }
 
--(void)viewWillAppear:(BOOL)animated{
-    [super viewWillAppear:animated];
-    [self buildUI];
+-(void)viewDidAppear:(BOOL)animated{
+    [super viewDidAppear:animated];
+    [self resetScrollViewFrame];
 }
-
 - (void)didReceiveMemoryWarning
 {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
 }
 
+//this method could be called multiple times
 -(void)buildUI{
     [_contentViews makeObjectsPerformSelector:@selector(removeFromSuperview)];
-    [_addButton removeFromSuperview];
-    _photos =  [[_user.photos allObjects] mutableCopy];
+    _photos = [UserService sortedPhotosForUser:_user];
     _photoViews = [NSMutableArray array];
     _contentViews = [NSMutableArray array];
-
     for (int i = 0; i < _photos.count; ++i) {
         [self addPhoto:[_photos objectAtIndex:i] atIndex:i];
     }
@@ -189,8 +196,8 @@
 }
 
 -(void)resetContentSize{
-    NSInteger tiles = _user.photos.count;
-    if (_addButton) {
+    NSInteger tiles = _photos.count;
+    if (_addButtonVisible) {
         tiles++;
     }
     NSInteger rows =  tiles/ 3 + (tiles % 3 == 0 ? 0 : 1);
@@ -198,14 +205,14 @@
 }
 
 -(void)addAddButtonIfNeeded{
-    if (_user.photos.count < 15 && [[Authentication sharedInstance].currentUser isEqual:_user]) {
-        _addButton= [[UIButton alloc] initWithFrame:[self frameAtIndex:_user.photos.count]];
-        [_addButton setBackgroundImage:[UIImage imageNamed:@"album_add_photo"] forState:UIControlStateNormal];
-        [_addButton addTarget:self action:@selector(addPhoto:) forControlEvents:UIControlEventTouchUpInside];
+    if (_user.photos.count < 15 && [[UserService service].loggedInUser isEqual:_user] &&!_editing) {
+        [_addButton removeFromSuperview];
+        _addButton.frame = [self frameAtIndex:_user.photos.count];
         [_scrollView addSubview:_addButton];
+        _addButtonVisible = YES;
     } else {
         [_addButton removeFromSuperview];
-        _addButton = nil;
+        _addButtonVisible = NO;
     }
 }
 
@@ -293,19 +300,20 @@
     return photos;
 }
 
--(CGFloat)heightForScrollView:(BOOL)withTabBar{
-    CGFloat height = self.view.frame.size.height;
-    if (withTabBar) {
-        height -= TABBAR_HEIGHT;
+-(void)resetScrollViewFrame{
+    CGRect frame = self.view.frame;
+    if (_tabBarVisible) {
+        frame.size.height -= TABBAR_HEIGHT;
     }
-    return height;
+    _scrollView.frame = frame;
 }
 #pragma mark ImageUploaderDelegate
 -(void)didUploadPhoto:(Photo*)photo image:(UIImage*)image{
-    [_photos addObject:photo];
-    [[Authentication sharedInstance] relogin]; 
     [_selectedIndexes removeAllObjects];
     [self buildUI];
+}
 
+-(void)didFailUploadPhoto:(UIImage*)image{
+    DDLogError(@"failed to upload image");
 }
 @end

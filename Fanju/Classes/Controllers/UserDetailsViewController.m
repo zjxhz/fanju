@@ -79,8 +79,6 @@
 
 -(void)buildUI{
     UIImage* toolbarBg = [UIImage imageNamed:@"toolbar_bg"] ;
-    _refreshControl = [[ODRefreshControl alloc] initInScrollView:self.tableView];
-    [_refreshControl addTarget:self action:@selector(reload:) forControlEvents:UIControlEventValueChanged];
     [self updateNavigationBar];
     self.toolbarItems  = [self createToolbarItems];
     [self.navigationController setToolbarHidden:NO];
@@ -101,6 +99,8 @@
 -(void)viewDidLoad{
     [super viewDidLoad];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(userUpdated:) name:NOTIFICATION_USER_UPDATE object:nil];
+    _refreshControl = [[ODRefreshControl alloc] initInScrollView:self.tableView];
+    [_refreshControl addTarget:self action:@selector(reload:) forControlEvents:UIControlEventValueChanged];
 }
 
 -(void)viewDidAppear:(BOOL)animated{
@@ -377,8 +377,13 @@
 {
     UITableViewCell *cell = nil;
     if (indexPath.section == 0) {
-        cell = [[UserDetailsCell alloc] initWithUser:_user];
+        static NSString* USER_DETAILS_CELL = @"USER_DETAILS_CELL";
+        cell = [self.tableView dequeueReusableCellWithIdentifier:USER_DETAILS_CELL];
+        if(!cell){
+            cell = [[UserDetailsCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:USER_DETAILS_CELL];
+        }
         _userDetailsCell = (UserDetailsCell*)cell;
+        _userDetailsCell.user = _user;
     } else if(indexPath.section == 1){
         if (indexPath.row == 0) {
             NSString* CellIdentifier = @"PhotoTitleCell";
@@ -405,10 +410,13 @@
         }
         _tagCell = (UserTagsCell* )cell;
         _tagCell.rootController = self;
+        CGFloat originalHeight = _tagCell.cellHeight;
         _tagCell.tags = [_user.tags allObjects];
+        if (_tagCell.cellHeight != originalHeight) {
+            recalculateHeight = YES;
+        }
         if (recalculateHeight) {
             [self.tableView reloadData];
-            recalculateHeight = NO;
         }
     }  else if(indexPath.section == 3){
         NSString* CellIdentifier = @"UserInfoCell";
@@ -557,10 +565,6 @@
     [_contex saveToPersistentStore:nil];//delete locally first, and hope that delete will success remotely as well
     [om deleteObject:nil path:path parameters:nil success:^(RKObjectRequestOperation *operation, RKMappingResult *mappingResult) {
         [SVProgressHUD dismissWithSuccess:@"删除成功"];
-//        NSError* error;
-//        if (![_context saveToPersistentStore:&error]) {
-//            DDLogError(@"failed to save after deleting a photo: %@", error);
-//        };
         [self.tableView reloadData];
         DDLogInfo(@"user photo delete.");
     } failure:^(RKObjectRequestOperation *operation, NSError *error) {
@@ -569,10 +573,9 @@
 }
 
 -(void)showAllTags{
-    return; //TODO
-//    UserTagsViewController* utvc = [[UserTagsViewController alloc] initWithUser:_user];
-//    utvc.tagDelegate = self;
-//    [self.navigationController pushViewController:utvc animated:YES];
+    UserTagsViewController* utvc = [[UserTagsViewController alloc] initWithUser:_user];
+    utvc.tagDelegate = self;
+    [self.navigationController pushViewController:utvc animated:YES];
 }
 
 -(void)userUpdated:(NSNotification*)notif{
@@ -619,6 +622,7 @@
     [_photoCell addUploadedPhoto:photo withLocalImage:image];
     [[Authentication sharedInstance] relogin]; // to refresh photos, or we can just add the new photo TODO
     [self.tableView reloadData];
+    [_photoCell scrollToRight];
 }
 -(void)didFailUploadPhoto:(UIImage*)image{
     DDLogWarn(@"failed to upload photo");

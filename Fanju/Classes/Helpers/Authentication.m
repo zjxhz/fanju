@@ -123,8 +123,8 @@ NSString * const EODidLogoutNotification = @"EODidLogoutNotification";
         [UserService service].loggedInUser = user;
         DDLogVerbose(@"fetched logged in user and stored to core data");
         [[RelationshipService service]fetchFollowingsForUser:user];
-        [[XMPPHandler sharedInstance] setup];
         _currentUser = [UserProfile profileWithData:data];
+        [[XMPPHandler sharedInstance] setup];
         [self registerToken];
         [self synchronize];
         [self.delegate userDidLogIn:_currentUser];
@@ -262,29 +262,13 @@ NSString * const EODidLogoutNotification = @"EODidLogoutNotification";
                                         }];
 }
 
-#warning check if this method can be replaced by relogin
--(void)refreshUserInfo:(retrieved_t)success failure:(retrieve_failed_t)failure{
-    if (_currentUser) {
-        [[NetworkHandler getHandler] requestFromURL:[NSString stringWithFormat:@"%@://%@/api/v1/user/%d/?format=json", HTTPS, EOHOST, _currentUser.uID]
-                                             method:GET
-                                        cachePolicy:TTURLRequestCachePolicyNone
-                                            success:^(id obj) {
-                                                _currentUser = [UserProfile profileWithData:obj];
-                                                [self synchronize];
-                                                success(_currentUser);
-                                            } failure:^{
-                                                failure();
-                                            }];
-    }
-}
-
 #pragma mark LocationProviderDelegate
 -(void)finishObtainingLocation:(CLLocation*)location {
     DDLogVerbose(@"obtained location: %@", location);
     if (_currentUser) {
         _currentUser.coordinate = location.coordinate;
         _currentUser.locationUpdatedTime = [[NSDate alloc] init];    
-        [self synchronize];
+//        [self synchronize];
         NSArray *params = @[[DictHelper dictWithKey:@"lat" andValue:[NSString stringWithFormat:@"%f", _currentUser.coordinate.latitude]],
         [DictHelper dictWithKey:@"lng" andValue:[NSString stringWithFormat:@"%f", _currentUser.coordinate.longitude]]];
 

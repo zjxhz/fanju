@@ -11,4 +11,5 @@
 @interface TagService : NSObject
 +(TagService*)service;
 +(NSString*)textOfTags:(NSArray*)tags;
++(NSString*) tagsToString:(NSArray*)tags;
 @end

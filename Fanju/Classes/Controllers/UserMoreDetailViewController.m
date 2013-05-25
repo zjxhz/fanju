@@ -88,12 +88,12 @@
                                       jsonObject:dict
                                         success:^(id obj) {
                                             [SVProgressHUD showSuccessWithStatus:@"保存成功！"];
-                                            [[Authentication sharedInstance] refreshUserInfo:^(id obj){
-                                                DDLogVerbose(@"user info refreshed");
-                                                [self.delegate userProfileUpdated:obj];
-                                            }failure:^(void){
-                                                DDLogVerbose(@"user info refresh failed");
-                                            }];
+//                                            [[Authentication sharedInstance] refreshUserInfo:^(id obj){
+//                                                DDLogVerbose(@"user info refreshed");
+//                                                [self.delegate userProfileUpdated:obj];
+//                                            }failure:^(void){
+//                                                DDLogVerbose(@"user info refresh failed");
+//                                            }];
                                             
                                         } failure:^{
                                              [SVProgressHUD showSuccessWithStatus:@"保存失败，请稍后再试…"];
@@ -136,7 +136,7 @@
    
     _industry = _user.industry;
     _occupation = _user.occupation;
-    NSArray *sectionItems4 = @[[@[@"爱好和特点", @"TODO"] mutableCopy],
+    NSArray *sectionItems4 = @[[@[@"兴趣和特点", @"TODO"] mutableCopy],
                               [@[@"职业",  [NSString stringWithFormat:@"%@\n%@",_industry, _occupation]] mutableCopy],
                               [@[@"公司", _user.workFor ? _user.workFor : @""] mutableCopy],
                               [@[@"学校", _user.college ? _user.college : @""] mutableCopy]];
@@ -263,7 +263,7 @@
             aac.delegate = self;
             [self.navigationController pushViewController:aac animated:YES];
         } else if (indexPath.section == 4 && indexPath.row == 0){
-            tagC = [[NewTagViewController alloc] initWithStyle:UITableViewStyleGrouped];
+            tagC = [[NewTagViewController alloc] initWithStyle:UITableViewStylePlain];
             tagC.user = self.user;
             tagC.delegate = self;
             tagC.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCancel target:self action:@selector(dismissTagViewController:)];
@@ -350,19 +350,19 @@
                                           method:PATCH
                                       jsonObject:dict
                                          success:^(id obj) {
-                                             [[Authentication sharedInstance] refreshUserInfo:^(id obj){
-//                                                 _profile = [[Authentication sharedInstance] currentUser];
-                                                 _uploadedImage = image;
-                                                 [SVProgressHUD showSuccessWithStatus:@"上传成功"];
-                                                 [self.tableView reloadData];
-//                                                 dispatch_async(dispatch_get_main_queue(), ^{                                                     _avatarView.defaultImage = image;            
-//                                                 });
-                                                 
-                                                 [self dismissModalViewControllerAnimated:YES];
-                                             } failure:^{
-                                                 [SVProgressHUD showSuccessWithStatus:@"图片上传失败…"];
-                                                 [self dismissModalViewControllerAnimated:YES];
-                                             }];
+//                                             [[Authentication sharedInstance] refreshUserInfo:^(id obj){
+////                                                 _profile = [[Authentication sharedInstance] currentUser];
+//                                                 _uploadedImage = image;
+//                                                 [SVProgressHUD showSuccessWithStatus:@"上传成功"];
+//                                                 [self.tableView reloadData];
+////                                                 dispatch_async(dispatch_get_main_queue(), ^{                                                     _avatarView.defaultImage = image;            
+////                                                 });
+//                                                 
+//                                                 [self dismissModalViewControllerAnimated:YES];
+//                                             } failure:^{
+//                                                 [SVProgressHUD showSuccessWithStatus:@"图片上传失败…"];
+//                                                 [self dismissModalViewControllerAnimated:YES];
+//                                             }];
                                          } failure:^{
                                              [SVProgressHUD showSuccessWithStatus:@"图片上传失败…"];
                                              [self dismissModalViewControllerAnimated:YES];

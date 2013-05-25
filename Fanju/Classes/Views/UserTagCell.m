@@ -13,17 +13,29 @@
 
 #pragma mark -
 #pragma mark TTTableViewCell
-
-- (id)object {
-	return _userTag;
-}
-
+//-(void)layoutSubviews{
+//    [super layoutSubviews];
+//    CGRect rect =  self.textLabel.frame;
+//    rect.origin.x = 17;
+//    self.textLabel.frame = rect;
+//}
 - (void)setObject:(id)object {
-	if (_userTag != object) {
-		[super setObject:object];
-        UserTag* tag = object;
-        self.textLabel.text = tag.name;
+    [super setObject:object];
+    if ([object isKindOfClass:[NSString class]]) {
+        NSString* text = object;
+        self.imageView.image = [UIImage imageNamed:@"tag_add"];
+        self.textLabel.font = [UIFont systemFontOfSize:16];
+        self.textLabel.text = text;
+        self.textLabel.textColor = RGBCOLOR(0x2B, 0x2B, 0x2B);
+        return;
+    } else {
+        self.imageView.image = nil;
     }
+    _userTag = object;
+    self.textLabel.font = [UIFont systemFontOfSize:17];
+    self.textLabel.textColor = RGBCOLOR(0x2B, 0x2B, 0x2B);
+    self.textLabel.text = _userTag.name;
+
 }
 
 @end

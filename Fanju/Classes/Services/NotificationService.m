@@ -66,10 +66,10 @@ NSString * const UnreadNotificationCount = @"UnreadNotificationCount";
 #pragma mark XMPP Delegate
 
 - (void)xmppStream:(XMPPStream *)sender didReceiveMessage:(XMPPMessage *)message{
-//    if ([message wasDelayed]) {
-//        DDLogVerbose(@"ignoring offline messages as we are handling archived messages only: %@", message);
-//        return;
-//    }
+    if ([message wasDelayed]) {
+        DDLogVerbose(@"ignoring offline messages as we are handling archived messages only: %@", message);
+        return;
+    }
     [self handleNotification:message at:[NSDate date] read:NO];
 }
 
@@ -156,12 +156,14 @@ NSString * const UnreadNotificationCount = @"UnreadNotificationCount";
         } else if([self isPhotoNotification:message]){
             NSString* photoID = [self photoIDFrom:message];
             fetch_photo_success photo_success = ^(Photo *photo) {
+                photo.user = [[UserService service] userWithID:userID]; //user should be available now when photo is fetched
                 [self handleSinglePendingNotification:un];
             };
             
             fetch_user_success user_success = ^(User *user) {
                 DDLogInfo(@"user info got, continue to fetch photo");
                 Photo* photo = [[PhotoService service] getOrFetchPhoto:photoID success:photo_success failure:failure];
+                photo.user = user;
                 if (photo) {
                     photo_success(photo);
                 }

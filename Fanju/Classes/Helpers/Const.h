@@ -13,15 +13,18 @@
 #define LOGGED_USER_PROFILE @"LOGGED_USER_PROFILE"
 
 //#define EOHOST [[NSUserDefaults standardUserDefaults] objectForKey:@"HOST"] ? [[NSUserDefaults standardUserDefaults] objectForKey:@"HOST"] : @"www.fanjoin.com"
-//#define EOHOST @"www.fanjoin.com"
-//#define XMPP_HOST @"fanjoin.com"
-#define EOHOST @"localhost:8000"
-#define XMPP_HOST @"wayne.local"
+#define EOHOST @"www.fanjoin.com"
+#define XMPP_HOST @"fanjoin.com"
+//#define EOHOST @"localhost:8000"
+//#define XMPP_HOST @"wayne.local"
+//#define EOHOST @"www.ifunjoin.com"
+//#define XMPP_HOST @"ifunjoin.com"
+
 //#define EOHOST @"www.ifunjoin.com:8001"
 #define HTTPS @"http" // use http for https in development
 #define APP_SCHEME @"Fanju"
-#define WEIBO_APP_KEY @"4071331500"
-#define WEIBO_APP_SECRET @"5cf4910b217617cee72b2889a8e394eb"
+#define WEIBO_APP_KEY @"2295468526" //@"4071331500"
+#define WEIBO_APP_SECRET @"5991184a22eaff8d2b1149bcf1b1ff91" //@"5cf4910b217617cee72b2889a8e394eb"
 #define WEIBO_APP_REDIRECT_URI @"http://www.fanjoin.com/login/weibo/"
 
 #define BLAME_NETWORK_ERROR_MESSAGE @"出错了，网络问题？"

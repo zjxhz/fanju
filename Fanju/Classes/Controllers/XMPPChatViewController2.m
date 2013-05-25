@@ -13,7 +13,6 @@
 #import "XMPPHandler.h"
 #import "SVProgressHUD.h"
 #import "UIView+CocoaPlant.h"
-#import "NewUserDetailsViewController.h"
 #import "NSDictionary+ParseHelper.h"
 #import "ODRefreshControl.h"
 #import "SVProgressHUD.h"
@@ -22,6 +21,7 @@
 #import "UserMessage.h"
 #import "MessageService.h"
 #import "Conversation.h"
+#import "UserDetailsViewController.h"
 
 #define kChatBarHeight1                      40
 #define kChatBarHeight4                      94
@@ -48,7 +48,6 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
     UIBubbleTableView *_bubbleTable;
     NSMutableArray *_bubbleData;
     CGFloat _keyboardHeight;
-    UserProfile* _profile;
     ODRefreshControl* _refreshControl;
     NSFetchRequest *_fetchRequest;
     NSInteger _fetchOffset;
@@ -91,7 +90,6 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-//    [self loadUserProfile];
     [self requestMessages];
     [self createMessageInputBar];
     UIGestureRecognizer *reg = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(viewTapped:)];
@@ -102,26 +100,6 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
                                                       userInfo:nil];
 }
 
-//-(void)loadUserProfile{
-//    NSString* url = [NSString stringWithFormat:@"http://%@/api/v1/user/?format=json&user__username=%@", EOHOST, [self username]];
-//    [[NetworkHandler getHandler] requestFromURL:url
-//                                         method:GET
-//                                    cachePolicy:TTURLRequestCachePolicyNone
-//                                        success:^(id obj) {
-//                                            NSArray *users = [obj objectForKeyInObjects];
-//                                            if (users.count == 1) {
-//                                                _profile = [UserProfile profileWithData:[users objectAtIndex:0]];
-//                                            } else {
-//                                                DDLogVerbose(@"获取数据失败");
-//                                            }
-//                                        } failure:^{
-//                                            DDLogVerbose(@"获取数据失败");
-//                                        }];
-//}
-
-//-(NSString*)username{
-//    return [[_contactJIDStr componentsSeparatedByString:@"@"] objectAtIndex:0];
-//}
 
 -(void) createMessageInputBar{
     self.view.frame = CGRectMake(0, 0, self.view.frame.size.width, self.view.frame.size.height-kChatBarHeight1);
@@ -203,12 +181,14 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
 -(void) requestMessages{
     _fetchRequest = [[NSFetchRequest alloc] init];
     _fetchRequest.entity = [NSEntityDescription entityForName:@"UserMessage" inManagedObjectContext:_context];
-    
-    _fetchRequest.predicate = [NSPredicate predicateWithFormat:@"conversation = %@", _conversation];
+    _fetchRequest.predicate = [NSPredicate predicateWithFormat:@"conversation == %@", _conversation];
     _fetchRequest.sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"time" ascending:NO]];
     _fetchRequest.fetchLimit = FETCH_LIMIT;
     NSError* error;
     NSArray* objects = [_context executeFetchRequest:_fetchRequest error:&error];
+    if (error) {
+        DDLogError(@"failed to fetch user messages for conversation %@ with error: %@", _conversation.objectID, error);
+    }
     _fetchOffset = FETCH_LIMIT;
     [self insertMessageBubbles:objects];
     [[NSNotificationCenter defaultCenter] addObserver:self
@@ -390,8 +370,7 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
 
 -(void)messageDidSave:(NSNotification*)notif {
     UserMessage* messageMO = notif.object;
-    User* me = [UserService service].loggedInUser;
-    if (![messageMO.conversation.owner isEqual:me]) {
+    if (![messageMO.conversation.with isEqual:_conversation.with]) {
         return; //not for this conversation
     }
 
@@ -430,14 +409,9 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
 
 #pragma mark UIBubbleTableViewCellAvatarDelegate
 -(void)avatarTapped:(UIImageView*)avatar{
-    NewUserDetailsViewController *newDeail = [[NewUserDetailsViewController alloc] initWithStyle:UITableViewStylePlain];
-    if (_profile) {
-        newDeail.user = _profile;
-    } else {
-//        [newDeail setUsername:[self username]];
-    }
-
-    [self.navigationController pushViewController:newDeail animated:YES];
+    UserDetailsViewController *details = [[UserDetailsViewController alloc] initWithStyle:UITableViewStylePlain];
+    details.user = _conversation.with;
+    [self.navigationController pushViewController:details animated:YES];
 }
 
 

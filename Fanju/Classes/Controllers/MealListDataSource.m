@@ -60,11 +60,15 @@
     if([self isWithinThisWeek:time]){
         [_mealsForThisWeek addObject:meal];
         DDLogVerbose(@"added a meal to this week: %@", time);
-//        [_mealsForThisWeek sortUsingSelector:@selector(compare:)]; //assuming they are already sorted
+        [_mealsForThisWeek sortUsingComparator:^NSComparisonResult(id obj1, id obj2) {
+            return [[MealService dateOfMeal:obj1] compare:[MealService dateOfMeal:obj2]];
+        }];
     } else {
         [_mealsAfterThisWeek addObject:meal];
         DDLogVerbose(@"added a meal to next week: %@", time);
-//        [_mealsAfterThisWeek sortUsingSelector:@selector(compare:)];
+        [_mealsAfterThisWeek sortUsingComparator:^NSComparisonResult(id obj1, id obj2) {
+            return [[MealService dateOfMeal:obj1] compare:[MealService dateOfMeal:obj2]];
+        }];
     }
 }
 

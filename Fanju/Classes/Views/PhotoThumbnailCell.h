@@ -26,4 +26,5 @@
 - (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier withUser:(User*)user editable:(BOOL)editable;
 -(void)addUploadedPhoto:(Photo*)photo withLocalImage:(UIImage*)localImage;
 -(void)deleteUserPhoto:(Photo*)photo atIndex:(NSInteger)index;
+-(void)scrollToRight;
 @end

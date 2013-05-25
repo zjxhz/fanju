@@ -7,10 +7,10 @@
 //
 
 #import <Three20UI/Three20UI.h>
-#import "UserTag.h"
+#import "Tag.h"
 
 @interface UserTagCell : TTTableViewCell{
-    UserTag* _userTag;
+    Tag* _userTag;
 }
 
 @end

@@ -54,14 +54,14 @@
 -(void)buildUI{   
     _imageViews = [NSMutableArray array];
     _contentViews = [NSMutableArray array];
-    _photos = [_user.photos allObjects];
+    _photos = [UserService sortedPhotosForUser:_user];
     _scrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(3, 0, 320 - 3, 70)];
     _scrollView.showsHorizontalScrollIndicator = NO;
     _scrollView.backgroundColor = [UIColor clearColor];
     [self resetContentSize:_photos.count];
     if (_photos.count == 0) {
         [self addAddOrRequestPhotoButton];
-    } else if([[Authentication sharedInstance].currentUser isEqual:_user] && _user.photos.count < 15){
+    } else if([_user isEqual:[UserService service].loggedInUser] && _photos.count < 15){
         [self addAddOrRequestPhotoButton];
     }
     for (int i = 0; i < _photos.count; ++i) {
@@ -71,10 +71,9 @@
 }
 
 -(void)addAddOrRequestPhotoButton{
-    _addOrRequestPhotoButton = [[UIButton alloc] initWithFrame:[self frameAtIndex:_user.photos.count]];
-    UserProfile* currentUser = [Authentication sharedInstance].currentUser;
+    _addOrRequestPhotoButton = [[UIButton alloc] initWithFrame:[self frameAtIndex:_photos.count]];
     UIImage* bgImg = nil;
-    if ([_user isEqual:currentUser]) {
+    if ([_user isEqual:[UserService service].loggedInUser]) {
         bgImg = [UIImage imageNamed:@"photo_add"];
     } else {
         bgImg = [UIImage imageNamed:@"photo_request"];
@@ -83,7 +82,7 @@
     [_addOrRequestPhotoButton setBackgroundImage:bgImg forState:UIControlStateNormal];
     [_addOrRequestPhotoButton addTarget:self action:@selector(addOrRequestTapped:) forControlEvents:UIControlEventTouchUpInside];
     [_scrollView addSubview:_addOrRequestPhotoButton];
-    [self resetContentSize:_user.photos.count];
+    [self resetContentSize:_photos.count];
 }
 
 -(void)resetContentSize:(NSInteger)photoCount{
@@ -158,5 +157,9 @@
     }
 
     [self.delegate didSelectUserPhoto:[_photos objectAtIndex:index] withAllPhotos:allImages atIndex:index];
+}
+
+-(void)scrollToRight{
+    [_scrollView scrollRectToVisible:[self frameAtIndex:_photos.count] animated:YES];
 }
 @end

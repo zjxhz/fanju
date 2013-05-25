@@ -30,4 +30,16 @@
     }
     return text;
 }
+
++(NSString*) tagsToString:(NSArray*)tags{
+    NSMutableString *tagStr = [[NSMutableString alloc] init];
+    for (int i = 0; i < tags.count; ++i) {
+        Tag *tag = [tags objectAtIndex:i];
+        [tagStr appendString:tag.name];
+        if (i != tags.count - 1) {
+            [tagStr appendString:@" "];
+        }
+    }
+    return tagStr;
+}
 @end

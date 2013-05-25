@@ -13,9 +13,9 @@
 #import "DictHelper.h"
 #import "InfoUtil.h"
 #import "UserTagDataSource.h"
+#import "WidgetFactory.h"
 
 @interface UserTagsViewController (){
-    NSMutableArray* _selectedTags;//selected, including all tags from the myself, which may not be visible if they are not tags of current user
     BOOL _tagCountBeforeDelete;
 }
 
@@ -26,11 +26,6 @@
 - (id)initWithUser:(User*)user{
     if(self = [super initWithStyle:UITableViewStylePlain]){
         self.user = user;
-        _selectedTags = [NSMutableArray array];
-        if (![self isViewForMyself]) {
-            [_selectedTags addObjectsFromArray:[Authentication sharedInstance].currentUser.tags];
-        }
-        
     }
     return self;
 }
@@ -38,22 +33,16 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-	self.title = [self isViewForMyself] ? @"您的爱好" : @"选择共同爱好";
-    NSString* rightBarButtonTitle = [self isViewForMyself] ? @"编辑" : @"保存";
-    SEL action = [self isViewForMyself] ? @selector(editTable:) : @selector(saveSeleted:);
-    self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:rightBarButtonTitle style:UIBarButtonItemStyleBordered target:self action:action];
+	self.navigationItem.titleView = [[WidgetFactory sharedFactory] titleViewWithTitle:@"我的兴趣"];
+    self.navigationItem.rightBarButtonItem = [[WidgetFactory sharedFactory] normalBarButtonItemWithTitle:@"编辑" target:self action:@selector(editTable:)];
+    self.tableView.backgroundColor = RGBCOLOR(0xF5, 0xF5, 0xF5);
     [self loadTags];    
 }
 
--(BOOL)isViewForMyself{
-    return [[Authentication sharedInstance].currentUser isEqual:_user];
-}
 
 -(void)loadTags{
-    UserTagDataSource* ds = [[UserTagDataSource alloc] initWithItems:[NSMutableArray arrayWithArray:_user.tags]];
-    if ([ self isViewForMyself]) {
-        [ds.items insertObject:@"加更多爱好" atIndex:0];
-    }
+    UserTagDataSource* ds = [[UserTagDataSource alloc] initWithItems:[_user.tags allObjects]];
+    [ds.items insertObject:@"添加更多兴趣" atIndex:0];
     self.dataSource = ds;
 }
 
@@ -61,16 +50,13 @@
     return self;
 }
 
-- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
-{
-    return (interfaceOrientation == UIInterfaceOrientationPortrait);
-}
-
 -(void)editTable:(id)sender{
     TTListDataSource* ds = self.dataSource;
+    UIBarButtonItem* item =  self.navigationItem.rightBarButtonItem;
+    UIButton* button = (UIButton*)item.customView;
     if (self.tableView.editing) {
         self.tableView.editing = NO;
-        self.navigationItem.rightBarButtonItem.title = @"编辑";
+        [button setTitle:@"编辑" forState:UIControlStateNormal];
         if (ds.items.count - 1 < _tagCountBeforeDelete) {
             _tagCountBeforeDelete = ds.items.count - 1;
             [self saveTags];
@@ -78,32 +64,35 @@
     } else {
         _tagCountBeforeDelete = ds.items.count - 1;
         self.tableView.editing = YES;
-        self.navigationItem.rightBarButtonItem.title = @"完成";
+        [button setTitle:@"完成" forState:UIControlStateNormal];
     }
 }
 
--(void)saveSeleted:(id)sender{
-    [SVProgressHUD showWithStatus:@"正在保存设置…" maskType:SVProgressHUDMaskTypeBlack];
-    [self saveTags];
-}
-
 -(void)saveTags{
-    UserProfile* user = [Authentication sharedInstance].currentUser;
     NSArray* tagsToSave = [self tagsToSave];
-    NSString *strTags = [UserTag tagsToString:tagsToSave];
+    NSString *strTags = [TagService tagsToString:tagsToSave];
     NSArray* params = [NSArray arrayWithObject:[DictHelper dictWithKey:@"tags" andValue:strTags]];
-    NSString *requestStr = [NSString stringWithFormat:@"%@://%@/api/v1/user/%d/tags/?format=json", HTTPS, EOHOST, user.uID];
+    NSString *requestStr = [NSString stringWithFormat:@"%@://%@/api/v1/user/%@/tags/?format=json", HTTPS, EOHOST, _user.uID];
     [[NetworkHandler getHandler] requestFromURL:requestStr
                                          method:POST
                                      parameters:params
                                     cachePolicy:TTURLRequestCachePolicyNone
                                         success:^(id obj) {
                                             if ([[obj objectForKey:@"status"] isEqualToString:@"OK"]) {
-                                                DDLogVerbose(@"tags saved");
-                                                [SVProgressHUD dismissWithSuccess:@"保存成功。"];
-                                                [user.tags removeAllObjects];
-                                                [user.tags addObjectsFromArray:tagsToSave];
-                                                [self.tagDelegate tagsSaved:tagsToSave forUser:user];
+                                                DDLogInfo(@"tags saved");
+                                                [SVProgressHUD dismissWithSuccess:@"保存成功"];
+                                                NSMutableSet* tags = [_user.tags mutableCopy];
+                                                NSSet* existingTags = [[NSSet alloc] initWithArray:tagsToSave];
+                                                [tags minusSet:existingTags];
+                                                for (Tag* tag in tags) {
+                                                    [_user removeTagsObject:tag];
+                                                }
+                                                NSManagedObjectContext* contex = [RKObjectManager sharedManager].managedObjectStore.mainQueueManagedObjectContext;
+                                                NSError* error;
+                                                if(![contex saveToPersistentStore:&error]){
+                                                    DDLogError(@"failed to save after saving tags: %@", error);
+                                                }
+                                                [self.tagDelegate tagsSaved:tagsToSave forUser:_user];
                                             } else {
                                                 [InfoUtil showError:obj];
                                             }
@@ -115,13 +104,9 @@
 
 -(NSArray*)tagsToSave{
     TTListDataSource *ds = self.dataSource;
-    if ([self isViewForMyself]) {
-        NSMutableArray* all = [ds.items mutableCopy];
-        [all removeObjectAtIndex:0];
-        return all;
-    } else {
-        return _selectedTags;
-    }
+    NSMutableArray* all = [ds.items mutableCopy];
+    [all removeObjectAtIndex:0];
+    return all;
 }
 
 #pragma mark UITableViewDelegate
@@ -129,35 +114,26 @@
     cell.selectionStyle = UITableViewCellSelectionStyleNone;
     TTListDataSource* ds = self.dataSource;
     id object = [ds tableView:self.tableView objectForRowAtIndexPath:indexPath];
-    if ([object isKindOfClass:[UserTag class]]) {
-        UserTag* tag = object;
-        if (![self isViewForMyself] && [_selectedTags containsObject:tag]) {
-            cell.accessoryType = UITableViewCellAccessoryCheckmark;
-        } else {
-            cell.accessoryType = UITableViewCellAccessoryNone;
-        }
-    } else if ([object isKindOfClass:[NSString class]]){
+    if ([object isKindOfClass:[NSString class]]){
         cell.textLabel.text = object;
         cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
     }
 }
 
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath{
-    if ([self isViewForMyself] && indexPath.row == 0) {
+    if (indexPath.row == 0) {
         [self showAllTags];
-    } else {
-        UserTag* tag = [self.dataSource tableView:self.tableView objectForRowAtIndexPath:indexPath];
-        if ([_selectedTags containsObject:tag]) {
-            [_selectedTags removeObject:tag];
-        } else {
-            [_selectedTags addObject:tag];
-        }
-        [self refresh];
     }
 }
 
+-(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath{
+    if (indexPath.row == 0) {
+        return 53;
+    }
+    return 45;
+}
 -(void)showAllTags{
-    NewTagViewController* tagC = [[NewTagViewController alloc] initWithStyle:UITableViewStyleGrouped];
+    NewTagViewController* tagC = [[NewTagViewController alloc] initWithStyle:UITableViewStylePlain];
     tagC.user = self.user;
     tagC.delegate = self;
     [self.navigationController pushViewController:tagC animated:YES];

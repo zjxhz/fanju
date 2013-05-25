@@ -34,4 +34,5 @@ typedef void (^service_failure)(void);
 +(NSArray*)photosUrlsForUser:(User*)user;
 +(UIImage*)genderImageForUser:(User*)user;
 +(NSString*)genderTextForUser:(User*)user;
++(NSArray*)sortedPhotosForUser:(User*)user;
 @end

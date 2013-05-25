@@ -124,7 +124,9 @@
     
     NSIndexSet *statusCodes = RKStatusCodeIndexSetForClass(RKStatusCodeClassSuccessful); // Anything in 2xx
     RKResponseDescriptor *mealResponseDescriptor = [RKResponseDescriptor responseDescriptorWithMapping:mealMapping pathPattern:@"meal/" keyPath:@"objects" statusCodes:statusCodes];
-    RKResponseDescriptor *orderResponseDescriptor = [RKResponseDescriptor responseDescriptorWithMapping:orderMapping pathPattern:@"user/:uID/order/" keyPath:@"objects" statusCodes:statusCodes];
+    RKResponseDescriptor *userMealResponseDescriptor = [RKResponseDescriptor responseDescriptorWithMapping:mealMapping pathPattern:@"user/:uID/meal/" keyPath:@"objects" statusCodes:statusCodes];
+    RKResponseDescriptor *userOrderResponseDescriptor = [RKResponseDescriptor responseDescriptorWithMapping:orderMapping pathPattern:@"user/:uID/order/" keyPath:@"objects" statusCodes:statusCodes];
+    RKResponseDescriptor *orderResponseDescriptor = [RKResponseDescriptor responseDescriptorWithMapping:orderMapping pathPattern:@"order/" keyPath:@"objects" statusCodes:statusCodes];
     RKResponseDescriptor *userResponseDescriptor = [RKResponseDescriptor responseDescriptorWithMapping:userMapping pathPattern:@"user/" keyPath:@"objects" statusCodes:statusCodes];
     RKResponseDescriptor *userDetailResponseDescriptor = [RKResponseDescriptor responseDescriptorWithMapping:userMapping pathPattern:@"user/:uID/" keyPath:nil statusCodes:statusCodes];
     RKResponseDescriptor *photoResponseDescriptor = [RKResponseDescriptor responseDescriptorWithMapping:photoMapping pathPattern:@"userphoto/" keyPath:@"objects" statusCodes:statusCodes];
@@ -133,6 +135,7 @@
     RKResponseDescriptor *usersNearbyResponseDescriptor = [RKResponseDescriptor responseDescriptorWithMapping:userMapping pathPattern:@"user/:uID/users_nearby/" keyPath:@"objects" statusCodes:statusCodes];
     RKResponseDescriptor *usersWithSameTagResponseDescriptor = [RKResponseDescriptor responseDescriptorWithMapping:userMapping pathPattern:@"usertag/:tID/users/" keyPath:@"objects" statusCodes:statusCodes];
     RKResponseDescriptor *relationshipResponseDescriptor = [RKResponseDescriptor responseDescriptorWithMapping:relationshipMapping pathPattern:@"relationship/" keyPath:@"objects" statusCodes:statusCodes];
+    RKResponseDescriptor *tagResponseDescriptor = [RKResponseDescriptor responseDescriptorWithMapping:tagMapping pathPattern:@"usertag/" keyPath:@"objects" statusCodes:statusCodes];
 //    RKResponseDescriptor *relationshipDetailResponseDescriptor = [RKResponseDescriptor responseDescriptorWithMapping:relationshipMapping pathPattern:@"relationship/:rID/" keyPath:nil statusCodes:statusCodes];
 //    RKObjectMapping *relationshipRequestMapping = [RKObjectMapping requestMapping];
 //    [relationshipRequestMapping addAttributeMappingsFromDictionary:relationshipMappingDictionary];
@@ -140,6 +143,7 @@
 //     = [relationshipMapping addAttributeMappingsFromDictionary:userMappingDictionary];
 //    RKRequestDescriptor *relationshipRequestDescriptor = [RKRequestDescriptor requestDescriptorWithMapping:[relationshipMapping inverseMapping] objectClass:[Relationship class] rootKeyPath:nil];
     [manager addResponseDescriptor:mealResponseDescriptor];
+    [manager addResponseDescriptor:userMealResponseDescriptor];
     [manager addResponseDescriptor:userResponseDescriptor];
     [manager addResponseDescriptor:userDetailResponseDescriptor];
     [manager addResponseDescriptor:photoResponseDescriptor];
@@ -148,7 +152,9 @@
     [manager addResponseDescriptor:usersNearbyResponseDescriptor];
     [manager addResponseDescriptor:usersWithSameTagResponseDescriptor];
     [manager addResponseDescriptor:orderResponseDescriptor];
+    [manager addResponseDescriptor:userOrderResponseDescriptor];    
     [manager addResponseDescriptor:relationshipResponseDescriptor];
+    [manager addResponseDescriptor:tagResponseDescriptor];
 //    [manager addRequestDescriptor:relationshipRequestDescriptor];
     [manager.router.routeSet addRoute:[RKRoute routeWithClass:[Photo class] pathPattern:@"userphoto/:pID/" method:RKRequestMethodGET | RKRequestMethodDELETE]];
     [manager.router.routeSet addRoute:[RKRoute routeWithClass:[Relationship class] pathPattern:@"relationship/" method:RKRequestMethodPOST]];

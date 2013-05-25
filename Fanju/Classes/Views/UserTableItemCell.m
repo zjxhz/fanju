@@ -16,7 +16,6 @@
 #import "DistanceUtil.h"
 #import "DateUtil.h"
 #import "Authentication.h"
-#import "NewUserDetailsViewController.h"
 
 
 #define INFO_FRAME_X 92
@@ -129,7 +128,7 @@
         NSMutableSet *otherTagSet = [_user.tags mutableCopy];
         [myTagSet intersectSet:otherTagSet];
         
-        [_numberOfSameTagsButton setTitle:[NSString stringWithFormat:@"%d个共同爱好", myTagSet.count] forState:UIControlStateNormal];
+        [_numberOfSameTagsButton setTitle:[NSString stringWithFormat:@"%d个共同兴趣", myTagSet.count] forState:UIControlStateNormal];
         NSInteger age = [DateUtil ageFromBirthday:_user.birthday];
         [_gender setTitle:[NSString stringWithFormat:@"%d", age] forState:UIControlStateNormal];
         NSInteger offset = age > 9 ? 9 : 7;

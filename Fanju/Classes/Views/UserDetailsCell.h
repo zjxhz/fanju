@@ -11,8 +11,8 @@
 #import "NINetworkImageView.h"
 
 @interface UserDetailsCell : UITableViewCell
--(id)initWithUser:(User*)user;
 @property(nonatomic,readonly) CGFloat cellHeight;
 -(void) requestNextMeal;
 @property(nonatomic, readonly) NINetworkImageView* avatar;
+@property(nonatomic, strong) User* user;
 @end

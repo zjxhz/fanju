@@ -53,7 +53,7 @@
 }
 
 
--(void)fetchPhotoWithID:(NSString*)mID success:(void (^)(Photo* meal))success failure:(void (^)(void))failure{
+-(void)fetchPhotoWithID:(NSString*)mID success:(fetch_photo_success)success failure:(void (^)(void))failure{
     RKObjectManager *manager = [RKObjectManager sharedManager];
     [manager getObjectsAtPath:@"userphoto/"
                    parameters:@{@"id":mID}

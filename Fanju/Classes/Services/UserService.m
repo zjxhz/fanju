@@ -170,10 +170,21 @@
 
 +(NSArray*)photosUrlsForUser:(User*)user{
     NSMutableArray* fullUrls = [NSMutableArray array];
-    for (Photo* photo in user.photos) {
+    for (Photo* photo in [UserService sortedPhotosForUser:user]) {
         [fullUrls addObject:[URLService absoluteURL:photo.url]];
     }
     return fullUrls;
+}
+
++(NSArray*)sortedPhotosForUser:(User*)user{
+    NSMutableArray* temp =  [[user.photos allObjects] mutableCopy];
+    [temp sortUsingComparator:^NSComparisonResult(id obj1, id obj2) {
+        Photo* photo1 = obj1;
+        Photo* photo2 = obj2;
+        return [photo1.pID compare:photo2.pID];
+    }];
+    return temp;
+
 }
 
 +(UIImage*)genderImageForUser:(User*)user{

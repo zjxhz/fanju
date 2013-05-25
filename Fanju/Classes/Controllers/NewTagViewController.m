@@ -14,12 +14,16 @@
 #import "DictHelper.h"
 #import "InfoUtil.h"
 #import "LoadMoreTableItem.h"
+#import "WidgetFactory.h"
+#import "Tag.h"
+#import "TagSelectionDataSource.h"
+#import "TagSelectionItem.h"
 
 const NSInteger MOST_POPULAR_TAG_COUNT = 5;
 
 @interface NewTagViewController (){
     NSMutableArray *_tags;
-    NSMutableArray *_selectedTags;
+//    NSMutableArray *_selectedTags;
     LoadMoreTableItem *_loadMore;
     UISearchBar* _searchBar;
     TagAutocompleteTableView* _autoComplete;
@@ -34,13 +38,22 @@ const NSInteger MOST_POPULAR_TAG_COUNT = 5;
 {
     [super viewDidLoad];
     [self loadTags];
-    self.title = @"选择感兴趣的话题";
-    UIBarButtonItem *saveButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemSave
-                                                                                  target:self
-                                                                                  action:@selector(save:)];
-    self.navigationItem.rightBarButtonItem = saveButton;
+    self.navigationItem.titleView = [[WidgetFactory sharedFactory] titleViewWithTitle:@"添加兴趣"];
+    self.navigationItem.rightBarButtonItem = [[WidgetFactory sharedFactory] normalBarButtonItemWithTitle:@"保存" target:self action:@selector(saveTags)];
+    self.tableView.backgroundColor = RGBCOLOR(0xF2, 0xF2, 0xF2);
     _searchBar = [[UISearchBar alloc] initWithFrame:CGRectMake(0, 0, 320, 50)];
+    _searchBar.placeholder = @"搜索兴趣";
+    _searchBar.backgroundImage = [[UIImage imageNamed:@"searchbar_bg"] resizableImageWithCapInsets:UIEdgeInsetsMake(21, 29, 22, 30)];
     _searchBar.delegate = self;
+    for(UIView *subView in _searchBar.subviews) {
+        if([subView conformsToProtocol:@protocol(UITextInputTraits)]) {
+            UITextField *t = (UITextField *)subView;
+            [t setKeyboardAppearance: UIKeyboardAppearanceAlert];
+            t.returnKeyType = UIReturnKeyDone;
+            t.delegate = self;
+            break;
+        }
+    }
     
     self.tableView.tableHeaderView = _searchBar;
     UIGestureRecognizer *reg = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(viewTapped:)];
@@ -58,98 +71,93 @@ const NSInteger MOST_POPULAR_TAG_COUNT = 5;
     
 }
 -(void)loadTags{
-    _selectedTags = [[NSMutableArray alloc] initWithArray:_user.tags];
-    NSString *baseURL = [NSString stringWithFormat:@"%@://%@/api/v1/usertag/?format=json&limit=0", HTTPS, EOHOST];
-    [[NetworkHandler getHandler] requestFromURL:baseURL
-                                         method:GET
-                                    cachePolicy:TTURLRequestCachePolicyNone
-                                        success:^(id obj) {
-                                            NSArray *tags = [obj objectForKeyInObjects];
-                                            _tags = [NSMutableArray array];
-
-                                            for (NSDictionary *dict in tags) {
-                                                UserTag *tag = [[UserTag alloc] initWithData:dict];
-                                                [_tags addObject:tag];
-                                            }
-                                            _autoComplete.tags = _tags;
-                                            NSArray* items = @[[self tagsOfSection:0], [self tagsOfSection:1]];
-                                            NSArray* sections = @[@"最热门", @"其它"];
-                                            TTSectionedDataSource *ds =  [TTSectionedDataSource dataSourceWithItems:items sections:sections];
-                                            
-                                            _loadMore = [[LoadMoreTableItem alloc] initWithResult:obj fromBaseURL:baseURL];
-                                            if ([_loadMore hasMore]) {
-                                                NSMutableArray* items1 = [ds.items objectAtIndex:1];
-                                                [items1 addObject:_loadMore];
-                                            }
-                                            self.dataSource = ds;
-                                        } failure:^{
-                                            DDLogError(@"failed to fetch user tags.");
-                                            [SVProgressHUD dismissWithError:@"获取数据失败"];
-                                        }];
+//    _selectedTags = [[[_user tags] allObjects] mutableCopy];
+    RKObjectManager* manager = [RKObjectManager sharedManager];
+    [manager getObjectsAtPath:@"usertag/" parameters:@{@"limit":@"0"} success:^(RKObjectRequestOperation *operation, RKMappingResult *mappingResult) {
+        _tags = [mappingResult.array mutableCopy];
+        _autoComplete.tags = _tags;
+        NSArray* items = @[[self tagsOfSection:0], [self tagsOfSection:1]];
+        NSArray* sections = @[@"最热门", @"其它"];
+        TagSelectionDataSource *ds =  [[TagSelectionDataSource alloc] initWithItems:items sections:sections];
+        
+//        _loadMore = [[LoadMoreTableItem alloc] initWithResult:obj fromBaseURL:baseURL];
+//        if ([_loadMore hasMore]) {
+//            NSMutableArray* items1 = [ds.items objectAtIndex:1];
+//            [items1 addObject:_loadMore];
+//        }
+        self.dataSource = ds;
+    } failure:^(RKObjectRequestOperation *operation, NSError *error) {
+        DDLogError(@"failed to fetch user tags.");
+        [SVProgressHUD dismissWithError:@"获取数据失败"];
+    }];
 }
 
--(void) loadMoreTags{
-    if (![_loadMore hasMore]) {
-        return;
-    }
-    [[NetworkHandler getHandler] requestFromURL:[_loadMore nextPageURL]
-                                         method:GET
-                                    cachePolicy:TTURLRequestCachePolicyNetwork
-                                        success:^(id obj) {
-                                            //load data
-                                            NSDictionary* result = obj;
-                                            NSArray *tags = [obj objectForKeyInObjects];
-                                            TTSectionedDataSource *ds = self.dataSource;
-                                            NSMutableArray * indexPaths = [NSMutableArray array];
-                                            if (tags && [tags count] > 0) {
-                                                for (NSDictionary *dict in tags) {
-                                                    UserTag* tag = [[UserTag alloc] initWithData:dict];
-                                                    [_tags addObject:tag];
-                                                    _autoComplete.tags = _tags;
-                                                    NSMutableArray* items1 = [ds.items objectAtIndex:1];
-                                                    [items1 insertObject:tag atIndex:items1.count - 1];
-                                                    NSIndexPath *indexPath = [NSIndexPath indexPathForRow:items1.count - 1 inSection:1];
-                                                    [indexPaths addObject:indexPath];
-                                                }
-                                            }
-                                            [self.tableView insertRowsAtIndexPaths:indexPaths withRowAnimation:UITableViewRowAnimationTop];
-                                            
-                                            //update load more text and decide if it should be removed
-                                            _loadMore.loading = NO;
-                                            _loadMore.offset = [result offset];
-                                            if (![_loadMore hasMore])  {
-                                                NSMutableArray* items1 = [ds.items objectAtIndex:1];
-                                                [items1 removeLastObject];
-                                                NSArray *rowToDelete = [NSArray arrayWithObject:[NSIndexPath indexPathForRow:(items1.count - 1) inSection:1]];
-                                                [self.tableView  deleteRowsAtIndexPaths:rowToDelete withRowAnimation:UITableViewRowAnimationAutomatic];
-                                            }
-                                            [self.tableView reloadData];
-                                        } failure:^{
-                                            DDLogError(@"failed to load more followings");
-#warning fail handling
-                                        }];
-}
-
+//-(void) loadMoreTags{
+//    if (![_loadMore hasMore]) {
+//        return;
+//    }
+//    [[NetworkHandler getHandler] requestFromURL:[_loadMore nextPageURL]
+//                                         method:GET
+//                                    cachePolicy:TTURLRequestCachePolicyNetwork
+//                                        success:^(id obj) {
+//                                            //load data
+//                                            NSDictionary* result = obj;
+//                                            NSArray *tags = [obj objectForKeyInObjects];
+//                                            TagSelectionDataSource *ds = self.dataSource;
+//                                            NSMutableArray * indexPaths = [NSMutableArray array];
+//                                            if (tags && [tags count] > 0) {
+//                                                for (NSDictionary *dict in tags) {
+//                                                    UserTag* tag = [[UserTag alloc] initWithData:dict];
+//                                                    [_tags addObject:tag];
+//                                                    _autoComplete.tags = _tags;
+//                                                    NSMutableArray* items1 = [ds.items objectAtIndex:1];
+//                                                    [items1 insertObject:tag atIndex:items1.count - 1];
+//                                                    NSIndexPath *indexPath = [NSIndexPath indexPathForRow:items1.count - 1 inSection:1];
+//                                                    [indexPaths addObject:indexPath];
+//                                                }
+//                                            }
+//                                            [self.tableView insertRowsAtIndexPaths:indexPaths withRowAnimation:UITableViewRowAnimationTop];
+//                                            
+//                                            //update load more text and decide if it should be removed
+//                                            _loadMore.loading = NO;
+//                                            _loadMore.offset = [result offset];
+//                                            if (![_loadMore hasMore])  {
+//                                                NSMutableArray* items1 = [ds.items objectAtIndex:1];
+//                                                [items1 removeLastObject];
+//                                                NSArray *rowToDelete = [NSArray arrayWithObject:[NSIndexPath indexPathForRow:(items1.count - 1) inSection:1]];
+//                                                [self.tableView  deleteRowsAtIndexPaths:rowToDelete withRowAnimation:UITableViewRowAnimationAutomatic];
+//                                            }
+//                                            [self.tableView reloadData];
+//                                        } failure:^{
+//                                            DDLogError(@"failed to load more followings");
+//                                        }];
+//}
+//
 -(NSArray*)tagsOfSection:(NSUInteger)section{
     if (section == 0) {
         NSMutableArray* items0 = [NSMutableArray arrayWithCapacity:5];
         for (int i = 0; i < 5; i++) {
-            [items0 addObject:[_tags objectAtIndex:i]];
+            TagSelectionItem* item = [self tagSelectionItem:_tags[i]];
+            [items0 addObject:item];
         }
         return items0;
     } else {
         NSMutableArray* items1 = [NSMutableArray arrayWithCapacity:5];
         for (int i = 5; i < _tags.count; i++) {
-            [items1 addObject:[_tags objectAtIndex:i]];
+            TagSelectionItem* item = [self tagSelectionItem:_tags[i]];
+            [items1 addObject:item];
         }
         return items1;
     }
 }
 
-- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
-{
-    return (interfaceOrientation == UIInterfaceOrientationPortrait);
+-(TagSelectionItem*)tagSelectionItem:(Tag*)tag{
+    TagSelectionItem* item = [[TagSelectionItem alloc] init];
+    item.tag = tag;
+    item.selected = [_user.tags containsObject:tag];
+    return item;
 }
+
 
 - (id<UITableViewDelegate>)createDelegate{
     return self;
@@ -157,33 +165,65 @@ const NSInteger MOST_POPULAR_TAG_COUNT = 5;
 
 
 - (void)save:(id)sender
-{
-    if (_selectedTags.count < 3) {
-        UIAlertView *a = [[UIAlertView alloc] initWithTitle:@"兴趣少于3个" message:@"请至少选择3项您感兴趣的内容" delegate:nil cancelButtonTitle:@"确定" otherButtonTitles: nil];
-        [a show];
-        return;
-    }
+{    
+//    if (_selectedTags.count < 3) {
+//        UIAlertView *a = [[UIAlertView alloc] initWithTitle:@"提示" message:@"请至少选择3项您感兴趣的内容" delegate:nil cancelButtonTitle:@"确定" otherButtonTitles: nil];
+//        [a show];
+//        return;
+//    }
     [SVProgressHUD showWithStatus:@"正在保存设置…" maskType:SVProgressHUDMaskTypeBlack];
     [self saveTags];
 }
 
+-(NSArray*)selectedTags{
+    NSMutableArray* selectedTags = [NSMutableArray array];
+    TagSelectionDataSource *ds = self.dataSource;
+    for (NSArray* sectionedItems in ds.items) {
+        for (TagSelectionItem *item in sectionedItems) {
+            if (item.selected) {
+                [selectedTags addObject:item.tag];
+            }
+        }
+    }
+    return selectedTags;
+}
 -(void)saveTags{
-    NSString *strTags = [UserTag tagsToString:_selectedTags];
+    [SVProgressHUD showWithStatus:@"保存中…" maskType:SVProgressHUDMaskTypeBlack];
+    NSArray* selectedTags = [self selectedTags];
+    NSString *strTags = [UserTag tagsToString:selectedTags];
     NSArray* params = [NSArray arrayWithObject:[DictHelper dictWithKey:@"tags" andValue:strTags]];
-    NSString *requestStr = [NSString stringWithFormat:@"%@://%@/api/v1/user/%d/tags/?format=json", HTTPS, EOHOST, _user.uID];
+    NSString *requestStr = [NSString stringWithFormat:@"%@://%@/api/v1/user/%@/tags/?format=json", HTTPS, EOHOST, _user.uID];
     [[NetworkHandler getHandler] requestFromURL:requestStr
                                          method:POST
                                      parameters:params
                                     cachePolicy:TTURLRequestCachePolicyNone
                                         success:^(id obj) {
-                                            if ([[obj objectForKey:@"status"] isEqualToString:@"OK"]) {
+                                            NSString* resultStatus = [obj objectForKey:@"status"];
+                                            if ([resultStatus isEqualToString:@"OK"]) {
                                                 DDLogVerbose(@"tags saved");
                                                 [SVProgressHUD dismissWithSuccess:@"保存成功。"];
-                                                [_user.tags removeAllObjects];
-                                                [_user.tags addObjectsFromArray:_selectedTags];
-                                                [self.delegate tagsSaved:_selectedTags forUser:_user];
+                                                NSMutableSet* tags = [_user.tags mutableCopy];
+                                                NSSet* existingTags = [[NSSet alloc] initWithArray:selectedTags];
+                                                [tags minusSet:existingTags];
+                                                for (Tag* tag in tags) {
+                                                    DDLogVerbose(@"removing tag %@", tag.name);
+                                                    [_user removeTagsObject:tag];
+                                                }
+                                                NSMutableSet* addedTags = [existingTags mutableCopy] ;
+                                                [addedTags minusSet:_user.tags];
+                                                for (Tag* tag in addedTags){
+                                                    [_user addTagsObject:tag];
+                                                    DDLogVerbose(@"adding tag %@", tag.name);
+                                                }
+                                                NSManagedObjectContext* contex = [RKObjectManager sharedManager].managedObjectStore.mainQueueManagedObjectContext;
+                                                NSError* error;
+                                                if(![contex saveToPersistentStore:&error]){
+                                                    DDLogError(@"failed to save after saving tags: %@", error);
+                                                }
+                                                [self.delegate tagsSaved:selectedTags forUser:_user];
                                             } else {
-                                                [InfoUtil showError:obj];
+                                                DDLogError(@"failed to set tags with error: %@",resultStatus);
+                                                [SVProgressHUD dismissWithError:resultStatus];
                                             }
                                         } failure:^{
                                             DDLogError(@"failed to save settings");
@@ -195,50 +235,29 @@ const NSInteger MOST_POPULAR_TAG_COUNT = 5;
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    TTSectionedDataSource* ds = self.dataSource;
+    TagSelectionDataSource* ds = self.dataSource;
     id object = [ds tableView:self.tableView objectForRowAtIndexPath:indexPath];
-    if ([object isKindOfClass:[UserTag class]]){
-        UserTag* tag = object;
-        if ([_selectedTags containsObject:tag]) {
-            [_selectedTags removeObject:tag];
-        } else {
-            [_selectedTags addObject:tag];
-        }
+    if ([object isKindOfClass:[TagSelectionItem class]]){
+        TagSelectionItem* item = object;
+        item.selected = !item.selected;
         [self.tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
     }
-    
-    else if ([object isKindOfClass:[LoadMoreTableItem class]]){
-        if (_loadMore.loading) {
-            return;
-        }
-        _loadMore.loading = YES;
-        [self reloadLastRow];
-        [self loadMoreTags];
-    }
+}
+-(UIView*)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section{
+    UIView* view = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, 30)];
+    view.backgroundColor = RGBCOLOR(0xE3, 0xE3, 0xE3);
+    NSString* title = section == 0 ? @"热门" : @"其他";
+    UILabel* titleLabel = [[UILabel alloc] initWithFrame:CGRectMake(10, 0, 310, 30)];
+    titleLabel.font = [UIFont systemFontOfSize:15];
+    titleLabel.text = title;
+    titleLabel.textColor = RGBCOLOR(0x7D, 0x7C, 0x7C);
+    titleLabel.backgroundColor = [UIColor clearColor];
+    [view addSubview:titleLabel];
+    return view;
 }
 
--(void)reloadLastRow{
-    TTSectionedDataSource* ds = self.dataSource;
-    NSMutableArray* items1 = [ds.items objectAtIndex:1];
-    
-    NSArray *lastRow = [NSArray arrayWithObject:[NSIndexPath indexPathForRow:items1.count - 1 inSection:1]];
-    [self.tableView reloadRowsAtIndexPaths:lastRow withRowAnimation:UITableViewRowAnimationAutomatic];
-}
-
--(void)tableView:(UITableView *)tableView willDisplayCell:(UITableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath{
-    TTSectionedDataSource* ds = self.dataSource;
-    id object = [ds tableView:self.tableView objectForRowAtIndexPath:indexPath];
-    if ([object isKindOfClass:[UserTag class]]) {
-        UserTag* tag = object;
-        cell.textLabel.text = tag.name;
-        cell.selectionStyle = UITableViewCellSelectionStyleNone;
-        
-        if ([_selectedTags containsObject:tag]) {
-            cell.accessoryType = UITableViewCellAccessoryCheckmark;
-        } else {
-            cell.accessoryType = UITableViewCellAccessoryNone;
-        }
-    }
+-(CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section{
+    return 30;
 }
 
 -(void)viewTapped:(UITapGestureRecognizer*)sender{
@@ -279,33 +298,91 @@ const NSInteger MOST_POPULAR_TAG_COUNT = 5;
     _autoComplete.hidden = YES;    
 }
 
+-(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath{
+    return 45;
+}
 #pragma mark TagAutocompleteDelegate
--(void)tagSelected:(UserTag *)tag{
-    TTSectionedDataSource* ds = self.dataSource;
+-(void)tagSelected:(Tag *)tag{
+    NSIndexPath* indexPath = [self indexPathForTag:tag];
     _autoComplete.hidden = YES;
-    NSIndexPath* indexPath = nil;
     [_searchBar setText:@""];
-    if ([_tags containsObject:tag]) {
-        indexPath = [ds tableView:self.tableView indexPathForObject:tag];
-        if (![_selectedTags containsObject:tag]) {
-            [_selectedTags addObject:tag];
-        }
-    } else {
-        [_tags addObject:tag];
-        TTSectionedDataSource* ds = self.dataSource;
-        NSMutableArray* items1 = [ds.items objectAtIndex:1];
-        [items1 addObject:tag];
-        indexPath = [NSIndexPath indexPathForRow:items1.count - 1 inSection:1];
-        [self.tableView insertRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationTop];
-        [_selectedTags addObject:tag];
-    }
     
+    TagSelectionItem* item = [self findItemForTag:tag];
+    item.selected = YES;
+   
     [self.tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
     [SVProgressHUD showInView:self.view status:[NSString stringWithFormat:@"您已选择了 %@", tag.name] networkIndicator:NO];
     [self performSelector:@selector(dismissHUD:) withObject:nil afterDelay:0.7];
 }
 
+-(NSIndexPath*)indexPathForTag:(Tag*)tag{
+    TagSelectionDataSource* ds = self.dataSource;
+    TagSelectionItem* item = [self findItemForTag:tag];
+    return [ds tableView:self.tableView indexPathForObject:item];
+}
+-(void)newTagSelected:(NSString*)tagName{
+    _autoComplete.hidden = YES;
+    NSArray* params = [NSArray arrayWithObject:[DictHelper dictWithKey:@"create_tag" andValue:tagName]];
+    NSString *requestStr = [NSString stringWithFormat:@"%@://%@/api/v1/user/%@/tags/", HTTPS, EOHOST, _user.uID];
+    [[NetworkHandler getHandler] requestFromURL:requestStr
+                                         method:POST
+                                     parameters:params
+                                    cachePolicy:TTURLRequestCachePolicyNone
+                                        success:^(id obj) {
+                                            NSString* resultStatus = [obj objectForKey:@"status"];
+                                            if ([resultStatus isEqualToString:@"OK"]) {
+                                                DDLogVerbose(@"tags created");
+                                                NSManagedObjectContext* contex = [RKObjectManager sharedManager].managedObjectStore.mainQueueManagedObjectContext;
+                                                Tag* tag = [NSEntityDescription insertNewObjectForEntityForName:@"Tag" inManagedObjectContext:contex];
+                                                tag.name = tagName;
+                                                tag.tID = [obj objectForKey:@"id"];
+                                                NSError* error;
+                                                if(![contex saveToPersistentStore:&error]){
+                                                    DDLogError(@"failed to save a new tag:%@, %@", tagName, error);
+                                                } else {
+                                                    TagSelectionItem* item = [self tagSelectionItem:tag];
+                                                    item.selected = YES;
+                                                    TagSelectionDataSource* ds = self.dataSource;
+                                                    NSMutableArray* items1 = [ds.items objectAtIndex:1];
+                                                    [items1 addObject:item];
+                                                    NSIndexPath* indexPath = [NSIndexPath indexPathForRow:items1.count - 1 inSection:1];
+                                                    [self.tableView insertRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationTop];
+                                                    [SVProgressHUD showInView:self.view status:[NSString stringWithFormat:@"您已创建并选择了 %@", tag.name] networkIndicator:NO];
+                                                    [self performSelector:@selector(dismissHUD:) withObject:nil afterDelay:0.7];
+                                                }
+                                                
+                                            } else {
+                                                DDLogError(@"failed to set tags with error: %@",resultStatus);
+                                                [SVProgressHUD dismissWithError:resultStatus];
+                                            }
+                                        } failure:^{
+                                            DDLogError(@"failed to save settings");
+                                            [SVProgressHUD dismissWithError:@"保存失败"];
+                                        }];
+
+
+       
+}
+
+-(TagSelectionItem*)findItemForTag:(Tag*)tag{
+    TagSelectionDataSource *ds = self.dataSource;
+    for (NSArray* sectionedItems in ds.items) {
+        for (TagSelectionItem *item in sectionedItems) {
+            if ([item.tag isEqual:tag]) {
+                return item;
+            }
+        }
+    }
+    return nil;
+}
+
 -(void) dismissHUD:(id)object{
     [SVProgressHUD dismiss];
+}
+
+#pragma mark UITextFieldDelegate
+-(BOOL)textFieldShouldReturn:(UITextField *)textField{
+    [_searchBar resignFirstResponder];
+    return YES;
 }
 @end

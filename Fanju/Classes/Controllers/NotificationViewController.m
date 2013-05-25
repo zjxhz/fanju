@@ -13,7 +13,6 @@
 #import "NINetworkImageView.h"
 #import "XMPPHandler.h"
 #import "DateUtil.h"
-#import "NewUserDetailsViewController.h"
 #import "MealDetailViewController.h"
 #import "MealEventCell.h"
 #import "UploadPhotoEventCell.h"

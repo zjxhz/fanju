@@ -167,7 +167,7 @@
             _mottoCell.textView.delegate = self;
         } else if(indexPath.row == 1){
             cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:CellIdentifier];
-            cell.textLabel.text = @"爱好";
+            cell.textLabel.text = @"兴趣";
             cell.detailTextLabel.text = [TagService textOfTags:[_user.tags allObjects]]; //TODO local copy
         } else if(indexPath.row == 2){
             cell = [[TextFormCell alloc] initWithStyle:UITableViewCellStyleValue1 reuseIdentifier:TextFormCellIdentifier];

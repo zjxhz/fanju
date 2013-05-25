@@ -151,7 +151,6 @@
     conversation.unread = [NSNumber numberWithInteger:0];
     [[MessageService service] markMessagesReadFrom:conversation.with];
     [[MessageService service] updateUnreadCount];
-//    [[XMPPHandler sharedInstance] retrieveMessagesWith:item.contact after:[item.time timeIntervalSince1970] retrievingFromList:NO];
     NSError *error = nil;
     if(![_contex saveToPersistentStore:&error]){
         DDLogError(@"failed to save updated unread count for conversation: %@", conversation);

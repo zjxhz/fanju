@@ -34,7 +34,6 @@
 -(void)logout;
 -(BOOL)isLoggedIn;
 -(void)synchronize;
--(void)refreshUserInfo:(retrieved_t)success failure:(retrieve_failed_t)failure;
 -(void)userRegisteredWithData:(NSDictionary*)data;
 -(void)relogin;
 @end

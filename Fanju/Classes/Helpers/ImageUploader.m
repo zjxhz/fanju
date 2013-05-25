@@ -115,23 +115,32 @@
             photo.thumbnailURL = result[@"thumbnail"];
             photo.user = [UserService service].loggedInUser;
             [_mainQueueContext saveToPersistentStore:nil];
+            _hud.progress = 1;
+            _hud.labelText = @"上传成功";
             [_delegate didUploadPhoto:photo image:image];
         }
         else {
             _hud.labelText = @"上传失败";
             [_delegate didFailUploadPhoto:image];
         }
-        [_hud hide:YES afterDelay:1];
-        [_pickerController dismissModalViewControllerAnimated:YES];
+        [NSTimer scheduledTimerWithTimeInterval:1 target:self selector:@selector(delayedDismiss) userInfo:nil repeats:NO];
     } failure:^{
         _hud.labelText = @"上传失败";
-        [_hud hide:YES afterDelay:1];
-        [_pickerController dismissModalViewControllerAnimated:YES];
         DDLogError(@"failed to upload images");
         [_delegate didFailUploadPhoto:image];
+        [NSTimer scheduledTimerWithTimeInterval:1 target:self selector:@selector(delayedDismiss) userInfo:nil repeats:NO];
     } progress:^(NSInteger totalBytesLoaded, NSInteger totalBytesExpected) {
-        _hud.progress = totalBytesLoaded * 1.0 / totalBytesExpected;
+        CGFloat progress = totalBytesLoaded * 1.0 / totalBytesExpected;
+        if (progress > 0.85) { //hack as there is always a delay when upload goes to 100% but success block is not invoked
+            progress = 0.85;
+        }
+        _hud.progress = progress;
     }];
+}
+
+-(void)delayedDismiss{
+    [_hud hide:YES afterDelay:1];
+    [_pickerController dismissModalViewControllerAnimated:YES];
 }
 
 -(void)doChangeAvatar:(UIImage*)image withName:(NSString*)filename{
@@ -139,20 +148,24 @@
     [[NetworkHandler getHandler] uploadImage:image withName:filename toURL:[NSString stringWithFormat:@"user/%@/avatar/", userID]
                                      success:^(id obj) {
                                          DDLogVerbose(@"avatar updated");
-                                         [_hud hide:YES];
                                          NSDictionary* data = obj;
                                          [_delegate didUploadAvatar:image withData:data];
-                                         [_viewController dismissModalViewControllerAnimated:YES];
                                          NSString* big_avatar = data[@"big_avatar"];
                                          [[NSNotificationCenter defaultCenter] postNotificationName:AVATAR_UPDATED_NOTIFICATION object:[URLService  absoluteURL:big_avatar]];
+                                         _hud.progress = 1;
+                                         _hud.labelText = @"上传成功";
+                                         [NSTimer scheduledTimerWithTimeInterval:1 target:self selector:@selector(delayedDismiss) userInfo:nil repeats:NO];
                                      } failure:^{
                                          DDLogError(@"failed to update avatar");
                                          _hud.labelText = @"上传失败";
-                                         [_hud hide:YES afterDelay:1];
                                          [_delegate didFailUploadAvatar:image];
-                                         [_viewController dismissModalViewControllerAnimated:YES];
+                                         [NSTimer scheduledTimerWithTimeInterval:1 target:self selector:@selector(delayedDismiss) userInfo:nil repeats:NO];
                                      }progress:^(NSInteger totalBytesLoaded, NSInteger totalBytesExpected) {
-                                         _hud.progress = totalBytesLoaded * 1.0 / totalBytesExpected;
+                                         CGFloat progress = totalBytesLoaded * 1.0 / totalBytesExpected;
+                                         if (progress > 0.85) { //hack as there is always a delay when upload goes to 100% but success block is not invoked
+                                             progress = 0.85;
+                                         }
+                                         _hud.progress = progress;
                                      }];
 }
 

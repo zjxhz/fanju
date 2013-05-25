@@ -52,7 +52,7 @@ NSString * const CurrentConversation = @"CurrentConversation";
     [_xmppStream addDelegate:self delegateQueue:dispatch_get_main_queue()];
     _unhandledMessages = [NSMutableDictionary dictionary];
     _unreadMessageCount = [[NSUserDefaults standardUserDefaults] integerForKey:[self unreadMessageKey]];
-    [self loadRecentContacts];
+    [self loadConversations];
 }
 
 -(NSString*)unreadMessageKey{
@@ -63,7 +63,7 @@ NSString * const CurrentConversation = @"CurrentConversation";
     [_xmppStream removeDelegate:self];
 }
 
--(void)loadRecentContacts{
+-(void)loadConversations{
     _conversations = [NSMutableArray array];
     NSFetchRequest *req = [[NSFetchRequest alloc] init];
     req.entity = [NSEntityDescription entityForName:@"Conversation" inManagedObjectContext:_mainQueueContext];

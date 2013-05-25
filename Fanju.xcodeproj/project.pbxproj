@@ -29,6 +29,17 @@
 		B0079552174C66C400C98E83 /* TagService.m in Sources */ = {isa = PBXBuildFile; fileRef = B0079551174C66C100C98E83 /* TagService.m */; };
 		B0079555174CA4CF00C98E83 /* TextViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = B0079554174CA4CC00C98E83 /* TextViewCell.m */; };
 		B0079558174CB20F00C98E83 /* UIView+FindAndResignFirstResponder.m in Sources */ = {isa = PBXBuildFile; fileRef = B0079557174CB20E00C98E83 /* UIView+FindAndResignFirstResponder.m */; };
+		B007955E174CF7D000C98E83 /* tag_add.png in Resources */ = {isa = PBXBuildFile; fileRef = B007955C174CF7CF00C98E83 /* tag_add.png */; };
+		B007955F174CF7D000C98E83 /* tag_add@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = B007955D174CF7D000C98E83 /* tag_add@2x.png */; };
+		B0079562174D13FA00C98E83 /* searchbar_bg.png in Resources */ = {isa = PBXBuildFile; fileRef = B0079560174D13F900C98E83 /* searchbar_bg.png */; };
+		B0079563174D13FA00C98E83 /* searchbar_bg@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = B0079561174D13FA00C98E83 /* searchbar_bg@2x.png */; };
+		B0079566174D170D00C98E83 /* tag_selected.png in Resources */ = {isa = PBXBuildFile; fileRef = B0079564174D170C00C98E83 /* tag_selected.png */; };
+		B0079567174D170D00C98E83 /* tag_selected@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = B0079565174D170C00C98E83 /* tag_selected@2x.png */; };
+		B007956A174DAB2100C98E83 /* TagSelectionCell.m in Sources */ = {isa = PBXBuildFile; fileRef = B0079569174DAB1D00C98E83 /* TagSelectionCell.m */; };
+		B007956D174DAFDF00C98E83 /* tag_unselected.png in Resources */ = {isa = PBXBuildFile; fileRef = B007956B174DAFDE00C98E83 /* tag_unselected.png */; };
+		B007956E174DAFDF00C98E83 /* tag_unselected@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = B007956C174DAFDE00C98E83 /* tag_unselected@2x.png */; };
+		B0079571174DB08D00C98E83 /* TagSelectionDataSource.m in Sources */ = {isa = PBXBuildFile; fileRef = B0079570174DB08100C98E83 /* TagSelectionDataSource.m */; };
+		B0079574174DBDC500C98E83 /* TagSelectionItem.m in Sources */ = {isa = PBXBuildFile; fileRef = B0079573174DBDC000C98E83 /* TagSelectionItem.m */; };
 		B019AEC716F6B9E700327DCF /* toolbar_bg@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = B019AEC516F6B9E700327DCF /* toolbar_bg@2x.png */; };
 		B019AECC16F6BEB200327DCF /* female.png in Resources */ = {isa = PBXBuildFile; fileRef = B019AEC816F6BEB200327DCF /* female.png */; };
 		B019AECD16F6BEB200327DCF /* female@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = B019AEC916F6BEB200327DCF /* female@2x.png */; };
@@ -122,8 +133,6 @@
 		B04C29B516E2078100E86C7A /* NameAndGenderViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B04C28A016E2078100E86C7A /* NameAndGenderViewController.m */; };
 		B04C29B616E2078100E86C7A /* NewSidebarViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B04C28A216E2078100E86C7A /* NewSidebarViewController.m */; };
 		B04C29B716E2078100E86C7A /* NewTagViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B04C28A416E2078100E86C7A /* NewTagViewController.m */; };
-		B04C29B816E2078100E86C7A /* NewUserDetailsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B04C28A616E2078100E86C7A /* NewUserDetailsViewController.m */; };
-		B04C29B916E2078100E86C7A /* NewUserDetailsViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = B04C28A716E2078100E86C7A /* NewUserDetailsViewController.xib */; };
 		B04C29BA16E2078100E86C7A /* NotificationViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B04C28A916E2078100E86C7A /* NotificationViewController.m */; };
 		B04C29BB16E2078100E86C7A /* OrderDetailsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B04C28AB16E2078100E86C7A /* OrderDetailsViewController.m */; };
 		B04C29BC16E2078100E86C7A /* OrderDetailsViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = B04C28AC16E2078100E86C7A /* OrderDetailsViewController.xib */; };
@@ -131,9 +140,6 @@
 		B04C29C116E2078100E86C7A /* PhotoViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B04C28B616E2078100E86C7A /* PhotoViewController.m */; };
 		B04C29C216E2078100E86C7A /* PullRefreshTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B04C28B816E2078100E86C7A /* PullRefreshTableViewController.m */; };
 		B04C29C316E2078100E86C7A /* PullRefreshTableViewController2.m in Sources */ = {isa = PBXBuildFile; fileRef = B04C28BA16E2078100E86C7A /* PullRefreshTableViewController2.m */; };
-		B04C29C416E2078100E86C7A /* RecentContactsDataSource.m in Sources */ = {isa = PBXBuildFile; fileRef = B04C28BC16E2078100E86C7A /* RecentContactsDataSource.m */; };
-		B04C29C516E2078100E86C7A /* RecentContactsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B04C28BE16E2078100E86C7A /* RecentContactsViewController.m */; };
-		B04C29C616E2078100E86C7A /* RecentContactsViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = B04C28BF16E2078100E86C7A /* RecentContactsViewController.xib */; };
 		B04C29CA16E2078100E86C7A /* SetAvatarViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B04C28C716E2078100E86C7A /* SetAvatarViewController.m */; };
 		B04C29CB16E2078100E86C7A /* SettingsTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B04C28C916E2078100E86C7A /* SettingsTableViewController.m */; };
 		B04C29CC16E2078100E86C7A /* SimplePhotoSet.m in Sources */ = {isa = PBXBuildFile; fileRef = B04C28CB16E2078100E86C7A /* SimplePhotoSet.m */; };
@@ -622,6 +628,20 @@
 		B0079554174CA4CC00C98E83 /* TextViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TextViewCell.m; sourceTree = "<group>"; };
 		B0079556174CB20E00C98E83 /* UIView+FindAndResignFirstResponder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIView+FindAndResignFirstResponder.h"; sourceTree = "<group>"; };
 		B0079557174CB20E00C98E83 /* UIView+FindAndResignFirstResponder.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIView+FindAndResignFirstResponder.m"; sourceTree = "<group>"; };
+		B007955C174CF7CF00C98E83 /* tag_add.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = tag_add.png; sourceTree = "<group>"; };
+		B007955D174CF7D000C98E83 /* tag_add@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "tag_add@2x.png"; sourceTree = "<group>"; };
+		B0079560174D13F900C98E83 /* searchbar_bg.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = searchbar_bg.png; sourceTree = "<group>"; };
+		B0079561174D13FA00C98E83 /* searchbar_bg@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "searchbar_bg@2x.png"; sourceTree = "<group>"; };
+		B0079564174D170C00C98E83 /* tag_selected.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = tag_selected.png; sourceTree = "<group>"; };
+		B0079565174D170C00C98E83 /* tag_selected@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "tag_selected@2x.png"; sourceTree = "<group>"; };
+		B0079568174DAB1900C98E83 /* TagSelectionCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TagSelectionCell.h; sourceTree = "<group>"; };
+		B0079569174DAB1D00C98E83 /* TagSelectionCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TagSelectionCell.m; sourceTree = "<group>"; };
+		B007956B174DAFDE00C98E83 /* tag_unselected.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = tag_unselected.png; sourceTree = "<group>"; };
+		B007956C174DAFDE00C98E83 /* tag_unselected@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "tag_unselected@2x.png"; sourceTree = "<group>"; };
+		B007956F174DB07B00C98E83 /* TagSelectionDataSource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TagSelectionDataSource.h; sourceTree = "<group>"; };
+		B0079570174DB08100C98E83 /* TagSelectionDataSource.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TagSelectionDataSource.m; sourceTree = "<group>"; };
+		B0079572174DBDBA00C98E83 /* TagSelectionItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TagSelectionItem.h; sourceTree = "<group>"; };
+		B0079573174DBDC000C98E83 /* TagSelectionItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TagSelectionItem.m; sourceTree = "<group>"; };
 		B019AEC516F6B9E700327DCF /* toolbar_bg@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "toolbar_bg@2x.png"; sourceTree = "<group>"; };
 		B019AEC816F6BEB200327DCF /* female.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = female.png; sourceTree = "<group>"; };
 		B019AEC916F6BEB200327DCF /* female@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "female@2x.png"; sourceTree = "<group>"; };
@@ -747,9 +767,6 @@
 		B04C28A216E2078100E86C7A /* NewSidebarViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NewSidebarViewController.m; sourceTree = "<group>"; };
 		B04C28A316E2078100E86C7A /* NewTagViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NewTagViewController.h; sourceTree = "<group>"; };
 		B04C28A416E2078100E86C7A /* NewTagViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NewTagViewController.m; sourceTree = "<group>"; };
-		B04C28A516E2078100E86C7A /* NewUserDetailsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NewUserDetailsViewController.h; sourceTree = "<group>"; };
-		B04C28A616E2078100E86C7A /* NewUserDetailsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NewUserDetailsViewController.m; sourceTree = "<group>"; };
-		B04C28A716E2078100E86C7A /* NewUserDetailsViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = NewUserDetailsViewController.xib; sourceTree = "<group>"; };
 		B04C28A816E2078100E86C7A /* NotificationViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NotificationViewController.h; sourceTree = "<group>"; };
 		B04C28A916E2078100E86C7A /* NotificationViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NotificationViewController.m; sourceTree = "<group>"; };
 		B04C28AA16E2078100E86C7A /* OrderDetailsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OrderDetailsViewController.h; sourceTree = "<group>"; };
@@ -763,11 +780,6 @@
 		B04C28B816E2078100E86C7A /* PullRefreshTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PullRefreshTableViewController.m; sourceTree = "<group>"; };
 		B04C28B916E2078100E86C7A /* PullRefreshTableViewController2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PullRefreshTableViewController2.h; sourceTree = "<group>"; };
 		B04C28BA16E2078100E86C7A /* PullRefreshTableViewController2.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PullRefreshTableViewController2.m; sourceTree = "<group>"; };
-		B04C28BB16E2078100E86C7A /* RecentContactsDataSource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RecentContactsDataSource.h; sourceTree = "<group>"; };
-		B04C28BC16E2078100E86C7A /* RecentContactsDataSource.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RecentContactsDataSource.m; sourceTree = "<group>"; };
-		B04C28BD16E2078100E86C7A /* RecentContactsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RecentContactsViewController.h; sourceTree = "<group>"; };
-		B04C28BE16E2078100E86C7A /* RecentContactsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RecentContactsViewController.m; sourceTree = "<group>"; };
-		B04C28BF16E2078100E86C7A /* RecentContactsViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = RecentContactsViewController.xib; sourceTree = "<group>"; };
 		B04C28C616E2078100E86C7A /* SetAvatarViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SetAvatarViewController.h; sourceTree = "<group>"; };
 		B04C28C716E2078100E86C7A /* SetAvatarViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SetAvatarViewController.m; sourceTree = "<group>"; };
 		B04C28C816E2078100E86C7A /* SettingsTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SettingsTableViewController.h; sourceTree = "<group>"; };
@@ -1656,9 +1668,6 @@
 				B04C28A216E2078100E86C7A /* NewSidebarViewController.m */,
 				B04C28A316E2078100E86C7A /* NewTagViewController.h */,
 				B04C28A416E2078100E86C7A /* NewTagViewController.m */,
-				B04C28A516E2078100E86C7A /* NewUserDetailsViewController.h */,
-				B04C28A616E2078100E86C7A /* NewUserDetailsViewController.m */,
-				B04C28A716E2078100E86C7A /* NewUserDetailsViewController.xib */,
 				B079FAB01743860D007F48A1 /* UserDetailsViewController.h */,
 				B079FAB11743860E007F48A1 /* UserDetailsViewController.m */,
 				B04C28A816E2078100E86C7A /* NotificationViewController.h */,
@@ -1676,17 +1685,14 @@
 				B04C28B816E2078100E86C7A /* PullRefreshTableViewController.m */,
 				B04C28B916E2078100E86C7A /* PullRefreshTableViewController2.h */,
 				B04C28BA16E2078100E86C7A /* PullRefreshTableViewController2.m */,
-				B04C28BB16E2078100E86C7A /* RecentContactsDataSource.h */,
-				B04C28BC16E2078100E86C7A /* RecentContactsDataSource.m */,
-				B04C28BD16E2078100E86C7A /* RecentContactsViewController.h */,
-				B04C28BE16E2078100E86C7A /* RecentContactsViewController.m */,
-				B04C28BF16E2078100E86C7A /* RecentContactsViewController.xib */,
 				B04C28C616E2078100E86C7A /* SetAvatarViewController.h */,
 				B04C28C716E2078100E86C7A /* SetAvatarViewController.m */,
 				B04C28C816E2078100E86C7A /* SettingsTableViewController.h */,
 				B04C28C916E2078100E86C7A /* SettingsTableViewController.m */,
 				B04C28CA16E2078100E86C7A /* SimplePhotoSet.h */,
 				B04C28CB16E2078100E86C7A /* SimplePhotoSet.m */,
+				B007956F174DB07B00C98E83 /* TagSelectionDataSource.h */,
+				B0079570174DB08100C98E83 /* TagSelectionDataSource.m */,
 				B04C28D016E2078100E86C7A /* UserDetailsCell.xib */,
 				B04C28D416E2078100E86C7A /* UserListDataSource.h */,
 				B04C28D516E2078100E86C7A /* UserListDataSource.m */,
@@ -1897,6 +1903,10 @@
 				B04C297716E2078100E86C7A /* SVWebViewController.m */,
 				B04C297816E2078100E86C7A /* TagAutocompleteTableView.h */,
 				B04C297916E2078100E86C7A /* TagAutocompleteTableView.m */,
+				B0079568174DAB1900C98E83 /* TagSelectionCell.h */,
+				B0079569174DAB1D00C98E83 /* TagSelectionCell.m */,
+				B0079572174DBDBA00C98E83 /* TagSelectionItem.h */,
+				B0079573174DBDC000C98E83 /* TagSelectionItem.m */,
 				B04C297C16E2078100E86C7A /* TextFormCell.h */,
 				B04C297D16E2078100E86C7A /* TextFormCell.m */,
 				B0079553174CA4CA00C98E83 /* TextViewCell.h */,
@@ -2159,6 +2169,8 @@
 				B00091581705909E0065CB53 /* photo_event_bg@2x.png */,
 				B0C60B0B16F94D2B00954DC3 /* photo_icon.png */,
 				B0C60B0C16F94D2B00954DC3 /* photo_icon@2x.png */,
+				B0079560174D13F900C98E83 /* searchbar_bg.png */,
+				B0079561174D13FA00C98E83 /* searchbar_bg@2x.png */,
 				B0C60B0316F856C200954DC3 /* sep_details.png */,
 				B0C60B0416F856C200954DC3 /* sep_details@2x.png */,
 				B019AED016F6C25C00327DCF /* separator.png */,
@@ -2175,6 +2187,8 @@
 				B0D7E3E116FEEED500EDE8AF /* social_sina@2x.png */,
 				B0D7E3E216FEEED500EDE8AF /* social.png */,
 				B0D7E3E316FEEED500EDE8AF /* social@2x.png */,
+				B007955C174CF7CF00C98E83 /* tag_add.png */,
+				B007955D174CF7D000C98E83 /* tag_add@2x.png */,
 				B0C60B1816F9B39500954DC3 /* tag_bg.png */,
 				B0C60B1916F9B39500954DC3 /* tag_bg@2x.png */,
 				B0C60B1A16F9B39600954DC3 /* tag_bg0.png */,
@@ -2183,6 +2197,10 @@
 				B0D7E3BB16FD533200EDE8AF /* tag_bg_normal@2x.png */,
 				B0D7E3BC16FD533200EDE8AF /* tag_bg0_normal.png */,
 				B0D7E3BD16FD533200EDE8AF /* tag_bg0_normal@2x.png */,
+				B0079564174D170C00C98E83 /* tag_selected.png */,
+				B0079565174D170C00C98E83 /* tag_selected@2x.png */,
+				B007956B174DAFDE00C98E83 /* tag_unselected.png */,
+				B007956C174DAFDE00C98E83 /* tag_unselected@2x.png */,
 				B019AEF016F7188200327DCF /* time_seg_0.png */,
 				B019AEF116F7188200327DCF /* time_seg_0@2x.png */,
 				B02F93691713C15F00DC0784 /* time_seg_1.png */,
@@ -2827,9 +2845,7 @@
 				B04C267A16E2070100E86C7A /* Default@2x.png in Resources */,
 				B04C267C16E2070100E86C7A /* Default-568h@2x.png in Resources */,
 				B04C29AF16E2078100E86C7A /* MealListViewController.xib in Resources */,
-				B04C29B916E2078100E86C7A /* NewUserDetailsViewController.xib in Resources */,
 				B04C29BC16E2078100E86C7A /* OrderDetailsViewController.xib in Resources */,
-				B04C29C616E2078100E86C7A /* RecentContactsViewController.xib in Resources */,
 				B04C29CF16E2078100E86C7A /* UserDetailsCell.xib in Resources */,
 				B04C29F516E2078100E86C7A /* SVProgressHUD.bundle in Resources */,
 				B04C2A6016E2080400E86C7A /* MessageBubbleBlue.png in Resources */,
@@ -3137,6 +3153,14 @@
 				B0079548174C594800C98E83 /* EditUserDetailsHeaderView.xib in Resources */,
 				B007954B174C5AC500C98E83 /* edit_personal_bg.png in Resources */,
 				B007954C174C5AC500C98E83 /* edit_personal_bg@2x.png in Resources */,
+				B007955E174CF7D000C98E83 /* tag_add.png in Resources */,
+				B007955F174CF7D000C98E83 /* tag_add@2x.png in Resources */,
+				B0079562174D13FA00C98E83 /* searchbar_bg.png in Resources */,
+				B0079563174D13FA00C98E83 /* searchbar_bg@2x.png in Resources */,
+				B0079566174D170D00C98E83 /* tag_selected.png in Resources */,
+				B0079567174D170D00C98E83 /* tag_selected@2x.png in Resources */,
+				B007956D174DAFDF00C98E83 /* tag_unselected.png in Resources */,
+				B007956E174DAFDF00C98E83 /* tag_unselected@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3189,15 +3213,12 @@
 				B04C29B516E2078100E86C7A /* NameAndGenderViewController.m in Sources */,
 				B04C29B616E2078100E86C7A /* NewSidebarViewController.m in Sources */,
 				B04C29B716E2078100E86C7A /* NewTagViewController.m in Sources */,
-				B04C29B816E2078100E86C7A /* NewUserDetailsViewController.m in Sources */,
 				B04C29BA16E2078100E86C7A /* NotificationViewController.m in Sources */,
 				B04C29BB16E2078100E86C7A /* OrderDetailsViewController.m in Sources */,
 				B04C29C016E2078100E86C7A /* OverlayViewController.m in Sources */,
 				B04C29C116E2078100E86C7A /* PhotoViewController.m in Sources */,
 				B04C29C216E2078100E86C7A /* PullRefreshTableViewController.m in Sources */,
 				B04C29C316E2078100E86C7A /* PullRefreshTableViewController2.m in Sources */,
-				B04C29C416E2078100E86C7A /* RecentContactsDataSource.m in Sources */,
-				B04C29C516E2078100E86C7A /* RecentContactsViewController.m in Sources */,
 				B04C29CA16E2078100E86C7A /* SetAvatarViewController.m in Sources */,
 				B04C29CB16E2078100E86C7A /* SettingsTableViewController.m in Sources */,
 				B04C29CC16E2078100E86C7A /* SimplePhotoSet.m in Sources */,
@@ -3413,6 +3434,9 @@
 				B0079552174C66C400C98E83 /* TagService.m in Sources */,
 				B0079555174CA4CF00C98E83 /* TextViewCell.m in Sources */,
 				B0079558174CB20F00C98E83 /* UIView+FindAndResignFirstResponder.m in Sources */,
+				B007956A174DAB2100C98E83 /* TagSelectionCell.m in Sources */,
+				B0079571174DB08D00C98E83 /* TagSelectionDataSource.m in Sources */,
+				B0079574174DBDC500C98E83 /* TagSelectionItem.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3454,7 +3478,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 0.0.15;
+				CURRENT_PROJECT_VERSION = 0.0.21;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -3489,7 +3513,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = YES;
-				CURRENT_PROJECT_VERSION = 0.0.15;
+				CURRENT_PROJECT_VERSION = 0.0.21;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;

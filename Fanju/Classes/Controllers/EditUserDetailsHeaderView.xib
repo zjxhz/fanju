@@ -39,7 +39,7 @@
 					<object class="IBUIImageView" id="244457428">
 						<reference key="NSNextResponder" ref="191373211"/>
 						<int key="NSvFlags">292</int>
-						<string key="NSFrameSize">{320, 159}</string>
+						<string key="NSFrameSize">{320, 149}</string>
 						<reference key="NSSuperview" ref="191373211"/>
 						<reference key="NSWindow"/>
 						<reference key="NSNextKeyView" ref="719726492"/>
@@ -49,10 +49,6 @@
 						<bool key="IBUIUserInteractionEnabled">NO</bool>
 						<string key="IBUIContentStretch">{{0, 0}, {0, 0}}</string>
 						<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
-						<object class="NSCustomResource" key="IBUIImage">
-							<string key="NSClassName">NSImage</string>
-							<string key="NSResourceName">restaurant_sample.jpg</string>
-						</object>
 					</object>
 					<object class="IBUIButton" id="719726492">
 						<reference key="NSNextResponder" ref="191373211"/>
@@ -205,6 +201,7 @@
 				<string key="-2.IBPluginDependency">com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 				<string key="1.CustomClassName">EditUserDetailsHeaderView</string>
 				<string key="1.IBPluginDependency">com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
+				<string key="4.CustomClassName">NINetworkImageView</string>
 				<string key="4.IBPluginDependency">com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 				<string key="5.IBPluginDependency">com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 				<string key="6.CustomClassName">NINetworkImageView</string>
@@ -224,7 +221,7 @@
 					<dictionary class="NSMutableDictionary" key="outlets">
 						<string key="avatarView">NINetworkImageView</string>
 						<string key="editPersonalBgButton">UIButton</string>
-						<string key="personalBgView">UIImageView</string>
+						<string key="personalBgView">NINetworkImageView</string>
 					</dictionary>
 					<dictionary class="NSMutableDictionary" key="toOneOutletInfosByName">
 						<object class="IBToOneOutletInfo" key="avatarView">
@@ -237,7 +234,7 @@
 						</object>
 						<object class="IBToOneOutletInfo" key="personalBgView">
 							<string key="name">personalBgView</string>
-							<string key="candidateClassName">UIImageView</string>
+							<string key="candidateClassName">NINetworkImageView</string>
 						</object>
 					</dictionary>
 					<object class="IBClassDescriptionSource" key="sourceIdentifier">
@@ -263,10 +260,10 @@
 		</object>
 		<bool key="IBDocument.PluginDeclaredDependenciesTrackSystemTargetVersion">YES</bool>
 		<int key="IBDocument.defaultPropertyAccessControl">3</int>
-		<dictionary class="NSMutableDictionary" key="IBDocument.LastKnownImageSizes">
-			<string key="edit_personal_bg.png">{46, 46}</string>
-			<string key="restaurant_sample.jpg">{972, 648}</string>
-		</dictionary>
+		<object class="NSMutableDictionary" key="IBDocument.LastKnownImageSizes">
+			<string key="NS.key.0">edit_personal_bg.png</string>
+			<string key="NS.object.0">{46, 46}</string>
+		</object>
 		<string key="IBCocoaTouchPluginVersion">2083</string>
 	</data>
 </archive>

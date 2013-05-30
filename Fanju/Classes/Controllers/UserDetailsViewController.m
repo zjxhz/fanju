@@ -33,6 +33,7 @@
 #import "ODRefreshControl.h"
 #import "Relationship.h"
 
+
 @interface UserDetailsViewController (){
     PhotoThumbnailCell* _photoCell;
     Photo* _selectedPhoto;
@@ -48,6 +49,7 @@
     ODRefreshControl* _refreshControl;
     UIButton* _followButton;
     NSManagedObjectContext* _contex;
+    BOOL _reloaded;
 }
 
 @end
@@ -67,10 +69,14 @@
 }
 
 -(void)edit:(id)sender{
-    EditUserDetailsViewController* editor = [[EditUserDetailsViewController alloc] initWithStyle:UITableViewStyleGrouped];
+    EditUserDetailsViewController* editor = [[EditUserDetailsViewController alloc] init];
     editor.user = _user;
 //    editor.delegate = self;
     [self.navigationController pushViewController:editor animated:YES];
+}
+
+-(void)delayedEndRefresh{
+    [NSTimer scheduledTimerWithTimeInterval:3 target:_refreshControl selector:@selector(endRefreshing) userInfo:nil repeats:NO];
 }
 -(void)viewWillAppear:(BOOL)animated{
     [super viewWillAppear:animated];
@@ -205,10 +211,16 @@
 }
 
 - (void)sendMsg:(id)sender {
-    Conversation* conversation = [[MessageService service] getOrCreateConversation:[UserService service].loggedInUser with:_user];
-    XMPPChatViewController2* c = [[XMPPChatViewController2 alloc] initWithConversation:conversation];
-//    c.avatarSomeoneElse =
-    [self.navigationController pushViewController:c animated:YES];
+    User* user = [UserService service].loggedInUser;
+    if (![UserService hasAvatar:user]) {
+        UIAlertView* av = [[UIAlertView alloc] initWithTitle:@"提示" message:@"发起会话之前，请先设置头像" delegate:self cancelButtonTitle:@"以后再说" otherButtonTitles:@"设置", nil];
+        [av show];
+    } else {
+        Conversation* conversation = [[MessageService service] getOrCreateConversation:[UserService service].loggedInUser with:_user];
+        XMPPChatViewController2* c = [[XMPPChatViewController2 alloc] initWithConversation:conversation];
+        [self.navigationController pushViewController:c animated:YES];        
+    }
+    
 }
 
 -(void) updateFollowOrNotButton{
@@ -242,7 +254,7 @@
                                      parameters:nil
                                     cachePolicy:TTURLRequestCachePolicyNone
                                         success:^(id obj) {
-                                            [SVProgressHUD dismissWithSuccess:nil];
+                                            [SVProgressHUD dismissWithSuccess:@"已取消关注"];
                                             [[UserService service].loggedInUser removeFollowingsObject:r];
                                             NSError* error;
                                             if(![_contex saveToPersistentStore:&error]){
@@ -252,7 +264,7 @@
                                             [self updateFollowOrNotButton];
                                             [self.tableView reloadData];
                                         } failure:^{
-                                            [SVProgressHUD dismissWithError:nil];
+                                            [SVProgressHUD dismissWithError:@"取消关注失败"];
                                             DDLogError(@"failed to remove following");
                                         }];
 }
@@ -267,7 +279,7 @@
                                     cachePolicy:TTURLRequestCachePolicyNone
                                         success:^(id obj) {
                                             if ([[obj objectForKey:@"status"] isEqualToString:@"OK"]) {
-                                                [SVProgressHUD dismissWithSuccess:nil];
+                                                [SVProgressHUD dismissWithSuccess:@"已关注"];
                                                 Relationship* r =  [NSEntityDescription insertNewObjectForEntityForName:@"Relationship" inManagedObjectContext:_contex];
                                                 r.fromPerson = [UserService service].loggedInUser;
                                                 r.toPerson = _user;
@@ -296,10 +308,12 @@
 }
 
 -(void)editMotto:(id)sender{
-    CellTextEditorViewController* controller = [[CellTextEditorViewController alloc] initWithText:_user.motto placeHolder:@"请输入签名" style:CellTextEditorStyleTextView];
-    controller.delegate = self;
-    controller.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc]initWithBarButtonSystemItem:UIBarButtonSystemItemCancel target:self action:@selector(dismissModalView:)];
-    UINavigationController *nav = [[UINavigationController alloc] initWithRootViewController:controller];
+    SetMottoViewController* vc = [[SetMottoViewController alloc] init];
+    vc.mottoDelegate = self;
+    [vc setMotto:_user.motto];
+    vc.navigationItem.leftBarButtonItem = [[WidgetFactory sharedFactory] normalBarButtonItemWithTitle:@"取消" target:self action:@selector(dismissModalView:)];
+    vc.navigationItem.rightBarButtonItem = [[WidgetFactory sharedFactory] normalBarButtonItemWithTitle:@"确定" target:vc action:@selector(saveMotto:)];
+    UINavigationController *nav = [[UINavigationController alloc] initWithRootViewController:vc];
     [self presentModalViewController:nav animated:YES];
 }
 
@@ -347,7 +361,9 @@
         case 1:
             return indexPath.row == 0 ? 31 : 70;
         case 2:
-            if (_tagCell) {
+            if(_user.tags.count == 0){
+                return 0;
+            } else if (_tagCell) {
                 return _tagCell.cellHeight;
             }
             return 36;
@@ -379,11 +395,20 @@
     if (indexPath.section == 0) {
         static NSString* USER_DETAILS_CELL = @"USER_DETAILS_CELL";
         cell = [self.tableView dequeueReusableCellWithIdentifier:USER_DETAILS_CELL];
+        BOOL recalculateHeight = NO;
         if(!cell){
             cell = [[UserDetailsCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:USER_DETAILS_CELL];
+            recalculateHeight = YES;
         }
         _userDetailsCell = (UserDetailsCell*)cell;
+        CGFloat originalHeight = _userDetailsCell.cellHeight;
         _userDetailsCell.user = _user;
+        if (_userDetailsCell.cellHeight != originalHeight) {
+            recalculateHeight = YES;
+        }
+        if (recalculateHeight) {
+            [self.tableView reloadData];
+        }
     } else if(indexPath.section == 1){
         if (indexPath.row == 0) {
             NSString* CellIdentifier = @"PhotoTitleCell";
@@ -393,6 +418,9 @@
             photoTitleCell.seeAllButton.hidden = !seeMore;
             photoTitleCell.disclosureView.hidden = !seeMore;
         } else {
+            if (!_reloaded) {
+                return [[UITableViewCell alloc] initWithFrame:CGRectZero];
+            } 
             NSString* CellIdentifier = @"PhotoThumbnailCell";
             cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
             BOOL editable = [self isViewForMyself];
@@ -587,6 +615,7 @@
 #pragma mark PullRefreshTableViewController
 -(void)reload:(id)sender{
     [[UserService service] fetchUserWithID:[_user.uID stringValue] success:^(User* user) {
+        _reloaded = YES;
         [self setUser:user];
         [_refreshControl endRefreshing];
     } failure:^{
@@ -638,5 +667,50 @@
 
 -(void)didFailUploadAvatar:(UIImage*)image{
     DDLogWarn(@"failed to upload avatar");
+}
+
+-(void)didUploadBackground:(UIImage*)image withData:(NSDictionary *)data{
+    _user.backgroundImage  = [data objectForKey:@"background_image"];
+    _userDetailsCell.backgroundImageView.image = image;
+    
+    [_userDetailsCell.avatar setPathToNetworkImage:[URLService absoluteURL:_user.avatar]];
+    [self.tableView reloadData];
+    [[Authentication sharedInstance] relogin];
+}
+
+-(void)didFailUploadBackground:(UIImage*)image{
+    DDLogWarn(@"failed to upload background image");
+}
+
+#pragma mark SetMottoDelegate
+-(void)mottoDidSet:(NSString*)motto{
+    NSMutableDictionary *dict = [@{@"motto":motto} mutableCopy];
+    [[NetworkHandler getHandler] sendJSonRequest:[NSString stringWithFormat:@"%@://%@/api/v1/user/%@/", HTTPS, EOHOST, _user.uID]
+                                          method:PATCH
+                                      jsonObject:dict
+                                         success:^(id obj) {
+                                             DDLogInfo(@"motto updated");
+                                             _user.motto = motto;
+                                             NSError* error;
+                                             if(![_contex saveToPersistentStore:&error]){
+                                                 DDLogError(@"failed to save motto to core data with error: %@", error);
+                                             }
+                                             [self.tableView reloadData];
+                                             [self dismissViewControllerAnimated:YES completion:^{}];
+                                         } failure:^{
+                                             [self dismissViewControllerAnimated:YES completion:^{}];
+                                             DDLogError(@"faile to save user info");
+                                         }];
+}
+
+#pragma mark UIAlertViewDelegate
+- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex{
+    if (buttonIndex == 1) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            UserDetailsViewController* vc = [[UserDetailsViewController alloc] init];
+            vc.user = [UserService service].loggedInUser;
+            [self.navigationController pushViewController:vc animated:YES];
+        });
+    }
 }
 @end

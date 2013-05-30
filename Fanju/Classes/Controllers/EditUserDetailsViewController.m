@@ -17,8 +17,13 @@
 #import "UIView+FindAndResignFirstResponder.h"
 #import "SVProgressHUD.h"
 #import "NetworkHandler.h"
+#import "UserTagsViewController.h"
+#import "ImageUploader.h"
+
 
 #define DATE_PICKER_HEIGHT 215
+#define GenderPickerHeight 162.0
+
 @implementation EditUserDetailsViewController{
     EditUserDetailsHeaderView* _headerView;
     NSString* _name;
@@ -26,60 +31,105 @@
     NSString* _college;
     NSString* _workFor;
     NSString* _occupation;
-    TextViewCell* _mottoCell;
-    UIDatePicker* _datePicker;
     NSDate* _birthday;
+    DatePickerWithToolbarView* _datePicker;
+    UIPickerView* _genderPicker;
+    UITableView* _tableView;
+    ImageUploader* _uploader;
+    NSInteger _gender;
 }
 
-- (id)initWithStyle:(UITableViewStyle)style{
-    if (self = [super initWithStyle:style]) {
+- (id)init{
+    if (self = [super init]) {
     }
     return self;
 }
 
 -(void)viewDidLoad{
     [super viewDidLoad];
-    self.tableView.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"bg"]];
-    self.tableView.backgroundView = nil;
-//    self.tableView.backgroundColor = [UIColor clearColor];
-    self.tableView.showsVerticalScrollIndicator = NO;
     self.title = @"编辑资料";
     self.navigationItem.rightBarButtonItem = [[WidgetFactory sharedFactory] normalBarButtonItemWithTitle:@"保存" target:self action:@selector(saveDetails:)];
-    [self createHeaderView];
-    [self createDatePicker];
-    UIGestureRecognizer *reg = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(viewTapped:)];
-    reg.delegate = self;
-    [self.view addGestureRecognizer:reg];
-
+//    UIGestureRecognizer *reg = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(viewTapped:)];
+//    reg.delegate = self;
+//    [self.view addGestureRecognizer:reg];
+    self.view.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"bg"]];
+    _tableView = [[UITableView alloc] initWithFrame:CGRectZero style:UITableViewStyleGrouped];
+    _tableView.backgroundView = nil;
+    _tableView.backgroundColor = [UIColor clearColor];
+    _tableView.showsVerticalScrollIndicator = NO;
+    _tableView.delegate = self;
+    _tableView.dataSource = self;
+    [self.view addSubview:_tableView];
 }
 
--(void)createHeaderView{
-    UIViewController* temp = [[UIViewController alloc] initWithNibName:@"EditUserDetailsHeaderView" bundle:nil];
-    _headerView = (EditUserDetailsHeaderView*)temp.view;
-    CGRect frame = _headerView.avatarView.frame;
-    _headerView.avatarView = [AvatarFactory avatarWithBg:_user big:YES];
-    _headerView.avatarView.frame = frame;
-    [_headerView addSubview:_headerView.avatarView];
-    _headerView.personalBgView.contentMode = UIViewContentModeScaleAspectFill;
-    _headerView.personalBgView.clipsToBounds = YES;
-    _headerView.personalBgView.image = [UIImage imageNamed:@"restaurant_sample.jpg"];
+-(void)viewDidAppear:(BOOL)animated{
+    [super viewDidAppear:animated];
+    _tableView.frame = self.view.frame;
+    [self createDatePicker];
+    [self createGenderPicker];
+}
+
+-(UIView*)headerView{
+    if (!_headerView) {
+        UIViewController* temp = [[UIViewController alloc] initWithNibName:@"EditUserDetailsHeaderView" bundle:nil];
+        _headerView = (EditUserDetailsHeaderView*)temp.view;
+        CGRect frame = _headerView.avatarView.frame;
+        _headerView.avatarView = [AvatarFactory avatarWithBg:_user big:YES];
+        _headerView.avatarView.frame = frame;
+        [_headerView addSubview:_headerView.avatarView];
+        _headerView.personalBgView.contentMode = UIViewContentModeScaleAspectFill;
+        _headerView.personalBgView.clipsToBounds = YES;
+        if (_user.backgroundImage) {
+            [_headerView.personalBgView setPathToNetworkImage:[URLService absoluteURL:_user.backgroundImage] forDisplaySize:_headerView.personalBgView.frame.size contentMode:UIViewContentModeScaleAspectFill];
+        } else {
+            _headerView.personalBgView.image = [UIImage imageNamed:@"restaurant_sample.jpg"];
+        }
+
+        [_headerView.editPersonalBgButton addTarget:self action:@selector(editBackgroundImage:) forControlEvents:UIControlEventTouchUpInside];
+    }
+    
+    return _headerView;
 }
 
 -(void)createDatePicker{
-    CGFloat y = self.view.frame.size.height - DATE_PICKER_HEIGHT;
-    _datePicker = [[UIDatePicker alloc] initWithFrame:CGRectMake(0, y, 320, DATE_PICKER_HEIGHT)];
-    _datePicker.datePickerMode = UIDatePickerModeDate;
-    _datePicker.minimumDate = [DateUtil dateFromShortString:@"1913-01-01"];
-    _datePicker.maximumDate = [DateUtil dateFromShortString:@"2007-12-31"];
-    _datePicker.date = _birthday;
-    [_datePicker addTarget:self action:@selector(dateUpdated:) forControlEvents:UIControlEventValueChanged];
+//    CGFloat y = self.view.frame.size.height - DATE_PICKER_HEIGHT;
+//    _datePicker = [[UIDatePicker alloc] initWithFrame:CGRectMake(0, y, 320, DATE_PICKER_HEIGHT)];
+//    _datePicker.datePickerMode = UIDatePickerModeDate;
+//    _datePicker.minimumDate = [DateUtil dateFromShortString:@"1913-01-01"];
+//    _datePicker.maximumDate = [DateUtil dateFromShortString:@"2007-12-31"];
+//    _datePicker.date = _birthday;
+//    [_datePicker addTarget:self action:@selector(dateUpdated:) forControlEvents:UIControlEventValueChanged];
+    CGFloat y = self.view.frame.size.height - DateTimePickerHeight;
+    _datePicker = [[DatePickerWithToolbarView alloc] initWithFrame:CGRectMake(0, y, 320, DateTimePickerHeight)];
+    _datePicker.datePickerDelegate = self;
+    if (_birthday) {
+        _datePicker.picker.date = _birthday;
+    } else {
+        _datePicker.picker.date = [DateUtil dateFromShortString:@"1991-02-27"];
+    }
+    [_datePicker setMode:UIDatePickerModeDate];
+    [self.view addSubview:_datePicker];
+    [_datePicker setHidden:YES animated:NO];
 }
 
--(void)dateUpdated:(id)sender{
-    _birthday = _datePicker.date;
-    [self.tableView reloadData];
+-(void)createGenderPicker{
+    CGFloat y = self.view.frame.size.height - GenderPickerHeight - 20;
+    _genderPicker = [[UIPickerView alloc] initWithFrame:CGRectMake(0, y, 320, GenderPickerHeight)];
+    _genderPicker.dataSource = self;
+    _genderPicker.delegate = self;
+    _genderPicker.hidden = YES;
+    [self.view addSubview:_genderPicker];
 }
 
+-(void)datePicked:(NSDate *)date{
+    _birthday = date;
+    [_tableView reloadData];
+    _tableView.userInteractionEnabled = YES;
+}
+
+-(void)datePickCanceled{
+    _tableView.userInteractionEnabled = YES;
+}
 -(void)setUser:(User *)user{
     _user = user;
     _name = _user.name;
@@ -88,14 +138,15 @@
     _workFor = _user.workFor;
     _occupation = _user.occupation;
     _birthday = _user.birthday;
-    [self.tableView reloadData];
+    _gender = [_user.gender integerValue];
+    [_tableView reloadData];
 }
 
 -(UIView*)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section{
     if (section > 0) {
         return nil;
     }
-    return _headerView;
+    return [self headerView];
     
 }
 
@@ -113,12 +164,8 @@
 -(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath{
     if (indexPath.section == 1){
         if(indexPath.row == 0) {
-//            CGSize textSize = [_motto sizeWithFont:[UIFont systemFontOfSize:15.0f] constrainedToSize:CGSizeMake(280, 400) lineBreakMode: UILineBreakModeWordWrap];
-//            return textSize.height + 40;
-//            if (_mottoCell) {
-//                return _mottoCell.preferredHeight;
-//            }
-            return 95;
+            CGSize textSize = [_motto sizeWithFont:[UIFont systemFontOfSize:15.0f] constrainedToSize:CGSizeMake(260, 400) lineBreakMode: UILineBreakModeWordWrap];
+            return textSize.height + 40;
         } else if(indexPath.row == 1){
             return 68;
         }
@@ -146,33 +193,43 @@
             cell = [[TextFormCell alloc] initWithStyle:UITableViewCellStyleValue1 reuseIdentifier:TextFormCellIdentifier];
             TextFormCell* textFormCell = (TextFormCell*)cell;
             textFormCell.textLabel.text = @"名字";
+            textFormCell.textField.font = [UIFont systemFontOfSize:15];
+            textFormCell.textField.textColor = RGBCOLOR(0x50, 0x50, 0x50);
             textFormCell.textField.text = _name;
             textFormCell.textField.tag = 0;
             textFormCell.textField.delegate = self;
         } else if(indexPath.row == 1) {
             cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleValue1 reuseIdentifier:CellIdentifier];
             cell.textLabel.text = @"性别";
-            cell.detailTextLabel.text = [UserService genderTextForUser:_user];
+            cell.detailTextLabel.text = _gender ? @"女" : @"男";
         } else if(indexPath.row == 2) {
             cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleValue1 reuseIdentifier:BirthdayCellIdentifier];
             cell.textLabel.text = @"生日";
+            cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
             cell.detailTextLabel.text = [DateUtil longStringFromDate:_birthday];
         }
     } else if(indexPath.section == 1){
         if (indexPath.row == 0) {
-            cell = [[TextViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:SubtitleCellIdentifier];
-            _mottoCell = (TextViewCell*)cell;
-            _mottoCell.textLabel.text = @"签名";
-            _mottoCell.textView.text = _motto;
-            _mottoCell.textView.delegate = self;
+            cell = [_tableView dequeueReusableCellWithIdentifier:SubtitleCellIdentifier];
+            if (!cell) {
+                cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:SubtitleCellIdentifier];
+                cell.detailTextLabel.numberOfLines = 0;
+                cell.detailTextLabel.lineBreakMode = UILineBreakModeWordWrap;
+                cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+            }
+            cell.textLabel.text = @"签名";
+            cell.detailTextLabel.text = _motto;
         } else if(indexPath.row == 1){
             cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:CellIdentifier];
             cell.textLabel.text = @"兴趣";
+            cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
             cell.detailTextLabel.text = [TagService textOfTags:[_user.tags allObjects]]; //TODO local copy
         } else if(indexPath.row == 2){
             cell = [[TextFormCell alloc] initWithStyle:UITableViewCellStyleValue1 reuseIdentifier:TextFormCellIdentifier];
             TextFormCell* textFormCell = (TextFormCell*)cell;
             textFormCell.textLabel.text = @"学校";
+            textFormCell.textField.font = [UIFont systemFontOfSize:15];
+            textFormCell.textField.textColor = RGBCOLOR(0x50, 0x50, 0x50);
             textFormCell.textField.tag = 12;
             textFormCell.textField.text = _college;
             textFormCell.textField.delegate = self;
@@ -180,12 +237,16 @@
             cell = [[TextFormCell alloc] initWithStyle:UITableViewCellStyleValue1 reuseIdentifier:TextFormCellIdentifier];
             TextFormCell* textFormCell = (TextFormCell*)cell;
             textFormCell.textLabel.text = @"单位";
+            textFormCell.textField.font = [UIFont systemFontOfSize:15];
+            textFormCell.textField.textColor = RGBCOLOR(0x50, 0x50, 0x50);
             textFormCell.textField.tag = 13;
             textFormCell.textField.text = _workFor;
             textFormCell.textField.delegate = self;
         } else if(indexPath.row == 4){
             cell = [[TextFormCell alloc] initWithStyle:UITableViewCellStyleValue1 reuseIdentifier:TextFormCellIdentifier];
             TextFormCell* textFormCell = (TextFormCell*)cell;
+            textFormCell.textField.font = [UIFont systemFontOfSize:15];
+            textFormCell.textField.textColor = RGBCOLOR(0x50, 0x50, 0x50);
             textFormCell.textLabel.text = @"职业";
             textFormCell.textField.tag = 14;
             textFormCell.textField.text = _occupation;
@@ -204,7 +265,7 @@
     [self.view findAndResignFirstResponder];
     [SVProgressHUD showWithStatus:@"正在保存…" maskType:SVProgressHUDMaskTypeBlack];
     NSMutableDictionary *dict = [@{@"name":_name, @"motto":_motto, @"occupation": _occupation,
-                                 @"work_for":_workFor, @"college":_college} mutableCopy];
+                                 @"work_for":_workFor, @"college":_college, @"gender": [NSString stringWithFormat:@"%d", _gender]} mutableCopy];
     if (_birthday) {
         [dict setValue:[DateUtil longStringFromDate:_birthday] forKey:@"birthday"];
     }
@@ -235,44 +296,55 @@
 }
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath{
     if (indexPath.section == 0) {
-        if (indexPath.row == 2) {
-            if (_datePicker.superview) {
-                [_datePicker removeFromSuperview];
-            } else {
-                _datePicker.date = _birthday;
-                [self.navigationController.view addSubview:_datePicker];
-                [self.tableView scrollToRowAtIndexPath:[NSIndexPath indexPathForRow:4 inSection:1] atScrollPosition:UITableViewScrollPositionBottom animated:YES];
-//                [self.tableView setContentOffset:CGPointMake(0, UITableViewScrollPositionBottom) animated:YES];
-            }
-        } else {
-            [_datePicker removeFromSuperview];
+        if (indexPath.row == 1) {
+            [self scrollToBottom];
+            _tableView.userInteractionEnabled = NO;
+            _genderPicker.hidden = NO;
+//            <#statements#>
+        } else if (indexPath.row == 2) {
+            [_datePicker setHidden:NO animated:YES];
+            
+            [self scrollToBottom];
+            _tableView.userInteractionEnabled = NO;
+        } 
+    }  else if(indexPath.section == 1){
+        if (indexPath.row == 0) {
+            SetMottoViewController* vc = [[SetMottoViewController alloc] init];
+            [vc setMotto:_motto];
+            vc.mottoDelegate = self;
+            vc.navigationItem.leftBarButtonItem = [[WidgetFactory sharedFactory] backButtonWithTarget:vc action:@selector(saveMotto:)];
+            [self.navigationController pushViewController:vc animated:YES];
+        }else if (indexPath.row == 1) {
+            UserTagsViewController *ut = [[UserTagsViewController alloc] initWithUser:_user];
+            ut.tagDelegate = self;
+            [self.navigationController pushViewController:ut animated:YES];
+            
         }
-    } else {
-        [_datePicker removeFromSuperview];
     }
 }
 
--(void)viewDidDisappear:(BOOL)animated{
-    [super viewDidDisappear:animated];
-    [_datePicker removeFromSuperview];
+-(IBAction)editBackgroundImage:(id)sender{
+    if (!_uploader) {
+        _uploader = [[ImageUploader alloc] initWithViewController:self delegate:self];
+    }
+    [_uploader uploadBackgroundImage];
 }
-
--(void)viewTapped:(id)sender{
-    [self.view findAndResignFirstResponder];
-    [_datePicker removeFromSuperview];
-}
+//-(void)viewTapped:(id)sender{
+//    [self.view findAndResignFirstResponder];
+//    [_picker setHidden:YES animated:YES];
+//}
 
 
 #pragma mark UIGestureRecognizerDelegate <NSObject>
-- (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldReceiveTouch:(UITouch *)touch{
-    
-    if ([touch.view isKindOfClass:[UITextField class]]
-        || [touch.view isKindOfClass:[UITextView class]]
-            || [[touch.view superview] isKindOfClass:[UITableViewCell class]]) {
-        return NO;
-    }
-    return YES;
-}
+//- (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldReceiveTouch:(UITouch *)touch{
+//    if ([touch.view isKindOfClass:[UITextField class]]
+//        || [touch.view isKindOfClass:[UITextView class]]
+//            || [[touch.view superview] isKindOfClass:[UITableViewCell class]]
+//        || [touch.view isKindOfClass:[UIButton class]]) {
+//        return NO;
+//    }
+//    return YES;
+//}
 
 #pragma mark UITextFieldDelegate
 - (void)textFieldDidEndEditing:(UITextField *)textField{
@@ -292,25 +364,12 @@
         default:
             break;
     }
-//    NSIndexPath* p00 = [NSIndexPath indexPathForRow:0 inSection:0];
-//    TextFormCell* cell00 = (TextFormCell*)[self.tableView cellForRowAtIndexPath:p00];
-//    _name = cell00.textField.text;
-//    
-//    NSIndexPath* p10 = [NSIndexPath indexPathForRow:0 inSection:1];
-//    TextFormCell* cell10 = (TextFormCell*)[self.tableView cellForRowAtIndexPath:p10];
-//    _motto = cell10.textField.text;
-//    
-//    NSIndexPath* p12 = [NSIndexPath indexPathForRow:2 inSection:1];
-//    TextFormCell* cell12 = (TextFormCell*)[self.tableView cellForRowAtIndexPath:p12];
-//    _college = cell12.textField.text;
-//    
-//    NSIndexPath* p13 = [NSIndexPath indexPathForRow:3 inSection:1];
-//    TextFormCell* cell13 = (TextFormCell*)[self.tableView cellForRowAtIndexPath:p13];
-//    _workFor = cell13.textField.text;
-//    
-//    NSIndexPath* p14 = [NSIndexPath indexPathForRow:4 inSection:1];
-//    TextFormCell* cell14 = (TextFormCell*)[self.tableView cellForRowAtIndexPath:p14];
-//    _occupation = cell14.textField.text;
+    CGRect frame = _tableView.frame;
+    frame.origin.y = 0;
+    [UIView animateWithDuration:0.5 animations:^{
+        _tableView.frame = frame;
+    } completion:^(BOOL finished) {
+    }];
 }
 
 - (BOOL)textFieldShouldReturn:(UITextField *)textField
@@ -319,13 +378,97 @@
     return YES;
 }
 
+- (void)textFieldDidBeginEditing:(UITextField *)textField{
+    CGRect frame = _tableView.frame;
+    if (textField.tag == 0) {
+        frame.origin.y = -190;
+    } else {
+        frame.origin.y = -130 -(textField.tag - 12) * 45; //tags for the 2nd section start from 12
+    }
+
+    [UIView animateWithDuration:0.5 animations:^{
+        _tableView.frame = frame;
+    } completion:^(BOOL finished) {
+    }];
+}
+
 #pragma mark UITextViewDelegate
 - (void)textViewDidEndEditing:(UITextView *)textView{
     _motto = textView.text;
-    [self.tableView reloadData];
+    [_tableView reloadData];
+
+    CGRect frame = _tableView.frame;
+    frame.origin.y = 0;
+    [UIView animateWithDuration:0.5 animations:^{
+        _tableView.frame = frame;
+    } completion:^(BOOL finished) {
+    }];
 }
 
-- (void)textViewDidBeginEditing:(UITextView *)textView{
-    [_datePicker removeFromSuperview];
+-(void)textViewDidBeginEditing:(UITextView *)textView{
+    CGRect frame = _tableView.frame;
+    frame.origin.y = -55;
+    _tableView.frame = frame;
+    [_tableView scrollToRowAtIndexPath:[NSIndexPath indexPathForRow:1 inSection:0] atScrollPosition:UITableViewScrollPositionMiddle animated:YES];
+    [self scrollToBottom];
 }
+
+//so cells are visible when the keyboard pops up
+-(void)scrollToBottom{
+    [_tableView scrollToRowAtIndexPath:[NSIndexPath indexPathForRow:4 inSection:1] atScrollPosition:UITableViewScrollPositionBottom animated:YES];
+}
+
+#pragma mark TagViewControllerDelegate
+-(void)tagsSaved:(NSArray*)newTags forUser:(User*)user{
+    [_tableView reloadData];
+}
+
+#pragma mark ImageUploaderDelegate
+-(void)didUploadBackground:(UIImage*)image  withData:(NSDictionary*)data{
+    _headerView.personalBgView.image = image;
+    [[NSNotificationCenter defaultCenter] postNotificationName:NOTIFICATION_USER_UPDATE object:_user];
+}
+-(void)didFailUploadBackground:(UIImage*)image{
+    DDLogError(@"failed to upload background image");
+}
+
+#pragma mark UIPickerViewDataSource
+// returns the number of 'columns' to display.
+- (NSInteger)numberOfComponentsInPickerView:(UIPickerView *)pickerView{
+    return 1;
+}
+
+// returns the # of rows in each component..
+- (NSInteger)pickerView:(UIPickerView *)pickerView numberOfRowsInComponent:(NSInteger)component{
+    return 2;
+}
+
+#pragma mark UIPickerViewDelegate
+- (CGFloat)pickerView:(UIPickerView *)pickerView widthForComponent:(NSInteger)component{
+    return 320;
+}
+- (CGFloat)pickerView:(UIPickerView *)pickerView rowHeightForComponent:(NSInteger)component{
+    return 25;
+}
+
+- (NSString *)pickerView:(UIPickerView *)pickerView titleForRow:(NSInteger)row forComponent:(NSInteger)component{
+    return row == 0 ? @"男" : @"女";
+}
+
+//- (UIView *)pickerView:(UIPickerView *)pickerView viewForRow:(NSInteger)row forComponent:(NSInteger)component reusingView:(UIView *)view;
+
+- (void)pickerView:(UIPickerView *)pickerView didSelectRow:(NSInteger)row inComponent:(NSInteger)component{
+    _gender = row;
+    _genderPicker.hidden = YES;
+    _tableView.userInteractionEnabled = YES;
+    [_tableView reloadData];
+}
+
+#pragma mark SetMottoDelegate
+-(void)mottoDidSet:(NSString *)motto{
+    _motto = motto;
+    [self.navigationController popViewControllerAnimated:YES];
+    [_tableView reloadData];
+}
+
 @end

@@ -35,4 +35,5 @@ typedef void (^service_failure)(void);
 +(UIImage*)genderImageForUser:(User*)user;
 +(NSString*)genderTextForUser:(User*)user;
 +(NSArray*)sortedPhotosForUser:(User*)user;
++(BOOL)hasAvatar:(User*)user;
 @end

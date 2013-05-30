@@ -1,1 +1,1 @@
-../../../../Three20/src/Three20UINavigator/Headers/TTURLArguments.h
+../../../../Three20/src/Three20UINavigator/Headers/private/TTURLArguments.h

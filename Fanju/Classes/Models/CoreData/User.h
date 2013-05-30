@@ -2,7 +2,7 @@
 //  User.h
 //  Fanju
 //
-//  Created by Xu Huanze on 5/21/13.
+//  Created by Xu Huanze on 5/28/13.
 //  Copyright (c) 2013 Wayne. All rights reserved.
 //
 
@@ -31,15 +31,26 @@
 @property (nonatomic, retain) NSString * username;
 @property (nonatomic, retain) NSString * weiboID;
 @property (nonatomic, retain) NSString * workFor;
+@property (nonatomic, retain) NSString * backgroundImage;
+@property (nonatomic, retain) NSSet *followers;
+@property (nonatomic, retain) NSSet *followings;
 @property (nonatomic, retain) NSSet *meals;
 @property (nonatomic, retain) NSSet *orders;
 @property (nonatomic, retain) NSSet *photos;
 @property (nonatomic, retain) NSSet *tags;
-@property (nonatomic, retain) NSSet *followings;
-@property (nonatomic, retain) NSSet *followers;
 @end
 
 @interface User (CoreDataGeneratedAccessors)
+
+- (void)addFollowersObject:(Relationship *)value;
+- (void)removeFollowersObject:(Relationship *)value;
+- (void)addFollowers:(NSSet *)values;
+- (void)removeFollowers:(NSSet *)values;
+
+- (void)addFollowingsObject:(Relationship *)value;
+- (void)removeFollowingsObject:(Relationship *)value;
+- (void)addFollowings:(NSSet *)values;
+- (void)removeFollowings:(NSSet *)values;
 
 - (void)addMealsObject:(Meal *)value;
 - (void)removeMealsObject:(Meal *)value;
@@ -60,15 +71,5 @@
 - (void)removeTagsObject:(Tag *)value;
 - (void)addTags:(NSSet *)values;
 - (void)removeTags:(NSSet *)values;
-
-- (void)addFollowingsObject:(Relationship *)value;
-- (void)removeFollowingsObject:(Relationship *)value;
-- (void)addFollowings:(NSSet *)values;
-- (void)removeFollowings:(NSSet *)values;
-
-- (void)addFollowersObject:(Relationship *)value;
-- (void)removeFollowersObject:(Relationship *)value;
-- (void)addFollowers:(NSSet *)values;
-- (void)removeFollowers:(NSSet *)values;
 
 @end

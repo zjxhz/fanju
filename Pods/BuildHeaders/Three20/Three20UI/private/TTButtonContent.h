@@ -1,1 +1,1 @@
-../../../../Three20/src/Three20UI/Headers/TTButtonContent.h
+../../../../Three20/src/Three20UI/Headers/private/TTButtonContent.h

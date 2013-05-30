@@ -1,1 +1,1 @@
-../../../../Three20/src/Three20UINavigator/Headers/UIViewController+TTNavigatorGarbageCollection.h
+../../../../Three20/src/Three20UINavigator/Headers/private/UIViewController+TTNavigatorGarbageCollection.h

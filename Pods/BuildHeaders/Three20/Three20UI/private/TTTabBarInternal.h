@@ -1,1 +1,1 @@
-../../../../Three20/src/Three20UI/Headers/TTTabBarInternal.h
+../../../../Three20/src/Three20UI/Headers/private/TTTabBarInternal.h

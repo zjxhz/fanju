@@ -1,1 +1,1 @@
-../../../../Three20/src/Three20UI/Headers/TTLauncherScrollView.h
+../../../../Three20/src/Three20UI/Headers/private/TTLauncherScrollView.h

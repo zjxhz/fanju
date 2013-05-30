@@ -1,1 +1,1 @@
-../../../../Three20/src/Three20Network/Headers/TTURLRequestQueueInternal.h
+../../../../Three20/src/Three20Network/Headers/private/TTURLRequestQueueInternal.h

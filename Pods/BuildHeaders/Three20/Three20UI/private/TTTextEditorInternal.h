@@ -1,1 +1,1 @@
-../../../../Three20/src/Three20UI/Headers/TTTextEditorInternal.h
+../../../../Three20/src/Three20UI/Headers/private/TTTextEditorInternal.h

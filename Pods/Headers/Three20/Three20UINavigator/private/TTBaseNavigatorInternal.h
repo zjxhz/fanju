@@ -1,1 +1,1 @@
-../../../../Three20/src/Three20UINavigator/Headers/TTBaseNavigatorInternal.h
+../../../../Three20/src/Three20UINavigator/Headers/private/TTBaseNavigatorInternal.h

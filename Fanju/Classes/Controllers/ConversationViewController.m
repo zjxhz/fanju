@@ -128,7 +128,12 @@
 }
 
 -(void)reloadData{
-    _conversations = [MessageService service].conversations;
+    [_conversations removeAllObjects];
+    for (Conversation* c in [MessageService service].conversations) {
+        if (c.messages.count > 0) {
+            [_conversations addObject:c];
+        }
+    }
     [self.tableView reloadData];
 }
 

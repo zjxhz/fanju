@@ -198,4 +198,15 @@
         return @"女";
     }
 }
+
++(BOOL)hasAvatar:(User*)user{
+    if (!user.avatar) {
+        return NO;
+    }
+    
+    if ([user.avatar hasPrefix:@"/media/default"] || [user.avatar rangeOfString:@"defaultAvatar"].location != NSNotFound) {
+        return NO;
+    }
+    return YES;
+}
 @end

@@ -1,1 +1,1 @@
-../../../../Three20/src/Three20UI/Headers/TTLauncherHighlightView.h
+../../../../Three20/src/Three20UI/Headers/private/TTLauncherHighlightView.h

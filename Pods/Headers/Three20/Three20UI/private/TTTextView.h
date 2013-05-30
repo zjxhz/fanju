@@ -1,1 +1,1 @@
-../../../../Three20/src/Three20UI/Headers/TTTextView.h
+../../../../Three20/src/Three20UI/Headers/private/TTTextView.h

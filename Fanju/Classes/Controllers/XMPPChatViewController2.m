@@ -22,6 +22,9 @@
 #import "MessageService.h"
 #import "Conversation.h"
 #import "UserDetailsViewController.h"
+#import "AvatarFactory.h"
+#import "UserTagsCell.h"
+#import "WidgetFactory.h"
 
 #define kChatBarHeight1                      40
 #define kChatBarHeight4                      94
@@ -52,6 +55,7 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
     NSFetchRequest *_fetchRequest;
     NSInteger _fetchOffset;
     NSManagedObjectContext* _context;
+    UIView* _guideView;
 }
 
 @end
@@ -76,7 +80,7 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
 - (void) loadView{
     [super loadView];
     self.title = @"聊天";
-    self.view.backgroundColor = [UIColor whiteColor];
+    self.view.backgroundColor = RGBCOLOR(0xF0, 0xF0, 0xF0);
     _bubbleTable = [[UIBubbleTableView alloc] initWithFrame:CGRectZero style:UITableViewStylePlain];
     [self.view addSubview:_bubbleTable];
     _bubbleTable.bubbleDataSource = self;
@@ -85,8 +89,14 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
     [_bubbleTable reloadData];
     _refreshControl = [[ODRefreshControl alloc] initInScrollView:_bubbleTable];
     [_refreshControl addTarget:self action:@selector(loadEarlierMessages:) forControlEvents:UIControlEventValueChanged];
+    self.navigationItem.rightBarButtonItem = [[WidgetFactory sharedFactory] normalBarButtonItemWithTitle:@"TA的资料" target:self action:@selector(showUserDetails:)];
 }
 
+-(void)showUserDetails:(id)sender{
+    UserDetailsViewController *details = [[UserDetailsViewController alloc] initWithStyle:UITableViewStylePlain];
+    details.user = _conversation.with;
+    [self.navigationController pushViewController:details animated:YES];
+}
 
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -130,18 +140,10 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
     [_messageInputBar addSubview:messageInputBarBackgroundImageView];
     
     // Create sendButton.
+    UIImage *sendButtonBackgroundImage = [UIImage imageNamed:@"SendButton"];
     _sendButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    _sendButton.frame = CGRectMake(_messageInputBar.frame.size.width-65, 8, 59, 26);
-    _sendButton.autoresizingMask = (UIViewAutoresizingFlexibleTopMargin /* multiline input */ | UIViewAutoresizingFlexibleLeftMargin /* landscape */);
-    UIEdgeInsets sendButtonEdgeInsets = UIEdgeInsetsMake(0, 13, 0, 13); // 27 x 27
-    UIImage *sendButtonBackgroundImage = [[UIImage imageNamed:@"SendButton"] resizableImageWithCapInsets:sendButtonEdgeInsets];
+    _sendButton.frame = CGRectMake(_messageInputBar.frame.size.width - 60, (_messageInputBar.frame.size.height - sendButtonBackgroundImage.size.height) / 2, sendButtonBackgroundImage.size.width, sendButtonBackgroundImage.size.height);
     [_sendButton setBackgroundImage:sendButtonBackgroundImage forState:UIControlStateNormal];
-    [_sendButton setBackgroundImage:sendButtonBackgroundImage forState:UIControlStateDisabled];
-    [_sendButton setBackgroundImage:[[UIImage imageNamed:@"SendButtonHighlighted"] resizableImageWithCapInsets:sendButtonEdgeInsets] forState:UIControlStateHighlighted];
-    _sendButton.titleLabel.font = [UIFont boldSystemFontOfSize:16];
-    _sendButton.titleLabel.shadowOffset = CGSizeMake(0.0, -1.0);
-    [_sendButton setTitle:NSLocalizedString(@"发送", nil) forState:UIControlStateNormal];
-    [_sendButton setTitleShadowColor:[UIColor colorWithRed:0.325f green:0.463f blue:0.675f alpha:1] forState:UIControlStateNormal];
     [_sendButton addTarget:self action:@selector(sendMessage) forControlEvents:UIControlEventTouchUpInside];
     [_messageInputBar addSubview:_sendButton];
     [_sendButton setEnabled:NO];
@@ -153,6 +155,9 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
 
 -(void) viewWillAppear:(BOOL)animated{
     [super viewWillAppear:animated];
+    if (_bubbleData.count == 0) {
+        [self addGuideView];
+    }
     _bubbleTable.frame = CGRectMake(0, 0, self.view.frame.size.width, self.view.frame.size.height-kChatBarHeight1);
     _messageInputBar.frame = CGRectMake(0, self.view.frame.size.height-kChatBarHeight1, self.view.frame.size.width, kChatBarHeight1);
     UIKeyboardNotificationsObserve();
@@ -198,6 +203,50 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
     
 }
 
+-(void)addGuideView{
+    _guideView = [[UIView alloc] initWithFrame:self.view.frame];
+    NINetworkImageView* avatarView = [AvatarFactory avatarForUser:_conversation.with withFrame:CGRectMake(98, 57, 121, 121)];
+    [_guideView addSubview:avatarView];
+    
+    BOOL hasTag = _conversation.with.tags.count > 0;
+    CGFloat nextY = 200;
+    if (hasTag) {
+        UILabel* tagLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 200, 320, 20)];
+        tagLabel.backgroundColor = [UIColor clearColor];
+        NSMutableSet *myTagSet = [[UserService service].loggedInUser.tags mutableCopy];;
+        NSMutableSet *otherTagSet = [_conversation.with.tags mutableCopy];
+        [myTagSet intersectSet:otherTagSet];
+        if (myTagSet.count > 0) {
+            tagLabel.text = [NSString stringWithFormat:@"你和%@有%d个共同兴趣：", _conversation.with.name, myTagSet.count];
+        } else {
+            tagLabel.text = [NSString stringWithFormat:@"%@喜欢：", _conversation.with.name];
+        }
+        
+        tagLabel.font = [UIFont boldSystemFontOfSize:18];
+        tagLabel.textColor = RGBCOLOR(0x2B, 0x2B, 0x2B);
+        tagLabel.textAlignment = UITextAlignmentCenter;
+        [_guideView addSubview:tagLabel];
+        
+        UserTagsCell* cell = [[UserTagsCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"CELL"];
+        cell.width = 220;
+        cell.tags = [_conversation.with.tags allObjects];
+        cell.frame = CGRectMake(50, 228, cell.width, cell.cellHeight);
+        [_guideView addSubview:cell];
+        nextY = cell.frame.origin.y + cell.frame.size.height + 12;
+    }
+
+    UILabel* startChatLabel = [[UILabel alloc] initWithFrame:CGRectMake(20, nextY, 280, 50)];
+    startChatLabel.numberOfLines = 0;
+    startChatLabel.lineBreakMode = UILineBreakModeWordWrap;
+    startChatLabel.backgroundColor = [UIColor clearColor];
+    startChatLabel.text = hasTag ? @"何不从此聊起呢？" : [NSString stringWithFormat:@"%@还没有填写兴趣\n问问TA喜欢什么吧", _conversation.with.name];
+    startChatLabel.font = [UIFont boldSystemFontOfSize:15];
+    startChatLabel.textColor = RGBCOLOR(0x66, 0x66, 0x66);
+    startChatLabel.textAlignment = UITextAlignmentCenter;
+    [_guideView addSubview:startChatLabel];
+    
+    [self.view addSubview:_guideView];
+}
 -(void)loadEarlierMessages:(id)sender{
     //delayed so it looks like refreshing
     [NSTimer scheduledTimerWithTimeInterval:1 target:self selector:@selector(doLoadEarlierMessages) userInfo:nil repeats:NO];
@@ -287,6 +336,13 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
     [UIView animateWithDuration:animationDuration delay:0.0 options:(UIViewAnimationOptionsFromCurve(animationCurve) | UIViewAnimationOptionBeginFromCurrentState) animations:^{
         [self animateTextView] ;
     } completion:nil];
+    if (_bubbleData.count == 0) {
+        [UIView animateWithDuration:animationDuration animations:^{
+            CGRect frame = _guideView.frame;
+            frame.origin.y = -_keyboardHeight;
+            _guideView.frame = frame;
+        } completion:^(BOOL finished) {}];
+    }
 }
 
 - (void)keyboardWillHide:(NSNotification *)notification {
@@ -301,6 +357,13 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
     [UIView animateWithDuration:animationDuration delay:0.0 options:(UIViewAnimationOptionsFromCurve(animationCurve) | UIViewAnimationOptionBeginFromCurrentState) animations:^{
         [self animateTextView] ;
     } completion:nil];
+    if (_bubbleData.count == 0) {
+        [UIView animateWithDuration:animationDuration animations:^{
+            CGRect frame = _guideView.frame;
+            frame.origin.y = 0;
+            _guideView.frame = frame;
+        } completion:^(BOOL finished) {}];
+    }
 }
 
 
@@ -373,7 +436,14 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
     if (![messageMO.conversation.with isEqual:_conversation.with]) {
         return; //not for this conversation
     }
-
+    if (_bubbleData.count == 0) {
+//        [UIView animateWithDuration:0 animations:^{
+            CGRect frame = _guideView.frame;
+            frame.origin.y = 0;
+            _guideView.frame = frame;
+//        } completion:^(BOOL finished) {}];
+    }
+    [_guideView removeFromSuperview];
     _bubbleTable.typingBubble = NSBubbleTypingTypeNobody;
     NSBubbleData *bubble = [self bubbleFromMessage:messageMO];
     [_bubbleData addObject:bubble];
@@ -409,9 +479,9 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
 
 #pragma mark UIBubbleTableViewCellAvatarDelegate
 -(void)avatarTapped:(UIImageView*)avatar{
-    UserDetailsViewController *details = [[UserDetailsViewController alloc] initWithStyle:UITableViewStylePlain];
-    details.user = _conversation.with;
-    [self.navigationController pushViewController:details animated:YES];
+//    UserDetailsViewController *details = [[UserDetailsViewController alloc] initWithStyle:UITableViewStylePlain];
+//    details.user = _conversation.with;
+//    [self.navigationController pushViewController:details animated:YES];
 }
 
 

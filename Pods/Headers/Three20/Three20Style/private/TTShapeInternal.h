@@ -1,1 +1,1 @@
-../../../../Three20/src/Three20Style/Headers/TTShapeInternal.h
+../../../../Three20/src/Three20Style/Headers/private/TTShapeInternal.h

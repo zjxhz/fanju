@@ -1,1 +1,1 @@
-../../../../Three20/src/Three20UI/Headers/TTImageViewInternal.h
+../../../../Three20/src/Three20UI/Headers/private/TTImageViewInternal.h

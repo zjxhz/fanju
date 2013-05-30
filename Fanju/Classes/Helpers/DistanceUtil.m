@@ -37,6 +37,10 @@
     return [[CLLocation alloc] initWithLatitude:[user.latitude floatValue] longitude:[user.longitude floatValue]];
 }
 +(NSString*)getUserFriendlyDistance:(double)meters{
-    return [NSString stringWithFormat:@"%.2fkm", meters/1000];
+    double kms = meters/1000;
+    if (kms > 100) {
+        return [NSString stringWithFormat:@"%.0fkm", kms];
+    }
+    return [NSString stringWithFormat:@"%.2fkm", kms];
 }
 @end

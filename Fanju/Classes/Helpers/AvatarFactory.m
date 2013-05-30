@@ -70,6 +70,19 @@
     return [AvatarFactory avatarForUser:nil frame:frame];
 }
 
++(UserImageView*)avatarForUser:(User*)user withFrame:(CGRect)frame{
+    UserImageView *userImgView = [[UserImageView alloc] initWithFrame:frame];
+    userImgView.contentMode = UIViewContentModeScaleAspectFill;
+    userImgView.clipsToBounds = YES;
+    [userImgView setBackgroundColor:[UIColor clearColor]];
+    [userImgView setContentMode:UIViewContentModeScaleAspectFill];
+    userImgView.layer.cornerRadius = frame.size.width / 12;
+    userImgView.layer.masksToBounds = YES;
+    
+    [userImgView setPathToNetworkImage:[URLService absoluteURL:user.avatar] forDisplaySize:frame.size];
+    return userImgView;
+}
+
 +(NSString*)bestAvatarUrlForUser:(UserProfile*)user withFrame:(CGRect)frame{
     return [user avatarFullUrl];
 }

@@ -14,5 +14,6 @@
 @property(nonatomic,readonly) CGFloat cellHeight;
 -(void) requestNextMeal;
 @property(nonatomic, readonly) NINetworkImageView* avatar;
+@property(nonatomic, readonly) NINetworkImageView* backgroundImageView;
 @property(nonatomic, strong) User* user;
 @end

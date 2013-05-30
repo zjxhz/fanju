@@ -35,7 +35,7 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
     NumberOfParticipantsCell* _numberCell;
     TotalPriceCell* _totalPriceCell;
     MobileNumberCell* _mobileCell;
-    OrderInfo* _order;
+    Order* _order;
 }
 
 @end
@@ -262,15 +262,16 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
                                             NSDictionary* dic = obj;
                                              //note: as order has attribute "status" too if success status will set to the status of the order
                                             if ([dic[@"status"] isEqual:@"NOK"]) {
-                                                
                                                 [SVProgressHUD dismissWithError:dic[@"message"]];
                                                 [_confirmButton setEnabled:YES];
 
                                             } else {
-                                                OrderInfo* order = [OrderInfo orderInfoWithData:dic];
+//                                                NSString* orderID = 
+//                                                OrderInfo* order = [OrderInfo orderInfoWithData:dic];
                                                 NSString* signedString = [dic objectForKey:@"app_req_str"];
-                                                [self payFor:order withSignedString:signedString];
-                                                [_confirmButton setEnabled:NO];                                            }
+                                                [self pay:signedString];
+                                                [_confirmButton setEnabled:NO];
+                                            }
                                         } failure:^{
                                             [SVProgressHUD dismissWithError:@"加入饭局失败，请稍后重试"];
                                             [_confirmButton setEnabled:YES];
@@ -278,8 +279,7 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
 }
 
 
--(void)payFor:(OrderInfo*)orderInfo withSignedString:(NSString*)orderString{
-    _order = orderInfo;
+-(void)pay:(NSString*)orderString{
     AlixPay * alixpay = [AlixPay shared];
     int ret = [alixpay pay:orderString applicationScheme:APP_SCHEME];
     
@@ -318,13 +318,8 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
 -(void)alixPayResult:(NSNotification*)notif{
     NSDictionary* result = notif.object;
     if (result && [result[@"status"] isEqual:@"OK"]) {
-        [SVProgressHUD dismiss];
-        OrderDetailsViewController* detail = [[OrderDetailsViewController alloc] init];
-        _order.code = result[@"code"];
-        detail.order = _order;
-        detail.navigationItem.hidesBackButton = YES;
-        detail.navigationItem.rightBarButtonItem = [[WidgetFactory sharedFactory] normalBarButtonItemWithTitle:@"完成" target:[NewSidebarViewController sideBar] action:@selector(showMealList)];
-        [self.navigationController pushViewController:detail animated:YES];
+        NSString* orderID = result[@"order_id"];
+        [self fetchAndShowOrder:orderID];
     } else {
         [SVProgressHUD dismiss];
         UIAlertView* a = [[UIAlertView alloc] initWithTitle:@"支付失败" message:result[@"message"] delegate:nil cancelButtonTitle:@"确定" otherButtonTitles:nil];
@@ -333,6 +328,24 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
     }
 }
 
+-(void)fetchAndShowOrder:(NSString*)orderID{
+    RKObjectManager* manager = [RKObjectManager sharedManager];
+    NSString* path = [NSString stringWithFormat:@"order/%@/", orderID];
+    [manager getObject:nil path:path parameters:nil success:^(RKObjectRequestOperation *operation, RKMappingResult *mappingResult) {
+        [SVProgressHUD dismiss];
+        _order = mappingResult.firstObject;
+        OrderDetailsViewController* detail = [[OrderDetailsViewController alloc] init];
+        detail.order = _order;
+        detail.navigationItem.hidesBackButton = YES;
+        detail.navigationItem.rightBarButtonItem = [[WidgetFactory sharedFactory] normalBarButtonItemWithTitle:@"完成" target:[NewSidebarViewController sideBar] action:@selector(showMealList)];
+        [self.navigationController pushViewController:detail animated:YES];
+    } failure:^(RKObjectRequestOperation *operation, NSError *error) {
+        UIAlertView* a = [[UIAlertView alloc] initWithTitle:@"支付成功，但是…" message:@"…读取订单状态失败。请稍后去我的饭局查看，或联系客服。" delegate:nil cancelButtonTitle:@"确定" otherButtonTitles:nil];
+        [a show];
+        [SVProgressHUD dismiss];
+        DDLogError(@"failed to load order: %@", error);
+    }];
+}
 
 - (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldReceiveTouch:(UITouch *)touch{
     if ([touch.view isKindOfClass:[UIButton class]] || [touch.view isKindOfClass:[UITableViewCell class]]) {
@@ -352,21 +365,23 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
         NSArray* components = [urlStr componentsSeparatedByString:@"/"];
         NSString* orderID = [components objectAtIndex:(components.count - 2)];
         [self dismissModalViewControllerAnimated:YES];
-        [[NetworkHandler getHandler] requestFromURL:[NSString stringWithFormat:@"http://%@/api/v1/order/%@/", EOHOST, orderID]
-                                             method:GET
-                                        cachePolicy:TTURLRequestCachePolicyNone
-                                            success:^(id obj) {
-                                                [SVProgressHUD showWithStatus:@"付款成功，查询订单信息…"];
-                                                NSDictionary* dic = obj;
-                                                OrderInfo* order = [OrderInfo orderInfoWithData:dic];
-                                                [[NSNotificationCenter defaultCenter] postNotificationName:ALIPAY_PAY_RESULT
-                                                                                                    object:@{@"status":@"OK", @"code":order.code}];
-                                            } failure:^{
-                                                [SVProgressHUD dismissWithError:@"查询订单信息失败，请稍后刷新我的饭局页面"];
-                                                [_confirmButton setEnabled:YES];
-                                            }];
+        [self fetchAndShowOrder:orderID];
         
-        [SVProgressHUD dismissWithSuccess:@"付款成功" afterDelay:0.9];
+//        [[NetworkHandler getHandler] requestFromURL:[NSString stringWithFormat:@"http://%@/api/v1/order/%@/", EOHOST, orderID]
+//                                             method:GET
+//                                        cachePolicy:TTURLRequestCachePolicyNone
+//                                            success:^(id obj) {
+//                                                [SVProgressHUD showWithStatus:@"付款成功，查询订单信息…"];
+//                                                NSDictionary* dic = obj;
+//                                                OrderInfo* order = [OrderInfo orderInfoWithData:dic];
+//                                                [[NSNotificationCenter defaultCenter] postNotificationName:ALIPAY_PAY_RESULT
+//                                                                                                    object:@{@"status":@"OK", @"code":order.code}];
+//                                            } failure:^{
+//                                                [SVProgressHUD dismissWithError:@"查询订单信息失败，请稍后刷新我的饭局页面"];
+//                                                [_confirmButton setEnabled:YES];
+//                                            }];
+//        
+//        [SVProgressHUD dismissWithSuccess:@"付款成功" afterDelay:0.9];
         return NO;
     } else if([urlStr hasPrefix:failedURL]){
         [self cancelWithError:@"抱歉，付款遇到了问题，请联系客服。"];

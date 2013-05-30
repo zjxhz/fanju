@@ -120,17 +120,20 @@
 -(void) loadOrders:(BOOL)nextPage{
     RKObjectManager *manager = [RKObjectManager sharedManager];
     __weak typeof(self) weakSelf = self;
-    OrderListDataSource *ds;
+
     User* loggedInUser = [UserService service].loggedInUser;
     NSString* requestWithPagination = [NSString stringWithFormat:@"user/%@/order/?page=:currentPage&limit=:perPage", loggedInUser.uID];
     if (!nextPage) {
         _paginator = [manager paginatorWithPathPattern:requestWithPagination];
-        ds = [[OrderListDataSource alloc] init];
-        self.dataSource = ds;
-    } else {
-        ds = self.dataSource;
     }
     [_paginator setCompletionBlockWithSuccess:^(RKPaginator *paginator, NSArray *objects, NSUInteger page) {
+        OrderListDataSource *ds;
+        if (!nextPage) {
+            ds = [[OrderListDataSource alloc] init];
+            weakSelf.dataSource = ds;
+        } else {
+            ds = weakSelf.dataSource;
+        }
         for (Order *order in objects) {
             [ds addOrder:order];
         }

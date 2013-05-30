@@ -462,8 +462,6 @@
     [hostView addSubview:cost_view];
     [hostView addSubview:cost_label];
     [hostView addSubview:menuBtn];
-    
-    DDLogVerbose(@"frame of meal: %@", NSStringFromCGRect(imgView.frame));
     return hostView;
 }
 

@@ -1,1 +1,1 @@
-../../../../Three20/src/Three20UINavigator/Headers/TTURLWildcard.h
+../../../../Three20/src/Three20UINavigator/Headers/private/TTURLWildcard.h

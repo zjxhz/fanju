@@ -1,6 +1,6 @@
 platform :ios, '5.0' 
 # Or platform :osx, '10.7'
-pod 'RestKit', '~> 0.20.0pre'
+pod 'RestKit', '~> 0.20.1'
 pod 'Three20', '~> 1.0.11'
 pod 'Nimbus', '~> 1.0.0'
 pod 'MTStatusBarOverlay', '~> 0.9.1'
@@ -13,7 +13,6 @@ pod 'TDBadgedCell', '~> 2.1'
 pod 'AKSegmentedControl'
 pod 'ODRefreshControl', '~> 1.1.0'
 pod 'SBJson', '~> 3.2'
-
 
 # Testing and Search are optional components
 # pod 'RestKit/Testing', '~> 0.20.0pre'

@@ -32,6 +32,7 @@
         self.contentView.userInteractionEnabled = YES;
         UITapGestureRecognizer* tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(viewTapped:)];
         [self.contentView addGestureRecognizer:tap];
+        _width = 320;
     }
     return self;
 }
@@ -80,7 +81,7 @@
             tagWidth = width + 25;
         }
         CGFloat right = x + tagWidth;
-        if (right > 320 ) {
+        if (right > _width ) {
             x = TAG_GAP;
             y += bg.size.height + 5;
             bg = [self bgImageForTag:tag atFirst:YES];

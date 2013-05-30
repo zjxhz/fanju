@@ -1,1 +1,1 @@
-../../../../Three20/src/Three20UICommon/Headers/UIViewControllerGarbageCollection.h
+../../../../Three20/src/Three20UICommon/Headers/private/UIViewControllerGarbageCollection.h

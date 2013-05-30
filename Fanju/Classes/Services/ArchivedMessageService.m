@@ -18,6 +18,7 @@
 #import "RestKit.h"
 #import "UserService.h"
 #import "NotificationService.h"
+#import "DateUtil.h"
 
 NSString * const LAST_SUCCESSFUL_RETRIEVE_DATE = @"LAST_SUCCESSFUL_RETRIEVE_DATE";
 #define MAX_RETRIEVE 20
@@ -64,6 +65,7 @@ NSString * const LAST_SUCCESSFUL_RETRIEVE_DATE = @"LAST_SUCCESSFUL_RETRIEVE_DATE
     _unhanldedConversations = [NSMutableArray array];
     _lastSuccessfulRetrieveDate = nil;
 }
+
 -(void)retrieveConversations{
     _retrievingConversations = YES; //TODO
     [self retrieveConversationsStartFrom:_lastSuccessfulRetrieveDate after:-1];
@@ -71,8 +73,13 @@ NSString * const LAST_SUCCESSFUL_RETRIEVE_DATE = @"LAST_SUCCESSFUL_RETRIEVE_DATE
 
 -(void)retrieveConversationsStartFrom:(NSDate*)date after:(NSInteger)index{
     NSXMLElement *list = [NSXMLElement elementWithName:@"list" xmlns:@"urn:xmpp:archive"];
-    NSString* strDate = [self.formatter stringFromDate:date];
-	[list addAttributeWithName:@"start" stringValue:strDate];
+    if (date) {
+        NSString* strDate = [self.formatter stringFromDate:date];
+        [list addAttributeWithName:@"start" stringValue:strDate];
+    } else { //if date is not given, retrieve unread only
+        [list addAttributeWithName:@"read" stringValue:@"0"];
+    }
+
 	
     NSXMLElement *set = [NSXMLElement elementWithName:@"set" xmlns:@"http://jabber.org/protocol/rsm"];
     NSXMLElement *max = [NSXMLElement elementWithName:@"max"];
@@ -116,12 +123,25 @@ NSString * const LAST_SUCCESSFUL_RETRIEVE_DATE = @"LAST_SUCCESSFUL_RETRIEVE_DATE
     
     _lastSuccessfulRetrieveDate = [[NSUserDefaults standardUserDefaults] valueForKey:[self lastRetriveDateKey]];
     if(!_lastSuccessfulRetrieveDate){
-        _lastSuccessfulRetrieveDate = [self latestMessageDate];
+        NSDate* latestMessageDate = [self latestMessageDate];
+        NSDate* latestNotificationDate = [[NotificationService service] latestNotificationDate];
+        
+        if (!latestMessageDate) {
+            _lastSuccessfulRetrieveDate = [latestNotificationDate copy];
+        } else if(!latestNotificationDate){
+            _lastSuccessfulRetrieveDate = [latestMessageDate copy];
+        } else { //both are not nil
+            if ([latestMessageDate compare:latestNotificationDate] > 0) {
+                _lastSuccessfulRetrieveDate = [latestMessageDate copy];
+            } else {
+                _lastSuccessfulRetrieveDate = [latestNotificationDate copy];
+            }
+        }
     }
 
-    if(!_lastSuccessfulRetrieveDate){
-        _lastSuccessfulRetrieveDate = [self yesterday];
-    }
+//    if(!_lastSuccessfulRetrieveDate){
+//        _lastSuccessfulRetrieveDate = [self yesterday];
+//    }
 
     return _lastSuccessfulRetrieveDate;
 }
@@ -137,10 +157,11 @@ NSString * const LAST_SUCCESSFUL_RETRIEVE_DATE = @"LAST_SUCCESSFUL_RETRIEVE_DATE
     [[NSUserDefaults standardUserDefaults] synchronize];    
 }
 
--(NSDate*)yesterday{
+//used when if no local conversation found, currently it's 2 weeks
+-(NSDate*)maximalRetriveDate{
     NSCalendar *cal = [NSCalendar currentCalendar];
     NSDateComponents *components = [cal components:( NSEraCalendarUnit | NSYearCalendarUnit | NSMonthCalendarUnit | NSDayCalendarUnit) fromDate:[[NSDate alloc] init]];
-    [components setDay:([components day] - 1)];
+    [components setDay:([components day] - 14)];
     return [cal dateFromComponents:components];
 }
 
@@ -153,6 +174,10 @@ NSString * const LAST_SUCCESSFUL_RETRIEVE_DATE = @"LAST_SUCCESSFUL_RETRIEVE_DATE
                 if ([element.name isEqual:@"chat"]) {
                     NSString* with = [element attributeStringValueForName:@"with"];
                     DDLogInfo(@"retrived conversation with: %@", with);
+                    if ([with isEqual:XMPP_HOST]) {
+                        DDLogInfo(@"ignoring the system notification from %@", with);
+                        continue;
+                    }
                     if (![_unhanldedConversations containsObject:with]) {
                         [_unhanldedConversations addObject:with];
                     } else {
@@ -193,7 +218,11 @@ NSString * const LAST_SUCCESSFUL_RETRIEVE_DATE = @"LAST_SUCCESSFUL_RETRIEVE_DATE
         
         void (^block)(void) = ^(void){
             DDLogInfo(@"retriving messages with %@ after: %@", unhandledConversation, afterDate);
-            [self retrieveMessagesWith:unhandledConversation after:[afterDate timeIntervalSince1970]];
+            if (afterDate) {
+                [self retrieveMessagesWith:unhandledConversation after:[afterDate timeIntervalSince1970]];
+            } else {
+                [self retrieveMessagesWith:unhandledConversation after:-1];
+            }
         };
         if ([unhandledConversation isEqual:PUBSUB_SERVICE]) {
             block();
@@ -218,7 +247,7 @@ NSString * const LAST_SUCCESSFUL_RETRIEVE_DATE = @"LAST_SUCCESSFUL_RETRIEVE_DATE
         afterDate = [NotificationService service].latestNotificationDate;
         if (!afterDate) {
             DDLogInfo(@"no local notification found");
-            afterDate = [self yesterday];
+//            afterDate = [self maximalRetriveDate];
         }
     } else {
         Conversation* localConversation = [self localConversationWith:with];
@@ -226,7 +255,7 @@ NSString * const LAST_SUCCESSFUL_RETRIEVE_DATE = @"LAST_SUCCESSFUL_RETRIEVE_DATE
         if (!localConversation) {
             DDLogInfo(@"Messages from new contact %@",
                       with);
-            afterDate = [self yesterday];
+//            afterDate = [self maximalRetriveDate];
         } else {
             afterDate = localConversation.time;
         }
@@ -245,17 +274,21 @@ NSString * const LAST_SUCCESSFUL_RETRIEVE_DATE = @"LAST_SUCCESSFUL_RETRIEVE_DATE
 }
 
 -(void)retrieveMessagesWith:(NSString*)with after:(NSTimeInterval)interval{
-    double intervalInMilliSeconds = interval * 1000;
     NSXMLElement *retrieve = [NSXMLElement elementWithName:@"retrieve" xmlns:@"urn:xmpp:archive"];
 	[retrieve addAttributeWithName:@"with" stringValue:with];
     NSXMLElement *set = [NSXMLElement elementWithName:@"set" xmlns:@"http://jabber.org/protocol/rsm"];
     NSXMLElement *max = [NSXMLElement elementWithName:@"max"];
     [max setStringValue:[NSString stringWithFormat:@"%d", MAX_RETRIEVE]];
-    NSXMLElement* afterElement = [NSXMLElement elementWithName:@"after"];
-    [afterElement setStringValue:[NSString stringWithFormat:@"%.0f", intervalInMilliSeconds]];
-    
+
+    if (interval == -1) {//no local conversation or notifications found, do not use interval but "read"
+        [retrieve addAttributeWithName:@"read" stringValue:@"0"];
+    } else {
+        NSXMLElement* afterElement = [NSXMLElement elementWithName:@"after"];
+        double intervalInMilliSeconds = interval * 1000;
+        [afterElement setStringValue:[NSString stringWithFormat:@"%.0f", intervalInMilliSeconds]];
+        [set addChild:afterElement];
+    }
     [set addChild:max];
-    [set addChild:afterElement];
     [retrieve addChild:set];
     XMPPIQ *iq = [XMPPIQ iqWithType:@"get"];
     [iq addChild:retrieve];
@@ -280,10 +313,11 @@ NSString * const LAST_SUCCESSFUL_RETRIEVE_DATE = @"LAST_SUCCESSFUL_RETRIEVE_DATE
 
     NSInteger unread = 0;
     NSDate* messageDate = nil;
-    for (int i = 0; i < chatElement.children.count; ++i) {
-        NSXMLElement* element = chatElement.children[i];
+    NSArray* fromToElements = [self fromToElementsFrom:chatElement];
+    for (int i = 0; i < fromToElements.count; ++i) {
+        NSXMLElement* element = fromToElements[i];
         NSInteger seconds = [[element attributeStringValueForName:@"secs"] integerValue];
-        if (i < chatElement.children.count -1 ) {
+        if (i < fromToElements.count -1 ) {
             messageDate = [date dateByAddingTimeInterval:seconds];
         } else { //last message time must be accurate(in ms), others are in seconds
             messageDate = endDate;
@@ -343,6 +377,15 @@ NSString * const LAST_SUCCESSFUL_RETRIEVE_DATE = @"LAST_SUCCESSFUL_RETRIEVE_DATE
 //    });
 }
 
+-(NSArray*)fromToElementsFrom:(NSXMLElement*)chatElement{
+    NSMutableArray* fromToElements = [chatElement.children mutableCopy];
+    NSXMLElement* lastElement = [chatElement.children lastObject];
+    if ([lastElement.name isEqual:@"set"]) {
+        [fromToElements removeLastObject];
+        DDLogVerbose(@"ignoring the set element in chat element as it's not used in app");
+    }
+    return fromToElements;
+}
 -(BOOL)isMessageFromCurrentConversation:(UserMessage*)message{
     return [message.conversation.with isEqual:_currentContact];
 }

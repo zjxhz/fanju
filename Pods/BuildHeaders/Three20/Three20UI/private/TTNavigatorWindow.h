@@ -1,1 +1,1 @@
-../../../../Three20/src/Three20UI/Headers/TTNavigatorWindow.h
+../../../../Three20/src/Three20UI/Headers/private/TTNavigatorWindow.h

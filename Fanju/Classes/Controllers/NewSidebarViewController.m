@@ -43,7 +43,10 @@
 @synthesize delegate;
 @synthesize mealListViewController = _mealListViewController;
 @synthesize myMealsViewController = _myMealsViewController;
-@synthesize userListViewController = _userListViewController;
+//@synthesize userListViewController = _userListViewController;
+@synthesize followingsViewController = _followingsViewController;
+@synthesize usersNearbyViewController = _usersNearbyViewController;
+@synthesize similarUsersViewController = _similarUsersViewController;
 @synthesize userDetailsViewController = _userDetailsViewController;
 @synthesize notificationViewController = _notificationViewController;
 @synthesize conversationViewController = _conversationViewController;
@@ -124,13 +127,41 @@
     return _myMealsViewController;
 }
 
--(UserListViewController*) userListViewController{
-    if (!_userListViewController) {
-        _userListViewController = [[UserListViewController alloc] initWithStyle:UITableViewStylePlain];
-        [_userListViewController viewDidLoad];
+//-(UserListViewController*) userListViewController{
+//    if (!_userListViewController) {
+//        _userListViewController = [[UserListViewController alloc] initWithStyle:UITableViewStylePlain];
+//        [_userListViewController viewDidLoad];
+//    }
+//    return _userListViewController;
+//}
+
+-(UserListViewController*) followingsViewController{
+    if (!_followingsViewController) {
+        _followingsViewController = [[UserListViewController alloc] initWithStyle:UITableViewStylePlain];
+        [_followingsViewController viewDidLoad];
+//        _followingsViewController setBaseURL:<#(NSString *)#>
     }
-    return _userListViewController;
+    return _followingsViewController;
 }
+
+-(UserListViewController*) usersNearbyViewController{
+    if (!_usersNearbyViewController) {
+        _usersNearbyViewController = [[UserListViewController alloc] initWithStyle:UITableViewStylePlain];
+        [_usersNearbyViewController viewDidLoad];
+        //        _followingsViewController setBaseURL:<#(NSString *)#>
+    }
+    return _usersNearbyViewController;
+}
+
+-(UserListViewController*) similarUsersViewController{
+    if (!_similarUsersViewController) {
+        _similarUsersViewController = [[UserListViewController alloc] initWithStyle:UITableViewStylePlain];
+        [_similarUsersViewController viewDidLoad];
+        //        _followingsViewController setBaseURL:<#(NSString *)#>
+    }
+    return _similarUsersViewController;
+}
+
 
 -(ConversationViewController*)conversationViewController{
     if (!_conversationViewController) {
@@ -362,21 +393,24 @@
                     self.userDetailsViewController.user = [UserService service].loggedInUser;
                     break;
                 case 3:
-                    controller = self.userListViewController;
+                    controller = self.followingsViewController;
                     ((UserListViewController*)controller).baseURL = [NSString stringWithFormat:@"user/%@/following/", userID];
                     controller.title = @"我的关注";
+                    break;
                 default:
                     break;
             }
             break;
         case 1:
-            controller = self.userListViewController;
+            
             switch (indexPath.row) {
                 case 0:
+                    controller = self.similarUsersViewController;
                     ((UserListViewController*)controller).baseURL = [NSString stringWithFormat:@"user/%@/recommendations/", userID];
                     controller.title = @"志趣相投";
                     break;
                 case 1:
+                    controller = self.usersNearbyViewController;
                     ((UserListViewController*)controller).baseURL = [NSString stringWithFormat:@"user/%@/users_nearby/", userID];
                     controller.title = @"附近朋友";
                     break;
@@ -463,8 +497,10 @@
 
 #pragma mark NSNotificationCenter
 - (void)didLogout:(NSNotification*)notif {
-    _myMealsViewController = nil;;
-    _userListViewController = nil;
+    _myMealsViewController = nil;
+    _followingsViewController = nil;
+    _similarUsersViewController = nil;
+    _usersNearbyViewController = nil;
     _userDetailsViewController = nil;
     _conversationViewController = nil;
     _avatarLoaded = NO;

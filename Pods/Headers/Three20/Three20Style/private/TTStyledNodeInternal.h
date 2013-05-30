@@ -1,1 +1,1 @@
-../../../../Three20/src/Three20Style/Headers/TTStyledNodeInternal.h
+../../../../Three20/src/Three20Style/Headers/private/TTStyledNodeInternal.h

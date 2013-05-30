@@ -13,6 +13,7 @@
     NSMutableArray* _tagLabels;
     NSMutableDictionary* _frameTagDic;
 }
+@property(nonatomic) NSInteger width;
 @property(nonatomic, weak) NSArray* tags;
 @property(nonatomic, readonly) UIButton* showAllButton;
 @property(nonatomic, readonly) NSInteger cellHeight;

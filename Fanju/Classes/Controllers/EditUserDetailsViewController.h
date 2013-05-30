@@ -7,7 +7,11 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "DatePickerWithToolbarView.h"
+#import "UserTagsViewController.h"
+#import "ImageUploader.h"
+#import "SetMottoViewController.h"
 
-@interface EditUserDetailsViewController : UITableViewController<UITextFieldDelegate, UITextViewDelegate, UIGestureRecognizerDelegate>
+@interface EditUserDetailsViewController : UIViewController<UITableViewDataSource, UITableViewDelegate, UITextFieldDelegate, UITextViewDelegate, UIGestureRecognizerDelegate, DatePickerViewDelegate, TagViewControllerDelegate, ImageUploaderDelegate, UIPickerViewDataSource, UIPickerViewDelegate, SetMottoDelegate>
 @property(nonatomic, strong) User* user;;
 @end

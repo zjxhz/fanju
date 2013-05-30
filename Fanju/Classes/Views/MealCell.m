@@ -30,6 +30,11 @@
         UIViewController* temp = [[UIViewController alloc] initWithNibName:@"MealCell" bundle:nil];
          self = (MealCell*)temp.view;
         _participants = [NSMutableArray array];
+        _mealView.delegate = self;
+        _activityIndicator = [[UIActivityIndicatorView alloc]initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
+        _activityIndicator.center = _mealView.center;
+        [_activityIndicator hidesWhenStopped];
+        [_mealView addSubview: _activityIndicator];
 	}
     
 	return self;
@@ -72,5 +77,14 @@
         [_participants addObject:avatar];
         i++;
     }
+}
+
+#pragma mark NINetworkImageViewDelegate
+- (void)networkImageView:(NINetworkImageView *)imageView didLoadImage:(UIImage *)image{
+    [_activityIndicator stopAnimating];
+}
+
+- (void)networkImageViewDidStartLoad:(NINetworkImageView *)imageView{
+    [_activityIndicator startAnimating];
 }
 @end

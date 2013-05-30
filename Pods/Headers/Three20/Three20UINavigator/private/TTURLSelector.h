@@ -1,1 +1,1 @@
-../../../../Three20/src/Three20UINavigator/Headers/TTURLSelector.h
+../../../../Three20/src/Three20UINavigator/Headers/private/TTURLSelector.h

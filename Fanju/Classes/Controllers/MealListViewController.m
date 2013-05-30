@@ -164,37 +164,12 @@
 
 
 - (void) requestDataFromServer{
-    [self restRequest];
-//    NetworkHandler *hanlder = [NetworkHandler getHandler];
-//    [hanlder requestFromURL:[NSString stringWithFormat:@"http://%@/api/v1/meal/?format=json&limit=0", EOHOST]
-//                                         method:GET
-//                                    cachePolicy:TTURLRequestCachePolicyNone
-//                                        success:^(id obj) {
-//                                            NSArray *meals = [obj objectForKeyInObjects];
-//                                            if (meals && [meals count] > 0) {
-//                                                MealListDataSource *ds = [[MealListDataSource alloc] init];
-//                                                
-//                                                for (NSDictionary *dict in meals) {
-//                                                    [ds addMeal:[MealTableItem itemWithMealInfo:[MealInfo mealInfoWithData:dict]]];
-//                                                }  
-//                                                self.dataSource = ds;
-//                                                if (isLoading) {
-//                                                    [self stopLoading];
-//                                                }
-//                                            }
-//                                        } failure:^{
-//                                            if (isLoading) {
-//                                                [self stopLoading];
-//                                            }
-//                                            [SVProgressHUD dismissWithError:@"获取饭局列表失败"];
-//                                        }];
-}
-
--(void)restRequest{
     RKObjectManager* manager = [RKObjectManager sharedManager];
     [manager getObjectsAtPath:@"meal/"
                    parameters:@{@"limit":@"0"}
                       success:^(RKObjectRequestOperation *operation, RKMappingResult *mappingResult) {
+                          _modelError = nil;
+                          [self showError:NO];
                           DDLogVerbose(@"fetched results from /meal/");
                           MealListDataSource *ds = [[MealListDataSource alloc] init];
                           for (Meal* meal in mappingResult.array) {
@@ -202,11 +177,17 @@
                           }
                           self.dataSource = ds;
                           [_refreshControl endRefreshing];
-                        }
+                      }
                       failure:^(RKObjectRequestOperation *operation, NSError *error) {
+                          _modelError = error;
+                          [self showError:YES];
                           [_refreshControl endRefreshing];
                           DDLogError(@"failed from /meal/");
                       }];
+}
+
+-(void)reload{
+    [self requestDataFromServer];
 }
 - (void) removeSideMenuBarButtonItem {
     self.navigationItem.leftBarButtonItem = nil;
@@ -220,7 +201,7 @@
 
 -(IBAction)loginWithWeibo:(id)sender{
     [Authentication sharedInstance].delegate = self;
-    if (![EOHOST isEqual:@"www.fanjoin.com"]) { //quick hack as it's not possible to login as weibo user on localhost
+    if (![EOHOST hasSuffix:@"fanjoin.com"]) { //quick hack as it's not possible to login as weibo user on localhost
         DDAlertPrompt *loginPrompt = [[DDAlertPrompt alloc] initWithTitle:@"登录(开发服务器)" delegate:self cancelButtonTitle:@"取消" otherButtonTitle:@"确定"];
         [loginPrompt show];
         return;

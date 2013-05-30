@@ -23,11 +23,14 @@
 #import "MBProgressHUD.h"
 #import "ODRefreshControl.h"
 #import "LoadMoreTableItem.h"
+//#import "ISRefreshControl.h"
+
 
 @interface UserListViewController(){
     MBProgressHUD* _hud;
 }
 @property(nonatomic, strong) ODRefreshControl* refreshControl;
+//@property(nonatomic, strong) ISRefreshControl* refreshControl;
 @property(nonatomic) BOOL upadateLocationBeforeLoadUsers;
 @property(nonatomic, strong) RKPaginator* paginator;
 @property(nonatomic, strong)    LoadMoreTableItem *loadMore;
@@ -36,6 +39,7 @@
 
 @implementation UserListViewController{
     NSManagedObjectContext* _mainQueueContext;
+    NSDate *_lastUpdatedTime;
 }
 @synthesize baseURL = _baseURL;
 
@@ -45,9 +49,8 @@
     self.tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
     self.tableView.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"bg"]];
     _refreshControl = [[ODRefreshControl alloc] initInScrollView:self.tableView];
+//    [self.tableView addSubview:_refreshControl];
     [_refreshControl addTarget:self action:@selector(loadUsersWithNewLocation) forControlEvents:UIControlEventValueChanged];
-    UserListDataSource *ds = [[UserListDataSource alloc] init];
-    self.dataSource = ds;
     RKManagedObjectStore* store = [RKObjectManager sharedManager].managedObjectStore;
     _mainQueueContext = store.mainQueueManagedObjectContext;
     return self;
@@ -157,6 +160,8 @@
     NSString* requestWithPagination = [NSString stringWithFormat:@"%@?page=:currentPage&limit=:perPage%@", _baseURL, [self filerToString]];
     if (!nextPage) {
         _paginator = [manager paginatorWithPathPattern:requestWithPagination];
+        UserListDataSource *ds = [[UserListDataSource alloc] init];
+        self.dataSource = ds;
     }
     [_paginator setCompletionBlockWithSuccess:^(RKPaginator *paginator, NSArray *objects, NSUInteger page) {
         UserListDataSource *ds = weakSelf.dataSource;
@@ -165,13 +170,13 @@
             [ds.items removeLastObject];
         }
         [ds.items addObjectsFromArray:objects];
-        [weakSelf.refreshControl endRefreshing];
         weakSelf.upadateLocationBeforeLoadUsers = YES;
         if ([weakSelf.paginator hasNextPage]) {
             weakSelf.loadMore = [[LoadMoreTableItem alloc] init];
             [ds.items addObject:weakSelf.loadMore];
         }
         [weakSelf refresh];
+        [weakSelf.refreshControl endRefreshing];
     } failure:^(RKPaginator *paginator, NSError *error) {
         [weakSelf.refreshControl endRefreshing];
         DDLogError(@"failed to load users: %@", error);
@@ -193,25 +198,27 @@
     return str;
 }
 
--(void)removeAll{
-    UserListDataSource *ds = self.dataSource;
-    [ds.items removeAllObjects];
-    [self refresh];
+-(void)beginRefreshing{
+    self.tableView.contentOffset = CGPointMake(0, -44);
+    [_refreshControl beginRefreshing];
 }
 
 -(void)setFilter:(NSDictionary*)newFilter{
-    [self removeAll];
+    [self beginRefreshing];
     _upadateLocationBeforeLoadUsers = NO;
     _filter = newFilter;
-    [_refreshControl beginRefreshing];
     [self loadUsers];
 }
 
 -(void)setBaseURL:(NSString *)baseURL{
-    [self removeAll];
+    NSDate* now = [NSDate date];
+    if ([baseURL isEqual:_baseURL] && _lastUpdatedTime && [now timeIntervalSinceDate:_lastUpdatedTime] < 300 ) {
+        return;
+    }
+    _lastUpdatedTime = now;
     _upadateLocationBeforeLoadUsers = NO;
     _baseURL = baseURL;
-    [_refreshControl beginRefreshing];
+    [self beginRefreshing];
     [self loadUsers];
 }
 
@@ -292,7 +299,6 @@
             break;
     }
     
-//    [self performSelector:@selector(setFilter) withObject:newFilter afterDelay:0.1];
     [self setFilter:newFilter];
 }
 
@@ -310,7 +316,6 @@
             newFilter[@"lng"]= [NSString stringWithFormat:@"%f", location.coordinate.longitude];
             DDLogVerbose(@"load users with filter %@", _filter);
             _filter = newFilter;
-            [self removeAll];
             [self loadUsers];
         } orFailed:^{
             DDLogError(@"failed to update location, just load users for current location");

@@ -67,6 +67,7 @@
      @"weibo_id": @"weiboID",
      @"work_for":@"workFor",
      @"updated_at": @"locationUpdatedAt",
+     @"background_image":@"backgroundImage",
      @"birthday": @"birthday"
      }];
     [RKObjectMapping addDefaultDateFormatterForString:LONG_TIME_FORMAT_STR inTimeZone:[NSTimeZone defaultTimeZone]];
@@ -127,6 +128,7 @@
     RKResponseDescriptor *userMealResponseDescriptor = [RKResponseDescriptor responseDescriptorWithMapping:mealMapping pathPattern:@"user/:uID/meal/" keyPath:@"objects" statusCodes:statusCodes];
     RKResponseDescriptor *userOrderResponseDescriptor = [RKResponseDescriptor responseDescriptorWithMapping:orderMapping pathPattern:@"user/:uID/order/" keyPath:@"objects" statusCodes:statusCodes];
     RKResponseDescriptor *orderResponseDescriptor = [RKResponseDescriptor responseDescriptorWithMapping:orderMapping pathPattern:@"order/" keyPath:@"objects" statusCodes:statusCodes];
+    RKResponseDescriptor *orderDetailsResponseDescriptor = [RKResponseDescriptor responseDescriptorWithMapping:orderMapping pathPattern:@"order/:oID/" keyPath:nil statusCodes:statusCodes];
     RKResponseDescriptor *userResponseDescriptor = [RKResponseDescriptor responseDescriptorWithMapping:userMapping pathPattern:@"user/" keyPath:@"objects" statusCodes:statusCodes];
     RKResponseDescriptor *userDetailResponseDescriptor = [RKResponseDescriptor responseDescriptorWithMapping:userMapping pathPattern:@"user/:uID/" keyPath:nil statusCodes:statusCodes];
     RKResponseDescriptor *photoResponseDescriptor = [RKResponseDescriptor responseDescriptorWithMapping:photoMapping pathPattern:@"userphoto/" keyPath:@"objects" statusCodes:statusCodes];
@@ -152,6 +154,7 @@
     [manager addResponseDescriptor:usersNearbyResponseDescriptor];
     [manager addResponseDescriptor:usersWithSameTagResponseDescriptor];
     [manager addResponseDescriptor:orderResponseDescriptor];
+    [manager addResponseDescriptor:orderDetailsResponseDescriptor];
     [manager addResponseDescriptor:userOrderResponseDescriptor];    
     [manager addResponseDescriptor:relationshipResponseDescriptor];
     [manager addResponseDescriptor:tagResponseDescriptor];

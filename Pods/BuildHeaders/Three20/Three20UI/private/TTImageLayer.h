@@ -1,1 +1,1 @@
-../../../../Three20/src/Three20UI/Headers/TTImageLayer.h
+../../../../Three20/src/Three20UI/Headers/private/TTImageLayer.h

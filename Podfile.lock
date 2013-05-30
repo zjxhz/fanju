@@ -1,156 +1,132 @@
+PODS:
+  - AFNetworking (1.2.1)
+  - AKSegmentedControl (1.0.2)
+  - CrittercismSDK (3.4.9)
+  - JSONKit (1.5pre)
+  - MFSideMenu (0.4.1)
+  - MTStatusBarOverlay (0.9.1)
+  - Nimbus (1.0.0):
+    - Nimbus/AttributedLabel
+    - Nimbus/Badge
+    - Nimbus/Core
+    - Nimbus/CSS
+    - Nimbus/Interapp
+    - Nimbus/Launcher
+    - Nimbus/Models
+    - Nimbus/NetworkControllers
+    - Nimbus/NetworkImage
+    - Nimbus/Operations
+    - Nimbus/Overview
+    - Nimbus/PagingScrollView
+    - Nimbus/Photos
+    - Nimbus/WebController
+  - Nimbus/AttributedLabel (1.0.0):
+    - Nimbus/Core
+  - Nimbus/Badge (1.0.0):
+    - Nimbus/Core
+  - Nimbus/Core (1.0.0)
+  - Nimbus/CSS (1.0.0):
+    - AFNetworking
+    - Nimbus/Core
+  - Nimbus/Interapp (1.0.0):
+    - Nimbus/Core
+  - Nimbus/Launcher (1.0.0):
+    - Nimbus/Core
+  - Nimbus/Models (1.0.0):
+    - Nimbus/Core
+  - Nimbus/NetworkControllers (1.0.0):
+    - Nimbus/Core
+  - Nimbus/NetworkImage (1.0.0):
+    - Nimbus/Core
+  - Nimbus/Operations (1.0.0):
+    - Nimbus/Core
+    - Nimbus/Operations/JSON
+  - Nimbus/Operations/JSON (1.0.0):
+    - JSONKit
+    - Nimbus/Core
+  - Nimbus/Overview (1.0.0):
+    - Nimbus/Core
+  - Nimbus/PagingScrollView (1.0.0):
+    - Nimbus/Core
+  - Nimbus/Photos (1.0.0):
+    - Nimbus/Core
+    - Nimbus/PagingScrollView
+  - Nimbus/WebController (1.0.0):
+    - Nimbus/Core
+  - ODRefreshControl (1.1.0)
+  - RestKit (0.20.1):
+    - RestKit/Core
+  - RestKit/Core (0.20.1):
+    - RestKit/CoreData
+    - RestKit/Network
+    - RestKit/ObjectMapping
+  - RestKit/CoreData (0.20.1)
+  - RestKit/Network (0.20.1):
+    - AFNetworking (~> 1.2.0)
+    - RestKit/ObjectMapping
+    - RestKit/Support
+    - SOCKit
+  - RestKit/ObjectMapping (0.20.1)
+  - RestKit/Support (0.20.1):
+    - TransitionKit (= 1.1.0)
+  - SBJson (3.2)
+  - SinaWeibo (0.0.1):
+    - JSONKit
+  - SOCKit (1.1)
+  - TDBadgedCell (2.1)
+  - Three20 (1.0.11):
+    - Three20/UI
+  - Three20/Core (1.0.11)
+  - Three20/Network (1.0.11):
+    - Three20/Core
+  - Three20/Style (1.0.11):
+    - Three20/Core
+    - Three20/Network
+  - Three20/UI (1.0.11):
+    - Three20/Core
+    - Three20/Network
+    - Three20/Style
+    - Three20/UICommon
+    - Three20/UINavigator
+  - Three20/UICommon (1.0.11):
+    - Three20/Core
+  - Three20/UINavigator (1.0.11):
+    - Three20/Core
+    - Three20/UICommon
+  - TransitionKit (1.1.0)
+  - WEPopover (0.0.1)
 
-DEPENDENCIES: 
-- AKSegmentedControl
-- CrittercismSDK (~> 3.4.9)
-- JSONKit (~> 1.5pre)
-- MFSideMenu (~> 0.4.1)
-- MTStatusBarOverlay (~> 0.9.1)
-- Nimbus (~> 1.0.0)
-- ODRefreshControl (~> 1.1.0)
-- RestKit (~> 0.20.0pre)
-- SBJson (~> 3.2)
-- SinaWeibo (~> 0.0.1)
-- TDBadgedCell (~> 2.1)
-- Three20 (~> 1.0.11)
-- WEPopover (~> 0.0.1)
+DEPENDENCIES:
+  - AKSegmentedControl
+  - CrittercismSDK (~> 3.4.9)
+  - JSONKit (~> 1.5pre)
+  - MFSideMenu (~> 0.4.1)
+  - MTStatusBarOverlay (~> 0.9.1)
+  - Nimbus (~> 1.0.0)
+  - ODRefreshControl (~> 1.1.0)
+  - RestKit (~> 0.20.1)
+  - SBJson (~> 3.2)
+  - SinaWeibo (~> 0.0.1)
+  - TDBadgedCell (~> 2.1)
+  - Three20 (~> 1.0.11)
+  - WEPopover (~> 0.0.1)
 
-COCOAPODS: 0.16.4
-
-SPEC CHECKSUMS: 
-  TDBadgedCell: b10b1825ccb74f18a5bd1f861b45d5ebcc4855a0
-  AFNetworking: 761a418233d280c1e0580bcb76ff9cb4c3073d17
-  Three20/UI: f242b38f3a54d9f375d8f29fd60a5fecb567f743
-  Three20/Style: f242b38f3a54d9f375d8f29fd60a5fecb567f743
-  RestKit/Core: 0382132969d823a872b377c1ab2e383f3c74a339
-  Nimbus/Photos: 196175ecaddf4e88925c9e0441aa58e4e40a2b89
-  CrittercismSDK: cf4296c350e7c90bac15ae820f714dc48e1829ea
-  Three20/UICommon: f242b38f3a54d9f375d8f29fd60a5fecb567f743
-  SBJson: 4971016670e7b3fa04a36d4e72ab0fb1ad3a9f69
-  Nimbus/AttributedLabel: 196175ecaddf4e88925c9e0441aa58e4e40a2b89
-  Three20/UINavigator: f242b38f3a54d9f375d8f29fd60a5fecb567f743
-  Nimbus/Launcher: 196175ecaddf4e88925c9e0441aa58e4e40a2b89
-  Nimbus/Badge: 196175ecaddf4e88925c9e0441aa58e4e40a2b89
-  Nimbus: 196175ecaddf4e88925c9e0441aa58e4e40a2b89
-  JSONKit: 409734ab3407fce90ef7eaa95d7168f38d9a6601
-  RestKit/ObjectMapping: 0382132969d823a872b377c1ab2e383f3c74a339
-  ODRefreshControl: 886e323a7c25114b9e5c397a9eefbebc034224a9
-  Nimbus/Operations/JSON: 196175ecaddf4e88925c9e0441aa58e4e40a2b89
-  Nimbus/Interapp: 196175ecaddf4e88925c9e0441aa58e4e40a2b89
-  MTStatusBarOverlay: 2cee705996e4e307191d423bf49e583b9b2c14ac
+SPEC CHECKSUMS:
+  AFNetworking: a44069e3c9c89867544f6639482f155c7e5f9b41
   AKSegmentedControl: 200a37463b1d4320d433d55c8008d95549159a25
-  WEPopover: 119fe521e9c35069c5ec63dfc14334ca321275b8
-  RestKit/Network: 0382132969d823a872b377c1ab2e383f3c74a339
-  Nimbus/WebController: 196175ecaddf4e88925c9e0441aa58e4e40a2b89
-  Nimbus/PagingScrollView: 196175ecaddf4e88925c9e0441aa58e4e40a2b89
-  Nimbus/Overview: 196175ecaddf4e88925c9e0441aa58e4e40a2b89
-  Nimbus/Operations: 196175ecaddf4e88925c9e0441aa58e4e40a2b89
-  Three20/Network: f242b38f3a54d9f375d8f29fd60a5fecb567f743
-  SinaWeibo: 540a84e7e3df437738cfbcc5094d04a3e93f7457
-  Nimbus/CSS: 196175ecaddf4e88925c9e0441aa58e4e40a2b89
-  Three20: f242b38f3a54d9f375d8f29fd60a5fecb567f743
-  RestKit/Support: 0382132969d823a872b377c1ab2e383f3c74a339
-  RestKit/CoreData: 0382132969d823a872b377c1ab2e383f3c74a339
-  RestKit: 0382132969d823a872b377c1ab2e383f3c74a339
-  Nimbus/NetworkImage: 196175ecaddf4e88925c9e0441aa58e4e40a2b89
-  Three20/Core: f242b38f3a54d9f375d8f29fd60a5fecb567f743
-  SOCKit: ed67aeeca4a697b63a933229e53f4670d5b9300f
-  Nimbus/NetworkControllers: 196175ecaddf4e88925c9e0441aa58e4e40a2b89
-  Nimbus/Models: 196175ecaddf4e88925c9e0441aa58e4e40a2b89
-  Nimbus/Core: 196175ecaddf4e88925c9e0441aa58e4e40a2b89
+  CrittercismSDK: cf4296c350e7c90bac15ae820f714dc48e1829ea
+  JSONKit: 409734ab3407fce90ef7eaa95d7168f38d9a6601
   MFSideMenu: fb75eaacf2d48350ec2d3f508d6f6e465db0c8b9
+  MTStatusBarOverlay: 2cee705996e4e307191d423bf49e583b9b2c14ac
+  Nimbus: 3cab0289af9fab0674a95c0d161c223bd47697c6
+  ODRefreshControl: 886e323a7c25114b9e5c397a9eefbebc034224a9
+  RestKit: ceca63bc91172098c710c469facd2560e8a59164
+  SBJson: e60b4dc22448c2ae1e754b523a4ab53408e85c8d
+  SinaWeibo: d7cb18c0b5880a95c1b203842ab8dfdd0da106dc
+  SOCKit: ed67aeeca4a697b63a933229e53f4670d5b9300f
+  TDBadgedCell: b10b1825ccb74f18a5bd1f861b45d5ebcc4855a0
+  Three20: f242b38f3a54d9f375d8f29fd60a5fecb567f743
+  TransitionKit: 1624e84f252d5cd26900be28ccb73c69fbe63f8a
+  WEPopover: 119fe521e9c35069c5ec63dfc14334ca321275b8
 
-PODS: 
-- AFNetworking (1.1.0)
-- AKSegmentedControl (1.0.2)
-- CrittercismSDK (3.4.9)
-- JSONKit (1.5pre)
-- MFSideMenu (0.4.1)
-- MTStatusBarOverlay (0.9.1)
-- Nimbus (1.0.0): 
-  - Nimbus/AttributedLabel (= 1.0.0)
-  - Nimbus/Badge (= 1.0.0)
-  - Nimbus/CSS (= 1.0.0)
-  - Nimbus/Core (= 1.0.0)
-  - Nimbus/Interapp (= 1.0.0)
-  - Nimbus/Launcher (= 1.0.0)
-  - Nimbus/Models (= 1.0.0)
-  - Nimbus/NetworkControllers (= 1.0.0)
-  - Nimbus/NetworkImage (= 1.0.0)
-  - Nimbus/Operations (= 1.0.0)
-  - Nimbus/Overview (= 1.0.0)
-  - Nimbus/PagingScrollView (= 1.0.0)
-  - Nimbus/Photos (= 1.0.0)
-  - Nimbus/WebController (= 1.0.0)
-- Nimbus/AttributedLabel (1.0.0): 
-  - Nimbus/Core
-- Nimbus/Badge (1.0.0): 
-  - Nimbus/Core
-- Nimbus/CSS (1.0.0): 
-  - AFNetworking
-  - Nimbus/Core
-- Nimbus/Core (1.0.0)
-- Nimbus/Interapp (1.0.0): 
-  - Nimbus/Core
-- Nimbus/Launcher (1.0.0): 
-  - Nimbus/Core
-- Nimbus/Models (1.0.0): 
-  - Nimbus/Core
-- Nimbus/NetworkControllers (1.0.0): 
-  - Nimbus/Core
-- Nimbus/NetworkImage (1.0.0): 
-  - Nimbus/Core
-- Nimbus/Operations (1.0.0): 
-  - Nimbus/Core
-  - Nimbus/Operations/JSON (= 1.0.0)
-- Nimbus/Operations/JSON (1.0.0): 
-  - JSONKit
-  - Nimbus/Core
-- Nimbus/Overview (1.0.0): 
-  - Nimbus/Core
-- Nimbus/PagingScrollView (1.0.0): 
-  - Nimbus/Core
-- Nimbus/Photos (1.0.0): 
-  - Nimbus/Core
-  - Nimbus/PagingScrollView
-- Nimbus/WebController (1.0.0): 
-  - Nimbus/Core
-- ODRefreshControl (1.1.0)
-- RestKit (0.20.0rc1): 
-  - RestKit/Core (= 0.20.0rc1)
-- RestKit/Core (0.20.0rc1): 
-  - RestKit/CoreData
-  - RestKit/Network
-  - RestKit/ObjectMapping
-- RestKit/CoreData (0.20.0rc1)
-- RestKit/Network (0.20.0rc1): 
-  - AFNetworking (= 1.1.0)
-  - RestKit/ObjectMapping
-  - RestKit/Support
-  - SOCKit
-- RestKit/ObjectMapping (0.20.0rc1)
-- RestKit/Support (0.20.0rc1)
-- SBJson (3.2)
-- SOCKit (1.1)
-- SinaWeibo (0.0.1): 
-  - JSONKit
-- TDBadgedCell (2.1)
-- Three20 (1.0.11): 
-  - Three20/UI (= 1.0.11)
-- Three20/Core (1.0.11)
-- Three20/Network (1.0.11): 
-  - Three20/Core
-- Three20/Style (1.0.11): 
-  - Three20/Core
-  - Three20/Network
-- Three20/UI (1.0.11): 
-  - Three20/Core
-  - Three20/Network
-  - Three20/Style
-  - Three20/UICommon
-  - Three20/UINavigator
-- Three20/UICommon (1.0.11): 
-  - Three20/Core
-- Three20/UINavigator (1.0.11): 
-  - Three20/Core
-  - Three20/UICommon
-- WEPopover (0.0.1)
+COCOAPODS: 0.20.2

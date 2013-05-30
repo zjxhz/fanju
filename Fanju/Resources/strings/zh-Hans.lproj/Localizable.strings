@@ -101,3 +101,8 @@
 
 //  Messages
 "You're the host."="您是活动发起人，无需再次加入";
+"GKIchoosePhoto" = "选择照片";
+"GKIuse" = "确定";
+"GKImoveAndScale" = "移动或缩放";
+"GKIcancel" = "取消";
+"GKIuse" = "选择";

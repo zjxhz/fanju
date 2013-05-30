@@ -28,6 +28,7 @@
     UILabel* _mottoLabel;
     Meal* _meal;
     UIImageView* _locationIconView ;
+    UIImageView* _separatorView;
 }
 @end
 @implementation UserDetailsCell
@@ -36,11 +37,16 @@
     self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
     if (self) {
         UIImage* bg = [UIImage imageNamed:@"restaurant_sample.jpg"];
-        UIImageView* bgImgView = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 320, 149)];
-        bgImgView.clipsToBounds = YES;
-        bgImgView.contentMode = UIViewContentModeScaleAspectFill;
-        bgImgView.image = bg;
-        [self.contentView addSubview:bgImgView];
+        _backgroundImageView = [[NINetworkImageView alloc] initWithFrame:CGRectMake(0, 0, 320, 149)];
+        _backgroundImageView.clipsToBounds = YES;
+        _backgroundImageView.contentMode = UIViewContentModeScaleAspectFill;
+        if (_user.backgroundImage) {
+            [_backgroundImageView setPathToNetworkImage:[URLService absoluteURL:_user.backgroundImage] forDisplaySize:_backgroundImageView.frame.size contentMode:UIViewContentModeScaleAspectFill];
+        } else {
+            _backgroundImageView.image = bg;            
+        }
+
+        [self.contentView addSubview:_backgroundImageView];
         
         UIImage* maskBg = [UIImage imageNamed:@"u_detail_mask"];
         _nextMealView = [[UIImageView alloc] initWithFrame:CGRectMake(0, 109, maskBg.size.width, maskBg.size.height)];
@@ -116,26 +122,29 @@
         [self.contentView addSubview:_updatedLabel];
         
         _mottoLabel = [[UILabel alloc] initWithFrame:CGRectMake(15, 193, 295, 0)];
+        _mottoLabel.lineBreakMode = UILineBreakModeWordWrap;
         _mottoLabel.font = [UIFont systemFontOfSize:12];
         _mottoLabel.textColor = RGBCOLOR(80, 80, 80);
         _mottoLabel.backgroundColor = [UIColor clearColor];
         _mottoLabel.numberOfLines = 0;
-        [_mottoLabel sizeToFit];
         [self.contentView addSubview:_mottoLabel];
         
-        CGFloat y = _mottoLabel.frame.origin.y + _mottoLabel.frame.size.height + 10;
+        CGFloat y = _mottoLabel.frame.origin.y + _mottoLabel.frame.size.height + 30;
         UIImage* separatorImg = [UIImage imageNamed:@"sep_details"];
-        UIImageView* separatorView = [[UIImageView alloc] initWithFrame:CGRectMake(0, y, separatorImg.size.width, separatorImg.size.height)];
-        separatorView.image = separatorImg;
-        [self.contentView addSubview:separatorView];
+        _separatorView = [[UIImageView alloc] initWithFrame:CGRectMake(0, y, separatorImg.size.width, separatorImg.size.height)];
+        _separatorView.image = separatorImg;
+        [self.contentView addSubview:_separatorView];
         
-        _cellHeight = separatorView.frame.origin.y + separatorView.frame.size.height;
+        _cellHeight = _separatorView.frame.origin.y + _separatorView.frame.size.height;
     }
     return self;
 }
 
 -(void)setUser:(User *)user{
     _user = user;
+    if (_user.backgroundImage) {
+        [_backgroundImageView setPathToNetworkImage:[URLService absoluteURL:_user.backgroundImage] forDisplaySize:_backgroundImageView.frame.size contentMode:UIViewContentModeScaleAspectFill];
+    }
     [_avatar setPathToNetworkImage:[URLService absoluteURL:_user.avatar] forDisplaySize:CGSizeMake(62, 62)];
     UIImage* male = [UIImage imageNamed:@"male_details"];
     UIImage* female = [UIImage imageNamed:@"female_details"];
@@ -160,6 +169,11 @@
         _distanceLabel.text =  [DistanceUtil distanceFrom:_user];
     }
     _mottoLabel.text = _user.motto;
+    _mottoLabel.frame = CGRectMake(15, 193, 295, 0);
+    [_mottoLabel sizeToFit];
+    CGFloat y = _mottoLabel.frame.origin.y + _mottoLabel.frame.size.height + 10;
+    _separatorView.frame = CGRectMake(0, y, _separatorView.frame.size.width, _separatorView.frame.size.height);
+    _cellHeight = _separatorView.frame.origin.y + _separatorView.frame.size.height;
     [self requestNextMeal];
 }
 

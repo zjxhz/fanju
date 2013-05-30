@@ -19,10 +19,19 @@
         self.contentView.clipsToBounds = YES;
         [self.contentView addSubview:_textView];
         self.detailTextLabel.text = @"  ";// hack to move the textLabel up
+        
+        UIToolbar * topView = [[UIToolbar alloc]initWithFrame:CGRectMake(0, 0, 320, 30)];
+        UIBarButtonItem * btnSpace = [[UIBarButtonItem alloc]initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:self action:nil];
+        UIBarButtonItem * doneButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(dismissKeyBoard)];
+        [topView setItems:@[btnSpace, doneButton]];
+        [_textView setInputAccessoryView:topView];
     }
     return self;
 }
 
+-(IBAction)dismissKeyBoard{
+    [_textView resignFirstResponder];
+}
 
 
 #pragma mark -

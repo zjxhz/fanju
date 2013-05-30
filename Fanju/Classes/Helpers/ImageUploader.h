@@ -9,9 +9,10 @@
 #import <Foundation/Foundation.h>
 #import "User.h"
 #import "Photo.h"
+#import "GKImagePicker.h"
 
 typedef enum{
-    AVATAR, PHOTO
+    AVATAR, PHOTO, BACKGROUND
 }
 ImageUploaderOption;
 
@@ -21,13 +22,16 @@ ImageUploaderOption;
 -(void)didFailUploadPhoto:(UIImage*)image;
 -(void)didUploadAvatar:(UIImage*)image  withData:(NSDictionary*)data;
 -(void)didFailUploadAvatar:(UIImage*)image;
+-(void)didUploadBackground:(UIImage*)image  withData:(NSDictionary*)data;
+-(void)didFailUploadBackground:(UIImage*)image;
 @end
 
 
-@interface ImageUploader : NSObject<UIImagePickerControllerDelegate, UIActionSheetDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate>
+@interface ImageUploader : NSObject<UIImagePickerControllerDelegate, UIActionSheetDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, GKImagePickerDelegate>
 -(id)initWithViewController:(UIViewController*)viewController delegate:(id<ImageUploaderDelegate>)delegate;
 -(void)uploadAvatar;
 -(void)uploadPhoto;
+-(void)uploadBackgroundImage;
 @property(nonatomic) ImageUploaderOption option;
 @property(nonatomic, weak) id<ImageUploaderDelegate> delegate;
 @end

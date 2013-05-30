@@ -50,16 +50,26 @@
 }
 
 -(UIBarButtonItem*)normalBarButtonItemWithTitle:(NSString*)title  target:(id)target action:(SEL)action{
+
+    UIFont* font = [UIFont systemFontOfSize:12];
+    UIImage* toprt = [UIImage imageNamed:@"toprt"] ;
+    UIImage* toprt_resize =[toprt resizableImageWithCapInsets:UIEdgeInsetsMake(14, 24, 15, 25)];
+    CGFloat width = MAX([title sizeWithFont:font].width + 20, toprt.size.width);
+    
+    
     UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
-    button.titleLabel.font = [UIFont systemFontOfSize:12];
+    button.titleLabel.font = font;
     button.titleLabel.textColor = RGBCOLOR(220, 220, 220);
     button.titleEdgeInsets = UIEdgeInsetsMake(2, 0, 0, 0);
+
     [button setTitle:title forState:UIControlStateNormal];
-    [button setBackgroundImage:[UIImage imageNamed:@"toprt"] forState:UIControlStateNormal];
-    [button setBackgroundImage:[UIImage imageNamed:@"toprt_push"] forState:UIControlStateSelected | UIControlStateHighlighted];
+
+    button.frame = CGRectMake(0, 0, width, toprt.size.height);
+    [button setBackgroundImage:toprt_resize forState:UIControlStateNormal];
+//    [button setBackgroundImage:[UIImage imageNamed:@"toprt_push"] forState:UIControlStateSelected | UIControlStateHighlighted];
     button.contentVerticalAlignment = UIControlContentVerticalAlignmentCenter;
     [button addTarget:target action:action forControlEvents:UIControlEventTouchDown];
-    [button sizeToFit];
+//    [button sizeToFit];
     return [[UIBarButtonItem alloc] initWithCustomView:button];
 
 }

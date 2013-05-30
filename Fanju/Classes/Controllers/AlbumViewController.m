@@ -165,6 +165,7 @@
                                             }
                                             [_selectedIndexes removeAllObjects];
                                             [self buildUI];
+                                            [self edit:nil];
                                             DDLogVerbose(@"user photos deleted.");
                                         } failure:^{
                                             [SVProgressHUD dismissWithError:@"删除失败"];

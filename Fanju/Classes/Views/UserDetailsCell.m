@@ -18,7 +18,6 @@
 #import "URLService.h"
 
 @interface UserDetailsCell(){
-    UIImageView* _nextMealView;
     UILabel* _nextMealLabel;
     UITextField* _nextMealText;
     UIImageView* _gender;
@@ -26,7 +25,6 @@
     UILabel* _distanceLabel;
     UILabel* _updatedLabel;
     UILabel* _mottoLabel;
-    Meal* _meal;
     UIImageView* _locationIconView ;
     UIImageView* _separatorView;
 }
@@ -50,6 +48,7 @@
         
         UIImage* maskBg = [UIImage imageNamed:@"u_detail_mask"];
         _nextMealView = [[UIImageView alloc] initWithFrame:CGRectMake(0, 109, maskBg.size.width, maskBg.size.height)];
+        _nextMealView.userInteractionEnabled = YES;
         _nextMealView.image = maskBg;
         _nextMealView.alpha = 0;
         [self.contentView addSubview:_nextMealView];
@@ -75,13 +74,19 @@
         _nextMealText.contentVerticalAlignment = UIControlContentVerticalAlignmentBottom;
         
         UIImage* nextMealArrowImg = [UIImage imageNamed:@"next_meal_arrow"];
-        UIImageView* arrowView = [[UIImageView alloc] initWithFrame:CGRectMake(320 - nextMealArrowImg.size.width - 10, (_nextMealView.frame.size.height - nextMealArrowImg.size.height) /2 , nextMealArrowImg.size.width, nextMealArrowImg.size.height)];
-        arrowView.image = nextMealArrowImg;
+//        _nextMealButton = [UIButton buttonWithType:UIButtonTypeRoundedRect];
+//        _nextMealButton.frame = CGRectMake(200, 0 , nextMealArrowImg.size.width, nextMealArrowImg.size.height);
+        _nextMealButton = [[UIButton alloc] initWithFrame: CGRectMake(320 - nextMealArrowImg.size.width - 10, (_nextMealView.frame.size.height - nextMealArrowImg.size.height) /2 , nextMealArrowImg.size.width, nextMealArrowImg.size.height)];
+//        [_nextMealButton setTitle:@"下一个" forState:UIControlStateNormal];
+//        [_nextMealButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+//        [_nextMealButton sizeToFit];
+        [_nextMealButton setBackgroundImage:nextMealArrowImg forState:UIControlStateNormal];
+//        [_nextMealButton addTarget:self action:@selector(temp:) forControlEvents:UIControlEventTouchUpInside];
         
         
         [_nextMealView addSubview:_nextMealLabel];
         [_nextMealView addSubview:_nextMealText];
-        [_nextMealView addSubview:arrowView];
+        [_nextMealView addSubview:_nextMealButton];
         
         UIImage* avatarBgImg = [UIImage imageNamed:@"avatar_bg_big"];
         UIImageView* avatarView = [[UIImageView alloc] initWithFrame:CGRectMake(3, 106, avatarBgImg.size.width, avatarBgImg.size.height)];
@@ -198,6 +203,10 @@
     } failure:^(RKObjectRequestOperation *operation, NSError *error) {
         DDLogError(@"failed to fetch meals for user %@", _user.uID);
     }];
+}
+
+-(void)temp:(id)sender{
+    DDLogInfo(@"next meal clicked: %@", _meal);
 }
 
 @end

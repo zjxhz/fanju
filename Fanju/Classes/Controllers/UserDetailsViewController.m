@@ -32,7 +32,7 @@
 #import "SVWebViewController.h"
 #import "ODRefreshControl.h"
 #import "Relationship.h"
-
+#import "MealDetailViewController.h"
 
 @interface UserDetailsViewController (){
     PhotoThumbnailCell* _photoCell;
@@ -50,6 +50,7 @@
     UIButton* _followButton;
     NSManagedObjectContext* _contex;
     BOOL _reloaded;
+    Meal* _nextMeal;
 }
 
 @end
@@ -349,6 +350,14 @@
     return [[UserService service].loggedInUser isEqual:_user];
 }
 
+-(void)showNextMeal:(id)sender{
+    if (_userDetailsCell.meal) {
+        MealDetailViewController* vc = [[MealDetailViewController alloc] init];
+        vc.meal = _userDetailsCell.meal;
+        [self.navigationController pushViewController:vc animated:YES];
+    }
+}
+
 #pragma mark - Table view data source
 -(CGFloat) tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath{
     switch (indexPath.section) {
@@ -398,9 +407,15 @@
         BOOL recalculateHeight = NO;
         if(!cell){
             cell = [[UserDetailsCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:USER_DETAILS_CELL];
+            _userDetailsCell = (UserDetailsCell*)cell;
+            UIGestureRecognizer *nextMealTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(showNextMeal:)];
+            nextMealTap.delegate  = self;
+            [_userDetailsCell.nextMealView  addGestureRecognizer:nextMealTap];
+//            [_userDetailsCell.nextMealButton addGestureRecognizer:nextMealTap];
+            [_userDetailsCell.nextMealButton addTarget:self action:@selector(showNextMeal:) forControlEvents:UIControlEventTouchUpInside];
             recalculateHeight = YES;
         }
-        _userDetailsCell = (UserDetailsCell*)cell;
+
         CGFloat originalHeight = _userDetailsCell.cellHeight;
         _userDetailsCell.user = _user;
         if (_userDetailsCell.cellHeight != originalHeight) {
@@ -523,7 +538,7 @@
 }
 
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath{
-    if (indexPath.section == 1 && indexPath.row == 0) {
+     if (indexPath.section == 1 && indexPath.row == 0) {
         if (_user.photos.count > 4) {
             AlbumViewController* vc = [[AlbumViewController alloc] init];
             vc.user = _user;

@@ -11,15 +11,18 @@
 #import "Authentication.h"
 #import "URLService.h"
 #import "Photo.h"
+
+
 @implementation UserService{
     NSManagedObjectContext* _contex;
     NSFetchRequest* _fetchRequest;
 }
 +(UserService*)service{
+    static dispatch_once_t onceToken;
     static UserService* instance = nil;
-    if (!instance) {
+    dispatch_once(&onceToken,^{
         instance = [[UserService alloc] init];
-    }
+    });
     return instance;
 }
 
@@ -208,5 +211,11 @@
         return NO;
     }
     return YES;
+}
+
++(GuestUser*)createGuestOf:(User*)user{
+    GuestUser* guest = [[GuestUser alloc] init];
+    guest.host = user;
+    return guest;
 }
 @end

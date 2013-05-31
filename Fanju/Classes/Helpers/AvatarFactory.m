@@ -43,6 +43,7 @@
     return [AvatarFactory avatarWithBg:user big:NO];
 }
 
+
 +(UserImageView*)avatarWithBg:(User*)user big:(BOOL)big{
     UIImage* bg = nil;
     if (big) {
@@ -56,6 +57,24 @@
     NINetworkImageView* avatar = [[NINetworkImageView alloc] initWithFrame:avatarFrame];
     avatar.contentMode = UIViewContentModeScaleAspectFill;
     [avatar setPathToNetworkImage:[URLService absoluteURL:user.avatar]];
+    [view addSubview:avatar];
+    return  view;
+}
+
++(UserImageView*)guestAvatarWithBg:(BOOL)big{
+    UIImage* bg = nil;
+    if (big) {
+        bg = [UIImage imageNamed:@"avatar_bg_big"];
+    } else {
+        bg = [UIImage imageNamed:@"p_photo_bg"];
+    }
+    UserImageView* view = [[UserImageView alloc] initWithImage:bg];
+    CGFloat inset = big ? 5 : 3;
+    CGRect avatarFrame = CGRectMake(inset, inset, bg.size.width - inset * 2, bg.size.height - inset * 2);
+    NINetworkImageView* avatar = [[NINetworkImageView alloc] initWithFrame:avatarFrame];
+    avatar.contentMode = UIViewContentModeScaleAspectFill;
+//    [avatar setPathToNetworkImage:[URLService absoluteURL:user.avatar]];
+    avatar.image = [UIImage imageNamed:@"guest"];
     [view addSubview:avatar];
     return  view;
 }

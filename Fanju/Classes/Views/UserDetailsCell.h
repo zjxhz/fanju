@@ -16,4 +16,7 @@
 @property(nonatomic, readonly) NINetworkImageView* avatar;
 @property(nonatomic, readonly) NINetworkImageView* backgroundImageView;
 @property(nonatomic, strong) User* user;
+@property(nonatomic, strong) UIImageView* nextMealView;
+@property(nonatomic, strong) UIButton* nextMealButton;
+@property(nonatomic, strong) Meal* meal;
 @end

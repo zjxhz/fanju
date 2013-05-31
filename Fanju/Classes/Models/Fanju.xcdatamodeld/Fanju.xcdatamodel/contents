@@ -19,8 +19,7 @@
         <attribute name="startDate" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="startTime" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="topic" attributeType="String" syncable="YES"/>
-        <relationship name="host" optional="YES" minCount="1" maxCount="1" deletionRule="Nullify" destinationEntity="User" syncable="YES"/>
-        <relationship name="participants" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="User" inverseName="meals" inverseEntity="User" syncable="YES"/>
+        <relationship name="orders" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Order" inverseName="meal" inverseEntity="Order" syncable="YES"/>
         <relationship name="restaurant" minCount="1" maxCount="1" deletionRule="Nullify" destinationEntity="Restaurant" syncable="YES"/>
     </entity>
     <entity name="MealNotification" representedClassName="MealNotification" parentEntity="Notification" syncable="YES">
@@ -41,7 +40,7 @@
         <attribute name="numberOfPersons" optional="YES" attributeType="Integer 32" defaultValueString="0" syncable="YES"/>
         <attribute name="oID" optional="YES" attributeType="Integer 32" defaultValueString="0" syncable="YES"/>
         <attribute name="status" optional="YES" attributeType="Integer 16" defaultValueString="0" syncable="YES"/>
-        <relationship name="meal" optional="YES" minCount="1" maxCount="1" deletionRule="Nullify" destinationEntity="Meal" syncable="YES"/>
+        <relationship name="meal" optional="YES" minCount="1" maxCount="1" deletionRule="Nullify" destinationEntity="Meal" inverseName="orders" inverseEntity="Meal" syncable="YES"/>
         <relationship name="user" optional="YES" minCount="1" maxCount="1" deletionRule="Nullify" destinationEntity="User" inverseName="orders" inverseEntity="User" syncable="YES"/>
     </entity>
     <entity name="Photo" representedClassName="Photo" syncable="YES">
@@ -94,7 +93,7 @@
         <attribute name="workFor" optional="YES" attributeType="String" syncable="YES"/>
         <relationship name="followers" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Relationship" inverseName="toPerson" inverseEntity="Relationship" syncable="YES"/>
         <relationship name="followings" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Relationship" inverseName="fromPerson" inverseEntity="Relationship" syncable="YES"/>
-        <relationship name="meals" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Meal" inverseName="participants" inverseEntity="Meal" syncable="YES"/>
+        <relationship name="meals" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Meal" syncable="YES"/>
         <relationship name="orders" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Order" inverseName="user" inverseEntity="Order" syncable="YES"/>
         <relationship name="photos" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="Photo" inverseName="user" inverseEntity="Photo" syncable="YES"/>
         <relationship name="tags" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Tag" inverseName="user" inverseEntity="Tag" syncable="YES"/>
@@ -109,7 +108,7 @@
     </entity>
     <elements>
         <element name="Conversation" positionX="-23267" positionY="-7960" width="128" height="148"/>
-        <element name="Meal" positionX="-23645" positionY="-8424" width="128" height="223"/>
+        <element name="Meal" positionX="-23645" positionY="-8424" width="128" height="208"/>
         <element name="MealNotification" positionX="-23645" positionY="-8514" width="128" height="58"/>
         <element name="Notification" positionX="-23474" positionY="-8527" width="128" height="163"/>
         <element name="Order" positionX="-23733" positionY="-8152" width="128" height="133"/>

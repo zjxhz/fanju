@@ -160,10 +160,12 @@
     NSString* requestWithPagination = [NSString stringWithFormat:@"%@?page=:currentPage&limit=:perPage%@", _baseURL, [self filerToString]];
     if (!nextPage) {
         _paginator = [manager paginatorWithPathPattern:requestWithPagination];
-        UserListDataSource *ds = [[UserListDataSource alloc] init];
-        self.dataSource = ds;
     }
     [_paginator setCompletionBlockWithSuccess:^(RKPaginator *paginator, NSArray *objects, NSUInteger page) {
+        if (!nextPage) {
+            UserListDataSource *ds = [[UserListDataSource alloc] init];
+            weakSelf.dataSource = ds;
+        }
         UserListDataSource *ds = weakSelf.dataSource;
         id lastItem = [ds.items lastObject];
         if ([lastItem isKindOfClass:[LoadMoreTableItem class]]) {

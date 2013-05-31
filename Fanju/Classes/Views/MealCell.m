@@ -13,9 +13,10 @@
 #import "Restaurant.h"
 #import "MealService.h"
 #import "URLService.h"
-
+#import "Order.h"
+#import "GuestUser.h"
 @implementation MealCell{
-    Meal* _mealInfo;
+    Meal* _meal;
     NSMutableArray* _participants;
 }
 
@@ -41,7 +42,7 @@
 }
 
 - (id)object {
-    return _mealInfo;
+    return _meal;
 }
 
 -(void)prepareForReuse{
@@ -56,22 +57,29 @@
 
 - (void)setObject:(id)object {
     [super setObject:object];
-    _mealInfo = object;
-    if (!_mealInfo) {
+    _meal = object;
+    if (!_meal) {
         return;
     }
     _costLabel.text = [NSString stringWithFormat:NSLocalizedString(@"AverageCost", nil),
-                       [_mealInfo.price floatValue], ([_mealInfo.maxPersons integerValue] - [_mealInfo.actualPersons integerValue])];
-    _addressLabel.text = _mealInfo.restaurant.name;
-    _topicLabel.text = _mealInfo.topic;
-    _timeLabel.text = [MealService dateTextOfMeal:_mealInfo];
+                       [_meal.price floatValue], ([_meal.maxPersons integerValue] - [_meal.actualPersons integerValue])];
+    _addressLabel.text = _meal.restaurant.name;
+    _topicLabel.text = _meal.topic;
+    _timeLabel.text = [MealService dateTextOfMeal:_meal];
     NSInteger i = 0;
-    [_mealView setPathToNetworkImage:[URLService  absoluteURL:_mealInfo.photoURL] ];
-    for (User* participant in _mealInfo.participants) {
+    [_mealView setPathToNetworkImage:[URLService  absoluteURL:_meal.photoURL] ];
+    for (id obj in [MealService participantsOfMeal:_meal]) {
         if (i >= 5) {
             break;
         }
-        UIImageView* avatar = [AvatarFactory avatarWithBg:participant];
+        UIImageView* avatar = nil;
+        if ([obj isKindOfClass:[GuestUser class]]) {
+            avatar = [AvatarFactory guestAvatarWithBg:NO];
+        } else {
+            User* user = obj;
+            avatar = [AvatarFactory avatarWithBg:user];
+        }
+         
         avatar.frame = CGRectMake(23 + 55*i, 227, 53, 53);
         [self.contentView addSubview:avatar];
         [_participants addObject:avatar];

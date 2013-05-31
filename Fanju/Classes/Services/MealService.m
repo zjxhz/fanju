@@ -10,6 +10,8 @@
 #import "RestKit.h"
 #import "Meal.h"
 #import "DateUtil.h"
+#import "Order.h"
+
 static NSDateFormatter *_dateFormatter;
 
 @implementation MealService{
@@ -97,5 +99,16 @@ static NSDateFormatter *_dateFormatter;
 +(NSString*)dateTextOfMeal:(Meal*)meal{
     NSDate* date = [MealService dateOfMeal:meal];
     return [NSString stringWithFormat: @"%@ %@", [DateUtil weekday:date], [_dateFormatter stringFromDate:date]];
+}
+
++(NSArray*)participantsOfMeal:(Meal*)meal{
+    NSMutableArray* participants = [NSMutableArray array];
+    for (Order* order in meal.orders) {
+        [participants addObject:order.user];
+        for (NSInteger i = 1; i < [order.numberOfPersons integerValue]; ++i) {
+            [participants addObject:[UserService createGuestOf:order.user]];
+        }
+    }
+    return participants;
 }
 @end

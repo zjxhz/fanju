@@ -2,7 +2,7 @@
 //  Relationship.m
 //  Fanju
 //
-//  Created by Xu Huanze on 5/21/13.
+//  Created by Xu Huanze on 5/30/13.
 //  Copyright (c) 2013 Wayne. All rights reserved.
 //
 
@@ -12,8 +12,8 @@
 
 @implementation Relationship
 
-@dynamic status;
 @dynamic rID;
+@dynamic status;
 @dynamic fromPerson;
 @dynamic toPerson;
 

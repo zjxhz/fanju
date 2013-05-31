@@ -45,19 +45,24 @@
     manager.managedObjectStore = managedObjectStore;
     [RKObjectManager setSharedManager:manager];
     
+    RKEntityMapping *mealMapping = [RKEntityMapping mappingForEntityForName:@"Meal" inManagedObjectStore:managedObjectStore];
+    RKEntityMapping *orderMapping = [RKEntityMapping mappingForEntityForName:@"Order" inManagedObjectStore:managedObjectStore];
     RKEntityMapping *photoMapping = [RKEntityMapping mappingForEntityForName:@"Photo" inManagedObjectStore:managedObjectStore];
+    RKEntityMapping *tagMapping = [RKEntityMapping mappingForEntityForName:@"Tag" inManagedObjectStore:managedObjectStore];    
+    RKEntityMapping *userMapping = [RKEntityMapping mappingForEntityForName:@"User" inManagedObjectStore:managedObjectStore];
+    RKEntityMapping *restaurantMapping = [RKEntityMapping mappingForEntityForName:@"Restaurant" inManagedObjectStore:managedObjectStore];
+    RKEntityMapping *relationshipMapping = [RKEntityMapping mappingForEntityForName:@"Relationship" inManagedObjectStore:managedObjectStore];
+    
     photoMapping.identificationAttributes = @[@"pID"];
     [photoMapping addAttributeMappingsFromDictionary:@{
      @"id": @"pID",
      @"large":@"url",
      @"thumbnail":@"thumbnailURL"}];
     
-    RKEntityMapping *tagMapping = [RKEntityMapping mappingForEntityForName:@"Tag" inManagedObjectStore:managedObjectStore];
     tagMapping.identificationAttributes = @[@"tID"];
     [tagMapping addAttributeMappingsFromDictionary:@{@"id": @"tID"}];
     [tagMapping addAttributeMappingsFromArray:@[@"name"]];
     
-    RKEntityMapping *userMapping = [RKEntityMapping mappingForEntityForName:@"User" inManagedObjectStore:managedObjectStore];
     userMapping.identificationAttributes = @[@"uID"];
     [userMapping addAttributeMappingsFromDictionary:@{
      @"id": @"uID",
@@ -78,12 +83,11 @@
     [userMapping addRelationshipMappingWithSourceKeyPath:@"photos" mapping:photoMapping];
     [userMapping addRelationshipMappingWithSourceKeyPath:@"tags" mapping:tagMapping];
     
-    RKEntityMapping *restaurantMapping = [RKEntityMapping mappingForEntityForName:@"Restaurant" inManagedObjectStore:managedObjectStore];
+
     restaurantMapping.identificationAttributes = @[@"rID"];
     [restaurantMapping addAttributeMappingsFromDictionary:@{@"id": @"rID"}];
     [restaurantMapping addAttributeMappingsFromArray:@[@"address", @"latitude", @"longitude", @"name", @"tel"]];
     
-    RKEntityMapping *mealMapping = [RKEntityMapping mappingForEntityForName:@"Meal" inManagedObjectStore:managedObjectStore];
     mealMapping.identificationAttributes = @[@"mID"];
     [mealMapping addAttributeMappingsFromDictionary:@{
      @"id": @"mID",
@@ -95,10 +99,8 @@
      @"start_time": @"startTime"}];
     [mealMapping addAttributeMappingsFromArray:@[@"topic", @"introduction"]];
     [mealMapping addPropertyMapping:[RKRelationshipMapping relationshipMappingFromKeyPath:@"restaurant" toKeyPath:@"restaurant" withMapping:restaurantMapping]];
-    [mealMapping addPropertyMapping:[RKRelationshipMapping relationshipMappingFromKeyPath:@"host" toKeyPath:@"host" withMapping:userMapping]];
-    [mealMapping addPropertyMapping:[RKRelationshipMapping relationshipMappingFromKeyPath:@"participants" toKeyPath:@"participants" withMapping:userMapping]];
-    
-    RKEntityMapping *orderMapping = [RKEntityMapping mappingForEntityForName:@"Order" inManagedObjectStore:managedObjectStore];
+    [mealMapping addPropertyMapping:[RKRelationshipMapping relationshipMappingFromKeyPath:@"orders" toKeyPath:@"orders" withMapping:orderMapping]];
+
     orderMapping.identificationAttributes = @[@"oID"];
     [orderMapping addAttributeMappingsFromDictionary:@{
      @"id": @"oID",
@@ -108,8 +110,7 @@
     [orderMapping addPropertyMapping:[RKRelationshipMapping relationshipMappingFromKeyPath:@"customer" toKeyPath:@"user" withMapping:userMapping]];
     [orderMapping addRelationshipMappingWithSourceKeyPath:@"meal" mapping:mealMapping];
     
-//    NSMutableDictionary* relationshipMappingDictionary = @{@"id": @"rID", @"status":@"status",@"from_person_id":@"fromPerson.uID"};
-    RKEntityMapping *relationshipMapping = [RKEntityMapping mappingForEntityForName:@"Relationship" inManagedObjectStore:managedObjectStore];
+
     relationshipMapping.identificationAttributes = @[@"rID"];
     [relationshipMapping addAttributeMappingsFromDictionary:@{@"id": @"rID"}];
     [relationshipMapping addAttributeMappingsFromArray:@[@"status"]];
@@ -124,7 +125,7 @@
      }];
     
     NSIndexSet *statusCodes = RKStatusCodeIndexSetForClass(RKStatusCodeClassSuccessful); // Anything in 2xx
-    RKResponseDescriptor *mealResponseDescriptor = [RKResponseDescriptor responseDescriptorWithMapping:mealMapping pathPattern:@"meal/" keyPath:@"objects" statusCodes:statusCodes];
+    RKResponseDescriptor *mealResponseDescriptor = [RKResponseDescriptor responseDescriptorWithMapping:mealMapping pathPattern:@"meal/upcoming/" keyPath:@"objects" statusCodes:statusCodes];
     RKResponseDescriptor *userMealResponseDescriptor = [RKResponseDescriptor responseDescriptorWithMapping:mealMapping pathPattern:@"user/:uID/meal/" keyPath:@"objects" statusCodes:statusCodes];
     RKResponseDescriptor *userOrderResponseDescriptor = [RKResponseDescriptor responseDescriptorWithMapping:orderMapping pathPattern:@"user/:uID/order/" keyPath:@"objects" statusCodes:statusCodes];
     RKResponseDescriptor *orderResponseDescriptor = [RKResponseDescriptor responseDescriptorWithMapping:orderMapping pathPattern:@"order/" keyPath:@"objects" statusCodes:statusCodes];

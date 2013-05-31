@@ -26,4 +26,5 @@ AvatarSize;
 +(UserImageView*)avatarWithBg:(User*)user;
 +(UserImageView*)avatarWithBg:(User*)user big:(BOOL)big;
 +(UserImageView*)avatarForUser:(User*)user withFrame:(CGRect)frame;
++(UserImageView*)guestAvatarWithBg:(BOOL)big;
 @end

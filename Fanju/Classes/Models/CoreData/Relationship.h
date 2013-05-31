@@ -2,7 +2,7 @@
 //  Relationship.h
 //  Fanju
 //
-//  Created by Xu Huanze on 5/21/13.
+//  Created by Xu Huanze on 5/30/13.
 //  Copyright (c) 2013 Wayne. All rights reserved.
 //
 
@@ -13,8 +13,8 @@
 
 @interface Relationship : NSManagedObject
 
-@property (nonatomic, retain) NSNumber * status;
 @property (nonatomic, retain) NSNumber * rID;
+@property (nonatomic, retain) NSNumber * status;
 @property (nonatomic, retain) User *fromPerson;
 @property (nonatomic, retain) User *toPerson;
 

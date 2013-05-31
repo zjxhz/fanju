@@ -1,19 +1,14 @@
 //
-//  Tag.m
+//  GuestUser.m
 //  Fanju
 //
 //  Created by Xu Huanze on 5/30/13.
 //  Copyright (c) 2013 Wayne. All rights reserved.
 //
 
-#import "Tag.h"
+#import "GuestUser.h"
 #import "User.h"
 
-
-@implementation Tag
-
-@dynamic name;
-@dynamic tID;
-@dynamic user;
+@implementation GuestUser
 
 @end

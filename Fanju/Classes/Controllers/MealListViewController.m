@@ -165,7 +165,7 @@
 
 - (void) requestDataFromServer{
     RKObjectManager* manager = [RKObjectManager sharedManager];
-    [manager getObjectsAtPath:@"meal/"
+    [manager getObjectsAtPath:@"meal/upcoming/"
                    parameters:@{@"limit":@"0"}
                       success:^(RKObjectRequestOperation *operation, RKMappingResult *mappingResult) {
                           _modelError = nil;

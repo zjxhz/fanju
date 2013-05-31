@@ -9,6 +9,7 @@
 #import <Foundation/Foundation.h>
 #import "UserProfile.h"
 #import "User.h"
+#import "GuestUser.h"
 typedef void(^fetch_user_success)(User*);
 typedef void (^service_failure)(void);
 
@@ -36,4 +37,5 @@ typedef void (^service_failure)(void);
 +(NSString*)genderTextForUser:(User*)user;
 +(NSArray*)sortedPhotosForUser:(User*)user;
 +(BOOL)hasAvatar:(User*)user;
++(GuestUser*)createGuestOf:(User*)user;
 @end

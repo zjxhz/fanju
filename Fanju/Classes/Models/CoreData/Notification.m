@@ -2,7 +2,7 @@
 //  Notification.m
 //  Fanju
 //
-//  Created by Xu Huanze on 5/22/13.
+//  Created by Xu Huanze on 5/30/13.
 //  Copyright (c) 2013 Wayne. All rights reserved.
 //
 
@@ -13,11 +13,11 @@
 @implementation Notification
 
 @dynamic eventDescription;
+@dynamic nID;
 @dynamic node;
 @dynamic payload;
 @dynamic read;
 @dynamic time;
-@dynamic nID;
 @dynamic owner;
 @dynamic user;
 

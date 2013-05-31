@@ -1,19 +1,14 @@
 //
-//  Tag.m
+//  GuestUser.h
 //  Fanju
 //
 //  Created by Xu Huanze on 5/30/13.
 //  Copyright (c) 2013 Wayne. All rights reserved.
 //
 
-#import "Tag.h"
+#import <Foundation/Foundation.h>
 #import "User.h"
 
-
-@implementation Tag
-
-@dynamic name;
-@dynamic tID;
-@dynamic user;
-
+@interface GuestUser : NSObject
+@property(nonatomic, strong) User* host;
 @end

@@ -2,14 +2,14 @@
 //  Meal.h
 //  Fanju
 //
-//  Created by Xu Huanze on 5/17/13.
+//  Created by Xu Huanze on 5/30/13.
 //  Copyright (c) 2013 Wayne. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>
 #import <CoreData/CoreData.h>
 
-@class Restaurant, User;
+@class Order, Restaurant;
 
 @interface Meal : NSManagedObject
 
@@ -22,16 +22,15 @@
 @property (nonatomic, retain) NSString * startDate;
 @property (nonatomic, retain) NSString * startTime;
 @property (nonatomic, retain) NSString * topic;
-@property (nonatomic, retain) User *host;
-@property (nonatomic, retain) NSSet *participants;
 @property (nonatomic, retain) Restaurant *restaurant;
+@property (nonatomic, retain) NSSet *orders;
 @end
 
 @interface Meal (CoreDataGeneratedAccessors)
 
-- (void)addParticipantsObject:(User *)value;
-- (void)removeParticipantsObject:(User *)value;
-- (void)addParticipants:(NSSet *)values;
-- (void)removeParticipants:(NSSet *)values;
+- (void)addOrdersObject:(Order *)value;
+- (void)removeOrdersObject:(Order *)value;
+- (void)addOrders:(NSSet *)values;
+- (void)removeOrders:(NSSet *)values;
 
 @end

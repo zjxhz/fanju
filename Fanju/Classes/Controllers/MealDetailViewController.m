@@ -392,20 +392,32 @@
     _participantsView = [[UIScrollView alloc] initWithFrame:CGRectMake(9, y, 320 - 9, PARTICIPANTS_VIEW_HEIGHT)];
     _participantsView.showsHorizontalScrollIndicator = NO;
     _participantsView.backgroundColor = [UIColor clearColor];
-    _participantsView.contentSize = CGSizeMake( (PARTICIPANTS_WIDTH + PARTICIPANTS_GAP ) * _meal.participants.count, PARTICIPANTS_HEIGHT);
-    _participants = [_meal.participants allObjects];
+    _participants = [MealService participantsOfMeal:_meal];
+    _participantsView.contentSize = CGSizeMake( (PARTICIPANTS_WIDTH + PARTICIPANTS_GAP ) * _participants.count, PARTICIPANTS_HEIGHT);
+
     for (int i = 0; i < _participants.count; i++) {
-        UIImage* photo_bg = [UIImage imageNamed:@"p_photo_bg"];
-        UIView* contentView = [[UIView alloc] initWithFrame:CGRectMake((photo_bg.size.width + PARTICIPANTS_GAP) * i , 0, PARTICIPANTS_WIDTH, photo_bg.size.height)];
-        User *user = [_participants objectAtIndex:i];
-        UIImageView *avatarView = [AvatarFactory avatarWithBg:user];
-        avatarView.frame = CGRectMake(0, 0, 53, 53);
-        avatarView.tag = i;
-        UIGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(avatarTapped:)];
-        avatarView.userInteractionEnabled = YES;
-        [avatarView addGestureRecognizer:tap];
-        [contentView addSubview:avatarView];
-        [_participantsView addSubview:contentView];
+//        UIImage* photo_bg = [UIImage imageNamed:@"p_photo_bg"];
+        id obj = _participants[i];
+        UIImageView* avatarView = nil;
+        if ([obj isKindOfClass:[GuestUser class]]) {
+            avatarView = [AvatarFactory guestAvatarWithBg:NO];
+        } else {
+            avatarView = [AvatarFactory avatarWithBg:obj];
+        }
+        avatarView.frame = CGRectMake(55*i, 0, 53, 53);
+//        UIView* contentView = [[UIView alloc] initWithFrame:CGRectMake((photo_bg.size.width + PARTICIPANTS_GAP) * i , 0, PARTICIPANTS_WIDTH, photo_bg.size.height)];
+//        User *user = [_participants objectAtIndex:i];
+//        UIImageView *avatarView = [AvatarFactory avatarWithBg:user];
+//        avatarView.frame = CGRectMake(0, 0, 53, 53);
+        if ([obj isKindOfClass:[User class]]) {
+            avatarView.tag = i; 
+            UIGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(avatarTapped:)];
+            avatarView.userInteractionEnabled = YES;
+            [avatarView addGestureRecognizer:tap];
+        }
+        
+        [_participantsView addSubview:avatarView];
+//        [_participantsView addSubview:contentView];
     }
     [_detailsView addSubview:_participantsView];
     CGRect frame = _detailsView.frame;

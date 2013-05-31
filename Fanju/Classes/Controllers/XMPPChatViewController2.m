@@ -53,9 +53,10 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
     CGFloat _keyboardHeight;
     ODRefreshControl* _refreshControl;
     NSFetchRequest *_fetchRequest;
-    NSInteger _fetchOffset;
+//    NSInteger _fetchOffset;
     NSManagedObjectContext* _context;
     UIView* _guideView;
+    NSDate* _oldestMessageDate;
 }
 
 @end
@@ -155,7 +156,7 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
 
 -(void) viewWillAppear:(BOOL)animated{
     [super viewWillAppear:animated];
-    if (_bubbleData.count == 0) {
+    if (_bubbleData.count == 0 && _guideView.superview == nil/*not added*/) {
         [self addGuideView];
     }
     _bubbleTable.frame = CGRectMake(0, 0, self.view.frame.size.width, self.view.frame.size.height-kChatBarHeight1);
@@ -194,13 +195,48 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
     if (error) {
         DDLogError(@"failed to fetch user messages for conversation %@ with error: %@", _conversation.objectID, error);
     }
-    _fetchOffset = FETCH_LIMIT;
+//    _fetchOffset = objects.count;
+    [self updateOldestTime:objects];
     [self insertMessageBubbles:objects];
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(messageDidSave:)
                                                  name:MessageDidSaveNotification
                                                object:nil];
     
+}
+
+-(void)loadEarlierMessages:(id)sender{
+    //delayed so it looks like refreshing
+    [NSTimer scheduledTimerWithTimeInterval:1 target:self selector:@selector(doLoadEarlierMessages) userInfo:nil repeats:NO];
+}
+
+-(void)doLoadEarlierMessages{
+    //    _fetchRequest.fetchOffset = _fetchOffset;
+    //    _fetchRequest.fetchLimit = FETCH_LIMIT;
+    
+    NSError* error;
+    if (_oldestMessageDate) {
+        _fetchRequest.predicate = [NSPredicate predicateWithFormat:@"conversation == %@ AND time < %@", _conversation, _oldestMessageDate];
+    }
+
+    NSArray* objects = [_context executeFetchRequest:_fetchRequest error:&error];
+    if (error) {
+        DDLogError(@"failed to load messages earlier than %@", _oldestMessageDate);
+    }
+    [self updateOldestTime:objects];
+    [self insertMessageBubbles:objects];
+//    _fetchOffset += objects.count;
+    [_refreshControl endRefreshing];
+}
+
+-(void)updateOldestTime:(NSArray*)messages{
+    if (messages.count > 0) {
+        UserMessage* lastMessage = [messages lastObject];
+        _oldestMessageDate  = lastMessage.time;
+        DDLogInfo(@"set oldest message to %@", _oldestMessageDate);
+    } else {
+        DDLogInfo(@"message requested but not found");
+    }
 }
 
 -(void)addGuideView{
@@ -247,20 +283,6 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
     
     [self.view addSubview:_guideView];
 }
--(void)loadEarlierMessages:(id)sender{
-    //delayed so it looks like refreshing
-    [NSTimer scheduledTimerWithTimeInterval:1 target:self selector:@selector(doLoadEarlierMessages) userInfo:nil repeats:NO];
-}
-
--(void)doLoadEarlierMessages{
-    _fetchRequest.fetchOffset = _fetchOffset;
-    _fetchRequest.fetchLimit = FETCH_LIMIT;
-    NSArray* objects = [_context executeFetchRequest:_fetchRequest error:nil];
-    [self insertMessageBubbles:objects];
-    _fetchOffset += objects.count;
-    [_refreshControl endRefreshing];
-}
-
 
 -(void)insertMessageBubbles:(NSArray*)messages{
     for (UserMessage *message in messages) {
@@ -443,6 +465,7 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
             _guideView.frame = frame;
 //        } completion:^(BOOL finished) {}];
     }
+//    _fetchOffset++;
     [_guideView removeFromSuperview];
     _bubbleTable.typingBubble = NSBubbleTypingTypeNobody;
     NSBubbleData *bubble = [self bubbleFromMessage:messageMO];

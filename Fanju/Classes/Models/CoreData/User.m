@@ -2,7 +2,7 @@
 //  User.m
 //  Fanju
 //
-//  Created by Xu Huanze on 5/28/13.
+//  Created by Xu Huanze on 5/30/13.
 //  Copyright (c) 2013 Wayne. All rights reserved.
 //
 
@@ -17,6 +17,7 @@
 @implementation User
 
 @dynamic avatar;
+@dynamic backgroundImage;
 @dynamic birthday;
 @dynamic college;
 @dynamic dateJoined;
@@ -34,7 +35,6 @@
 @dynamic username;
 @dynamic weiboID;
 @dynamic workFor;
-@dynamic backgroundImage;
 @dynamic followers;
 @dynamic followings;
 @dynamic meals;

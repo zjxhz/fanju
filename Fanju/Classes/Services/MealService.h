@@ -16,4 +16,5 @@ typedef void(^fetch_meal_success)(Meal*);
 -(Meal*)mealWithID:(NSString*)mID;
 +(NSDate*)dateOfMeal:(Meal*)meal;
 +(NSString*)dateTextOfMeal:(Meal*)meal;
++(NSArray*)participantsOfMeal:(Meal*)meal;
 @end

@@ -54,6 +54,7 @@ NSString * const LAST_SUCCESSFUL_RETRIEVE_DATE = @"LAST_SUCCESSFUL_RETRIEVE_DATE
 }
 
 -(void)setup{
+    DDLogVerbose(@"setting up %@", [self class]);
     _xmppStream = [XMPPHandler sharedInstance].xmppStream;
     [_xmppStream addDelegate:self delegateQueue:dispatch_get_main_queue()];
     _lastSuccessfulRetrieveDate = [self lastSuccessfulRetrieveDate];
@@ -61,6 +62,7 @@ NSString * const LAST_SUCCESSFUL_RETRIEVE_DATE = @"LAST_SUCCESSFUL_RETRIEVE_DATE
 }
 
 -(void)tearDown{
+    DDLogVerbose(@"tearing down %@", [self class]);
     [_xmppStream removeDelegate:self];
     _unhanldedConversations = [NSMutableArray array];
     _lastSuccessfulRetrieveDate = nil;

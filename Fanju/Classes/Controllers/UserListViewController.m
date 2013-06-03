@@ -100,9 +100,7 @@
                                                 [NSTimer scheduledTimerWithTimeInterval:1.5 target:self selector:@selector(dismissHUD) userInfo:nil repeats:NO];
                                                 
                                                 [user addTagsObject:_tag];
-                                                
                                                 [_mainQueueContext saveToPersistentStore:nil];
-                                                [[Authentication sharedInstance] relogin];
                                                 [self.navigationController.toolbar setHidden:YES];
                                                 self.view.frame = CGRectMake(0, 0, 320, 416);
                                                 self.tableView.frame = self.view.frame;
@@ -243,7 +241,7 @@
     id object = [dataSource tableView:tableView objectForRowAtIndexPath:indexPath];
     if ([object isKindOfClass:[User class]]) {
         User *user = object;
-        UserDetailsViewController *newDeail = [[UserDetailsViewController alloc] initWithStyle:UITableViewStylePlain];
+        UserDetailsViewController *newDeail = [[UserDetailsViewController alloc] init];
         newDeail.user = user;
         [self.navigationController pushViewController:newDeail animated:YES];
     } else if ([object isKindOfClass:[LoadMoreTableItem class]]){

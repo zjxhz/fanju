@@ -2,7 +2,7 @@
 //  User.h
 //  Fanju
 //
-//  Created by Xu Huanze on 5/30/13.
+//  Created by Xu Huanze on 6/3/13.
 //  Copyright (c) 2013 Wayne. All rights reserved.
 //
 
@@ -32,6 +32,7 @@
 @property (nonatomic, retain) NSString * username;
 @property (nonatomic, retain) NSString * weiboID;
 @property (nonatomic, retain) NSString * workFor;
+@property (nonatomic, retain) NSString * mobile;
 @property (nonatomic, retain) NSSet *followers;
 @property (nonatomic, retain) NSSet *followings;
 @property (nonatomic, retain) NSSet *meals;

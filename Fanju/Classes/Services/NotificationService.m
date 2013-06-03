@@ -49,10 +49,14 @@ NSString * const UnreadNotificationCount = @"UnreadNotificationCount";
 }
 
 -(void)setup{
+    DDLogVerbose(@"setting up %@", [self class]);
     _xmppStream = [XMPPHandler sharedInstance].xmppStream;
     [_xmppStream addDelegate:self delegateQueue:dispatch_get_main_queue()];
     NSString* userSpecificKey = [self unreadNotificationKey];
     _unreadNotifCount = [[NSUserDefaults standardUserDefaults] integerForKey:userSpecificKey];
+    [[NSNotificationCenter defaultCenter] postNotificationName:UnreadNotificationCount
+                                                        object:[NSNumber numberWithInteger:_unreadNotifCount]
+                                                      userInfo:nil];//initial notif
     [NSTimer scheduledTimerWithTimeInterval:0.1 target:self selector:@selector(handlePendingNotifications) userInfo:nil repeats:YES];
 }
 
@@ -60,6 +64,7 @@ NSString * const UnreadNotificationCount = @"UnreadNotificationCount";
     return [NSString stringWithFormat:@"%@_%@", [UserService service].loggedInUser, UNREAD_NOTIFICATION_COUNT];
 }
 -(void)tearDown{
+    DDLogVerbose(@"tearing down %@", [self class]);
     [_xmppStream removeDelegate:self];
 }
 

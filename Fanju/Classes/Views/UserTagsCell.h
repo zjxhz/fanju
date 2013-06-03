@@ -17,5 +17,5 @@
 @property(nonatomic, weak) NSArray* tags;
 @property(nonatomic, readonly) UIButton* showAllButton;
 @property(nonatomic, readonly) NSInteger cellHeight;
-@property(nonatomic, weak) UITableViewController* rootController;
+@property(nonatomic, weak) UIViewController* rootController;
 @end

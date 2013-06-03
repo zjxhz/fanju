@@ -9,7 +9,7 @@
 #import "ConversationViewController.h"
 #import "User.h"
 #import "Conversation.h"
-#import "SimpleUserEventCell.h"
+#import "ConversationCell.h"
 #import "RestKit.h"
 #import "DateUtil.h"
 #import "UserService.h"
@@ -18,6 +18,7 @@
 #import "XMPPChatViewController2.h"
 #import "XMPPHandler.h"
 #import "WidgetFactory.h"
+#import "UserDetailsViewController.h"
 
 @interface ConversationViewController (){
     NSMutableArray* _conversations;
@@ -46,7 +47,7 @@
 {
     [super viewDidLoad];
     self.view.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"bg"]];
-    self.tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
+//    self.tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
     self.navigationItem.rightBarButtonItem = [[WidgetFactory sharedFactory] normalBarButtonItemWithTitle:@"编辑" target:self action:@selector(editTable:)];
     [self requestMessages];
 }
@@ -78,43 +79,43 @@
 }
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
-    return 55;
+    return 52;
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     Conversation* conversation = _conversations[indexPath.row];
-    static NSString *CellIdentifier = @"SimpleUserEventCell";
+    static NSString *CellIdentifier = @"ConversationCell";
     UITableViewCell *cell = nil;//[tableView dequeueReusableCellWithIdentifier:CellIdentifier];
-//    if (!cell) {
+    if (!cell) {
         UIViewController* temp = [[UIViewController alloc] initWithNibName:CellIdentifier bundle:nil];
         cell = (UITableViewCell*)temp.view;
-//    }
-    SimpleUserEventCell* eventCell = (SimpleUserEventCell*)cell;
+    }
+    ConversationCell* converstationCell = (ConversationCell*)cell;
     User* with = conversation.with;
-    eventCell.name.text = with.name;
-    eventCell.event.text = conversation.message;
-    eventCell.time.text = [DateUtil userFriendlyStringFromDate:conversation.time];
-    CGRect frame = eventCell.avatar.frame;
-    NSString* avatarURL = [NSString stringWithFormat:@"http://%@%@", EOHOST, with.avatar];
-    [eventCell.avatar setPathToNetworkImage:avatarURL forDisplaySize:frame.size contentMode:UIViewContentModeScaleAspectFill];
-    eventCell.avatar.layer.cornerRadius = 5;
-    eventCell.avatar.layer.masksToBounds = YES;
+    converstationCell.nameLabel.text = with.name;
+    converstationCell.messageLabel.text = conversation.message;
+    converstationCell.timeLabel.text = [DateUtil userFriendlyStringFromDate:conversation.time];
+    
+    CGRect frame = converstationCell.avatarView.frame;
+    NSString* avatarURL = [URLService absoluteURL:with.avatar];
+    [converstationCell.avatarView setPathToNetworkImage:avatarURL forDisplaySize:frame.size contentMode:UIViewContentModeScaleAspectFill];
+    converstationCell.avatarView.layer.cornerRadius = 3;
+    converstationCell.avatarView.layer.masksToBounds = YES;
     cell.selectionStyle = UITableViewCellSelectionStyleNone;
-    UIImage* xiaoxi = [UIImage imageNamed:@"xiaoxi"];
-    if ([conversation.unread integerValue] > 0) {
-        UIButton* unreadButton = [UIButton buttonWithType:UIButtonTypeCustom];
-        [unreadButton setBackgroundImage:xiaoxi forState:UIControlStateNormal];
-        unreadButton.frame = CGRectMake(250, 8, xiaoxi.size.width, xiaoxi.size.height);
-        [unreadButton setTitle:[NSString stringWithFormat:@"%d", [conversation.unread integerValue] ] forState:UIControlStateNormal];
-        unreadButton.titleLabel.textColor = [UIColor whiteColor];
-        unreadButton.titleLabel.font = [UIFont systemFontOfSize:12];
-        unreadButton.layer.shadowColor = [UIColor blackColor].CGColor;
-        unreadButton.layer.shadowOpacity = 0.5;
-        unreadButton.layer.shadowOffset = CGSizeMake(0, 1);
-        unreadButton.userInteractionEnabled = NO;
-        [cell.contentView addSubview:unreadButton];
-    }    
+
+    NSInteger unreadCount = [conversation.unread integerValue];
+    if (unreadCount > 0) {
+        converstationCell.unreadLabel.text = [NSString stringWithFormat:@"%d", unreadCount];
+        if (unreadCount > 99) {
+            [converstationCell.unreadLabel sizeToFit];
+        } else {
+            converstationCell.unreadLabel.frame = CGRectMake(40, 36, 15, 12);
+        }
+        converstationCell.unreadLabel.hidden = NO;
+    } else {
+        converstationCell.unreadLabel.hidden = YES;
+    }
     return cell;
 }
 
@@ -151,6 +152,11 @@
 #pragma mark - Table view delegate
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
+    if (![UserService hasAvatar:[UserService service].loggedInUser]) {
+        UIAlertView* av = [[UIAlertView alloc] initWithTitle:@"提示" message:@"要查看和回复消息，请先设置头像" delegate:self cancelButtonTitle:@"以后再说" otherButtonTitles:@"设置", nil];
+        [av show];
+        return;
+    }
     Conversation* conversation = _conversations[indexPath.row];
     XMPPChatViewController2 *chat =[[XMPPChatViewController2 alloc] initWithConversation:conversation];
     conversation.unread = [NSNumber numberWithInteger:0];
@@ -162,8 +168,6 @@
     }
     
     [self reloadData];
-    SimpleUserEventCell* eventCell = (SimpleUserEventCell*)[self tableView:self.tableView cellForRowAtIndexPath:indexPath];
-    chat.avatarSomeoneElse = eventCell.avatar.image;
     [self.navigationController pushViewController:chat animated:YES];
 }
 
@@ -174,4 +178,18 @@
     [[MessageService service] deleteConversation:c];
     [tableView reloadData];
 }
+
+#pragma mark UIAlertViewDelegate
+
+- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex{
+    if (buttonIndex == 1) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            UserDetailsViewController* vc = [[UserDetailsViewController alloc] init];
+            vc.user = [UserService service].loggedInUser;
+            [self.navigationController pushViewController:vc animated:YES];
+        });
+    }
+}
 @end
+
+

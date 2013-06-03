@@ -15,7 +15,7 @@
 #import "UserMoreDetailViewController.h"
 #import "SetMottoViewController.h"
 
-@interface UserDetailsViewController : UITableViewController<CellTextEditorDelegate,PhotoThumbnailCellDelegate,UINavigationControllerDelegate, UserDetailSaveDelegate,  CellTextEditorDelegate, UIActionSheetDelegate, UIGestureRecognizerDelegate, TagViewControllerDelegate, ImageUploaderDelegate, SetMottoDelegate, UIAlertViewDelegate>
+@interface UserDetailsViewController : UIViewController<CellTextEditorDelegate,PhotoThumbnailCellDelegate,UINavigationControllerDelegate, UserDetailSaveDelegate,  CellTextEditorDelegate, UIActionSheetDelegate, UIGestureRecognizerDelegate, TagViewControllerDelegate, ImageUploaderDelegate, SetMottoDelegate, UIAlertViewDelegate, UITableViewDataSource, UITableViewDelegate>
 @property(nonatomic, strong) User* user;
 -(void)reload:(id)sender;
 

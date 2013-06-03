@@ -18,6 +18,12 @@
 #define COCOAPODS_VERSION_MINOR_AKSegmentedControl 0
 #define COCOAPODS_VERSION_PATCH_AKSegmentedControl 2
 
+// CMPopTipView
+#define COCOAPODS_POD_AVAILABLE_CMPopTipView
+#define COCOAPODS_VERSION_MAJOR_CMPopTipView 1
+#define COCOAPODS_VERSION_MINOR_CMPopTipView 2
+#define COCOAPODS_VERSION_PATCH_CMPopTipView 0
+
 // CrittercismSDK
 #define COCOAPODS_POD_AVAILABLE_CrittercismSDK
 #define COCOAPODS_VERSION_MAJOR_CrittercismSDK 3

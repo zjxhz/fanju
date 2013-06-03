@@ -71,7 +71,7 @@
 
 -(void)viewDidAppear:(BOOL)animated{
     [super viewDidAppear:animated];
-    [[NSNotificationCenter defaultCenter] postNotificationName:EOUnreadNotificationCount
+    [[NSNotificationCenter defaultCenter] postNotificationName:UnreadNotificationCount
                                                         object:[NSNumber numberWithInteger:0]
                                                       userInfo:nil];
     [[NotificationService service] markAllNotificationsRead];
@@ -178,8 +178,10 @@
         }
         MealEventCell* mealEventCell = (MealEventCell*)cell;
         MealNotification* mn = (MealNotification*)notification;
-        mealEventCell.topic.text = mn.meal.topic;
+        mealEventCell.topic.text = [NSString stringWithFormat:@" %@ ", mn.meal.topic]; //spaces to create margins
+        [mealEventCell.topic sizeToFit];
         [mealEventCell.mealImage setPathToNetworkImage:[URLService absoluteURL:mn.meal.photoURL] forDisplaySize:mealEventCell.mealImage.frame.size contentMode:UIViewContentModeScaleAspectFill];
+
     } else if([notification isKindOfClass:[PhotoNotification class]]){
         NSString* CellIdentifier = @"UploadPhotoEventCell";
         cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];

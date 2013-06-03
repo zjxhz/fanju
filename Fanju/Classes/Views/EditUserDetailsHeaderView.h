@@ -11,6 +11,5 @@
 
 @interface EditUserDetailsHeaderView : UIView
 @property(nonatomic, weak) IBOutlet UIButton* editPersonalBgButton;
-@property(nonatomic, weak) IBOutlet NINetworkImageView* avatarView;
 @property(nonatomic, weak) IBOutlet NINetworkImageView* personalBgView;
 @end

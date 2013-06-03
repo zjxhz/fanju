@@ -73,8 +73,8 @@
      @"work_for":@"workFor",
      @"updated_at": @"locationUpdatedAt",
      @"background_image":@"backgroundImage",
-     @"birthday": @"birthday"
      }];
+    [userMapping addAttributeMappingsFromArray:@[@"birthday",@"mobile"]];
     [RKObjectMapping addDefaultDateFormatterForString:LONG_TIME_FORMAT_STR inTimeZone:[NSTimeZone defaultTimeZone]];
     [RKObjectMapping addDefaultDateFormatterForString:SHORT_TIME_FORMAT_STR inTimeZone:[NSTimeZone defaultTimeZone]];
     

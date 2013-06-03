@@ -36,8 +36,10 @@
 }
 
 -(void)setup{
+    DDLogVerbose(@"setting up %@", [self class]);
 }
 -(void)tearDown{
+    DDLogVerbose(@"tearing down %@", [self class]);
     _loggedInUser = nil;
 }
 -(User*)getOrFetchUserWithUsername:(NSString*)username success:(fetch_user_success)success failure:(void (^)(void))failure{

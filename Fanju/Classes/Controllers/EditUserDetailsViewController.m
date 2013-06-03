@@ -73,10 +73,6 @@
     if (!_headerView) {
         UIViewController* temp = [[UIViewController alloc] initWithNibName:@"EditUserDetailsHeaderView" bundle:nil];
         _headerView = (EditUserDetailsHeaderView*)temp.view;
-        CGRect frame = _headerView.avatarView.frame;
-        _headerView.avatarView = [AvatarFactory avatarWithBg:_user big:YES];
-        _headerView.avatarView.frame = frame;
-        [_headerView addSubview:_headerView.avatarView];
         _headerView.personalBgView.contentMode = UIViewContentModeScaleAspectFill;
         _headerView.personalBgView.clipsToBounds = YES;
         if (_user.backgroundImage) {
@@ -86,6 +82,10 @@
         }
 
         [_headerView.editPersonalBgButton addTarget:self action:@selector(editBackgroundImage:) forControlEvents:UIControlEventTouchUpInside];
+        CGRect frame = CGRectMake(5, 105, 70, 70);
+        NINetworkImageView* avatarView = [AvatarFactory avatarWithBg:_user big:YES];
+        avatarView.frame = frame;
+        [_headerView addSubview:avatarView];
     }
     
     return _headerView;

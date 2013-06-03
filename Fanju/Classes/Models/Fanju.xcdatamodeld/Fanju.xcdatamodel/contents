@@ -83,6 +83,7 @@
         <attribute name="latitude" optional="YES" attributeType="Float" defaultValueString="0.0" syncable="YES"/>
         <attribute name="locationUpdatedAt" optional="YES" attributeType="Date" syncable="YES"/>
         <attribute name="longitude" optional="YES" attributeType="Float" defaultValueString="0.0" syncable="YES"/>
+        <attribute name="mobile" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="motto" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="name" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="occupation" optional="YES" attributeType="String" syncable="YES"/>
@@ -117,7 +118,7 @@
         <element name="Relationship" positionX="-23726" positionY="-7978" width="128" height="103"/>
         <element name="Restaurant" positionX="-23816" positionY="-8298" width="128" height="133"/>
         <element name="Tag" positionX="-23465" positionY="-7900" width="128" height="88"/>
-        <element name="User" positionX="-23438" positionY="-8335" width="128" height="418"/>
+        <element name="User" positionX="-23438" positionY="-8335" width="128" height="433"/>
         <element name="UserMessage" positionX="-23265" positionY="-8109" width="128" height="133"/>
     </elements>
 </model>

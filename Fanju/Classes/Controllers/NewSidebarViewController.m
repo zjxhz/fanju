@@ -172,7 +172,7 @@
 
 -(UserDetailsViewController*)userDetailsViewController{
     if (!_userDetailsViewController) {
-        _userDetailsViewController = [[UserDetailsViewController alloc] initWithStyle:UITableViewStylePlain];
+        _userDetailsViewController = [[UserDetailsViewController alloc] init];
     }
     return _userDetailsViewController;
 }
@@ -195,7 +195,10 @@
 
 -(void)viewDidAppear:(BOOL)animated{
     [super viewDidAppear:animated];
-    self.view.frame = CGRectMake(0, 0, 270, 460);
+    CGRect appFrame = [[UIScreen mainScreen] applicationFrame];
+    appFrame.origin.y = 0;
+    self.view.frame = appFrame;
+    DDLogVerbose(@"setting side bar frame to: %@", NSStringFromCGRect(self.view.frame));
 }
 
 #pragma mark - Table view data source
@@ -331,7 +334,15 @@
     
 }
 - (void)showMealList{
+    [self showMealList:NO];
+}
+
+- (void)showMealList:(BOOL)reload{
     [self showViewController:self.mealListViewController];
+    if (reload) {
+    [self.mealListViewController reload];
+    }
+
 }
 
 -(void)showMyMeals{

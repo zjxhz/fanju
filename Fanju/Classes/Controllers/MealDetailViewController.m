@@ -33,12 +33,15 @@
 #import "UserService.h"
 #import "Restaurant.h"
 #import "Order.h"
+#import "CMPopTipView.h"
 
 @implementation MealDetailViewController{
     MealDetailsViewDelegate* _mealDetailsViewDelegate;
     Order* _myOrder;
     NSArray* _participants;
+    CMPopTipView *_navBarLeftButtonPopTipView;
 }
+
 -(id)init{
     if (self = [super init]) {
         _mealDetailsViewDelegate = [[MealDetailsViewDelegate alloc] init];
@@ -53,38 +56,6 @@
     [self initTabView];
 }
 
--(void)requestOrderStatus{
-    User* loggedInUser = [UserService service].loggedInUser;
-    RKObjectManager* manager = [RKObjectManager sharedManager];
-    NSDictionary* params = @{@"meal__id":self.meal.mID, @"status": @"2"};
-    [manager getObjectsAtPath:@"order/" parameters:params success:^(RKObjectRequestOperation *operation, RKMappingResult *mappingResult) {
-        NSArray* orders = mappingResult.array;
-        if ( [orders count] >= 1) {
-            if (orders.count > 1) {
-                DDLogError(@"duplicated orders found for meal(%@) and user(%@)", self.meal.mID, loggedInUser.uID);
-            }
-            _myOrder = orders[0];
-            [_joinButton setTitle:@"已支付，查看订单" forState:UIControlStateNormal];
-            [_joinButton addTarget:self action:@selector(viewOrder:) forControlEvents:UIControlEventTouchDown];
-        } else {
-            NSDate* time = [MealService dateOfMeal:_meal];
-            if([time compare:[NSDate date]] == NSOrderedAscending){
-                [_joinButton setTitle:@"已结束" forState:UIControlStateNormal];
-            }  else if ([self.meal.actualPersons integerValue] >= [self.meal.maxPersons integerValue]) {
-                [_joinButton setTitle:@"卖光了" forState:UIControlStateNormal];
-                [_joinButton removeTarget:self action:@selector(joinMeal:) forControlEvents:UIControlEventTouchDown];
-            } else {
-                [_joinButton setTitle:@"参加饭局" forState:UIControlStateNormal];
-                [_joinButton addTarget:self action:@selector(joinMeal:) forControlEvents:UIControlEventTouchDown];
-            }
-        }
-        [UIView animateWithDuration:0.9 animations:^{
-            _tabBar.hidden = NO;
-        }];
-    } failure:^(RKObjectRequestOperation *operation, NSError *error) {
-        DDLogError(@"failed to get order status for id %@", _mealID);
-    }];
-}
 
 -(void)viewOrder:(id)sender{
     OrderDetailsViewController *orderVC = [[OrderDetailsViewController alloc] init];
@@ -107,9 +78,7 @@
     _joinButton.titleLabel.textColor = [UIColor whiteColor];
     _joinButton.titleLabel.font = [UIFont boldSystemFontOfSize:19];
 
-    if (!_unfinishedOrder) {
-        _tabBar.hidden = YES;
-    } else {
+    if (_unfinishedOrder) {
         [_joinButton setTitle:@"去支付" forState:UIControlStateNormal];
         [_joinButton addTarget:self action:@selector(finishOrder:) forControlEvents:UIControlEventTouchDown];
     }
@@ -170,12 +139,33 @@
 -(void)viewWillAppear:(BOOL)animated{
     _mealDetailsViewDelegate.detailsHeight = _detailsView.frame.size.height;
     if (!_unfinishedOrder) {
-        [self requestOrderStatus];
+        [self updateJoinButton];
     }
     [super viewWillAppear:animated];
     
 }
 
+-(void)updateJoinButton{
+    User* loggedInUser = [UserService service].loggedInUser;
+    for (Order* order in _meal.orders) {
+        if ([order.user isEqual:loggedInUser]) {
+            _myOrder = order;
+            [_joinButton setTitle:@"已支付，查看订单" forState:UIControlStateNormal];
+            [_joinButton addTarget:self action:@selector(viewOrder:) forControlEvents:UIControlEventTouchDown];
+            return;
+        }
+    }
+    NSDate* time = [MealService dateOfMeal:_meal];
+    if([time compare:[NSDate date]] == NSOrderedAscending){
+        [_joinButton setTitle:@"已结束" forState:UIControlStateNormal];
+    }  else if ([self.meal.actualPersons integerValue] >= [self.meal.maxPersons integerValue]) {
+        [_joinButton setTitle:@"卖光了" forState:UIControlStateNormal];
+        [_joinButton removeTarget:self action:@selector(joinMeal:) forControlEvents:UIControlEventTouchDown];
+    } else {
+        [_joinButton setTitle:@"参加饭局" forState:UIControlStateNormal];
+        [_joinButton addTarget:self action:@selector(joinMeal:) forControlEvents:UIControlEventTouchDown];
+    }
+}
 -(void)finishOrder:(id)sender{
     JoinMealViewController* vc = [[JoinMealViewController alloc] init];
     vc.meal = self.meal;
@@ -396,7 +386,6 @@
     _participantsView.contentSize = CGSizeMake( (PARTICIPANTS_WIDTH + PARTICIPANTS_GAP ) * _participants.count, PARTICIPANTS_HEIGHT);
 
     for (int i = 0; i < _participants.count; i++) {
-//        UIImage* photo_bg = [UIImage imageNamed:@"p_photo_bg"];
         id obj = _participants[i];
         UIImageView* avatarView = nil;
         if ([obj isKindOfClass:[GuestUser class]]) {
@@ -405,14 +394,13 @@
             avatarView = [AvatarFactory avatarWithBg:obj];
         }
         avatarView.frame = CGRectMake(55*i, 0, 53, 53);
-//        UIView* contentView = [[UIView alloc] initWithFrame:CGRectMake((photo_bg.size.width + PARTICIPANTS_GAP) * i , 0, PARTICIPANTS_WIDTH, photo_bg.size.height)];
-//        User *user = [_participants objectAtIndex:i];
-//        UIImageView *avatarView = [AvatarFactory avatarWithBg:user];
-//        avatarView.frame = CGRectMake(0, 0, 53, 53);
+        avatarView.tag = i;
+        avatarView.userInteractionEnabled = YES;
         if ([obj isKindOfClass:[User class]]) {
-            avatarView.tag = i; 
             UIGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(avatarTapped:)];
-            avatarView.userInteractionEnabled = YES;
+            [avatarView addGestureRecognizer:tap];
+        } else {
+            UIGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(guestTapped:)];
             [avatarView addGestureRecognizer:tap];
         }
         
@@ -433,6 +421,25 @@
     [self.navigationController pushViewController:userDetails animated:YES];
 }
 
+-(void)guestTapped:(UITapGestureRecognizer*)tap{
+    if (!_navBarLeftButtonPopTipView) {
+        _navBarLeftButtonPopTipView = [[CMPopTipView alloc] init] ;
+        _navBarLeftButtonPopTipView.dismissTapAnywhere = YES;
+    } else {
+        [_navBarLeftButtonPopTipView dismissAnimated:NO];
+    }
+    UIView* view = tap.view;
+    NSInteger tag = view.tag;
+    GuestUser* guest = _participants[tag];
+    NSString* message = [NSString stringWithFormat:@"%@邀请的朋友", guest.host.name];
+    _navBarLeftButtonPopTipView.message = message;
+    _navBarLeftButtonPopTipView.backgroundColor = [UIColor blackColor];
+//    navBarLeftButtonPopTipView.delegate = self;
+    [_navBarLeftButtonPopTipView presentPointingAtView:view inView:self.view animated:YES];
+//    [navBarLeftButtonPopTipView presentPointingAtBarButtonItem:self.navigationItem.leftBarButtonItem animated:YES];
+    // Dismiss a CMPopTipView
+//    [navBarLeftButtonPopTipView dismissAnimated:YES];
+}
 -(void) updateNumberOfParticipants{
      _numberOfPersons.text = [NSString stringWithFormat:@"%@/%@", _meal.actualPersons, _meal.maxPersons];
     [_numberOfPersons sizeToFit];

@@ -34,6 +34,7 @@
 #import "Relationship.h"
 #import "MealDetailViewController.h"
 
+#define TOOLBAR_HEIGHT 49
 @interface UserDetailsViewController (){
     PhotoThumbnailCell* _photoCell;
     Photo* _selectedPhoto;
@@ -51,18 +52,21 @@
     NSManagedObjectContext* _contex;
     BOOL _reloaded;
     Meal* _nextMeal;
+    UITableView* _tableView;
 }
 
 @end
 
 @implementation UserDetailsViewController
-- (id)initWithStyle:(UITableViewStyle)style{
-    if (self = [super initWithStyle:style]) {
-        self.tableView.delegate = self;
-        self.tableView.dataSource = self;
-        self.tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
-        self.tableView.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"bg"]];
-        self.tableView.showsVerticalScrollIndicator = NO;
+- (id)init{
+    if (self = [super init]) {
+        _tableView = [[UITableView alloc] initWithFrame:CGRectZero style:UITableViewStylePlain];
+        [self.view addSubview:_tableView];
+        _tableView.delegate = self;
+        _tableView.dataSource = self;
+        _tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
+        _tableView.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"bg"]];
+        _tableView.showsVerticalScrollIndicator = NO;
         RKManagedObjectStore* store = [RKObjectManager sharedManager].managedObjectStore;
         _contex = store.mainQueueManagedObjectContext;
     }
@@ -81,34 +85,52 @@
 }
 -(void)viewWillAppear:(BOOL)animated{
     [super viewWillAppear:animated];
-    [self buildUI];
+    
+    [self updateNavigationBar];
+    UIImage* toolbarBg = [UIImage imageNamed:@"toolbar_bg"] ;
+    self.toolbarItems  = [self createToolbarItems];
+    [self.navigationController.toolbar setBackgroundImage:toolbarBg forToolbarPosition:UIToolbarPositionAny barMetrics:UIBarMetricsDefault];
+    [self.navigationController setToolbarHidden:NO];
+    
+    UIImage* toolbarShadow = [UIImage imageNamed:@"toolbar_shadow"];
+    CGFloat toolbarHeight = toolbarBg.size.height;
+    CGFloat shadowY = self.view.frame.size.height- toolbarHeight - toolbarShadow.size.height;
+    _shadowView.frame  = CGRectMake(0, shadowY, toolbarShadow.size.width, toolbarShadow.size.height);
+    
+    CGRect frame = self.view.frame;
+    frame.size.height = self.view.frame.size.height - toolbarBg.size.height;
+    _tableView.frame = frame;
+    [self.view sendSubviewToBack:_tableView];
 }
 
 -(void)buildUI{
-    UIImage* toolbarBg = [UIImage imageNamed:@"toolbar_bg"] ;
-    [self updateNavigationBar];
     self.toolbarItems  = [self createToolbarItems];
-    [self.navigationController setToolbarHidden:NO];
-    [self.navigationController.toolbar setBackgroundImage:toolbarBg forToolbarPosition:UIToolbarPositionAny barMetrics:UIBarMetricsDefault];
-    
     UIImage* toolbarShadow = [UIImage imageNamed:@"toolbar_shadow"];
-    _shadowView = [[UIImageView alloc] initWithFrame:CGRectMake(0, -toolbarShadow.size.height, toolbarShadow.size.width, toolbarShadow.size.height)];
+    _shadowView = [[UIImageView alloc] initWithFrame:CGRectZero];
     _shadowView.image = toolbarShadow;
-    [self.navigationController.toolbar addSubview:_shadowView];
+    [self.view addSubview:_shadowView];
 }
 
 -(void)viewWillDisappear:(BOOL)animated{
     [super viewDidDisappear:animated];
     [self.navigationController setToolbarHidden:YES];
-    [_shadowView removeFromSuperview];
 }
 
 -(void)viewDidLoad{
     [super viewDidLoad];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(userUpdated:) name:NOTIFICATION_USER_UPDATE object:nil];
-    _refreshControl = [[ODRefreshControl alloc] initInScrollView:self.tableView];
+    _refreshControl = [[ODRefreshControl alloc] initInScrollView:_tableView];
     [_refreshControl addTarget:self action:@selector(reload:) forControlEvents:UIControlEventValueChanged];
+    
+    UIImage* toolbarBg = [UIImage imageNamed:@"toolbar_bg"] ;
+    
+    self.toolbarItems  = [self createToolbarItems];
+    [self.navigationController setToolbarHidden:NO];
+    [self.navigationController.toolbar setBackgroundImage:toolbarBg forToolbarPosition:UIToolbarPositionAny barMetrics:UIBarMetricsDefault];
+    
+    [self buildUI];
 }
+
 
 -(void)viewDidAppear:(BOOL)animated{
     [super viewDidAppear:animated];
@@ -120,7 +142,7 @@
     _user = user;
     self.navigationItem.titleView = [[WidgetFactory sharedFactory] titleViewWithTitle:_user.name];
 //    [self loadComments];
-    [self.tableView reloadData];
+    [_tableView reloadData];
 }
 
 -(void)updateTitle{
@@ -263,7 +285,7 @@
                                             }
                                             
                                             [self updateFollowOrNotButton];
-                                            [self.tableView reloadData];
+                                            [_tableView reloadData];
                                         } failure:^{
                                             [SVProgressHUD dismissWithError:@"取消关注失败"];
                                             DDLogError(@"failed to remove following");
@@ -293,7 +315,7 @@
                                                 }
                                                 
                                                 [self updateFollowOrNotButton];
-                                                [self.tableView reloadData];
+                                                [_tableView reloadData];
                                             } else {
                                                 [SVProgressHUD dismissWithError:@"关注失败"];
                                             }
@@ -403,7 +425,7 @@
     UITableViewCell *cell = nil;
     if (indexPath.section == 0) {
         static NSString* USER_DETAILS_CELL = @"USER_DETAILS_CELL";
-        cell = [self.tableView dequeueReusableCellWithIdentifier:USER_DETAILS_CELL];
+        cell = [_tableView dequeueReusableCellWithIdentifier:USER_DETAILS_CELL];
         BOOL recalculateHeight = NO;
         if(!cell){
             cell = [[UserDetailsCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:USER_DETAILS_CELL];
@@ -422,7 +444,7 @@
             recalculateHeight = YES;
         }
         if (recalculateHeight) {
-            [self.tableView reloadData];
+            [_tableView reloadData];
         }
     } else if(indexPath.section == 1){
         if (indexPath.row == 0) {
@@ -459,7 +481,7 @@
             recalculateHeight = YES;
         }
         if (recalculateHeight) {
-            [self.tableView reloadData];
+            [_tableView reloadData];
         }
     }  else if(indexPath.section == 3){
         NSString* CellIdentifier = @"UserInfoCell";
@@ -564,7 +586,7 @@
 #pragma mark CellTextEditorDelegate
 -(void)valueSaved:(NSString *)value{
     _user.motto = value;
-    [self.tableView reloadData];
+    [_tableView reloadData];
     [self dismissModalViewControllerAnimated:YES];
     NSDictionary* paramDict = @{@"motto": value};
     NSString* url = [URLService absoluteApiURL:@"user/%@/", _user.uID];
@@ -608,7 +630,7 @@
     [_contex saveToPersistentStore:nil];//delete locally first, and hope that delete will success remotely as well
     [om deleteObject:nil path:path parameters:nil success:^(RKObjectRequestOperation *operation, RKMappingResult *mappingResult) {
         [SVProgressHUD dismissWithSuccess:@"删除成功"];
-        [self.tableView reloadData];
+        [_tableView reloadData];
         DDLogInfo(@"user photo delete.");
     } failure:^(RKObjectRequestOperation *operation, NSError *error) {
         [SVProgressHUD dismissWithError:@"删除失败"];
@@ -658,14 +680,13 @@
 
 #pragma mark TagViewControllerDelegate
 -(void)tagsSaved:(NSArray*)newTags forUser:(UserProfile*)user{
-    [self.tableView reloadData];
+    [_tableView reloadData];
 }
 
 #pragma mark ImageUploaderDelegate
 -(void)didUploadPhoto:(Photo *)photo image:(UIImage *)image{
     [_photoCell addUploadedPhoto:photo withLocalImage:image];
-    [[Authentication sharedInstance] relogin]; // to refresh photos, or we can just add the new photo TODO
-    [self.tableView reloadData];
+    [_tableView reloadData];
     [_photoCell scrollToRight];
 }
 -(void)didFailUploadPhoto:(UIImage*)image{
@@ -676,8 +697,7 @@
     _userDetailsCell.avatar.image = image;
     
     [_userDetailsCell.avatar setPathToNetworkImage:[URLService absoluteURL:_user.avatar]];
-    [self.tableView reloadData];
-    [[Authentication sharedInstance] relogin];
+    [_tableView reloadData];
 }
 
 -(void)didFailUploadAvatar:(UIImage*)image{
@@ -689,8 +709,7 @@
     _userDetailsCell.backgroundImageView.image = image;
     
     [_userDetailsCell.avatar setPathToNetworkImage:[URLService absoluteURL:_user.avatar]];
-    [self.tableView reloadData];
-    [[Authentication sharedInstance] relogin];
+    [_tableView reloadData];
 }
 
 -(void)didFailUploadBackground:(UIImage*)image{
@@ -710,7 +729,7 @@
                                              if(![_contex saveToPersistentStore:&error]){
                                                  DDLogError(@"failed to save motto to core data with error: %@", error);
                                              }
-                                             [self.tableView reloadData];
+                                             [_tableView reloadData];
                                              [self dismissViewControllerAnimated:YES completion:^{}];
                                          } failure:^{
                                              [self dismissViewControllerAnimated:YES completion:^{}];

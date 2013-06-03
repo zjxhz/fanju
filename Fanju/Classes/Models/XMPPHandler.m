@@ -25,7 +25,7 @@ NSString * const EOMessageDidSaveNotification = @"EOMessageDidSaveNotification";
 NSString * const EOMessageDidDeleteNotification = @"EOMessageDidDeleteNotification";
 NSString * const EOCurrentContact = @"EOCurrentContact";
 NSString * const EOUnreadMessageCount = @"EOUnreadMessageCount";
-NSString * const EOUnreadNotificationCount = @"EOUnreadNotificationCount";
+
 
 
 

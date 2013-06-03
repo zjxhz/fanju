@@ -119,6 +119,7 @@
     UITapGestureRecognizer *tapGestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(loginWithWeibo:)];
     [self.loginWithWeibo addGestureRecognizer:tapGestureRecognizer];
     [self requestDataFromServer];
+//    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(alixPayResult:) name:ALIPAY_PAY_RESULT object:nil];
     
 }
 
@@ -231,14 +232,6 @@
 -(IBAction)loginWithQQ:(id)sender{
     
 }
-
-#pragma mark -
-#pragma mark PullRefreshTableViewController
-
-- (void)pullToRefresh {
-    [self requestDataFromServer];
-}
-
 
 #pragma mark AuthenticationDelegate
 -(void) sinaweiboDidLogin:(SinaWeibo *)sinaWeibo{

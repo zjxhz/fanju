@@ -1,6 +1,7 @@
 PODS:
   - AFNetworking (1.2.1)
   - AKSegmentedControl (1.0.2)
+  - CMPopTipView (1.2.0)
   - CrittercismSDK (3.4.9)
   - JSONKit (1.5pre)
   - MFSideMenu (0.4.1)
@@ -98,6 +99,7 @@ PODS:
 
 DEPENDENCIES:
   - AKSegmentedControl
+  - CMPopTipView (~> 1.2.0)
   - CrittercismSDK (~> 3.4.9)
   - JSONKit (~> 1.5pre)
   - MFSideMenu (~> 0.4.1)
@@ -114,6 +116,7 @@ DEPENDENCIES:
 SPEC CHECKSUMS:
   AFNetworking: a44069e3c9c89867544f6639482f155c7e5f9b41
   AKSegmentedControl: 200a37463b1d4320d433d55c8008d95549159a25
+  CMPopTipView: 3f2da10317571f050ea5457329002d3c11aae634
   CrittercismSDK: cf4296c350e7c90bac15ae820f714dc48e1829ea
   JSONKit: 409734ab3407fce90ef7eaa95d7168f38d9a6601
   MFSideMenu: fb75eaacf2d48350ec2d3f508d6f6e465db0c8b9

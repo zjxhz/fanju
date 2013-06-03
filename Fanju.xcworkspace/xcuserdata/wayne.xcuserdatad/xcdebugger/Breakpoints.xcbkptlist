@@ -8,11 +8,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Fanju/Classes/Controllers/JoinMealViewController.m"
-         timestampString = "388309457.442377"
+         timestampString = "391955915.243895"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "304"
-         endingLineNumber = "304"
+         startingLineNumber = "331"
+         endingLineNumber = "331"
          landmarkName = "-cancel:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -21,11 +21,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Fanju/Classes/Controllers/JoinMealViewController.m"
-         timestampString = "391313059.815706"
+         timestampString = "391955915.243895"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "327"
-         endingLineNumber = "327"
+         startingLineNumber = "354"
+         endingLineNumber = "354"
          landmarkName = "-alixPayResult:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -60,11 +60,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Fanju/Classes/Services/ArchivedMessageService.m"
-         timestampString = "391575509.918623"
+         timestampString = "391686452.200019"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "402"
-         endingLineNumber = "402"
+         startingLineNumber = "404"
+         endingLineNumber = "404"
          landmarkName = "-isValidMessage:messageDate:message:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -86,11 +86,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Fanju/Classes/Services/ArchivedMessageService.m"
-         timestampString = "391575509.918623"
+         timestampString = "391686452.200019"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "399"
-         endingLineNumber = "399"
+         startingLineNumber = "401"
+         endingLineNumber = "401"
          landmarkName = "-isValidMessage:messageDate:message:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -125,11 +125,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Fanju/Classes/Services/ArchivedMessageService.m"
-         timestampString = "391489066.669499"
+         timestampString = "391686452.200019"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "98"
-         endingLineNumber = "98"
+         startingLineNumber = "100"
+         endingLineNumber = "100"
          landmarkName = "-retrieveConversationsStartFrom:after:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -151,7 +151,7 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Fanju/Classes/Controllers/MealListViewController.m"
-         timestampString = "390452969.836702"
+         timestampString = "391676437.62084"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "121"
@@ -164,11 +164,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Fanju/Classes/Services/NotificationService.m"
-         timestampString = "391138030.364033"
+         timestampString = "391686452.200019"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "341"
-         endingLineNumber = "341"
+         startingLineNumber = "346"
+         endingLineNumber = "346"
          landmarkName = "-handleNotificationsFor:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -177,11 +177,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Fanju/Classes/Services/NotificationService.m"
-         timestampString = "391138030.364033"
+         timestampString = "391686452.200019"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "305"
-         endingLineNumber = "305"
+         startingLineNumber = "310"
+         endingLineNumber = "310"
          landmarkName = "-handlePhotoNotifications:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -203,11 +203,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Fanju/Classes/Services/ArchivedMessageService.m"
-         timestampString = "391575509.918623"
+         timestampString = "391686452.200019"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "301"
-         endingLineNumber = "301"
+         startingLineNumber = "303"
+         endingLineNumber = "303"
          landmarkName = "-handleRetrievedMessages:after:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -216,11 +216,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Fanju/Classes/Controllers/ConversationViewController.m"
-         timestampString = "390822947.437227"
+         timestampString = "391684019.840008"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "86"
-         endingLineNumber = "86"
+         startingLineNumber = "87"
+         endingLineNumber = "87"
          landmarkName = "-tableView:cellForRowAtIndexPath:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -229,11 +229,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Fanju/Classes/Services/NotificationService.m"
-         timestampString = "391138030.364033"
+         timestampString = "391686452.200019"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "191"
-         endingLineNumber = "191"
+         startingLineNumber = "196"
+         endingLineNumber = "196"
          landmarkName = "-handleArchivedNotificatoin:atTime:read:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -294,11 +294,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Fanju/Classes/Services/NotificationService.m"
-         timestampString = "390822171.383143"
+         timestampString = "391686452.200019"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "115"
-         endingLineNumber = "115"
+         startingLineNumber = "120"
+         endingLineNumber = "120"
          landmarkName = "-handlePendingNotifications"
          landmarkType = "5">
       </FileBreakpoint>
@@ -321,11 +321,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Fanju/Classes/Services/NotificationService.m"
-         timestampString = "390822171.383143"
+         timestampString = "391686452.200019"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "77"
-         endingLineNumber = "77"
+         startingLineNumber = "82"
+         endingLineNumber = "82"
          landmarkName = "-handleNotification:at:read:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -347,11 +347,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Fanju/Classes/Controllers/UserDetailsViewController.m"
-         timestampString = "391656408.471501"
+         timestampString = "391942121.301164"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "610"
-         endingLineNumber = "610"
+         startingLineNumber = "632"
+         endingLineNumber = "632"
          landmarkName = "-deleteUserPhoto:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -360,11 +360,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Fanju/Classes/Controllers/UserDetailsViewController.m"
-         timestampString = "391656408.471501"
+         timestampString = "391942121.301164"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "614"
-         endingLineNumber = "614"
+         startingLineNumber = "636"
+         endingLineNumber = "636"
          landmarkName = "-deleteUserPhoto:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -386,11 +386,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Fanju/Classes/Controllers/MealDetailViewController.m"
-         timestampString = "391098759.146658"
+         timestampString = "391684019.840008"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "363"
-         endingLineNumber = "363"
+         startingLineNumber = "353"
+         endingLineNumber = "353"
          landmarkName = "-fetchMenu:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -399,11 +399,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Fanju/Classes/Controllers/MealDetailViewController.m"
-         timestampString = "391098759.146658"
+         timestampString = "391684019.840008"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "367"
-         endingLineNumber = "367"
+         startingLineNumber = "357"
+         endingLineNumber = "357"
          landmarkName = "-fetchMenu:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -412,11 +412,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Fanju/Classes/Controllers/MealDetailViewController.m"
-         timestampString = "391098759.146658"
+         timestampString = "391684019.840008"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "379"
-         endingLineNumber = "379"
+         startingLineNumber = "369"
+         endingLineNumber = "369"
          landmarkName = "-fetchMenu:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -451,11 +451,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Fanju/Classes/Controllers/UserListViewController.m"
-         timestampString = "391599425.068517"
+         timestampString = "391686800.105076"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "302"
-         endingLineNumber = "302"
+         startingLineNumber = "300"
+         endingLineNumber = "300"
          landmarkName = "-actionSheet:clickedButtonAtIndex:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -490,11 +490,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Fanju/Classes/Controllers/UserDetailsViewController.m"
-         timestampString = "391606944.01843"
+         timestampString = "391942121.301164"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "301"
-         endingLineNumber = "301"
+         startingLineNumber = "323"
+         endingLineNumber = "323"
          landmarkName = "-follow"
          landmarkType = "5">
       </FileBreakpoint>
@@ -503,11 +503,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Fanju/Classes/Controllers/UserDetailsViewController.m"
-         timestampString = "391606944.01843"
+         timestampString = "391942121.301164"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "268"
-         endingLineNumber = "268"
+         startingLineNumber = "290"
+         endingLineNumber = "290"
          landmarkName = "-unfollow"
          landmarkType = "5">
       </FileBreakpoint>
@@ -658,19 +658,6 @@
          shouldBeEnabled = "Yes"
          ignoreCount = "0"
          continueAfterRunningActions = "No"
-         filePath = "Fanju/Classes/Controllers/MealDetailViewController.m"
-         timestampString = "391098759.146658"
-         startingColumnNumber = "9223372036854775807"
-         endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "85"
-         endingLineNumber = "85"
-         landmarkName = "-requestOrderStatus"
-         landmarkType = "5">
-      </FileBreakpoint>
-      <FileBreakpoint
-         shouldBeEnabled = "Yes"
-         ignoreCount = "0"
-         continueAfterRunningActions = "No"
          filePath = "Fanju/Classes/Controllers/AlbumViewController.m"
          timestampString = "391100092.749377"
          startingColumnNumber = "9223372036854775807"
@@ -678,19 +665,6 @@
          startingLineNumber = "157"
          endingLineNumber = "157"
          landmarkName = "-deletePhotos:"
-         landmarkType = "5">
-      </FileBreakpoint>
-      <FileBreakpoint
-         shouldBeEnabled = "Yes"
-         ignoreCount = "0"
-         continueAfterRunningActions = "No"
-         filePath = "Fanju/Classes/Helpers/ImageUploader.m"
-         timestampString = "391592087.642635"
-         startingColumnNumber = "9223372036854775807"
-         endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "125"
-         endingLineNumber = "125"
-         landmarkName = "-doAddPhoto:withName:"
          landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
@@ -711,11 +685,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Fanju/Classes/Controllers/JoinMealViewController.m"
-         timestampString = "391313059.815706"
+         timestampString = "391955915.243895"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "320"
-         endingLineNumber = "320"
+         startingLineNumber = "347"
+         endingLineNumber = "347"
          landmarkName = "-alixPayResult:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -769,19 +743,6 @@
          startingLineNumber = "181"
          endingLineNumber = "181"
          landmarkName = "-parseAlixPayUrl:application:"
-         landmarkType = "5">
-      </FileBreakpoint>
-      <FileBreakpoint
-         shouldBeEnabled = "Yes"
-         ignoreCount = "0"
-         continueAfterRunningActions = "No"
-         filePath = "Fanju/Classes/Helpers/ImageUploader.m"
-         timestampString = "391592087.642635"
-         startingColumnNumber = "9223372036854775807"
-         endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "79"
-         endingLineNumber = "79"
-         landmarkName = "-imagePickerController:didFinishPickingMediaWithInfo:"
          landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
@@ -867,11 +828,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Fanju/Classes/Controllers/UserDetailsViewController.m"
-         timestampString = "391656408.471501"
+         timestampString = "391942121.301164"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "723"
-         endingLineNumber = "723"
+         startingLineNumber = "742"
+         endingLineNumber = "742"
          landmarkName = "-alertView:clickedButtonAtIndex:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -880,51 +841,12 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Fanju/Classes/Controllers/UserDetailsViewController.m"
-         timestampString = "391606944.01843"
+         timestampString = "391942121.301164"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "215"
-         endingLineNumber = "215"
+         startingLineNumber = "237"
+         endingLineNumber = "237"
          landmarkName = "-sendMsg:"
-         landmarkType = "5">
-      </FileBreakpoint>
-      <FileBreakpoint
-         shouldBeEnabled = "Yes"
-         ignoreCount = "0"
-         continueAfterRunningActions = "No"
-         filePath = "Fanju/Classes/Helpers/ImageUploader.m"
-         timestampString = "391592087.642635"
-         startingColumnNumber = "9223372036854775807"
-         endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "133"
-         endingLineNumber = "133"
-         landmarkName = "-doAddPhoto:withName:"
-         landmarkType = "5">
-      </FileBreakpoint>
-      <FileBreakpoint
-         shouldBeEnabled = "Yes"
-         ignoreCount = "0"
-         continueAfterRunningActions = "No"
-         filePath = "Fanju/Classes/Helpers/ImageUploader.m"
-         timestampString = "391592087.642635"
-         startingColumnNumber = "9223372036854775807"
-         endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "137"
-         endingLineNumber = "137"
-         landmarkName = "-doAddPhoto:withName:"
-         landmarkType = "5">
-      </FileBreakpoint>
-      <FileBreakpoint
-         shouldBeEnabled = "Yes"
-         ignoreCount = "0"
-         continueAfterRunningActions = "No"
-         filePath = "Fanju/Classes/Helpers/ImageUploader.m"
-         timestampString = "391592087.642635"
-         startingColumnNumber = "9223372036854775807"
-         endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "216"
-         endingLineNumber = "216"
-         landmarkName = "-actionSheet:clickedButtonAtIndex:"
          landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
@@ -945,11 +867,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Fanju/Classes/Controllers/UserDetailsViewController.m"
-         timestampString = "391607109.120824"
+         timestampString = "391942121.301164"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "354"
-         endingLineNumber = "354"
+         startingLineNumber = "376"
+         endingLineNumber = "376"
          landmarkName = "-showNextMeal:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -964,6 +886,32 @@
          startingLineNumber = "217"
          endingLineNumber = "217"
          landmarkName = "-doLoadEarlierMessages"
+         landmarkType = "5">
+      </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "Yes"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         filePath = "Fanju/Classes/Controllers/JoinMealViewController.m"
+         timestampString = "391955915.243895"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "309"
+         endingLineNumber = "309"
+         landmarkName = "-updateMobile"
+         landmarkType = "5">
+      </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "Yes"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         filePath = "Fanju/Classes/Controllers/JoinMealViewController.m"
+         timestampString = "391955915.243895"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "286"
+         endingLineNumber = "286"
+         landmarkName = "-pay:"
          landmarkType = "5">
       </FileBreakpoint>
    </FileBreakpoints>

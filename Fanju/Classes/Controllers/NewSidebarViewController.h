@@ -35,6 +35,7 @@
 
 +(NewSidebarViewController*) sideBar;
 - (void)showMealList;
+- (void)showMealList:(BOOL)reload;
 - (void)showRegistrationWizard;
 @end
 

@@ -94,7 +94,7 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
 }
 
 -(void)showUserDetails:(id)sender{
-    UserDetailsViewController *details = [[UserDetailsViewController alloc] initWithStyle:UITableViewStylePlain];
+    UserDetailsViewController *details = [[UserDetailsViewController alloc] init];
     details.user = _conversation.with;
     [self.navigationController pushViewController:details animated:YES];
 }
@@ -502,7 +502,7 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
 
 #pragma mark UIBubbleTableViewCellAvatarDelegate
 -(void)avatarTapped:(UIImageView*)avatar{
-//    UserDetailsViewController *details = [[UserDetailsViewController alloc] initWithStyle:UITableViewStylePlain];
+//    UserDetailsViewController *details = [[UserDetailsViewController alloc] init];
 //    details.user = _conversation.with;
 //    [self.navigationController pushViewController:details animated:YES];
 }

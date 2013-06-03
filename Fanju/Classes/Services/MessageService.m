@@ -48,18 +48,23 @@ NSString * const CurrentConversation = @"CurrentConversation";
 }
 
 -(void)setup{
+    DDLogVerbose(@"setting up %@", [self class]);
     _xmppStream = [XMPPHandler sharedInstance].xmppStream;
     [_xmppStream addDelegate:self delegateQueue:dispatch_get_main_queue()];
     _unhandledMessages = [NSMutableDictionary dictionary];
     _unreadMessageCount = [[NSUserDefaults standardUserDefaults] integerForKey:[self unreadMessageKey]];
+    [[NSNotificationCenter defaultCenter] postNotificationName:EOUnreadMessageCount
+                                                        object:[NSNumber numberWithInteger:_unreadMessageCount]
+                                                      userInfo:nil]; //initial notif to update total
     [self loadConversations];
 }
 
 -(NSString*)unreadMessageKey{
-    return [NSString stringWithFormat:@"%@_%@", [UserService service].loggedInUser, UNREAD_MESSAGE_COUNT];
+    return [NSString stringWithFormat:@"%@_%@", [UserService service].loggedInUser.uID, UNREAD_MESSAGE_COUNT];
 }
 
 -(void)tearDown{
+    DDLogVerbose(@"tearing down %@", [self class]);
     [_xmppStream removeDelegate:self];
 }
 
@@ -237,6 +242,7 @@ NSString * const CurrentConversation = @"CurrentConversation";
     }
     _unreadMessageCount = totoalUnread;
     [[NSUserDefaults standardUserDefaults] setInteger:_unreadMessageCount forKey:[self unreadMessageKey]];
+    [[NSUserDefaults standardUserDefaults] synchronize];
     [[NSNotificationCenter defaultCenter] postNotificationName:EOUnreadMessageCount
                                                         object:[NSNumber numberWithInteger:totoalUnread]
                                                       userInfo:nil];

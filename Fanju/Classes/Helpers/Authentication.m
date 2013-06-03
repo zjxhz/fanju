@@ -100,6 +100,7 @@ NSString * const EODidLogoutNotification = @"EODidLogoutNotification";
 
 //re-login may be needed as the cookie can be invalid(e.g. password was changed somewhere else), and if it's invalid then the cookies 
 //should be deleted by logging out
+//NOTE: call this only when app starts up or services will be set up multiple times
 -(void)relogin{
     if (_currentUser && _currentUser.username && _currentUser.password) {
         DDLogVerbose(@"logging in with username and password");

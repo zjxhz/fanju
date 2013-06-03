@@ -36,6 +36,7 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
     TotalPriceCell* _totalPriceCell;
     MobileNumberCell* _mobileCell;
     Order* _order;
+    NSString* _mobile;
 }
 
 @end
@@ -62,7 +63,7 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
     UITapGestureRecognizer* tap  = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(viewTapped:)];
     tap.delegate = self;
     [self.view addGestureRecognizer:tap];
-
+    _mobile = [[UserService service].loggedInUser.mobile copy];
 }
 
 -(void)viewWillAppear:(BOOL)animated{
@@ -189,6 +190,8 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
         }
     } else {
         _mobileCell = [self getOrCreateCell:@"MobileNumberCell"];
+        _mobileCell.mobileTextField.delegate = self;
+        _mobileCell.mobileTextField.text = _mobile;
         cell = _mobileCell;
     }
     return cell;
@@ -249,6 +252,7 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
 
 -(IBAction)joinMeal:(id)sender{
     [_confirmButton setEnabled:NO];
+    [self updateMobile];
     NSString *mealID = [NSString stringWithFormat:@"%@", self.meal.mID];
     NSString *numberOfPerson = [NSString stringWithFormat:@"%d", _numberOfPersons];
     NSArray *params = @[[DictHelper dictWithKey:@"meal_id" andValue:mealID],
@@ -301,6 +305,29 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
     }
 }
 
+-(void)updateMobile{
+    User* user = [UserService service].loggedInUser;
+    if (_mobile && ![_mobile isEqual:user.mobile]) {
+        DDLogInfo(@"updating mobile to %@", _mobile);
+        NSMutableDictionary *dict = [@{@"mobile":_mobile} mutableCopy];
+        [[NetworkHandler getHandler] sendJSonRequest:[NSString stringWithFormat:@"%@://%@/api/v1/user/%@/", HTTPS, EOHOST, user.uID]
+                                              method:PATCH
+                                          jsonObject:dict
+                                             success:^(id obj) {
+                                                 DDLogInfo(@"mobile info updated");
+                                                 user.mobile = _mobile;
+                                                 NSManagedObjectContext *context = [RKObjectManager sharedManager].managedObjectStore.mainQueueManagedObjectContext;
+                                                 NSError* error;
+                                                 if(![context saveToPersistentStore:&error]){
+                                                     DDLogError(@"failed to save mobile");
+                                                 }                                                 
+                                             } failure:^{
+                                                 DDLogError(@"faile to update mobile to: %@", _mobile);
+                                             }];
+
+    }
+}
+
 -(void)cancel:(id)sender{
     [self cancelWithError:@"已取消"];
 }
@@ -337,7 +364,7 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
         OrderDetailsViewController* detail = [[OrderDetailsViewController alloc] init];
         detail.order = _order;
         detail.navigationItem.hidesBackButton = YES;
-        detail.navigationItem.rightBarButtonItem = [[WidgetFactory sharedFactory] normalBarButtonItemWithTitle:@"完成" target:[NewSidebarViewController sideBar] action:@selector(showMealList)];
+        detail.navigationItem.rightBarButtonItem = [[WidgetFactory sharedFactory] normalBarButtonItemWithTitle:@"完成" target:self action:@selector(showAndReloadMealList)];
         [self.navigationController pushViewController:detail animated:YES];
     } failure:^(RKObjectRequestOperation *operation, NSError *error) {
         UIAlertView* a = [[UIAlertView alloc] initWithTitle:@"支付成功，但是…" message:@"…读取订单状态失败。请稍后去我的饭局查看，或联系客服。" delegate:nil cancelButtonTitle:@"确定" otherButtonTitles:nil];
@@ -345,6 +372,10 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
         [SVProgressHUD dismiss];
         DDLogError(@"failed to load order: %@", error);
     }];
+}
+
+-(void)showAndReloadMealList{
+    [[NewSidebarViewController sideBar] showMealList:YES];
 }
 
 - (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldReceiveTouch:(UITouch *)touch{
@@ -388,5 +419,10 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
         return NO;
     }
     return YES;
+}
+
+#pragma mark UITextFieldDelegate
+- (void)textFieldDidEndEditing:(UITextField *)textField{
+    _mobile = _mobileCell.mobileTextField.text;
 }
 @end

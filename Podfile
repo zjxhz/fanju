@@ -13,6 +13,7 @@ pod 'TDBadgedCell', '~> 2.1'
 pod 'AKSegmentedControl'
 pod 'ODRefreshControl', '~> 1.1.0'
 pod 'SBJson', '~> 3.2'
+pod 'CMPopTipView', '~> 1.2.0'
 
 # Testing and Search are optional components
 # pod 'RestKit/Testing', '~> 0.20.0pre'

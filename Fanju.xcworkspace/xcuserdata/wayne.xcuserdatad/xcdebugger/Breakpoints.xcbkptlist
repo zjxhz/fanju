@@ -164,11 +164,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Fanju/Classes/Services/NotificationService.m"
-         timestampString = "391686452.200019"
+         timestampString = "391958116.771927"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "346"
-         endingLineNumber = "346"
+         startingLineNumber = "347"
+         endingLineNumber = "347"
          landmarkName = "-handleNotificationsFor:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -177,11 +177,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Fanju/Classes/Services/NotificationService.m"
-         timestampString = "391686452.200019"
+         timestampString = "391958116.771927"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "310"
-         endingLineNumber = "310"
+         startingLineNumber = "311"
+         endingLineNumber = "311"
          landmarkName = "-handlePhotoNotifications:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -229,11 +229,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Fanju/Classes/Services/NotificationService.m"
-         timestampString = "391686452.200019"
+         timestampString = "391958116.771927"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "196"
-         endingLineNumber = "196"
+         startingLineNumber = "197"
+         endingLineNumber = "197"
          landmarkName = "-handleArchivedNotificatoin:atTime:read:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -294,11 +294,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Fanju/Classes/Services/NotificationService.m"
-         timestampString = "391686452.200019"
+         timestampString = "391958116.771927"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "120"
-         endingLineNumber = "120"
+         startingLineNumber = "121"
+         endingLineNumber = "121"
          landmarkName = "-handlePendingNotifications"
          landmarkType = "5">
       </FileBreakpoint>
@@ -321,11 +321,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Fanju/Classes/Services/NotificationService.m"
-         timestampString = "391686452.200019"
+         timestampString = "391958116.771927"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "82"
-         endingLineNumber = "82"
+         startingLineNumber = "83"
+         endingLineNumber = "83"
          landmarkName = "-handleNotification:at:read:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -912,6 +912,19 @@
          startingLineNumber = "286"
          endingLineNumber = "286"
          landmarkName = "-pay:"
+         landmarkType = "5">
+      </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "Yes"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         filePath = "Fanju/Classes/Services/UserService.m"
+         timestampString = "392006648.875707"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "163"
+         endingLineNumber = "163"
+         landmarkName = "-loggedInUser"
          landmarkType = "5">
       </FileBreakpoint>
    </FileBreakpoints>

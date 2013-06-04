@@ -202,7 +202,7 @@
 
 -(IBAction)loginWithWeibo:(id)sender{
     [Authentication sharedInstance].delegate = self;
-    if (![EOHOST hasSuffix:@"fanjoin.com"]) { //quick hack as it's not possible to login as weibo user on localhost
+    if ([EOHOST rangeOfString:@"localhost"].location != NSNotFound) { //quick hack as it's not possible to login as weibo user on localhost
         DDAlertPrompt *loginPrompt = [[DDAlertPrompt alloc] initWithTitle:@"登录(开发服务器)" delegate:self cancelButtonTitle:@"取消" otherButtonTitle:@"确定"];
         [loginPrompt show];
         return;

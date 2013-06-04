@@ -454,7 +454,7 @@
     if (controller != _lastViewController || self.sideMenu.navigationController.viewControllers.count > 1) {
         [self.sideMenu.navigationController setViewControllers:@[controller] animated:YES];
     }
-    if (controller != self.userDetailsViewController) {
+    if (controller != _userDetailsViewController) {
         [self.sideMenu.navigationController setToolbarHidden:YES];
     }
     _lastViewController = controller;

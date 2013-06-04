@@ -63,6 +63,7 @@ NSString * const UnreadNotificationCount = @"UnreadNotificationCount";
 -(NSString*)unreadNotificationKey{
     return [NSString stringWithFormat:@"%@_%@", [UserService service].loggedInUser, UNREAD_NOTIFICATION_COUNT];
 }
+
 -(void)tearDown{
     DDLogVerbose(@"tearing down %@", [self class]);
     [_xmppStream removeDelegate:self];

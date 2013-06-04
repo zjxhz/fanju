@@ -156,9 +156,9 @@
     }
     Notification* notification = [_notifications objectAtIndex:indexPath.row];
     if ([notification isKindOfClass:[PhotoNotification class]] || [notification isKindOfClass:[MealNotification class]]) {
-        return 75;
+        return 80;
     }
-    return 55;
+    return 52;
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath{

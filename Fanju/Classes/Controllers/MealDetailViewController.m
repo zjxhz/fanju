@@ -40,6 +40,7 @@
     Order* _myOrder;
     NSArray* _participants;
     CMPopTipView *_navBarLeftButtonPopTipView;
+    UIButton* _commentButton;
 }
 
 -(id)init{
@@ -70,7 +71,7 @@
     _tabBar = [[UIView alloc] initWithFrame:CGRectMake(0, self.view.frame.size.height - TAB_BAR_HEIGHT, self.view.frame.size.width, TAB_BAR_HEIGHT)];
     _tabBar.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"toolbar_bg"]];
     UIImage* join_img = [UIImage imageNamed:@"toolbth1"];
-    UIImage* comment_img = [UIImage imageNamed:@"toolbth2"];
+    UIImage* comment_img = [UIImage imageNamed:@"meal_comment"];
     CGFloat x = (320 - join_img.size.width - comment_img.size.width) / 2;
     CGFloat y = (_tabBar.frame.size.height - join_img.size.height) / 2;
     _joinButton = [[UIButton alloc] initWithFrame:CGRectMake(x, y, join_img.size.width, join_img.size.height)];
@@ -83,15 +84,12 @@
         [_joinButton addTarget:self action:@selector(finishOrder:) forControlEvents:UIControlEventTouchDown];
     }
     
-
-    UIImage* comment_img_push = [UIImage imageNamed:@"toolbth2_push"];
     x = _joinButton.frame.origin.x + _joinButton.frame.size.width;
-    UIButton* commentButton = [[UIButton alloc] initWithFrame:CGRectMake(x, y, comment_img.size.width, comment_img.size.height)];
-    [commentButton setBackgroundImage:comment_img forState:UIControlStateNormal];
-    [commentButton setBackgroundImage:comment_img_push forState:UIControlStateSelected | UIControlStateHighlighted ];
+    _commentButton = [[UIButton alloc] initWithFrame:CGRectMake(x, y, comment_img.size.width, comment_img.size.height)];
+    [_commentButton setBackgroundImage:comment_img forState:UIControlStateNormal];
     
     [_tabBar addSubview:_joinButton];
-    [_tabBar addSubview:commentButton];
+    [_tabBar addSubview:_commentButton];
     [self.view addSubview:_tabBar];
     
     UIImageView* shadowView = [[UIImageView alloc] initWithFrame:CGRectMake(0, -toolbarShadow.size.height, toolbarShadow.size.width, toolbarShadow.size.height)];
@@ -160,6 +158,8 @@
         [_joinButton setTitle:@"已结束" forState:UIControlStateNormal];
     }  else if ([self.meal.actualPersons integerValue] >= [self.meal.maxPersons integerValue]) {
         [_joinButton setTitle:@"卖光了" forState:UIControlStateNormal];
+        [_joinButton setBackgroundImage:[UIImage imageNamed:@"sold_out"] forState:UIControlStateNormal];
+        [_commentButton setBackgroundImage:[UIImage imageNamed:@"meal_comment_sold_out"] forState:UIControlStateNormal];
         [_joinButton removeTarget:self action:@selector(joinMeal:) forControlEvents:UIControlEventTouchDown];
     } else {
         [_joinButton setTitle:@"参加饭局" forState:UIControlStateNormal];

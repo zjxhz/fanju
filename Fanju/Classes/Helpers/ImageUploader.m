@@ -248,7 +248,7 @@
     DDLogVerbose(@"picked image size: %@, ratio: %.2f ", NSStringFromCGSize(image.size), image.size.height / image.size.width);
     CGSize newSize = image.size;
     if(_option == BACKGROUND && image.size.width > 640){
-        newSize = CGSizeMake(MAX_BACKGROUND_WIDTH, MAX_BACKGROUND_HEIGHT);
+        newSize = CGSizeMake(MAX_BACKGROUND_WIDTH, MAX_BACKGROUND_WIDTH);
     } else {
         
     }

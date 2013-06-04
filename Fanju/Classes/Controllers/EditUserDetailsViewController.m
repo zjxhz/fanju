@@ -23,7 +23,6 @@
 
 #define DATE_PICKER_HEIGHT 215
 #define GenderPickerHeight 162.0
-
 @implementation EditUserDetailsViewController{
     EditUserDetailsHeaderView* _headerView;
     NSString* _name;
@@ -49,9 +48,6 @@
     [super viewDidLoad];
     self.title = @"编辑资料";
     self.navigationItem.rightBarButtonItem = [[WidgetFactory sharedFactory] normalBarButtonItemWithTitle:@"保存" target:self action:@selector(saveDetails:)];
-//    UIGestureRecognizer *reg = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(viewTapped:)];
-//    reg.delegate = self;
-//    [self.view addGestureRecognizer:reg];
     self.view.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"bg"]];
     _tableView = [[UITableView alloc] initWithFrame:CGRectZero style:UITableViewStyleGrouped];
     _tableView.backgroundView = nil;
@@ -76,7 +72,7 @@
         _headerView.personalBgView.contentMode = UIViewContentModeScaleAspectFill;
         _headerView.personalBgView.clipsToBounds = YES;
         if (_user.backgroundImage) {
-            [_headerView.personalBgView setPathToNetworkImage:[URLService absoluteURL:_user.backgroundImage] forDisplaySize:_headerView.personalBgView.frame.size contentMode:UIViewContentModeScaleAspectFill];
+            [_headerView.personalBgView setPathToNetworkImage:[URLService absoluteURL:_user.backgroundImage] forDisplaySize:CGSizeMake(320, 320) contentMode:UIViewContentModeScaleAspectFill];
         } else {
             _headerView.personalBgView.image = [UIImage imageNamed:@"restaurant_sample.jpg"];
         }
@@ -471,4 +467,12 @@
     [_tableView reloadData];
 }
 
+#pragma mark UIScrollViewDelegate
+-(void)scrollViewDidScroll:(UIScrollView *)scrollView{
+    CGFloat offset = scrollView.contentOffset.y;
+    CGRect frame = _headerView.personalBgView.frame;
+    frame.origin.y = offset;
+    frame.size.height = 149 - offset;
+    _headerView.personalBgView.frame = frame;
+}
 @end

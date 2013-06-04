@@ -22,12 +22,10 @@
 //#define EOHOST @"www.ifunjoin.com:8001"
 #define HTTPS @"http" // use http for https in development
 #define APP_SCHEME @"Fanju"
-#define WEIBO_APP_KEY @"2295468526" //@"4071331500"
-#define WEIBO_APP_SECRET @"5991184a22eaff8d2b1149bcf1b1ff91" //@"5cf4910b217617cee72b2889a8e394eb"
-#define WEIBO_APP_REDIRECT_URI @"http://www.fanjoin.com/login/weibo/"
+#define WEIBO_APP_KEY @"2295468526"
+#define WEIBO_APP_SECRET @"5991184a22eaff8d2b1149bcf1b1ff91" 
+#define WEIBO_APP_REDIRECT_URI @"http://fanjoin.com/login/weibo/"
 
-#define BLAME_NETWORK_ERROR_MESSAGE @"出错了，网络问题？"
-#define PAGE_LIMIT 5 //number of items to be shown in one page
 #define UNREAD_MESSAGE_COUNT @"UNREAD_MESSAGE_COUNT"
 #define UNREAD_NOTIFICATION_COUNT @"UNREAD_NOTIFICATION_COUNT"
 #define AVATAR_UPDATED_NOTIFICATION @"AVATAR_UPDATED_NOTIFICATION"

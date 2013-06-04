@@ -38,11 +38,8 @@
         _backgroundImageView = [[NINetworkImageView alloc] initWithFrame:CGRectMake(0, 0, 320, 149)];
         _backgroundImageView.clipsToBounds = YES;
         _backgroundImageView.contentMode = UIViewContentModeScaleAspectFill;
-        if (_user.backgroundImage) {
-            [_backgroundImageView setPathToNetworkImage:[URLService absoluteURL:_user.backgroundImage] forDisplaySize:_backgroundImageView.frame.size contentMode:UIViewContentModeScaleAspectFill];
-        } else {
-            _backgroundImageView.image = bg;            
-        }
+        _backgroundImageView.image = bg;
+
 
         [self.contentView addSubview:_backgroundImageView];
         
@@ -73,15 +70,9 @@
         _nextMealText.layer.shadowOffset = CGSizeMake(0, 2);
         _nextMealText.contentVerticalAlignment = UIControlContentVerticalAlignmentBottom;
         
-        UIImage* nextMealArrowImg = [UIImage imageNamed:@"next_meal_arrow"];
-//        _nextMealButton = [UIButton buttonWithType:UIButtonTypeRoundedRect];
-//        _nextMealButton.frame = CGRectMake(200, 0 , nextMealArrowImg.size.width, nextMealArrowImg.size.height);
+        UIImage* nextMealArrowImg = [UIImage imageNamed:@"next_meal_arrow"];;
         _nextMealButton = [[UIButton alloc] initWithFrame: CGRectMake(320 - nextMealArrowImg.size.width - 10, (_nextMealView.frame.size.height - nextMealArrowImg.size.height) /2 , nextMealArrowImg.size.width, nextMealArrowImg.size.height)];
-//        [_nextMealButton setTitle:@"下一个" forState:UIControlStateNormal];
-//        [_nextMealButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
-//        [_nextMealButton sizeToFit];
         [_nextMealButton setBackgroundImage:nextMealArrowImg forState:UIControlStateNormal];
-//        [_nextMealButton addTarget:self action:@selector(temp:) forControlEvents:UIControlEventTouchUpInside];
         
         
         [_nextMealView addSubview:_nextMealLabel];
@@ -148,7 +139,7 @@
 -(void)setUser:(User *)user{
     _user = user;
     if (_user.backgroundImage) {
-        [_backgroundImageView setPathToNetworkImage:[URLService absoluteURL:_user.backgroundImage] forDisplaySize:_backgroundImageView.frame.size contentMode:UIViewContentModeScaleAspectFill];
+        [_backgroundImageView setPathToNetworkImage:[URLService absoluteURL:_user.backgroundImage] forDisplaySize:CGSizeMake(320, 320) contentMode:UIViewContentModeScaleAspectFill];
     }
     [_avatar setPathToNetworkImage:[URLService absoluteURL:_user.avatar] forDisplaySize:CGSizeMake(62, 62)];
     UIImage* male = [UIImage imageNamed:@"male_details"];

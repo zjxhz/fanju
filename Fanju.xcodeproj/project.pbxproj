@@ -409,6 +409,8 @@
 		B06A7F57175CD23A009F6A31 /* meal_comment_sold_out@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = B06A7F55175CD239009F6A31 /* meal_comment_sold_out@2x.png */; };
 		B06A7F5A175CD241009F6A31 /* sold_out.png in Resources */ = {isa = PBXBuildFile; fileRef = B06A7F58175CD240009F6A31 /* sold_out.png */; };
 		B06A7F5B175CD241009F6A31 /* sold_out@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = B06A7F59175CD241009F6A31 /* sold_out@2x.png */; };
+		B06A7F5E175D8EB8009F6A31 /* meal_bg.png in Resources */ = {isa = PBXBuildFile; fileRef = B06A7F5C175D8EB8009F6A31 /* meal_bg.png */; };
+		B06A7F5F175D8EB8009F6A31 /* meal_bg@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = B06A7F5D175D8EB8009F6A31 /* meal_bg@2x.png */; };
 		B06B02F516F5693700D73850 /* PhotoUploadedEvent.m in Sources */ = {isa = PBXBuildFile; fileRef = B06B02F416F5693700D73850 /* PhotoUploadedEvent.m */; };
 		B076AB7D16FAF41B005B7006 /* meal_thumbnail_bg.png in Resources */ = {isa = PBXBuildFile; fileRef = B076AB7B16FAF41B005B7006 /* meal_thumbnail_bg.png */; };
 		B076AB7E16FAF41B005B7006 /* meal_thumbnail_bg@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = B076AB7C16FAF41B005B7006 /* meal_thumbnail_bg@2x.png */; };
@@ -1234,6 +1236,8 @@
 		B06A7F55175CD239009F6A31 /* meal_comment_sold_out@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "meal_comment_sold_out@2x.png"; sourceTree = "<group>"; };
 		B06A7F58175CD240009F6A31 /* sold_out.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = sold_out.png; sourceTree = "<group>"; };
 		B06A7F59175CD241009F6A31 /* sold_out@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "sold_out@2x.png"; sourceTree = "<group>"; };
+		B06A7F5C175D8EB8009F6A31 /* meal_bg.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = meal_bg.png; sourceTree = "<group>"; };
+		B06A7F5D175D8EB8009F6A31 /* meal_bg@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "meal_bg@2x.png"; sourceTree = "<group>"; };
 		B06B02F316F5693700D73850 /* PhotoUploadedEvent.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PhotoUploadedEvent.h; sourceTree = "<group>"; };
 		B06B02F416F5693700D73850 /* PhotoUploadedEvent.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PhotoUploadedEvent.m; sourceTree = "<group>"; };
 		B076AB7B16FAF41B005B7006 /* meal_thumbnail_bg.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = meal_thumbnail_bg.png; sourceTree = "<group>"; };
@@ -2060,6 +2064,8 @@
 				B04CE2CE16F1AB920047E13F /* map_push@2x.png */,
 				B04CE2CF16F1AB920047E13F /* map.png */,
 				B04CE2D016F1AB920047E13F /* map@2x.png */,
+				B06A7F5C175D8EB8009F6A31 /* meal_bg.png */,
+				B06A7F5D175D8EB8009F6A31 /* meal_bg@2x.png */,
 				B0954F6F1715AB5400E52EC8 /* meal_mask_bottom.png */,
 				B0954F701715AB5400E52EC8 /* meal_mask_bottom@2x.png */,
 				B076AB7F16FAFBF2005B7006 /* meal_code.png */,
@@ -3243,6 +3249,8 @@
 				B06A7F57175CD23A009F6A31 /* meal_comment_sold_out@2x.png in Resources */,
 				B06A7F5A175CD241009F6A31 /* sold_out.png in Resources */,
 				B06A7F5B175CD241009F6A31 /* sold_out@2x.png in Resources */,
+				B06A7F5E175D8EB8009F6A31 /* meal_bg.png in Resources */,
+				B06A7F5F175D8EB8009F6A31 /* meal_bg@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3570,7 +3578,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 0.0.28;
+				CURRENT_PROJECT_VERSION = 0.0.30;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -3605,7 +3613,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = YES;
-				CURRENT_PROJECT_VERSION = 0.0.28;
+				CURRENT_PROJECT_VERSION = 0.0.30;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;

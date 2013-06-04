@@ -183,7 +183,7 @@
                           _modelError = error;
                           [self showError:YES];
                           [_refreshControl endRefreshing];
-                          DDLogError(@"failed from /meal/");
+                          DDLogError(@"failed from /meal/: %@", error);
                       }];
 }
 

@@ -22,7 +22,6 @@
 #define MAX_PHOTO_HEIGHT 960
 #define MAX_PHOTO_WIDTH 640
 #define MAX_BACKGROUND_WIDTH 640
-#define MAX_BACKGROUND_HEIGHT 298
 @implementation ImageUploader{
     UIActionSheet* _imagePickerActions;
     MBProgressHUD* _hud;
@@ -78,7 +77,7 @@
 - (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info{
     UIImage *image = [info valueForKey:UIImagePickerControllerOriginalImage];
     CGRect cropRect = CGRectZero;
-    if (_option == AVATAR) {
+    if (_option == AVATAR || _option == BACKGROUND) {
         cropRect = [[info valueForKey:UIImagePickerControllerCropRect] CGRectValue];
         cropRect = [image convertCropRect:cropRect];
         image = [image croppedImage:cropRect];
@@ -87,6 +86,8 @@
     CGSize newSize = image.size;
     if (_option == AVATAR && image.size.width > LARGE_AVATAR_LENGTH){
         newSize = CGSizeMake(LARGE_AVATAR_LENGTH, LARGE_AVATAR_LENGTH);
+    } else if(_option == BACKGROUND && image.size.width > MAX_BACKGROUND_WIDTH){
+        newSize = CGSizeMake(MAX_BACKGROUND_WIDTH, MAX_BACKGROUND_WIDTH);
     } else if(_option == PHOTO){
         CGFloat ratio = image.size.height / image.size.width;
         if (ratio > 1.5 && image.size.height > MAX_PHOTO_HEIGHT) { //
@@ -107,10 +108,11 @@
     
     _hud = [MBProgressHUD showHUDAddedTo:picker.view animated:YES];
 	_hud.mode = MBProgressHUDModeAnnularDeterminate;
-    NSString* userID = [[UserService service].loggedInUser.uID stringValue];
-    NSString* filename  = [NSString stringWithFormat:@"%@_%@_%.0f.jpg", userID, _option == AVATAR ? @"a" : @"p", [[NSDate date] timeIntervalSince1970] * 1000 ];
+    NSString* filename  = [self filename];
     if (_option == AVATAR) {
         [self doChangeAvatar:image withName:filename];
+    } else if(_option == BACKGROUND){
+        [self doChangeBackground:image withName:filename];
     } else {
         [self doAddPhoto:image withName:filename];
     }
@@ -214,16 +216,18 @@
 #pragma mark UIActionSheetDelegate
 - (void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex{
     if(_imagePickerActions == actionSheet){
-        if (_option == BACKGROUND) {
-            _customCropPicker.cropSize = CGSizeMake(320, 149);
-        } else if(_option == AVATAR){
+//        if (_option == BACKGROUND) {
+//            _customCropPicker.cropSize = CGSizeMake(320, USER_BACKGROUND_IMAGE_HEIGHT);
+//        } else
+        if(_option == AVATAR || _option == BACKGROUND){
             _normalImagePickerController.allowsEditing = YES;
 //            _customCropPicker.cropSize = CGSizeMake(320, 320);
         } else if(_option == PHOTO){
             _normalImagePickerController.allowsEditing = NO;
         }
         
-        UIImagePickerController* temp = _option == BACKGROUND ? _customCropPicker.imagePickerController : _normalImagePickerController;
+//        UIImagePickerController* temp = _option == BACKGROUND ? _customCropPicker.imagePickerController : _normalImagePickerController;
+        UIImagePickerController* temp = _normalImagePickerController;
         if (buttonIndex == 0) {
             temp.sourceType = UIImagePickerControllerSourceTypeCamera;
         } else if(buttonIndex == 1){

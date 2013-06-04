@@ -30,7 +30,6 @@
 #import "Authentication.h"
 #import "UserTagsViewController.h"
 #import "SVWebViewController.h"
-#import "ODRefreshControl.h"
 #import "Relationship.h"
 #import "MealDetailViewController.h"
 
@@ -47,7 +46,6 @@
     UIImageView* _shadowView;
     ImageUploader* _imageUploader;
     UserDetailsCell* _userDetailsCell;
-    ODRefreshControl* _refreshControl;
     UIButton* _followButton;
     NSManagedObjectContext* _contex;
     BOOL _reloaded;
@@ -80,9 +78,6 @@
     [self.navigationController pushViewController:editor animated:YES];
 }
 
--(void)delayedEndRefresh{
-    [NSTimer scheduledTimerWithTimeInterval:3 target:_refreshControl selector:@selector(endRefreshing) userInfo:nil repeats:NO];
-}
 -(void)viewWillAppear:(BOOL)animated{
     [super viewWillAppear:animated];
     
@@ -119,9 +114,6 @@
 -(void)viewDidLoad{
     [super viewDidLoad];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(userUpdated:) name:NOTIFICATION_USER_UPDATE object:nil];
-    _refreshControl = [[ODRefreshControl alloc] initInScrollView:_tableView];
-    [_refreshControl addTarget:self action:@selector(reload:) forControlEvents:UIControlEventValueChanged];
-    
     UIImage* toolbarBg = [UIImage imageNamed:@"toolbar_bg"] ;
     
     self.toolbarItems  = [self createToolbarItems];
@@ -433,7 +425,6 @@
             UIGestureRecognizer *nextMealTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(showNextMeal:)];
             nextMealTap.delegate  = self;
             [_userDetailsCell.nextMealView  addGestureRecognizer:nextMealTap];
-//            [_userDetailsCell.nextMealButton addGestureRecognizer:nextMealTap];
             [_userDetailsCell.nextMealButton addTarget:self action:@selector(showNextMeal:) forControlEvents:UIControlEventTouchUpInside];
             recalculateHeight = YES;
         }
@@ -648,16 +639,15 @@
     [self setUser:user];
 }
 
+
 #pragma mark -
 #pragma mark PullRefreshTableViewController
 -(void)reload:(id)sender{
     [[UserService service] fetchUserWithID:[_user.uID stringValue] success:^(User* user) {
         _reloaded = YES;
         [self setUser:user];
-        [_refreshControl endRefreshing];
     } failure:^{
         DDLogError(@"failed to refresh user info");
-        [_refreshControl endRefreshing];
     }];
 }
 
@@ -746,5 +736,13 @@
             [self.navigationController pushViewController:vc animated:YES];
         });
     }
+}
+#pragma mark UIScrollViewDelegate
+-(void)scrollViewDidScroll:(UIScrollView *)scrollView{
+    CGFloat offset = scrollView.contentOffset.y;
+    CGRect frame = _userDetailsCell.backgroundImageView.frame;
+    frame.origin.y = offset;
+    frame.size.height = 149 - offset;
+    _userDetailsCell.backgroundImageView.frame = frame;
 }
 @end

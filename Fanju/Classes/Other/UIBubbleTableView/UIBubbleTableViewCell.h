@@ -10,15 +10,9 @@
 
 #import <UIKit/UIKit.h>
 #import "NSBubbleData.h"
-@protocol UIBubbleTableViewCellAvatarDelegate
--(void)avatarTapped:(UIImageView*)avatar;
-@end
-
-
 @interface UIBubbleTableViewCell : UITableViewCell
 
 @property (nonatomic, strong) NSBubbleData *data;
 @property (nonatomic) BOOL showAvatar;
-@property (nonatomic, strong) id<UIBubbleTableViewCellAvatarDelegate> delegate;
 
 @end

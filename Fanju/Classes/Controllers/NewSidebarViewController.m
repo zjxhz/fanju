@@ -22,9 +22,7 @@
 #import "UserHeaderCell.h"
 #import "SideMealCell.h"
 #import "SideCell.h"
-#import "NotificationService.h"
-#import "UserService.h"
-#import "URLService.h"
+#import "SearchUserViewController.h"
 
 #define SIDEBAR_HEADER_HEIGHT 22
 #define CELL_HEIGHT 44
@@ -148,6 +146,7 @@
     if (!_usersNearbyViewController) {
         _usersNearbyViewController = [[UserListViewController alloc] initWithStyle:UITableViewStylePlain];
         [_usersNearbyViewController viewDidLoad];
+        _usersNearbyViewController.hideDistanceUpdatedTime = YES;
         //        _followingsViewController setBaseURL:<#(NSString *)#>
     }
     return _usersNearbyViewController;
@@ -286,6 +285,7 @@
                     cell = [[SideMealCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier];
                     [cell.currentMealsButton addTarget:self action:@selector(showMealList) forControlEvents:UIControlEventTouchUpInside];
                     [cell.myMealsButton addTarget:self action:@selector(showMyMeals) forControlEvents:UIControlEventTouchUpInside];
+                    [cell.createMealButton addTarget:self action:@selector(createMeal:) forControlEvents:UIControlEventTouchUpInside];
                 }
                 return cell;
             }
@@ -318,6 +318,10 @@
     return cell;
 }
 
+-(void)createMeal:(id)sender{
+    UIAlertView* alert = [[UIAlertView alloc] initWithTitle:@"提示" message:@"暂不支持从手机发起饭局，请登录fanjoin.com" delegate:nil cancelButtonTitle:@"确定" otherButtonTitles:nil];
+    [alert show];
+}
 #pragma mark - Table view delegate
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView{
@@ -426,6 +430,7 @@
                     controller.title = @"附近朋友";
                     break;
                 case 2:
+                    controller = [[SearchUserViewController alloc] init];
                     break;
             }
             
@@ -438,7 +443,7 @@
                 case 2:
                     [self.sideMenu setMenuState:MFSideMenuStateClosed];
                     [[Authentication sharedInstance] logout];
-                    [SVProgressHUD dismissWithSuccess:@"成功登出"];
+                    [SVProgressHUD showSuccessWithStatus:@"成功登出"];
                     controller = self.mealListViewController;
                     break;
             }
@@ -528,7 +533,7 @@
 
 - (void)unreadNotifUpdated:(NSNotification*)notif {
     NSInteger unreadNotifCount = [notif.object integerValue];
-    if (_lastViewController == self.notificationViewController && self.sideMenu.navigationController.viewControllers.count == 1) {
+    if ([NotificationService service].suspend) {
         //notification view is being displayed
         unreadNotifCount = 0;
         [[NotificationService service] markAllNotificationsRead];

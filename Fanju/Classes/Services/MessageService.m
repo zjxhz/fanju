@@ -73,6 +73,7 @@ NSString * const CurrentConversation = @"CurrentConversation";
     NSFetchRequest *req = [[NSFetchRequest alloc] init];
     req.entity = [NSEntityDescription entityForName:@"Conversation" inManagedObjectContext:_mainQueueContext];
     req.predicate = [NSPredicate predicateWithFormat:@"owner = %@", [UserService service].loggedInUser];
+    req.sortDescriptors = @[[[NSSortDescriptor alloc] initWithKey:@"time" ascending:NO]];
     NSError* error;
     _conversations = [[_mainQueueContext executeFetchRequest:req error:&error] mutableCopy];
     if (error) {
@@ -191,7 +192,7 @@ NSString * const CurrentConversation = @"CurrentConversation";
 -(void)updateStatusBar:(NSString*)message{
     MTStatusBarOverlay* status = [MTStatusBarOverlay sharedInstance];
     status.animation = MTStatusBarOverlayAnimationShrink;
-    [status postMessage:message duration:1.5];
+    [status postMessage:message duration:4];
 }
 
 -(BOOL)isMessageFromCurrentConversation:(User*)with{

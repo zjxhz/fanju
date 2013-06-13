@@ -32,7 +32,7 @@
     [super layoutSubviews];
     CGRect rect = CGRectMake(MarginBetweenControls, 
                              12.0, 
-                             self.contentView.bounds.size.width - 5.0 - MarginBetweenControls, 
+                             self.contentView.bounds.size.width - 9.0 - MarginBetweenControls,
                              25.0);
     [textField setFrame:rect];
 }

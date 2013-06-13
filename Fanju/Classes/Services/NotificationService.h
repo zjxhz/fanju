@@ -12,6 +12,7 @@
 @interface NotificationService : NSObject
 @property(nonatomic, readonly) NSInteger unreadNotifCount;
 @property(nonatomic, strong)     NSDate* latestNotificationDate;
+@property(nonatomic) BOOL suspend;//if true, notification number should not count and new notifications are not shown on status bar
 +(NotificationService*)service;
 -(void)setup;
 -(void)tearDown;

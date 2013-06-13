@@ -102,6 +102,14 @@ NSString * const EODidLogoutNotification = @"EODidLogoutNotification";
 //should be deleted by logging out
 //NOTE: call this only when app starts up or services will be set up multiple times
 -(void)relogin{
+    NSString* previousHost = [[NSUserDefaults standardUserDefaults] objectForKey:FANJU_HOST_KEY];
+    [[NSUserDefaults standardUserDefaults] setObject:EOHOST forKey:FANJU_HOST_KEY];
+    if (previousHost && ![previousHost isEqual:EOHOST]) {
+        DDLogInfo(@"Host has changed from %@ to %@, logging out", previousHost, EOHOST);
+        [self logout];
+        return;
+    }
+    
     if (_currentUser && _currentUser.username && _currentUser.password) {
         DDLogVerbose(@"logging in with username and password");
         [[Authentication sharedInstance] loginWithUserName:_currentUser.username password:_currentUser.password];
@@ -266,13 +274,13 @@ NSString * const EODidLogoutNotification = @"EODidLogoutNotification";
 #pragma mark LocationProviderDelegate
 -(void)finishObtainingLocation:(CLLocation*)location {
     DDLogVerbose(@"obtained location: %@", location);
-    if (_currentUser) {
-        _currentUser.coordinate = location.coordinate;
-        _currentUser.locationUpdatedTime = [[NSDate alloc] init];    
-//        [self synchronize];
+    User* loggedInUser = [UserService service].loggedInUser;
+    if (loggedInUser) {
+        loggedInUser.latitude = [NSNumber numberWithDouble:location.coordinate.latitude];
+        loggedInUser.longitude = [NSNumber numberWithDouble:location.coordinate.longitude];
+        loggedInUser.locationUpdatedAt = [[NSDate alloc] init];
         NSArray *params = @[[DictHelper dictWithKey:@"lat" andValue:[NSString stringWithFormat:@"%f", _currentUser.coordinate.latitude]],
         [DictHelper dictWithKey:@"lng" andValue:[NSString stringWithFormat:@"%f", _currentUser.coordinate.longitude]]];
-
         NSString *requestStr = [NSString stringWithFormat:@"%@://%@/api/v1/user/%d/location/", HTTPS, EOHOST, _currentUser.uID];
         [[NetworkHandler getHandler] requestFromURL:requestStr
                                              method:POST

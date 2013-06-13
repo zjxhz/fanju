@@ -144,9 +144,15 @@
             NSTimeInterval interval = [_user.locationUpdatedAt timeIntervalSinceNow] > 0 ? 0 : -[_user.locationUpdatedAt timeIntervalSinceNow];
             updated = [DateUtil humanReadableIntervals: interval];
         }
-        _distance.text = [NSString stringWithFormat:@"%@ | %@", [DistanceUtil distanceFrom:_user], updated];
+//        _distance.text = [NSString stringWithFormat:@"%@ | %@", [DistanceUtil distanceFrom:_user], updated];
+        _distance.text = [DistanceUtil distanceFrom:_user];
         [_distance sizeToFit];
         _motto.text = _user.motto;
 	}
+}
+
+-(void)hideTime{
+    _distance.text = [DistanceUtil distanceFrom:_user];
+    [_distance sizeToFit];
 }
 @end

@@ -13,6 +13,7 @@
 @interface MealListDataSource : TTTableViewDataSource{
     NSMutableArray *_mealsForThisWeek;
     NSMutableArray *_mealsAfterThisWeek;
+    NSMutableArray* _passedMeals;
 }
 
 

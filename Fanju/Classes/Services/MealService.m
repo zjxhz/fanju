@@ -103,7 +103,14 @@ static NSDateFormatter *_dateFormatter;
 
 +(NSArray*)participantsOfMeal:(Meal*)meal{
     NSMutableArray* participants = [NSMutableArray array];
-    for (Order* order in meal.orders) {
+    NSMutableArray* orders = [[meal.orders allObjects] mutableCopy];
+    [orders sortUsingComparator:^NSComparisonResult(id obj1, id obj2) {
+        Order* order1 = obj1;
+        Order* order2 = obj2;
+        return [order1.oID compare:order2.oID];
+    }];
+    
+    for (Order* order in orders) {
         [participants addObject:order.user];
         for (NSInteger i = 1; i < [order.numberOfPersons integerValue]; ++i) {
             [participants addObject:[UserService createGuestOf:order.user]];

@@ -154,7 +154,7 @@
                                      parameters:params
                                     cachePolicy:TTURLRequestCachePolicyNoCache
                                         success:^(id obj) {
-                                            [SVProgressHUD dismissWithSuccess:@"删除成功"];
+                                            [SVProgressHUD showSuccessWithStatus:@"删除成功"];
                                             [_user removePhotos:[[NSSet alloc] initWithArray:photosToBeDeleted]];
                                             for (Photo* photo in photosToBeDeleted) {
                                                 [_mainQueueContext deleteObject:photo];
@@ -168,7 +168,7 @@
                                             [self edit:nil];
                                             DDLogVerbose(@"user photos deleted.");
                                         } failure:^{
-                                            [SVProgressHUD dismissWithError:@"删除失败"];
+                                            [SVProgressHUD showErrorWithStatus:@"删除失败"];
                                         }];
 }
 

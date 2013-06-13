@@ -45,14 +45,19 @@
         return;
     }
 
-    Tag* tag = _item.tag;
+
     if (_item.selected) {
         _imageView.image = _selectedImg;
     } else {
         _imageView.image = _unselectedImg;
     }
     [self.contentView addSubview:_imageView];
-    self.textLabel.text = tag.name;
+    if ([_item isSaved]) {
+         Tag* tag = _item.tag;
+        self.textLabel.text = tag.name;
+    } else {
+        self.textLabel.text = _item.tagName;
+    }
 }
 
 @end

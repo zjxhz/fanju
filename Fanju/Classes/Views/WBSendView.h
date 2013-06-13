@@ -31,6 +31,7 @@
 - (void)sendViewWillDisappear:(WBSendView *)view;
 - (void)sendViewDidDisappear:(WBSendView *)view;
 
+- (void)sendViewDidStartSending:(WBSendView*)view;
 - (void)sendViewDidFinishSending:(WBSendView *)view;
 - (void)sendView:(WBSendView *)view didFailWithError:(NSError *)error;
 

@@ -37,6 +37,7 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
     MobileNumberCell* _mobileCell;
     Order* _order;
     NSString* _mobile;
+    UIToolbar* _numberToolbar;
 }
 
 @end
@@ -190,6 +191,17 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
         }
     } else {
         _mobileCell = [self getOrCreateCell:@"MobileNumberCell"];
+        _mobileCell.mobileTextField.returnKeyType = UIReturnKeyDone;
+        if (!_numberToolbar) {
+            _numberToolbar = [[UIToolbar alloc]initWithFrame:CGRectMake(0, 0, 320, 50)];
+            _numberToolbar.barStyle = UIBarStyleBlackTranslucent;
+            _numberToolbar.items = @[ [[UIBarButtonItem alloc]initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil],
+                                   [[UIBarButtonItem alloc]initWithTitle:@"确定" style:UIBarButtonItemStyleDone target:_mobileCell.mobileTextField action:@selector(resignFirstResponder)]];
+            [_numberToolbar sizeToFit];
+            _mobileCell.mobileTextField.inputAccessoryView = _numberToolbar;
+        }
+         
+
         _mobileCell.mobileTextField.delegate = self;
         _mobileCell.mobileTextField.text = _mobile;
         cell = _mobileCell;
@@ -234,7 +246,7 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
     [[userInfo objectForKey:UIKeyboardAnimationDurationUserInfoKey] getValue:&animationDuration];
     [UIView animateWithDuration:animationDuration animations:^{
         CGRect frame =  _tableView.frame;
-        frame.origin.y = -90;
+        frame.origin.y = -120;
         _tableView.frame = frame;
     } completion:nil];
 }
@@ -266,9 +278,8 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
                                             NSDictionary* dic = obj;
                                              //note: as order has attribute "status" too if success status will set to the status of the order
                                             if ([dic[@"status"] isEqual:@"NOK"]) {
-                                                [SVProgressHUD dismissWithError:dic[@"message"]];
+                                                [SVProgressHUD showErrorWithStatus:dic[@"info"]];
                                                 [_confirmButton setEnabled:YES];
-
                                             } else {
 //                                                NSString* orderID = 
 //                                                OrderInfo* order = [OrderInfo orderInfoWithData:dic];
@@ -277,7 +288,7 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
                                                 [_confirmButton setEnabled:NO];
                                             }
                                         } failure:^{
-                                            [SVProgressHUD dismissWithError:@"加入饭局失败，请稍后重试"];
+                                            [SVProgressHUD showErrorWithStatus:@"加入饭局失败，请稍后重试"];
                                             [_confirmButton setEnabled:YES];
                                         }];
 }
@@ -336,7 +347,7 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
     [_confirmButton setEnabled:YES];
     [self dismissModalViewControllerAnimated:YES];
     if (message) {
-        [SVProgressHUD dismissWithError:message afterDelay:3.0];
+        [SVProgressHUD showErrorWithStatus:message];
     } else {
         [SVProgressHUD dismiss];
     }
@@ -408,11 +419,11 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
 //                                                [[NSNotificationCenter defaultCenter] postNotificationName:ALIPAY_PAY_RESULT
 //                                                                                                    object:@{@"status":@"OK", @"code":order.code}];
 //                                            } failure:^{
-//                                                [SVProgressHUD dismissWithError:@"查询订单信息失败，请稍后刷新我的饭局页面"];
+//                                                [SVProgressHUD showErrorWithStatus:@"查询订单信息失败，请稍后刷新我的饭局页面"];
 //                                                [_confirmButton setEnabled:YES];
 //                                            }];
 //        
-//        [SVProgressHUD dismissWithSuccess:@"付款成功" afterDelay:0.9];
+//        [SVProgressHUD showSuccessWithStatus:@"付款成功" afterDelay:0.9];
         return NO;
     } else if([urlStr hasPrefix:failedURL]){
         [self cancelWithError:@"抱歉，付款遇到了问题，请联系客服。"];

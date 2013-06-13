@@ -43,7 +43,7 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
 [[NSNotificationCenter defaultCenter] removeObserver:self];
 
 @interface XMPPChatViewController2 (){
-    ACPlaceholderTextView *_textView;
+    UITextView *_textView;
     UIButton *_sendButton;
     CGFloat _previousTextViewContentHeight;
     UIImageView *_messageInputBar;
@@ -55,8 +55,9 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
     NSFetchRequest *_fetchRequest;
 //    NSInteger _fetchOffset;
     NSManagedObjectContext* _context;
-    UIView* _guideView;
+    UIScrollView* _guideView;
     NSDate* _oldestMessageDate;
+    CGFloat _lastContentOffset;
 }
 
 @end
@@ -73,20 +74,14 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
     return self;
 }
 
-- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
-{
-    return (interfaceOrientation == UIInterfaceOrientationPortrait);
-}
-
 - (void) loadView{
     [super loadView];
-    self.title = @"聊天";
+    self.title = _conversation.with.name;
     self.view.backgroundColor = RGBCOLOR(0xF0, 0xF0, 0xF0);
     _bubbleTable = [[UIBubbleTableView alloc] initWithFrame:CGRectZero style:UITableViewStylePlain];
     [self.view addSubview:_bubbleTable];
     _bubbleTable.bubbleDataSource = self;
     _bubbleTable.showAvatars = YES;
-    _bubbleTable.avatarDelegate = self;
     [_bubbleTable reloadData];
     _refreshControl = [[ODRefreshControl alloc] initInScrollView:_bubbleTable];
     [_refreshControl addTarget:self action:@selector(loadEarlierMessages:) forControlEvents:UIControlEventValueChanged];
@@ -111,7 +106,6 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
                                                       userInfo:nil];
 }
 
-
 -(void) createMessageInputBar{
     self.view.frame = CGRectMake(0, 0, self.view.frame.size.width, self.view.frame.size.height-kChatBarHeight1);
     // Create messageInputBar to contain _textView, messageInputBarBackgroundImageView, & _sendButton.
@@ -123,14 +117,13 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
     
     // Create _textView to compose messages.
     // TODO: Shrink cursor height by 1 px on top & 1 px on bottom.
-    _textView = [[ACPlaceholderTextView alloc] initWithFrame:CGRectMake(TEXT_VIEW_X, TEXT_VIEW_Y, TEXT_VIEW_WIDTH, TEXT_VIEW_HEIGHT_MIN)];
+    _textView = [[UITextView alloc] initWithFrame:CGRectMake(TEXT_VIEW_X, TEXT_VIEW_Y, TEXT_VIEW_WIDTH, TEXT_VIEW_HEIGHT_MIN)];
     _textView.autoresizingMask = UIViewAutoresizingFlexibleWidth;
     _textView.delegate = self;
     _textView.backgroundColor = [UIColor colorWithWhite:245/255.0f alpha:1];
     _textView.scrollIndicatorInsets = UIEdgeInsetsMake(13, 0, 8, 6);
     _textView.scrollsToTop = NO;
     _textView.font = [UIFont systemFontOfSize:MessageFontSize];
-    _textView.placeholder = NSLocalizedString(@" Message", nil);
     [_messageInputBar addSubview:_textView];
     _previousTextViewContentHeight = MessageFontSize+20;
     
@@ -159,9 +152,8 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
     if (_bubbleData.count == 0 && _guideView.superview == nil/*not added*/) {
         [self addGuideView];
     }
-    _bubbleTable.frame = CGRectMake(0, 0, self.view.frame.size.width, self.view.frame.size.height-kChatBarHeight1);
-    _messageInputBar.frame = CGRectMake(0, self.view.frame.size.height-kChatBarHeight1, self.view.frame.size.width, kChatBarHeight1);
     UIKeyboardNotificationsObserve();
+    [_bubbleTable addObserver:self forKeyPath:@"contentOffset" options:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld context:nil];
     [self scrollToBottomAnimated:NO];
 }
 
@@ -170,18 +162,28 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
     if ([_textView isFirstResponder]) {
         [_textView resignFirstResponder];
     }
+    _bubbleTable.frame = CGRectMake(0, 0, self.view.frame.size.width, self.view.frame.size.height-kChatBarHeight1);
+    _messageInputBar.frame = CGRectMake(0, self.view.frame.size.height-kChatBarHeight1, self.view.frame.size.width, kChatBarHeight1);
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
     [super viewWillAppear:animated];
     UIKeyboardNotificationsUnobserve(); // as soon as possible
+    [_bubbleTable removeObserver:self forKeyPath:@"contentOffset"];
     [[NSNotificationCenter defaultCenter] postNotificationName:CurrentConversation
                                                         object:nil
                                                       userInfo:nil];
 }
 
--(void)viewDidUnload{
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context{
+    CGFloat newOffset = [[change objectForKey:@"new"] CGPointValue].y;
+    CGFloat oldOffset = [[change objectForKey:@"old"] CGPointValue].y;
+    CGFloat diff = newOffset - oldOffset;
+    if (diff < 0 && diff  != -20.0  ) { //scrolling down, 20 is cost by deleting a line in the text view
+        if ([_textView isFirstResponder]) {
+            [_textView resignFirstResponder];
+        }
+    }
 }
 
 -(void) requestMessages{
@@ -240,7 +242,7 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
 }
 
 -(void)addGuideView{
-    _guideView = [[UIView alloc] initWithFrame:self.view.frame];
+    _guideView = [[UIScrollView alloc] initWithFrame:self.view.frame];
     NINetworkImageView* avatarView = [AvatarFactory avatarForUser:_conversation.with withFrame:CGRectMake(98, 57, 121, 121)];
     [_guideView addSubview:avatarView];
     
@@ -262,13 +264,18 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
         tagLabel.textColor = RGBCOLOR(0x2B, 0x2B, 0x2B);
         tagLabel.textAlignment = UITextAlignmentCenter;
         [_guideView addSubview:tagLabel];
-        
+    
         UserTagsCell* cell = [[UserTagsCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"CELL"];
         cell.width = 220;
         cell.tags = [_conversation.with.tags allObjects];
         cell.frame = CGRectMake(50, 228, cell.width, cell.cellHeight);
+//        cell.frame = CGRectMake(0, 0, cell.width, cell.cellHeight);
         [_guideView addSubview:cell];
         nextY = cell.frame.origin.y + cell.frame.size.height + 12;
+//        nextY = scrollView.frame.origin.y + scrollView.frame.size.height + 12;
+//        scrollView.contentSize = CGSizeMake(220, cell.cellHeight);
+//        [_guideView addSubview:scrollView];
+        
     }
 
     UILabel* startChatLabel = [[UILabel alloc] initWithFrame:CGRectMake(20, nextY, 280, 50)];
@@ -281,6 +288,7 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
     startChatLabel.textAlignment = UITextAlignmentCenter;
     [_guideView addSubview:startChatLabel];
     
+    _guideView.contentSize = CGSizeMake(320, startChatLabel.frame.origin.y + startChatLabel.frame.size.height);
     [self.view addSubview:_guideView];
 }
 
@@ -301,7 +309,7 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
 
 - (void)sendMessage {
     if (!_textView.text.length) {
-        [SVProgressHUD dismissWithError:@"还没输入内容呢"];
+        [SVProgressHUD showErrorWithStatus:@"还没输入内容呢"];
         return;
     }
     // Autocomplete text before sending. @hack
@@ -311,6 +319,7 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
     _textView.text = nil;
     [self textViewDidChange:_textView];
     [self sendMessage:message To:_conversation.with];
+    _bubbleTable.contentInset = UIEdgeInsetsZero;
 }
 
 -(void)sendMessage:(NSString*)message To:(User*)to{
@@ -325,12 +334,23 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
     [messageElement addAttributeWithName:@"type" stringValue:@"chat"];
     [messageElement addChild:body];
     [[XMPPHandler sharedInstance].xmppStream sendElement:messageElement];
+    
+    [self insertBubble:[NSBubbleData dataWithText:message date:[NSDate date] type:BubbleTypeMine]];
 }
 
+-(void)insertBubble:(NSBubbleData*)bubble{
+    [_guideView removeFromSuperview];
+    _bubbleTable.typingBubble = NSBubbleTypingTypeNobody;
+    [_bubbleData addObject:bubble];
+    [_bubbleTable reloadData];
+    [self layoutUI];
+    [self scrollToBottomAnimated:YES];
+}
 -(void)layoutUI{
     if (_keyboardHeight == 0){
-        _messageInputBar.frame = CGRectMake(0, self.view.frame.size.height - kChatBarHeight1, _messageInputBar.frame.size.width, _messageInputBar.frame.size.height);
-        self.view.frame = CGRectMake(0, 0, self.view.frame.size.width, self.view.frame.size.height);
+        _messageInputBar.frame = CGRectMake(0, self.view.frame.size.height - _messageInputBar.frame.size.height, _messageInputBar.frame.size.width, _messageInputBar.frame.size.height);
+//        self.view.frame = CGRectMake(0, 0, self.view.frame.size.width, self.view.frame.size.height);
+        _bubbleTable.frame = CGRectMake(0, 0, self.view.frame.size.width, self.view.frame.size.height-kChatBarHeight1);
         return;
     }
     
@@ -338,11 +358,11 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
     if (_keyboardHeight + _bubbleTable.contentSize.height + kChatBarHeight1 < self.view.frame.size.height){
         _messageInputBar.frame = CGRectMake(0, visibleHeight, _messageInputBar.frame.size.width, _messageInputBar.frame.size.height);
     } else if (   self.view.frame.size.height < kChatBarHeight1 + _bubbleTable.contentSize.height ){
-        _messageInputBar.frame = CGRectMake(0, self.view.frame.size.height - kChatBarHeight1, _messageInputBar.frame.size.width, _messageInputBar.frame.size.height);
-        self.view.frame = CGRectMake(0,  -_keyboardHeight, self.view.frame.size.width, self.view.frame.size.height);
+        _messageInputBar.frame = CGRectMake(0, visibleHeight, _messageInputBar.frame.size.width, _messageInputBar.frame.size.height);
+        _bubbleTable.frame = CGRectMake(0, -_keyboardHeight, _bubbleTable.frame.size.width, _bubbleTable.frame.size.height);
     } else  {
-        _messageInputBar.frame = CGRectMake(0, _bubbleTable.contentSize.height, _messageInputBar.frame.size.width, _messageInputBar.frame.size.height);
-        self.view.frame = CGRectMake(0,  visibleHeight- _bubbleTable.contentSize.height, self.view.frame.size.width, self.view.frame.size.height);
+        _messageInputBar.frame = CGRectMake(0, visibleHeight, _messageInputBar.frame.size.width, _messageInputBar.frame.size.height);
+        _bubbleTable.frame = CGRectMake(0, visibleHeight- _bubbleTable.contentSize.height, _bubbleTable.frame.size.width, _bubbleTable.frame.size.height);
     }
 }
 #pragma mark - Keyboard Notifications
@@ -390,14 +410,6 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
 
 
 #pragma mark UITextViewDelegate
--(BOOL)textView:(UITextView *)textView shouldChangeTextInRange:(NSRange)range replacementText:(NSString *)text{
-    if ([text isEqualToString:@"\n"]) {
-        [self sendMessage];
-        return NO;
-    }
-    return YES;
-}
-
 - (void)textViewDidChange:(UITextView *)textView {
     // Change height of _tableView & messageInputBar to match textView's content height.
     CGFloat textViewContentHeight = textView.contentSize.height;
@@ -415,7 +427,6 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
             UIView *messageInputBar = _textView.superview;
             messageInputBar.frame = CGRectMake(0, messageInputBar.frame.origin.y-changeInHeight, messageInputBar.frame.size.width, messageInputBar.frame.size.height+changeInHeight);
         } completion:^(BOOL finished) {
-            [_textView updateShouldDrawPlaceholder];
         }];
         _previousTextViewContentHeight = MIN(textViewContentHeight, kChatBarHeight4+2);
     }
@@ -455,8 +466,8 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
 
 -(void)messageDidSave:(NSNotification*)notif {
     UserMessage* messageMO = notif.object;
-    if (![messageMO.conversation.with isEqual:_conversation.with]) {
-        return; //not for this conversation
+    if (![messageMO.incoming boolValue] || ![messageMO.conversation.with isEqual:_conversation.with]) {
+        return; //sent messages are inserted right away, and ignore messages that are for this conversation
     }
     if (_bubbleData.count == 0) {
 //        [UIView animateWithDuration:0 animations:^{
@@ -466,13 +477,8 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
 //        } completion:^(BOOL finished) {}];
     }
 //    _fetchOffset++;
-    [_guideView removeFromSuperview];
-    _bubbleTable.typingBubble = NSBubbleTypingTypeNobody;
-    NSBubbleData *bubble = [self bubbleFromMessage:messageMO];
-    [_bubbleData addObject:bubble];
-    [_bubbleTable reloadData];
-    [self layoutUI];
-    [self scrollToBottomAnimated:YES];
+    
+    [self insertBubble:[self bubbleFromMessage:messageMO]];
 }
 
 #pragma mark - UIBubbleTableViewDataSource implementation
@@ -499,13 +505,4 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
     }
     return YES;
 }
-
-#pragma mark UIBubbleTableViewCellAvatarDelegate
--(void)avatarTapped:(UIImageView*)avatar{
-//    UserDetailsViewController *details = [[UserDetailsViewController alloc] init];
-//    details.user = _conversation.with;
-//    [self.navigationController pushViewController:details animated:YES];
-}
-
-
 @end

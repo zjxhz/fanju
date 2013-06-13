@@ -51,10 +51,15 @@ static NSDateFormatter *dateOnlyFormat;
     return [SHORT_DATE_FORMAT dateFromString:dateString];
 }
 
++(NSString*) humanReadableIntervalsFromDate:(NSDate*)date{
+    NSTimeInterval interval = [date timeIntervalSinceNow] > 0 ? 0 : -[date timeIntervalSinceNow];
+    return [DateUtil humanReadableIntervals: interval];
+}
 +(NSString*) humanReadableIntervals:(NSTimeInterval)interval{
     int seconds = interval;
     if( seconds < 60){
-        return [NSString stringWithFormat:@"%d%@", seconds, NSLocalizedString(@"SecondsAgo", nil)];
+//        return [NSString stringWithFormat:@"%d%@", seconds, NSLocalizedString(@"SecondsAgo", nil)];
+        return @"刚刚";
     }
     int minutes = seconds / 60;
     if(minutes < 60) {

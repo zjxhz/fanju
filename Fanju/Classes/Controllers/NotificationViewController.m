@@ -69,6 +69,15 @@
     [self requestNotifications];
 }
 
+-(void)viewWillAppear:(BOOL)animated{
+    [super viewWillAppear:animated];
+    [NotificationService service].suspend = YES;
+}
+
+-(void)viewWillDisappear:(BOOL)animated{
+    [super viewWillDisappear:animated];
+    [NotificationService service].suspend = NO;
+}
 -(void)viewDidAppear:(BOOL)animated{
     [super viewDidAppear:animated];
     [[NSNotificationCenter defaultCenter] postNotificationName:UnreadNotificationCount
@@ -158,7 +167,7 @@
     if ([notification isKindOfClass:[PhotoNotification class]] || [notification isKindOfClass:[MealNotification class]]) {
         return 80;
     }
-    return 52;
+    return 61;
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath{

@@ -87,6 +87,7 @@
         _avatar = [[NINetworkImageView alloc] initWithFrame:CGRectMake(4, 4, 62, 62)];
 
         [avatarView addSubview:_avatar];
+        avatarView.userInteractionEnabled = YES;//not to trigger the next meal event
         [self.contentView addSubview:avatarView];
         
         _gender = [[UIImageView alloc] initWithFrame:CGRectMake(81, 156, 45, 17)];        

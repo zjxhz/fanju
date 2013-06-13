@@ -9,7 +9,7 @@
 #import <UIKit/UIKit.h>
 #import "UserTag.h"
 @protocol TagAutocompleteDelegate
--(void)tagSelected:(Tag*)tag;
+-(void)tagSelected:(NSString*)tagName;
 -(void)newTagSelected:(NSString*)tagName;
 @end
 

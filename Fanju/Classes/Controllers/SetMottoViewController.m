@@ -34,6 +34,7 @@
 {
     [super viewDidLoad];
 	_textView = [[UITextView alloc] initWithFrame:CGRectMake(0, 0, 320, 220)];
+    _textView.font = [UIFont systemFontOfSize:15];
     _textView.contentInset = UIEdgeInsetsMake(3, 3, 3, 3);
     self.view.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"bg"]];
     _textView.delegate = self;

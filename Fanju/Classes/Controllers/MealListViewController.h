@@ -16,6 +16,7 @@
 @interface MealListViewController : TTTableViewController <UITableViewDelegate, AuthenticationDelegate, UIScrollViewDelegate>{
     UIView *_thisWeek;
     UIView *_afterThisWeek;
+    UIView* _passedMeals;
     NSMutableDictionary* imageDownloadsInProgress;
     ODRefreshControl* _refreshControl;
 }

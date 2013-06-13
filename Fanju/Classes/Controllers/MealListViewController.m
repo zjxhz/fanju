@@ -63,7 +63,8 @@
 
     
     _thisWeek = [self createHeader:@"ThisWeek"];
-    _afterThisWeek = [self createHeader:@"AfterThisWeek"];   
+    _afterThisWeek = [self createHeader:@"AfterThisWeek"];
+    _passedMeals = [self createHeader:@"PassedMeals"];
     AppDelegate *delegate = (AppDelegate*)[UIApplication sharedApplication].delegate;
     self.tableView.backgroundColor = [UIColor colorWithPatternImage:delegate.bgImage];
     self.tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
@@ -141,9 +142,14 @@
         } else {
             return _afterThisWeek;
         }
-    }
-    else { // section == 1 means there are meals both for this week and after this week
-        return _afterThisWeek;
+    } else if(section == 1){
+        if (ds.numberOfMealsAfterThisWeek > 0) {
+            return _afterThisWeek;
+        } else {
+            return _passedMeals;
+        }
+    } else {
+        return _passedMeals;
     }
 }
 - (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section {
@@ -166,7 +172,7 @@
 
 - (void) requestDataFromServer{
     RKObjectManager* manager = [RKObjectManager sharedManager];
-    [manager getObjectsAtPath:@"meal/upcoming/"
+    [manager getObjectsAtPath:@"meal/"
                    parameters:@{@"limit":@"0"}
                       success:^(RKObjectRequestOperation *operation, RKMappingResult *mappingResult) {
                           _modelError = nil;
@@ -181,7 +187,12 @@
                       }
                       failure:^(RKObjectRequestOperation *operation, NSError *error) {
                           _modelError = error;
-                          [self showError:YES];
+                          if ([self canShowModel]) {
+                              [SVProgressHUD showErrorWithStatus:[error localizedDescription]];
+                          } else {
+                              [self showError:YES];
+                          }
+                          
                           [_refreshControl endRefreshing];
                           DDLogError(@"failed from /meal/: %@", error);
                       }];

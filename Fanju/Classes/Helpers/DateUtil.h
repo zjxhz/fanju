@@ -20,4 +20,5 @@
 +(NSString*) fullStringFromDate:(NSDate*)date;
 +(NSString*) userFriendlyStringFromDate:(NSDate*)date;
 +(NSString*)weekday:(NSDate*)date;
++(NSString*) humanReadableIntervalsFromDate:(NSDate*)date;
 @end

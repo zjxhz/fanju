@@ -12,6 +12,6 @@
 #import "ImageUploader.h"
 #import "SetMottoViewController.h"
 
-@interface EditUserDetailsViewController : UIViewController<UITableViewDataSource, UITableViewDelegate, UITextFieldDelegate, UITextViewDelegate, UIGestureRecognizerDelegate, DatePickerViewDelegate, TagViewControllerDelegate, ImageUploaderDelegate, UIPickerViewDataSource, UIPickerViewDelegate, SetMottoDelegate>
+@interface EditUserDetailsViewController : UIViewController<UITableViewDataSource, UITableViewDelegate, UITextFieldDelegate, UITextViewDelegate, UIGestureRecognizerDelegate, DatePickerViewDelegate, TagViewControllerDelegate, ImageUploaderDelegate, UIPickerViewDataSource, UIPickerViewDelegate, SetMottoDelegate, UIAlertViewDelegate>
 @property(nonatomic, strong) User* user;;
 @end

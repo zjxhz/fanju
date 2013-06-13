@@ -37,8 +37,10 @@
     </entity>
     <entity name="Order" representedClassName="Order" syncable="YES">
         <attribute name="code" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="createdTime" optional="YES" attributeType="Date" syncable="YES"/>
         <attribute name="numberOfPersons" optional="YES" attributeType="Integer 32" defaultValueString="0" syncable="YES"/>
         <attribute name="oID" optional="YES" attributeType="Integer 32" defaultValueString="0" syncable="YES"/>
+        <attribute name="paidTime" optional="YES" attributeType="Date" syncable="YES"/>
         <attribute name="status" optional="YES" attributeType="Integer 16" defaultValueString="0" syncable="YES"/>
         <relationship name="meal" optional="YES" minCount="1" maxCount="1" deletionRule="Nullify" destinationEntity="Meal" inverseName="orders" inverseEntity="Meal" syncable="YES"/>
         <relationship name="user" optional="YES" minCount="1" maxCount="1" deletionRule="Nullify" destinationEntity="User" inverseName="orders" inverseEntity="User" syncable="YES"/>
@@ -112,7 +114,7 @@
         <element name="Meal" positionX="-23645" positionY="-8424" width="128" height="208"/>
         <element name="MealNotification" positionX="-23645" positionY="-8514" width="128" height="58"/>
         <element name="Notification" positionX="-23474" positionY="-8527" width="128" height="163"/>
-        <element name="Order" positionX="-23733" positionY="-8152" width="128" height="133"/>
+        <element name="Order" positionX="-23733" positionY="-8152" width="128" height="163"/>
         <element name="Photo" positionX="-23267" positionY="-8325" width="128" height="103"/>
         <element name="PhotoNotification" positionX="-23310" positionY="-8460" width="128" height="58"/>
         <element name="Relationship" positionX="-23726" positionY="-7978" width="128" height="103"/>

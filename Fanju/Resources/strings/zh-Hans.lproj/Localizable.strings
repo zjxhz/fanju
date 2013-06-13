@@ -63,6 +63,7 @@
 /* Meal */
 "ThisWeek"="本周";
 "AfterThisWeek"="一周以后";
+"PassedMeals"="已经结束";
 
 "Meals" = "饭局";
 "MealDetail"="饭局详情";

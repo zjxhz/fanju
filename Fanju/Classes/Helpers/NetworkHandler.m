@@ -211,18 +211,19 @@ static int t = 0;
 
 - (void)request:(TTURLRequest*)request didFailLoadWithError:(NSError*)error {
     dispatch_async(dispatch_get_main_queue(), ^{
-            NSData * data = [error.userInfo objectForKey:@"responsedata"];
+        NSData * data = [error.userInfo objectForKey:@"responsedata"];
 //                DDLogVerbose([[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding]) ;
-            NSString* html = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
-            
-            NSString* errorPage = [NSString stringWithFormat:@"%@/error.html", NSTemporaryDirectory()];
-            [html writeToFile:errorPage atomically:NO encoding:NSUTF8StringEncoding error:nil];
-            DDLogError(@"Network Error: error page saved to %@", errorPage);
-            if (self.failure != NULL) {
-                self.failure();
-            }
-            self.available = YES;
-        });
+        NSString* html = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+        
+        NSString* errorPage = [NSString stringWithFormat:@"%@/error.html", NSTemporaryDirectory()];
+        [html writeToFile:errorPage atomically:NO encoding:NSUTF8StringEncoding error:nil];
+        DDLogError(@"request failed with error: %@", error);
+        DDLogError(@"Network Error: error page saved to %@", errorPage);
+        if (self.failure != NULL) {
+            self.failure();
+        }
+        self.available = YES;
+    });
     
 
 }

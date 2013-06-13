@@ -9,5 +9,7 @@
 #import "TagSelectionItem.h"
 
 @implementation TagSelectionItem
-
+-(BOOL)isSaved{
+    return _tag != nil && _tag.tID != nil;
+}
 @end

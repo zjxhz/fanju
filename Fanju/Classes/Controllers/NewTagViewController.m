@@ -18,15 +18,16 @@
 #import "Tag.h"
 #import "TagSelectionDataSource.h"
 #import "TagSelectionItem.h"
+#import "InfoUtil.h"
 
 const NSInteger MOST_POPULAR_TAG_COUNT = 5;
-
+#define AUTO_COMPLETE_Y 55
 @interface NewTagViewController (){
     NSMutableArray *_tags;
-//    NSMutableArray *_selectedTags;
     LoadMoreTableItem *_loadMore;
     UISearchBar* _searchBar;
     TagAutocompleteTableView* _autoComplete;
+    NSMutableArray *_newTags;
 }
 
 @end
@@ -38,7 +39,9 @@ const NSInteger MOST_POPULAR_TAG_COUNT = 5;
 {
     [super viewDidLoad];
     [self loadTags];
+    
     self.navigationItem.titleView = [[WidgetFactory sharedFactory] titleViewWithTitle:@"添加兴趣"];
+    self.navigationItem.leftBarButtonItem = [[WidgetFactory sharedFactory] backButtonWithTarget:self action:@selector(goBack)];
     self.navigationItem.rightBarButtonItem = [[WidgetFactory sharedFactory] normalBarButtonItemWithTitle:@"保存" target:self action:@selector(saveTags)];
     self.tableView.backgroundColor = RGBCOLOR(0xF2, 0xF2, 0xF2);
     _searchBar = [[UISearchBar alloc] initWithFrame:CGRectMake(0, 0, 320, 50)];
@@ -60,21 +63,49 @@ const NSInteger MOST_POPULAR_TAG_COUNT = 5;
     reg.delegate = self;
     reg.cancelsTouchesInView = NO;
     [self.view addGestureRecognizer:reg];
-    _autoComplete = [[TagAutocompleteTableView alloc] initWithFrame:CGRectMake(0, 55, 320, 240) style:UITableViewStylePlain];
+    _autoComplete = [[TagAutocompleteTableView alloc] initWithFrame:CGRectMake(0, AUTO_COMPLETE_Y, 320, 240) style:UITableViewStylePlain];
     _autoComplete.hidden = YES;
     _autoComplete.autocompleteDelegate = self;
     [self.view addSubview:_autoComplete];
+}
+
+-(void)viewWillAppear:(BOOL)animated{
+    [super viewWillAppear:animated];
+    CGFloat autoCompleteHeight = self.view.frame.size.height - AUTO_COMPLETE_Y;
+    _autoComplete.frame = CGRectMake(0, AUTO_COMPLETE_Y, 320, autoCompleteHeight);
 }
 
 -(void)viewDidAppear:(BOOL)animated{
     [super viewDidAppear:animated];
     
 }
+
+-(void)goBack{
+//    BOOL changeFound = NO;
+//    NSMutableArray* selectedTags = [NSMutableArray array];
+//    for (TagSelectionItem* item in [self selectedTags]) {
+//        if ([item isSaved]) {
+//            [selectedTags addObject:item.tag];
+//        } else {
+//            changeFound = YES;
+//            break;
+//        }
+//    }
+    NSSet* selectedTagSet = [[NSSet alloc] initWithArray:[self selectedTags]];
+    if (![_user.tags isEqual:selectedTagSet]) {
+        UIAlertView* alert = [[UIAlertView alloc] initWithTitle:nil message:@"兴趣爱好已经修改，是否保存" delegate:self cancelButtonTitle:@"不保存" otherButtonTitles:@"保存", nil];
+        [alert show];
+        return;
+    } else {
+        [self.navigationController popViewControllerAnimated:YES];
+    }
+}
 -(void)loadTags{
 //    _selectedTags = [[[_user tags] allObjects] mutableCopy];
     RKObjectManager* manager = [RKObjectManager sharedManager];
     [manager getObjectsAtPath:@"usertag/" parameters:@{@"limit":@"0"} success:^(RKObjectRequestOperation *operation, RKMappingResult *mappingResult) {
         _tags = [mappingResult.array mutableCopy];
+        _newTags = [NSMutableArray array];
         _autoComplete.tags = _tags;
         NSArray* items = @[[self tagsOfSection:0], [self tagsOfSection:1]];
         NSArray* sections = @[@"最热门", @"其它"];
@@ -88,7 +119,7 @@ const NSInteger MOST_POPULAR_TAG_COUNT = 5;
         self.dataSource = ds;
     } failure:^(RKObjectRequestOperation *operation, NSError *error) {
         DDLogError(@"failed to fetch user tags.");
-        [SVProgressHUD dismissWithError:@"获取数据失败"];
+        [SVProgressHUD showErrorWithStatus:@"获取数据失败"];
     }];
 }
 
@@ -181,16 +212,22 @@ const NSInteger MOST_POPULAR_TAG_COUNT = 5;
     for (NSArray* sectionedItems in ds.items) {
         for (TagSelectionItem *item in sectionedItems) {
             if (item.selected) {
-                [selectedTags addObject:item.tag];
+                [selectedTags addObject:[item isSaved] ? item.tag : item.tagName];
             }
         }
     }
     return selectedTags;
 }
 -(void)saveTags{
-    [SVProgressHUD showWithStatus:@"保存中…" maskType:SVProgressHUDMaskTypeBlack];
     NSArray* selectedTags = [self selectedTags];
-    NSString *strTags = [UserTag tagsToString:selectedTags];
+    if (selectedTags.count < 3) {
+        [InfoUtil showAlert:@"请至少选择3个标签"];
+        return;
+    }
+    
+    [SVProgressHUD showWithStatus:@"保存中…" maskType:SVProgressHUDMaskTypeBlack];
+
+    NSString *strTags = [TagService tagsToString:selectedTags];
     NSArray* params = [NSArray arrayWithObject:[DictHelper dictWithKey:@"tags" andValue:strTags]];
     NSString *requestStr = [NSString stringWithFormat:@"%@://%@/api/v1/user/%@/tags/?format=json", HTTPS, EOHOST, _user.uID];
     [[NetworkHandler getHandler] requestFromURL:requestStr
@@ -201,38 +238,70 @@ const NSInteger MOST_POPULAR_TAG_COUNT = 5;
                                             NSString* resultStatus = [obj objectForKey:@"status"];
                                             if ([resultStatus isEqualToString:@"OK"]) {
                                                 DDLogVerbose(@"tags saved");
-                                                [SVProgressHUD dismissWithSuccess:@"保存成功。"];
-                                                NSMutableSet* tags = [_user.tags mutableCopy];
-                                                NSSet* existingTags = [[NSSet alloc] initWithArray:selectedTags];
-                                                [tags minusSet:existingTags];
-                                                for (Tag* tag in tags) {
-                                                    DDLogVerbose(@"removing tag %@", tag.name);
-                                                    [_user removeTagsObject:tag];
-                                                }
-                                                NSMutableSet* addedTags = [existingTags mutableCopy] ;
-                                                [addedTags minusSet:_user.tags];
-                                                for (Tag* tag in addedTags){
-                                                    [_user addTagsObject:tag];
-                                                    DDLogVerbose(@"adding tag %@", tag.name);
-                                                }
-                                                NSManagedObjectContext* contex = [RKObjectManager sharedManager].managedObjectStore.mainQueueManagedObjectContext;
-                                                NSError* error;
-                                                if(![contex saveToPersistentStore:&error]){
-                                                    DDLogError(@"failed to save after saving tags: %@", error);
-                                                }
-                                                [self.delegate tagsSaved:selectedTags forUser:_user];
+                                                [self reloadUserTags];
+//                                                [SVProgressHUD showSuccessWithStatus:@"保存成功。"];
+//                                                
+//                                                
+//                                                [_user removeTags:_user.tags];
+//                                                
+//                                                
+//                                                
+//                                                NSMutableSet* tags = [_user.tags mutableCopy];
+//                                                NSSet* existingTags = [[NSSet alloc] initWithArray:selectedTags];
+//                                                [tags minusSet:existingTags];
+//                                                for (Tag* tag in tags) {
+//                                                    DDLogVerbose(@"removing tag %@", tag.name);
+//                                                    [_user removeTagsObject:tag];
+//                                                }
+//                                                NSMutableSet* addedTags = [existingTags mutableCopy] ;
+//                                                [addedTags minusSet:_user.tags];
+//                                                for (Tag* tag in addedTags){
+//                                                    [_user addTagsObject:tag];
+//                                                    DDLogVerbose(@"adding tag %@", tag.name);
+//                                                }
+//                                                NSManagedObjectContext* contex = [RKObjectManager sharedManager].managedObjectStore.mainQueueManagedObjectContext;
+//                                                NSError* error;
+//                                                if(![contex saveToPersistentStore:&error]){
+//                                                    DDLogError(@"failed to save after saving tags: %@", error);
+//                                                }
+//                                                [self.delegate tagsSaved:selectedTags forUser:_user];
                                             } else {
                                                 DDLogError(@"failed to set tags with error: %@",resultStatus);
-                                                [SVProgressHUD dismissWithError:resultStatus];
+                                                [SVProgressHUD showErrorWithStatus:resultStatus];
                                             }
                                         } failure:^{
                                             DDLogError(@"failed to save settings");
-                                            [SVProgressHUD dismissWithError:@"保存失败"];
+                                            [SVProgressHUD showErrorWithStatus:@"保存失败"];
                                         }];
 }
 
-#pragma mark - Table view delegate
+-(void)reloadUserTags{
+    RKObjectManager* manager = [RKObjectManager sharedManager];
+    NSString* path = [NSString stringWithFormat:@"user/%@/tags/", _user.uID];
+    [manager getObjectsAtPath:path parameters:nil success:^(RKObjectRequestOperation *operation, RKMappingResult *mappingResult) {
+        DDLogInfo(@"user tags reloaded");
+        [SVProgressHUD showSuccessWithStatus:@"保存成功"];
+        [_user removeTags:_user.tags];
+        [_user addTags:[[NSSet alloc] initWithArray:mappingResult.array]];
+        NSManagedObjectContext* contex = manager.managedObjectStore.mainQueueManagedObjectContext;
+        NSError* error;
+        if(![contex saveToPersistentStore:&error]){
+            DDLogError(@"failed to save after saving tags: %@", error);
+        }
+        [self.delegate tagsSaved:[self selectedTags] forUser:_user];
+        [NSTimer scheduledTimerWithTimeInterval:0.7 target:self selector:@selector(goBackLater) userInfo:nil repeats:NO];
+    } failure:^(RKObjectRequestOperation *operation, NSError *error) {
+        [SVProgressHUD showErrorWithStatus:@"已保存到服务器，但无法同步，请稍后再试"];
+        DDLogError(@"failed to reload tags for user: %@", error);
+    }];
+    
+}
 
+-(void)goBackLater{
+    [self.navigationController popViewControllerAnimated:YES];
+}
+
+#pragma mark - Table view delegate
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
     TagSelectionDataSource* ds = self.dataSource;
@@ -302,87 +371,105 @@ const NSInteger MOST_POPULAR_TAG_COUNT = 5;
     return 45;
 }
 #pragma mark TagAutocompleteDelegate
--(void)tagSelected:(Tag *)tag{
-    NSIndexPath* indexPath = [self indexPathForTag:tag];
+-(void)tagSelected:(NSString *)tagName{
+    NSIndexPath* indexPath = [self indexPathForTagName:tagName];
     _autoComplete.hidden = YES;
     [_searchBar setText:@""];
     
-    TagSelectionItem* item = [self findItemForTag:tag];
+    TagSelectionItem* item = [self findItemForTagName:tagName];
     item.selected = YES;
    
     [self.tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
-    [SVProgressHUD showInView:self.view status:[NSString stringWithFormat:@"您已选择了 %@", tag.name] networkIndicator:NO];
-    [self performSelector:@selector(dismissHUD:) withObject:nil afterDelay:0.7];
+    [SVProgressHUD showSuccessWithStatus:[NSString stringWithFormat:@"您已选择了 %@", tagName]];
 }
 
--(NSIndexPath*)indexPathForTag:(Tag*)tag{
+-(NSIndexPath*)indexPathForTagName:(NSString*)tagName{
     TagSelectionDataSource* ds = self.dataSource;
-    TagSelectionItem* item = [self findItemForTag:tag];
+    TagSelectionItem* item = [self findItemForTagName:tagName];
     return [ds tableView:self.tableView indexPathForObject:item];
 }
+
 -(void)newTagSelected:(NSString*)tagName{
     _autoComplete.hidden = YES;
-    NSArray* params = [NSArray arrayWithObject:[DictHelper dictWithKey:@"create_tag" andValue:tagName]];
-    NSString *requestStr = [NSString stringWithFormat:@"%@://%@/api/v1/user/%@/tags/", HTTPS, EOHOST, _user.uID];
-    [[NetworkHandler getHandler] requestFromURL:requestStr
-                                         method:POST
-                                     parameters:params
-                                    cachePolicy:TTURLRequestCachePolicyNone
-                                        success:^(id obj) {
-                                            NSString* resultStatus = [obj objectForKey:@"status"];
-                                            if ([resultStatus isEqualToString:@"OK"]) {
-                                                DDLogVerbose(@"tags created");
-                                                NSManagedObjectContext* contex = [RKObjectManager sharedManager].managedObjectStore.mainQueueManagedObjectContext;
-                                                Tag* tag = [NSEntityDescription insertNewObjectForEntityForName:@"Tag" inManagedObjectContext:contex];
-                                                tag.name = tagName;
-                                                tag.tID = [obj objectForKey:@"id"];
-                                                NSError* error;
-                                                if(![contex saveToPersistentStore:&error]){
-                                                    DDLogError(@"failed to save a new tag:%@, %@", tagName, error);
-                                                } else {
-                                                    TagSelectionItem* item = [self tagSelectionItem:tag];
-                                                    item.selected = YES;
-                                                    TagSelectionDataSource* ds = self.dataSource;
-                                                    NSMutableArray* items1 = [ds.items objectAtIndex:1];
-                                                    [items1 addObject:item];
-                                                    NSIndexPath* indexPath = [NSIndexPath indexPathForRow:items1.count - 1 inSection:1];
-                                                    [self.tableView insertRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationTop];
-                                                    [SVProgressHUD showInView:self.view status:[NSString stringWithFormat:@"您已创建并选择了 %@", tag.name] networkIndicator:NO];
-                                                    [self performSelector:@selector(dismissHUD:) withObject:nil afterDelay:0.7];
-                                                }
-                                                
-                                            } else {
-                                                DDLogError(@"failed to set tags with error: %@",resultStatus);
-                                                [SVProgressHUD dismissWithError:resultStatus];
-                                            }
-                                        } failure:^{
-                                            DDLogError(@"failed to save settings");
-                                            [SVProgressHUD dismissWithError:@"保存失败"];
-                                        }];
-
-
+    [_newTags addObject:tagName];
+    [_tags addObject:tagName];
+    _autoComplete.tags = _tags;
+    TagSelectionItem* item = [[TagSelectionItem alloc] init];
+    item.tagName = tagName;
+    item.selected = YES;
+    
+    TagSelectionDataSource* ds = self.dataSource;
+    NSMutableArray* items1 = [ds.items objectAtIndex:1];
+    [items1 addObject:item];
+    NSIndexPath* indexPath = [NSIndexPath indexPathForRow:items1.count - 1 inSection:1];
+    [self.tableView insertRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationTop];
+    [SVProgressHUD showSuccessWithStatus:[NSString stringWithFormat:@"您已创建并选择了 %@", tagName]];
+    
+//    NSArray* params = [NSArray arrayWithObject:[DictHelper dictWithKey:@"create_tag" andValue:tagName]];
+//    NSString *requestStr = [NSString stringWithFormat:@"%@://%@/api/v1/user/%@/tags/", HTTPS, EOHOST, _user.uID];
+//    [[NetworkHandler getHandler] requestFromURL:requestStr
+//                                         method:POST
+//                                     parameters:params
+//                                    cachePolicy:TTURLRequestCachePolicyNone
+//                                        success:^(id obj) {
+//                                            NSString* resultStatus = [obj objectForKey:@"status"];
+//                                            if ([resultStatus isEqualToString:@"OK"]) {
+//                                                DDLogVerbose(@"tags created");
+//                                                NSManagedObjectContext* contex = [RKObjectManager sharedManager].managedObjectStore.mainQueueManagedObjectContext;
+//                                                Tag* tag = [NSEntityDescription insertNewObjectForEntityForName:@"Tag" inManagedObjectContext:contex];
+//                                                tag.name = tagName;
+//                                                tag.tID = [obj objectForKey:@"id"];
+//                                                NSError* error;
+//                                                if(![contex saveToPersistentStore:&error]){
+//                                                    DDLogError(@"failed to save a new tag:%@, %@", tagName, error);
+//                                                } else {
+//                                                    [_tags addObject:tag];
+//                                                    _autoComplete.tags = _tags;
+//                                                    TagSelectionItem* item = [self tagSelectionItem:tag];
+//                                                    item.selected = YES;
+//                                                    TagSelectionDataSource* ds = self.dataSource;
+//                                                    NSMutableArray* items1 = [ds.items objectAtIndex:1];
+//                                                    [items1 addObject:item];
+//                                                    NSIndexPath* indexPath = [NSIndexPath indexPathForRow:items1.count - 1 inSection:1];
+//                                                    [self.tableView insertRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationTop];
+//                                                    [SVProgressHUD showSuccessWithStatus:[NSString stringWithFormat:@"您已创建并选择了 %@", tag.name]];
+//                                                }
+//                                                
+//                                            } else {
+//                                                DDLogError(@"failed to set tags with error: %@",resultStatus);
+//                                                [SVProgressHUD showErrorWithStatus:resultStatus];
+//                                            }
+//                                        } failure:^{
+//                                            DDLogError(@"failed to save settings");
+//                                            [SVProgressHUD showErrorWithStatus:@"保存失败"];
+//                                        }];
        
 }
 
--(TagSelectionItem*)findItemForTag:(Tag*)tag{
+-(TagSelectionItem*)findItemForTagName:(NSString*)tagName{
     TagSelectionDataSource *ds = self.dataSource;
     for (NSArray* sectionedItems in ds.items) {
         for (TagSelectionItem *item in sectionedItems) {
-            if ([item.tag isEqual:tag]) {
+            if (([item isSaved] && [item.tag.name isEqual:tagName]) || [item.tagName isEqual:tagName]) {
                 return item;
-            }
+            } 
         }
     }
     return nil;
-}
-
--(void) dismissHUD:(id)object{
-    [SVProgressHUD dismiss];
 }
 
 #pragma mark UITextFieldDelegate
 -(BOOL)textFieldShouldReturn:(UITextField *)textField{
     [_searchBar resignFirstResponder];
     return YES;
+}
+
+#pragma mark UIAlertViewDelegate
+- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex{
+    if (buttonIndex == 1) {
+        [self saveTags];
+    } else {
+        [self.navigationController popViewControllerAnimated:YES];
+    }
 }
 @end

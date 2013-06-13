@@ -11,6 +11,5 @@
 
 @interface InfoUtil : NSObject
 +(void) showError:(NSDictionary*) dict;
-
-+(void) showErrorWithString:(NSString*) error;
++(void) showAlert:(NSString*)alert;
 @end

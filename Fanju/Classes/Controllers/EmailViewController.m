@@ -69,11 +69,11 @@
                                                 
                                             } 
                                             else {
-                                                [SVProgressHUD dismissWithError:[result objectForKey:@"info"]];
+                                                [SVProgressHUD showErrorWithStatus:[result objectForKey:@"info"]];
                                             }
                                         } failure:^{
 #warning how to guide user to login as an app user in this case?
-                                            [SVProgressHUD dismissWithError:@"邮箱已被注册，如果您曾以该邮箱注册，请使用邮箱账号登录。或者使用其他邮箱。"];
+                                            [SVProgressHUD showErrorWithStatus:@"邮箱已被注册，如果您曾以该邮箱注册，请使用邮箱账号登录。或者使用其他邮箱。"];
                                         }];
     return YES;
 }

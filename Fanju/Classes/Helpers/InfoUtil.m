@@ -11,12 +11,11 @@
 @implementation InfoUtil
 
 +(void) showError:(NSDictionary*) dict{
-    [SVProgressHUD show];
-    [SVProgressHUD dismissWithError:NSLocalizedString([dict objectForKey:@"info"], nil) afterDelay:2];
+    [SVProgressHUD showErrorWithStatus:NSLocalizedString([dict objectForKey:@"info"], nil)];
 }
 
-+(void) showErrorWithString:(NSString*) error{
-    [SVProgressHUD show];
-    [SVProgressHUD dismissWithError:NSLocalizedString(error, nil) afterDelay:2];
++(void) showAlert:(NSString*)alert{
+    UIAlertView* alertView = [[UIAlertView alloc] initWithTitle:nil message:alert delegate:nil cancelButtonTitle:@"确定" otherButtonTitles:nil];
+    [alertView show];
 }
 @end

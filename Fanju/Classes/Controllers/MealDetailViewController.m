@@ -41,6 +41,7 @@
     NSArray* _participants;
     CMPopTipView *_navBarLeftButtonPopTipView;
     UIButton* _commentButton;
+    NINetworkImageView *_mealImageView;
 }
 
 -(id)init{
@@ -139,8 +140,14 @@
     if (!_unfinishedOrder) {
         [self updateJoinButton];
     }
+    [self.tableView addObserver:self forKeyPath:@"contentOffset" options:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld context:nil];
     [super viewWillAppear:animated];
     
+}
+
+- (void)viewWillDisappear:(BOOL)animated {
+    [super viewWillDisappear:animated];
+    [self.tableView removeObserver:self forKeyPath:@"contentOffset"];
 }
 
 -(void)updateJoinButton{
@@ -368,7 +375,7 @@
                                         failure:^(void){
                                             [self updateMenuButton:menuButton withReadingStatus:NO];
                                             DDLogError(@"failed to fetch menu");
-                                            [SVProgressHUD dismissWithError:@"获取菜单失败"];
+                                            [SVProgressHUD showErrorWithStatus:@"获取菜单失败"];
                                         }];
 
     
@@ -453,10 +460,11 @@
 
 - (UIView*) createHostView{
     UIView* hostView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, DISH_VIEW_WIDTH, DISH_VIEW_HEIGHT)];
-    NINetworkImageView *imgView = [[NINetworkImageView alloc] initWithFrame:CGRectMake(0, 0, DISH_VIEW_WIDTH, DISH_VIEW_HEIGHT)];
+    _mealImageView = [[NINetworkImageView alloc] initWithFrame:CGRectMake(0, 0, 320, DISH_VIEW_HEIGHT)];
+    _mealImageView.clipsToBounds = YES;
 
-    [imgView setContentMode:UIViewContentModeScaleAspectFill];
-    [imgView setPathToNetworkImage:[URLService  absoluteURL:_meal.photoURL] forDisplaySize:CGSizeMake(DISH_VIEW_WIDTH, DISH_VIEW_HEIGHT)];
+    [_mealImageView setContentMode:UIViewContentModeScaleAspectFill];
+    [_mealImageView setPathToNetworkImage:[URLService  absoluteURL:_meal.photoURL] forDisplaySize:CGSizeMake(320, 213)];
     UIImage* cost_bg = [UIImage imageNamed:@"renjun_mon"];
     UIImageView* cost_view = [[UIImageView alloc] initWithImage:cost_bg];
     cost_view.frame = CGRectMake(9, 0, cost_bg.size.width, cost_bg.size.height);
@@ -477,7 +485,7 @@
     menuBtn.titleLabel.font = [UIFont systemFontOfSize:12];
     [menuBtn addTarget:self action:@selector(displayMenu:) forControlEvents:UIControlEventTouchUpInside];
     
-    [hostView addSubview:imgView];
+    [hostView addSubview:_mealImageView];
     [hostView addSubview:cost_view];
     [hostView addSubview:cost_label];
     [hostView addSubview:menuBtn];
@@ -510,12 +518,13 @@
 }
 
 - (void) onShareClicked:(id)sender{
-    if (_shareContentViewController == nil) {
-        _shareContentViewController = [[ShareTableViewController alloc] initWithStyle:UITableViewStylePlain];
-        _shareContentViewController.delegate = self;
-        _sharePopOver = [[WEPopoverController alloc] initWithContentViewController:_shareContentViewController];
-    }
-    [_sharePopOver presentPopoverFromBarButtonItem:self.navigationItem.rightBarButtonItem permittedArrowDirections:UIPopoverArrowDirectionUp animated:YES];
+    [self shareToSinaWeibo];
+//    if (_shareContentViewController == nil) {
+//        _shareContentViewController = [[ShareTableViewController alloc] initWithStyle:UITableViewStylePlain];
+//        _shareContentViewController.delegate = self;
+//        _sharePopOver = [[WEPopoverController alloc] initWithContentViewController:_shareContentViewController];
+//    }
+//    [_sharePopOver presentPopoverFromBarButtonItem:self.navigationItem.rightBarButtonItem permittedArrowDirections:UIPopoverArrowDirectionUp animated:YES];
 }
 
 - (SinaWeibo *)sinaweibo{
@@ -536,8 +545,9 @@
 }
 
 -(void) sendWeiBo{
-    NSString *defaultMessage = [NSString stringWithFormat:@"我发现了一个有意思的饭局：%@ http://www.fanjoin.com", self.meal.topic];
-    WBSendView *sendView = [[WBSendView alloc] initWithAppKey:WEIBO_APP_KEY appSecret:WEIBO_APP_SECRET text:defaultMessage image:[[TTURLCache sharedCache] imageForURL:[NSString stringWithFormat:@"http://%@%@", EOHOST, self.meal.photoURL]]];
+    NSString *defaultMessage = [NSString stringWithFormat:@"一个有趣的饭局：%@ http://%@/meal/%@/", _meal.topic, EOHOST, _meal.mID];
+    UIImage* image = _mealImageView.image;
+    WBSendView *sendView = [[WBSendView alloc] initWithAppKey:WEIBO_APP_KEY appSecret:WEIBO_APP_SECRET text:defaultMessage image:image];
     sendView.delegate = self;
     sendView.backgroundColor = [UIColor whiteColor];
     [sendView show:YES];
@@ -554,19 +564,46 @@
 
 #pragma mark _
 #pragma mark WBSendViewDelegate
+-(void)sendViewDidStartSending:(WBSendView *)view{
+    [SVProgressHUD showWithStatus:@"正在发送" maskType:SVProgressHUDMaskTypeBlack];
+}
 - (void)sendViewDidFinishSending:(WBSendView *)view{
     [SVProgressHUD showSuccessWithStatus:@"发送成功！"];
     [view hide:YES];
 }
 
 - (void)sendView:(WBSendView *)view didFailWithError:(NSError *)error{
-    [InfoUtil showErrorWithString:@"发送失败，请稍后重试"];
-    DDLogVerbose(@"send weibo message failed with error: %@", error.description);
+    [SVProgressHUD showErrorWithStatus:@"发送失败，请稍后重试"];
+    DDLogVerbose(@"send weibo message failed with error: %@", error);
+}
+
+- (void)sendViewNotAuthorized:(WBSendView *)view{
+    DDLogError(@"sending weibo while not authorized");
+}
+
+- (void)sendViewAuthorizeExpired:(WBSendView *)view{
+    DDLogError(@"sending weibo while authorization expired");
 }
 
 #pragma mark NSObject
 -(NSString*)description{
     return [NSString stringWithFormat:@"class: %@, %@", [self class], [super description]];
+}
+
+#pragma mark UIScrollViewDelegate
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context{
+    CGFloat offset = [[change objectForKey:@"new"] CGPointValue].y;
+    CGRect frame = _mealImageView.frame;
+    frame.origin.y = offset;
+    frame.size.height = DISH_VIEW_HEIGHT - offset;
+    _mealImageView.frame = frame;
+}
+-(void)scrollViewDidScroll:(UIScrollView *)scrollView{
+//    CGFloat offset = scrollView.contentOffset.y;
+//    CGRect frame = _mealImageView.frame;
+////    frame.origin.y = offset;
+//    frame.size.height = 140 - offset;
+//    _mealImageView.frame = frame;
 }
 
 @end

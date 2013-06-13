@@ -12,13 +12,21 @@
 #import "Const.h"
 #import "NetworkHandler.h"
 #import "DictHelper.h"
-
+#import "InfoUtil.h"
 @implementation UserTagDataSource
 -(BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath{
+//    if (_items.count <= 4) {
+//        return NO;
+//    }
     return indexPath.row != 0;
 }
 
 -(void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath{
+    if (_items.count <= 4) {
+        [InfoUtil showAlert:@"抱歉，请至少保留3个兴趣标签"];
+        return;
+    }
+    
     Tag* deletedTag = [self tableView:tableView objectForRowAtIndexPath:indexPath];    
     NSArray* params = [NSArray arrayWithObject:[DictHelper dictWithKey:@"deleted_tag" andValue:deletedTag.name]];
     User* loggedInUser = [UserService service].loggedInUser;

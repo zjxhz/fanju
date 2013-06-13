@@ -10,7 +10,7 @@
 #import "Tag.h"
 
 @interface TagAutocompleteTableView(){
-    NSMutableArray* _matchedTags;
+    NSMutableArray* _matchedTagNames;
     NSString* _newTag;
     BOOL _exactMatchFound;
 
@@ -22,7 +22,7 @@
     self = [super initWithFrame:frame style:style];
     if (self) {
         _tags = [NSArray array];
-        _matchedTags = [NSMutableArray array];
+        _matchedTagNames = [NSMutableArray array];
         self.scrollEnabled = YES;
         self.delegate = self;
         self.dataSource = self;
@@ -36,14 +36,14 @@
 }
 
 -(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
-    return _matchedTags.count + (_newTag == nil ? 0 : 1);
+    return _matchedTagNames.count + (_newTag == nil ? 0 : 1);
 }
 
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath{
-    if (_matchedTags.count == 0 || (!_exactMatchFound && indexPath.row == [self numberOfRowsInSection:0] - 1)) {
+    if (_matchedTagNames.count == 0 || (!_exactMatchFound && indexPath.row == [self numberOfRowsInSection:0] - 1)) {
         [_autocompleteDelegate newTagSelected:_newTag];
     } else {
-        [_autocompleteDelegate tagSelected:[_matchedTags objectAtIndex:indexPath.row]];
+        [_autocompleteDelegate tagSelected:[_matchedTagNames objectAtIndex:indexPath.row]];
     }
 }
 
@@ -58,8 +58,8 @@
     if(!_exactMatchFound && (!_exactMatchFound && indexPath.row == [self numberOfRowsInSection:0] - 1)){
         cell.textLabel.text = [NSString stringWithFormat:@"添加新标签 “%@”", _newTag];
     } else {
-        UserTag* tag = [_matchedTags objectAtIndex:indexPath.row];
-        cell.textLabel.text = tag.name;
+        NSString* tagName = [_matchedTagNames objectAtIndex:indexPath.row];
+        cell.textLabel.text = tagName;
     }
     
     return cell;
@@ -67,24 +67,31 @@
 }
 
 -(BOOL)searchText:(NSString*)text{
-    _matchedTags = [NSMutableArray array];
+    _matchedTagNames = [NSMutableArray array];
     _exactMatchFound = NO;
-    for (Tag* tag in _tags) {
-        if ([tag.name caseInsensitiveCompare:text] == NSOrderedSame){
+    for (id obj in _tags) {
+        NSString* tagName = nil;
+        if ([obj isKindOfClass:[Tag class]]) {
+            Tag* tag = obj;
+            tagName = tag.name;
+        } else if([obj isKindOfClass:[NSString class]]){
+            tagName = obj;
+        }
+        if ([tagName caseInsensitiveCompare:text] == NSOrderedSame){
             _exactMatchFound  =  YES;
-            [_matchedTags addObject:tag];
+            [_matchedTagNames addObject:tagName];
             continue;
         }
-        if ([tag.name rangeOfString:text options:NSCaseInsensitiveSearch].location != NSNotFound) {
-            [_matchedTags addObject:tag];
+        if ([tagName rangeOfString:text options:NSCaseInsensitiveSearch].location != NSNotFound) {
+            [_matchedTagNames addObject:tagName];
         }
     }
-    if (_matchedTags.count == 0 || !_exactMatchFound) {
+    if (_matchedTagNames.count == 0 || !_exactMatchFound) {
         _newTag = text;
     } else {
         _newTag = nil;
     }
     [self reloadData];
-    return _matchedTags.count > 0;
+    return _matchedTagNames.count > 0;
 }
 @end

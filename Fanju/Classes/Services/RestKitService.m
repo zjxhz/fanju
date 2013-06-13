@@ -11,6 +11,7 @@
 #import "DateUtil.h"
 #import "Relationship.h"
 
+
 @implementation RestKitService
 +(RestKitService*)service{
     static dispatch_once_t onceToken;
@@ -21,16 +22,19 @@
     return instance;
 }
 
+-(NSString*)sqlitePath{
+    NSString* normalizedHost = [EOHOST stringByReplacingOccurrencesOfString:@":" withString:@"_"];
+    NSString* userSpecificPath = [NSString stringWithFormat:@"%@_Fanju.sqlite", normalizedHost];
+    NSString *path = [RKApplicationDataDirectory() stringByAppendingPathComponent:userSpecificPath];
+    DDLogVerbose(@"Fanju.sqlite path: %@", path);
+    return path;
+}
 -(void)setup{
     NSURL *modelURL = [[NSBundle mainBundle] URLForResource:@"Fanju" withExtension:@"momd"];
     NSManagedObjectModel *managedObjectModel = [[NSManagedObjectModel alloc] initWithContentsOfURL:modelURL];
     RKManagedObjectStore *managedObjectStore = [[RKManagedObjectStore alloc] initWithManagedObjectModel:managedObjectModel];
-    NSString *path = [RKApplicationDataDirectory() stringByAppendingPathComponent:@"Fanju.sqlite"];
-    DDLogVerbose(@"Fanju.sqlite path: %@", path);
-//    if(path && [[NSUserDefaults standardUserDefaults] boolForKey:@"DELETE_OLD_DATA"]){
-        NSFileManager* fileMgr = [NSFileManager defaultManager];
-        [fileMgr removeItemAtPath:path error:nil];
-//    }
+    NSString *path = [self sqlitePath];
+
     
     [managedObjectStore createPersistentStoreCoordinator];
     NSError* error = nil;
@@ -104,7 +108,9 @@
     orderMapping.identificationAttributes = @[@"oID"];
     [orderMapping addAttributeMappingsFromDictionary:@{
      @"id": @"oID",
-     @"num_persons": @"numberOfPersons"
+     @"num_persons": @"numberOfPersons",
+     @"payed_time": @"paidTime",
+     @"created_time": @"createdTime"
      }];
     [orderMapping addAttributeMappingsFromArray:@[@"code", @"status"]];
     [orderMapping addPropertyMapping:[RKRelationshipMapping relationshipMappingFromKeyPath:@"customer" toKeyPath:@"user" withMapping:userMapping]];
@@ -125,7 +131,8 @@
      }];
     
     NSIndexSet *statusCodes = RKStatusCodeIndexSetForClass(RKStatusCodeClassSuccessful); // Anything in 2xx
-    RKResponseDescriptor *mealResponseDescriptor = [RKResponseDescriptor responseDescriptorWithMapping:mealMapping pathPattern:@"meal/upcoming/" keyPath:@"objects" statusCodes:statusCodes];
+    RKResponseDescriptor *upcomingMealResponseDescriptor = [RKResponseDescriptor responseDescriptorWithMapping:mealMapping pathPattern:@"meal/upcoming/" keyPath:@"objects" statusCodes:statusCodes];
+    RKResponseDescriptor *mealResponseDescriptor = [RKResponseDescriptor responseDescriptorWithMapping:mealMapping pathPattern:@"meal/" keyPath:@"objects" statusCodes:statusCodes];
     RKResponseDescriptor *userMealResponseDescriptor = [RKResponseDescriptor responseDescriptorWithMapping:mealMapping pathPattern:@"user/:uID/meal/" keyPath:@"objects" statusCodes:statusCodes];
     RKResponseDescriptor *userOrderResponseDescriptor = [RKResponseDescriptor responseDescriptorWithMapping:orderMapping pathPattern:@"user/:uID/order/" keyPath:@"objects" statusCodes:statusCodes];
     RKResponseDescriptor *orderResponseDescriptor = [RKResponseDescriptor responseDescriptorWithMapping:orderMapping pathPattern:@"order/" keyPath:@"objects" statusCodes:statusCodes];
@@ -139,6 +146,7 @@
     RKResponseDescriptor *usersWithSameTagResponseDescriptor = [RKResponseDescriptor responseDescriptorWithMapping:userMapping pathPattern:@"usertag/:tID/users/" keyPath:@"objects" statusCodes:statusCodes];
     RKResponseDescriptor *relationshipResponseDescriptor = [RKResponseDescriptor responseDescriptorWithMapping:relationshipMapping pathPattern:@"relationship/" keyPath:@"objects" statusCodes:statusCodes];
     RKResponseDescriptor *tagResponseDescriptor = [RKResponseDescriptor responseDescriptorWithMapping:tagMapping pathPattern:@"usertag/" keyPath:@"objects" statusCodes:statusCodes];
+    RKResponseDescriptor *userTagsResponseDescriptor = [RKResponseDescriptor responseDescriptorWithMapping:tagMapping pathPattern:@"user/:uID/tags/" keyPath:@"objects" statusCodes:statusCodes];
 //    RKResponseDescriptor *relationshipDetailResponseDescriptor = [RKResponseDescriptor responseDescriptorWithMapping:relationshipMapping pathPattern:@"relationship/:rID/" keyPath:nil statusCodes:statusCodes];
 //    RKObjectMapping *relationshipRequestMapping = [RKObjectMapping requestMapping];
 //    [relationshipRequestMapping addAttributeMappingsFromDictionary:relationshipMappingDictionary];
@@ -146,6 +154,7 @@
 //     = [relationshipMapping addAttributeMappingsFromDictionary:userMappingDictionary];
 //    RKRequestDescriptor *relationshipRequestDescriptor = [RKRequestDescriptor requestDescriptorWithMapping:[relationshipMapping inverseMapping] objectClass:[Relationship class] rootKeyPath:nil];
     [manager addResponseDescriptor:mealResponseDescriptor];
+    [manager addResponseDescriptor:upcomingMealResponseDescriptor];
     [manager addResponseDescriptor:userMealResponseDescriptor];
     [manager addResponseDescriptor:userResponseDescriptor];
     [manager addResponseDescriptor:userDetailResponseDescriptor];
@@ -159,6 +168,7 @@
     [manager addResponseDescriptor:userOrderResponseDescriptor];    
     [manager addResponseDescriptor:relationshipResponseDescriptor];
     [manager addResponseDescriptor:tagResponseDescriptor];
+    [manager addResponseDescriptor:userTagsResponseDescriptor];
 //    [manager addRequestDescriptor:relationshipRequestDescriptor];
     [manager.router.routeSet addRoute:[RKRoute routeWithClass:[Photo class] pathPattern:@"userphoto/:pID/" method:RKRequestMethodGET | RKRequestMethodDELETE]];
     [manager.router.routeSet addRoute:[RKRoute routeWithClass:[Relationship class] pathPattern:@"relationship/" method:RKRequestMethodPOST]];

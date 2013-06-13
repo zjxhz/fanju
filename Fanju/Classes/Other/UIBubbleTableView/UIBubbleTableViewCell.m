@@ -85,27 +85,25 @@
 #else
         self.avatarImage = [[NINetworkImageView alloc] init];//        [[UIImageView alloc] initWithImage:(self.data.avatar ? self.data.avatar : [UIImage imageNamed:@"missingAvatar.png"])];
 #endif
-        self.avatarImage.layer.cornerRadius = 9.0;
+        self.avatarImage.layer.cornerRadius = 3.0;
         self.avatarImage.layer.masksToBounds = YES;
         self.avatarImage.layer.borderColor = [UIColor colorWithWhite:0.0 alpha:0.2].CGColor;
         self.avatarImage.layer.borderWidth = 1.0;
         
-        CGFloat avatarX = (type == BubbleTypeSomeoneElse) ? 2 : self.frame.size.width - 52;
-        CGFloat avatarY = self.frame.size.height - 50;
+        CGFloat avatarX = (type == BubbleTypeSomeoneElse) ? 4 : self.frame.size.width - 38;
+        CGFloat avatarY = 0;//self.frame.size.height - 38;
 
         [self.avatarImage setPathToNetworkImage:self.data.avatarURL forDisplaySize:CGSizeMake(50, 50)];
-        self.avatarImage.frame = CGRectMake(avatarX, avatarY, 50, 50);
+        self.avatarImage.frame = CGRectMake(avatarX, avatarY, 38, 38);
         self.avatarImage.userInteractionEnabled = YES;
-        UITapGestureRecognizer* tgr = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(avatarTapped:)];
-        [self.avatarImage addGestureRecognizer:tgr];
         
         [self addSubview:self.avatarImage];
         
-        CGFloat delta = self.frame.size.height - (self.data.insets.top + self.data.insets.bottom + self.data.view.frame.size.height);
-        if (delta > 0) y = delta;
+//        CGFloat delta = self.frame.size.height - (self.data.insets.top + self.data.insets.bottom + self.data.view.frame.size.height);
+//        if (delta > 0) y = delta;
         
-        if (type == BubbleTypeSomeoneElse) x += 54;
-        if (type == BubbleTypeMine) x -= 54;
+        if (type == BubbleTypeSomeoneElse) x += 46;
+        if (type == BubbleTypeMine) x -= 46;
     }
 
     [self.customView removeFromSuperview];
@@ -115,17 +113,13 @@
 
     if (type == BubbleTypeSomeoneElse)
     {
-        self.bubbleImage.image = [[UIImage imageNamed:@"bubbleSomeone.png"] stretchableImageWithLeftCapWidth:21 topCapHeight:14];
+        self.bubbleImage.image = [[UIImage imageNamed:@"bubbleSomeone.png"] stretchableImageWithLeftCapWidth:21 topCapHeight:34];
 
     }
     else {
-        self.bubbleImage.image = [[UIImage imageNamed:@"bubbleMine.png"] stretchableImageWithLeftCapWidth:15 topCapHeight:14];
+        self.bubbleImage.image = [[UIImage imageNamed:@"bubbleMine.png"] stretchableImageWithLeftCapWidth:15 topCapHeight:34];
     }
 
     self.bubbleImage.frame = CGRectMake(x, y, width + self.data.insets.left + self.data.insets.right, height + self.data.insets.top + self.data.insets.bottom);
-}
-
--(void)avatarTapped:(id)sender{
-    [self.delegate avatarTapped:self.avatarImage];
 }
 @end

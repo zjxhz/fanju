@@ -12,19 +12,28 @@
 
 #define LOGGED_USER_PROFILE @"LOGGED_USER_PROFILE"
 
-//#define EOHOST [[NSUserDefaults standardUserDefaults] objectForKey:@"HOST"] ? [[NSUserDefaults standardUserDefaults] objectForKey:@"HOST"] : @"www.fanjoin.com"
 //#define EOHOST @"fanjoin.com"
-//#define XMPP_HOST @"fanjoin.com"
+//#define XMPP_HOST EOHOST
+//#define WEIBO_APP_KEY @"2295468526"
+//#define WEIBO_APP_SECRET @"5991184a22eaff8d2b1149bcf1b1ff91"
+//#define WEIBO_APP_REDIRECT_URI @"http://fanjoin.com/login/weibo/" 
+
+#define EOHOST @"t.ifunjoin.com"
+#define XMPP_HOST @"ifunjoin.com"
+#define WEIBO_APP_KEY @"1086545555"
+#define WEIBO_APP_SECRET @"edc858db52e5c2bc803010a81b183c5d"
+#define WEIBO_APP_REDIRECT_URI @"http://t.ifunjoin.com/login/weibo/"
+
 //#define EOHOST @"localhost:8000"
 //#define XMPP_HOST @"wayne.local"
-#define EOHOST @"ifunjoin.com"
-#define XMPP_HOST @"ifunjoin.com"
-//#define EOHOST @"www.ifunjoin.com:8001"
+//#define WEIBO_APP_KEY @"2295468526"
+//#define WEIBO_APP_SECRET @"5991184a22eaff8d2b1149bcf1b1ff91"
+//#define WEIBO_APP_REDIRECT_URI @"http://fanjoin.com/login/weibo/"
+
+
+#define FANJU_HOST_KEY @"FANJU_HOST_KEY"
 #define HTTPS @"http" // use http for https in development
 #define APP_SCHEME @"Fanju"
-#define WEIBO_APP_KEY @"2295468526"
-#define WEIBO_APP_SECRET @"5991184a22eaff8d2b1149bcf1b1ff91" 
-#define WEIBO_APP_REDIRECT_URI @"http://fanjoin.com/login/weibo/"
 
 #define UNREAD_MESSAGE_COUNT @"UNREAD_MESSAGE_COUNT"
 #define UNREAD_NOTIFICATION_COUNT @"UNREAD_NOTIFICATION_COUNT"

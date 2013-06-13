@@ -19,6 +19,7 @@
 #import "MealService.h"
 #import "PhotoService.h"
 #import "UnhandledNotification.h"
+#import "MTStatusBarOverlay.h"
 
 NSString * const NotificationDidSaveNotification = @"NotificationDidSaveNotification";
 NSString * const UnreadNotificationCount = @"UnreadNotificationCount";
@@ -253,10 +254,21 @@ NSString * const UnreadNotificationCount = @"UnreadNotificationCount";
             [[NSNotificationCenter defaultCenter] postNotificationName:NotificationDidSaveNotification
                                                                 object:notification
                                                               userInfo:nil];
+            [self updateStatusBar:notification];
             if (![notification.read boolValue]) {
                 [self setUnreadNotifCount:_unreadNotifCount + 1];
             }
         }
+    }
+}
+
+-(void)updateStatusBar:(Notification*)notification{
+    //notification is not read and is a recent notification, i.e. not an archived one, and not suspend(notfication view visible)
+    if (![notification.read boolValue] && ABS([notification.time timeIntervalSinceNow]) < 5 && !_suspend) {
+        MTStatusBarOverlay* status = [MTStatusBarOverlay sharedInstance];
+        status.animation = MTStatusBarOverlayAnimationShrink;
+        NSString* message = [NSString stringWithFormat:@"%@%@", notification.user.name, notification.eventDescription];
+        [status postMessage:message duration:2];
     }
 }
 
@@ -367,7 +379,7 @@ NSString * const UnreadNotificationCount = @"UnreadNotificationCount";
 -(BOOL)isSimpleUserNotificaiton:(XMPPMessage*)message{
     NSXMLElement *event = [message elementForName:@"event"];
     NSString* node = [self nodeNameFrom:event];
-    return [node hasSuffix:@"/followers"] || [node hasSuffix:@"/visitors"];
+    return [node hasSuffix:@"/followers"] || [node hasSuffix:@"/visitors"] || [node hasSuffix:@"/photo_requests"];
 }
 
 -(BOOL)isMealNotification:(XMPPMessage*)message{

@@ -20,6 +20,13 @@
 #import "UserTagsViewController.h"
 #import "ImageUploader.h"
 
+#define UIKeyboardNotificationsObserve() \
+NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter]; \
+[notificationCenter addObserver:self selector:@selector(keyboardWillShow:) name:UIKeyboardWillShowNotification object:nil]; \
+[notificationCenter addObserver:self selector:@selector(keyboardWillHide:) name:UIKeyboardWillHideNotification object:nil]
+
+#define UIKeyboardNotificationsUnobserve() \
+[[NSNotificationCenter defaultCenter] removeObserver:self];
 
 #define DATE_PICKER_HEIGHT 215
 #define GenderPickerHeight 162.0
@@ -36,6 +43,8 @@
     UITableView* _tableView;
     ImageUploader* _uploader;
     NSInteger _gender;
+    CGFloat _keyboardHeight;
+    UIToolbar *_genderPickerToolbar;
 }
 
 - (id)init{
@@ -47,6 +56,7 @@
 -(void)viewDidLoad{
     [super viewDidLoad];
     self.title = @"编辑资料";
+    self.navigationItem.leftBarButtonItem = [[WidgetFactory sharedFactory] backButtonWithTarget:self action:@selector(backButtonClicked:)];
     self.navigationItem.rightBarButtonItem = [[WidgetFactory sharedFactory] normalBarButtonItemWithTitle:@"保存" target:self action:@selector(saveDetails:)];
     self.view.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"bg"]];
     _tableView = [[UITableView alloc] initWithFrame:CGRectZero style:UITableViewStyleGrouped];
@@ -58,6 +68,28 @@
     [self.view addSubview:_tableView];
 }
 
+-(void)viewWillAppear:(BOOL)animated{
+    [super viewWillAppear:animated];
+    [_tableView reloadData];//so when tags are deleted from tags view and come back tags will be updated
+    UIKeyboardNotificationsObserve();
+}
+
+-(void)viewWillDisappear:(BOOL)animated{
+    [super viewWillDisappear:animated];
+    UIKeyboardNotificationsUnobserve();
+}
+
+-(void)backButtonClicked:(id)sender{
+    if (![_name isEqual:_user.name] || ![_motto isEqual:_user.motto] || ![_college isEqual:_user.college]
+        ||![_workFor isEqual:_user.workFor] || ![_occupation isEqual:_user.occupation]
+        || ![_birthday isEqual:_user.birthday] || _gender != [_user.gender integerValue]) {
+        UIAlertView* alert = [[UIAlertView alloc] initWithTitle:nil message:@"资料已经修改，是否保存？" delegate:self cancelButtonTitle:@"不保存" otherButtonTitles:@"保存", nil];
+        [alert show];
+        return;
+    } else {
+        [self.navigationController popViewControllerAnimated:YES];
+    }
+}
 -(void)viewDidAppear:(BOOL)animated{
     [super viewDidAppear:animated];
     _tableView.frame = self.view.frame;
@@ -109,11 +141,23 @@
 }
 
 -(void)createGenderPicker{
-    CGFloat y = self.view.frame.size.height - GenderPickerHeight - 20;
+    CGFloat y = self.view.frame.size.height - GenderPickerHeight;
     _genderPicker = [[UIPickerView alloc] initWithFrame:CGRectMake(0, y, 320, GenderPickerHeight)];
     _genderPicker.dataSource = self;
     _genderPicker.delegate = self;
     _genderPicker.hidden = YES;
+    [_genderPicker setShowsSelectionIndicator:YES];
+    
+    
+    _genderPickerToolbar = [[UIToolbar alloc] initWithFrame: CGRectMake(0, 0, 320, 44)];
+    _genderPickerToolbar.barStyle = UIBarStyleBlackOpaque;    
+    UIBarButtonItem *doneButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action: @selector(setGender)];
+    _genderPickerToolbar.items = [NSArray arrayWithObject: doneButton];
+    
+//    UIBarButtonItem *cancelButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCancel target:self action: @selector(cancelPressed)];
+    
+    UIBarButtonItem* flexiSpace = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
+    _genderPickerToolbar.items = @[flexiSpace, doneButton];
     [self.view addSubview:_genderPicker];
 }
 
@@ -128,12 +172,12 @@
 }
 -(void)setUser:(User *)user{
     _user = user;
-    _name = _user.name;
-    _motto = _user.motto;
-    _college = _user.college;
-    _workFor = _user.workFor;
-    _occupation = _user.occupation;
-    _birthday = _user.birthday;
+    _name = _user.name ? _user.name : @"";
+    _motto = _user.motto ? _user.motto : @"";
+    _college = _user.college ? _user.college : @"";
+    _workFor = _user.workFor ? _user.workFor : @"";
+    _occupation = _user.occupation ? _user.occupation : @"";
+    _birthday = _user.birthday ? _user.birthday : [DateUtil dateFromShortString:@"1988-08-08"];
     _gender = [_user.gender integerValue];
     [_tableView reloadData];
 }
@@ -195,9 +239,18 @@
             textFormCell.textField.tag = 0;
             textFormCell.textField.delegate = self;
         } else if(indexPath.row == 1) {
-            cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleValue1 reuseIdentifier:CellIdentifier];
-            cell.textLabel.text = @"性别";
-            cell.detailTextLabel.text = _gender ? @"女" : @"男";
+            cell = [_tableView dequeueReusableCellWithIdentifier:TextFormCellIdentifier];
+            if (!cell) {
+                cell = [[TextFormCell alloc] initWithStyle:UITableViewCellStyleValue1 reuseIdentifier:TextFormCellIdentifier];
+            }
+            TextFormCell* textFormCell = (TextFormCell*)cell;
+            textFormCell.textField.inputView = _genderPicker;
+            textFormCell.textField.tag = 1;
+            textFormCell.textField.delegate = self;
+            textFormCell.textField.inputAccessoryView = _genderPickerToolbar;
+//            cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleValue1 reuseIdentifier:CellIdentifier];
+            textFormCell.textLabel.text = @"性别";
+            textFormCell.textField.text = _gender ? @"女" : @"男";
         } else if(indexPath.row == 2) {
             cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleValue1 reuseIdentifier:BirthdayCellIdentifier];
             cell.textLabel.text = @"生日";
@@ -254,6 +307,7 @@
     cell.textLabel.font = [UIFont boldSystemFontOfSize:16];
     cell.detailTextLabel.font = [UIFont systemFontOfSize:15];
     cell.detailTextLabel.textColor = RGBCOLOR(0x50, 0x50, 0x50);
+    cell.backgroundColor = RGBCOLOR(0xF0, 0xF0, 0xF0);
     return cell;
 }
 
@@ -269,7 +323,7 @@
                                           method:PATCH
                                       jsonObject:dict
                                          success:^(id obj) {
-                                             [SVProgressHUD dismissWithSuccess:@"保存成功！"];
+                                             [SVProgressHUD showSuccessWithStatus:@"保存成功！"];
                                              DDLogInfo(@"user info updated");
                                              _user.name = _name;
                                              _user.motto = _motto;
@@ -286,17 +340,17 @@
                                              [self.navigationController popViewControllerAnimated:YES];
                                              
                                          } failure:^{
-                                             [SVProgressHUD dismissWithSuccess:@"操作失败，请稍后再试"];
+                                             [SVProgressHUD showSuccessWithStatus:@"操作失败，请稍后再试"];
                                              DDLogError(@"faile to save user info");
                                          }];
 }
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath{
+    [self.view findAndResignFirstResponder];
     if (indexPath.section == 0) {
         if (indexPath.row == 1) {
             [self scrollToBottom];
             _tableView.userInteractionEnabled = NO;
             _genderPicker.hidden = NO;
-//            <#statements#>
         } else if (indexPath.row == 2) {
             [_datePicker setHidden:NO animated:YES];
             
@@ -311,10 +365,17 @@
             vc.navigationItem.leftBarButtonItem = [[WidgetFactory sharedFactory] backButtonWithTarget:vc action:@selector(saveMotto:)];
             [self.navigationController pushViewController:vc animated:YES];
         }else if (indexPath.row == 1) {
-            UserTagsViewController *ut = [[UserTagsViewController alloc] initWithUser:_user];
-            ut.tagDelegate = self;
-            [self.navigationController pushViewController:ut animated:YES];
-            
+            if (_user.tags.count > 0) {
+                UserTagsViewController *ut = [[UserTagsViewController alloc] initWithUser:_user];
+                ut.tagDelegate = self;
+                [self.navigationController pushViewController:ut animated:YES];
+            } else {
+                NewTagViewController* tagC = [[NewTagViewController alloc] initWithStyle:UITableViewStylePlain];
+                tagC.user = self.user;
+                tagC.delegate = self;
+                [self.navigationController pushViewController:tagC animated:YES];
+            }
+
         }
     }
 }
@@ -360,12 +421,12 @@
         default:
             break;
     }
-    CGRect frame = _tableView.frame;
-    frame.origin.y = 0;
-    [UIView animateWithDuration:0.5 animations:^{
-        _tableView.frame = frame;
-    } completion:^(BOOL finished) {
-    }];
+//    CGRect frame = _tableView.frame;
+//    frame.origin.y = 0;
+//    [UIView animateWithDuration:0.5 animations:^{
+//        _tableView.frame = frame;
+//    } completion:^(BOOL finished) {
+//    }];
 }
 
 - (BOOL)textFieldShouldReturn:(UITextField *)textField
@@ -375,17 +436,20 @@
 }
 
 - (void)textFieldDidBeginEditing:(UITextField *)textField{
-    CGRect frame = _tableView.frame;
-    if (textField.tag == 0) {
-        frame.origin.y = -190;
-    } else {
-        frame.origin.y = -130 -(textField.tag - 12) * 45; //tags for the 2nd section start from 12
+//    CGRect frame = _tableView.frame;
+//    if (textField.tag == 0) {
+//        frame.origin.y = -190;
+//    } else {
+//        frame.origin.y = -130 -(textField.tag - 12) * 45; //tags for the 2nd section start from 12
+//    }
+//
+//    [UIView animateWithDuration:0.5 animations:^{
+//        _tableView.frame = frame;
+//    } completion:^(BOOL finished) {
+//    }];
+    if (textField.tag == 1) {
+        _genderPicker.hidden = NO;
     }
-
-    [UIView animateWithDuration:0.5 animations:^{
-        _tableView.frame = frame;
-    } completion:^(BOOL finished) {
-    }];
 }
 
 #pragma mark UITextViewDelegate
@@ -393,12 +457,12 @@
     _motto = textView.text;
     [_tableView reloadData];
 
-    CGRect frame = _tableView.frame;
-    frame.origin.y = 0;
-    [UIView animateWithDuration:0.5 animations:^{
-        _tableView.frame = frame;
-    } completion:^(BOOL finished) {
-    }];
+//    CGRect frame = _tableView.frame;
+//    frame.origin.y = 0;
+//    [UIView animateWithDuration:0.5 animations:^{
+//        _tableView.frame = frame;
+//    } completion:^(BOOL finished) {
+//    }];
 }
 
 -(void)textViewDidBeginEditing:(UITextView *)textView{
@@ -444,7 +508,7 @@
     return 320;
 }
 - (CGFloat)pickerView:(UIPickerView *)pickerView rowHeightForComponent:(NSInteger)component{
-    return 25;
+    return 50;
 }
 
 - (NSString *)pickerView:(UIPickerView *)pickerView titleForRow:(NSInteger)row forComponent:(NSInteger)component{
@@ -455,6 +519,13 @@
 
 - (void)pickerView:(UIPickerView *)pickerView didSelectRow:(NSInteger)row inComponent:(NSInteger)component{
     _gender = row;
+    
+//    _genderPicker.hidden = YES;
+//    _tableView.userInteractionEnabled = YES;
+//    [_tableView reloadData];
+}
+
+-(void)setGender{
     _genderPicker.hidden = YES;
     _tableView.userInteractionEnabled = YES;
     [_tableView reloadData];
@@ -474,5 +545,41 @@
     frame.origin.y = offset;
     frame.size.height = 149 - offset;
     _headerView.personalBgView.frame = frame;
+}
+
+#pragma mark - Keyboard Notifications
+- (void)keyboardWillShow:(NSNotification *)notification {
+    NSTimeInterval animationDuration;
+    CGRect frameEnd;
+    NSDictionary *userInfo = [notification userInfo];
+    [[userInfo objectForKey:UIKeyboardAnimationDurationUserInfoKey] getValue:&animationDuration];
+    [[userInfo objectForKey:UIKeyboardFrameEndUserInfoKey] getValue:&frameEnd];
+    _keyboardHeight = frameEnd.size.height;
+ 
+    [UIView animateWithDuration:animationDuration animations:^{
+        CGRect frame =  _tableView.frame;
+        frame.origin.y = -_keyboardHeight + 30; // twisted a bit or the first row will be invisible
+        _tableView.frame = frame;
+    } completion:nil];
+}
+
+- (void)keyboardWillHide:(NSNotification *)notification {
+    NSTimeInterval animationDuration;
+    NSDictionary *userInfo = [notification userInfo];
+    [[userInfo objectForKey:UIKeyboardAnimationDurationUserInfoKey] getValue:&animationDuration];
+    [UIView animateWithDuration:animationDuration animations:^{
+        CGRect frame =  _tableView.frame;
+        frame.origin.y = 0;
+        _tableView.frame = frame;
+    } completion:nil];
+}
+
+#pragma mark UIAlertViewDelegate
+- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex{
+    if (buttonIndex == 1) {
+        [self saveDetails:nil];
+    } else {
+        [self.navigationController popViewControllerAnimated:YES];
+    }
 }
 @end

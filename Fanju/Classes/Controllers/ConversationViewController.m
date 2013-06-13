@@ -46,8 +46,9 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    self.title = @"对话";
     self.view.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"bg"]];
-//    self.tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
+    self.tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
     self.navigationItem.rightBarButtonItem = [[WidgetFactory sharedFactory] normalBarButtonItemWithTitle:@"编辑" target:self action:@selector(editTable:)];
     [self requestMessages];
 }
@@ -79,7 +80,7 @@
 }
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
-    return 52;
+    return 61;
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
@@ -100,7 +101,7 @@
     CGRect frame = converstationCell.avatarView.frame;
     NSString* avatarURL = [URLService absoluteURL:with.avatar];
     [converstationCell.avatarView setPathToNetworkImage:avatarURL forDisplaySize:frame.size contentMode:UIViewContentModeScaleAspectFill];
-    converstationCell.avatarView.layer.cornerRadius = 3;
+    converstationCell.avatarView.layer.cornerRadius = 5;
     converstationCell.avatarView.layer.masksToBounds = YES;
     cell.selectionStyle = UITableViewCellSelectionStyleNone;
 
@@ -110,7 +111,7 @@
         if (unreadCount > 99) {
             [converstationCell.unreadLabel sizeToFit];
         } else {
-            converstationCell.unreadLabel.frame = CGRectMake(40, 36, 15, 12);
+            converstationCell.unreadLabel.frame = CGRectMake(47, 43, 16, 16);
         }
         converstationCell.unreadLabel.hidden = NO;
     } else {
@@ -121,7 +122,12 @@
 
 
 -(void)messageDidSave:(NSNotification*)notif {
-    [self reloadData];
+    UserMessage* message = notif.object;
+    if([_conversations containsObject:message.conversation]){
+        [self.tableView reloadData];
+    } else {
+        [self reloadData];
+    }
 }
 
 -(void)messageDidDelete:(NSNotification*)notif {
@@ -135,17 +141,24 @@
             [_conversations addObject:c];
         }
     }
+    [_conversations sortUsingComparator:^NSComparisonResult(id obj1, id obj2) {
+        Conversation* c1 = obj1;
+        Conversation* c2 = obj2;
+        return [c2.time compare:c1.time];
+    }];
     [self.tableView reloadData];
 }
 
 
 -(void)editTable:(id)sender{
+    UIBarButtonItem* item =  self.navigationItem.rightBarButtonItem;
+    UIButton* button = (UIButton*)item.customView;
     if (self.tableView.editing) {
         self.tableView.editing = NO;
-        self.navigationItem.rightBarButtonItem.title = @"编辑";
+        [button setTitle:@"编辑" forState:UIControlStateNormal];
     } else {
         self.tableView.editing = YES;
-        self.navigationItem.rightBarButtonItem.title = @"完成";
+        [button setTitle:@"完成" forState:UIControlStateNormal];
     }
 }
 

@@ -24,5 +24,6 @@
 @property(nonatomic) BOOL hideFilterButton;
 @property(nonatomic) BOOL showAddTagButton;
 @property(nonatomic, strong) Tag* tag;
+@property(nonatomic) BOOL hideDistanceUpdatedTime;
     
 @end

@@ -57,10 +57,11 @@
     if (self.tableView.editing) {
         self.tableView.editing = NO;
         [button setTitle:@"编辑" forState:UIControlStateNormal];
-        if (ds.items.count - 1 < _tagCountBeforeDelete) {
-            _tagCountBeforeDelete = ds.items.count - 1;
-            [self saveTags];
-        }
+        //no need to save as it is already saved when it is deleted
+//        if (ds.items.count - 1 < _tagCountBeforeDelete) {
+//            _tagCountBeforeDelete = ds.items.count - 1;
+//            [self saveTags];
+//        }
     } else {
         _tagCountBeforeDelete = ds.items.count - 1;
         self.tableView.editing = YES;
@@ -69,37 +70,37 @@
 }
 
 -(void)saveTags{
-    NSArray* tagsToSave = [self tagsToSave];
-    NSString *strTags = [TagService tagsToString:tagsToSave];
-    NSArray* params = [NSArray arrayWithObject:[DictHelper dictWithKey:@"tags" andValue:strTags]];
-    NSString *requestStr = [NSString stringWithFormat:@"%@://%@/api/v1/user/%@/tags/?format=json", HTTPS, EOHOST, _user.uID];
-    [[NetworkHandler getHandler] requestFromURL:requestStr
-                                         method:POST
-                                     parameters:params
-                                    cachePolicy:TTURLRequestCachePolicyNone
-                                        success:^(id obj) {
-                                            if ([[obj objectForKey:@"status"] isEqualToString:@"OK"]) {
-                                                DDLogInfo(@"tags saved");
-                                                [SVProgressHUD dismissWithSuccess:@"保存成功"];
-                                                NSMutableSet* tags = [_user.tags mutableCopy];
-                                                NSSet* existingTags = [[NSSet alloc] initWithArray:tagsToSave];
-                                                [tags minusSet:existingTags];
-                                                for (Tag* tag in tags) {
-                                                    [_user removeTagsObject:tag];
-                                                }
-                                                NSManagedObjectContext* contex = [RKObjectManager sharedManager].managedObjectStore.mainQueueManagedObjectContext;
-                                                NSError* error;
-                                                if(![contex saveToPersistentStore:&error]){
-                                                    DDLogError(@"failed to save after saving tags: %@", error);
-                                                }
-                                                [self.tagDelegate tagsSaved:tagsToSave forUser:_user];
-                                            } else {
-                                                [InfoUtil showError:obj];
-                                            }
-                                        } failure:^{
-                                            DDLogError(@"failed to save settings");
-                                            [SVProgressHUD dismissWithError:@"保存失败，请退出此页面重新刷新再试"];
-                                        }];
+//    NSArray* tagsToSave = [self tagsToSave];
+//    NSString *strTags = [TagService tagsToString:tagsToSave];
+//    NSArray* params = [NSArray arrayWithObject:[DictHelper dictWithKey:@"tags" andValue:strTags]];
+//    NSString *requestStr = [NSString stringWithFormat:@"%@://%@/api/v1/user/%@/tags/?format=json", HTTPS, EOHOST, _user.uID];
+//    [[NetworkHandler getHandler] requestFromURL:requestStr
+//                                         method:POST
+//                                     parameters:params
+//                                    cachePolicy:TTURLRequestCachePolicyNone
+//                                        success:^(id obj) {
+//                                            if ([[obj objectForKey:@"status"] isEqualToString:@"OK"]) {
+//                                                DDLogInfo(@"tags saved");
+//                                                [SVProgressHUD showSuccessWithStatus:@"保存成功"];
+//                                                NSMutableSet* tags = [_user.tags mutableCopy];
+//                                                NSSet* existingTags = [[NSSet alloc] initWithArray:tagsToSave];
+//                                                [tags minusSet:existingTags];
+//                                                for (Tag* tag in tags) {
+//                                                    [_user removeTagsObject:tag];
+//                                                }
+//                                                NSManagedObjectContext* contex = [RKObjectManager sharedManager].managedObjectStore.mainQueueManagedObjectContext;
+//                                                NSError* error;
+//                                                if(![contex saveToPersistentStore:&error]){
+//                                                    DDLogError(@"failed to save after saving tags: %@", error);
+//                                                }
+//                                                [self.tagDelegate tagsSaved:tagsToSave forUser:_user];
+//                                            } else {
+//                                                [InfoUtil showError:obj];
+//                                            }
+//                                        } failure:^{
+//                                            DDLogError(@"failed to save settings");
+//                                            [SVProgressHUD showErrorWithStatus:@"保存失败，请退出此页面重新刷新再试"];
+//                                        }];
 }
 
 -(NSArray*)tagsToSave{
@@ -117,6 +118,8 @@
     if ([object isKindOfClass:[NSString class]]){
         cell.textLabel.text = object;
         cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+    } else {
+        cell.accessoryType = UITableViewCellAccessoryNone;
     }
 }
 

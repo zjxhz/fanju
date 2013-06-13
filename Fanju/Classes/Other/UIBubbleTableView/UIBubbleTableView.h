@@ -26,6 +26,5 @@ typedef enum _NSBubbleTypingType
 @property (nonatomic) NSTimeInterval snapInterval;
 @property (nonatomic) NSBubbleTypingType typingBubble;
 @property (nonatomic) BOOL showAvatars;
-@property (nonatomic, strong) id<UIBubbleTableViewCellAvatarDelegate> avatarDelegate;
 
 @end

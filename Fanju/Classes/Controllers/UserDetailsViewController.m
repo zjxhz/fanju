@@ -74,32 +74,21 @@
 -(void)edit:(id)sender{
     EditUserDetailsViewController* editor = [[EditUserDetailsViewController alloc] init];
     editor.user = _user;
-//    editor.delegate = self;
+    //    editor.delegate = self;
     [self.navigationController pushViewController:editor animated:YES];
 }
 
 -(void)viewWillAppear:(BOOL)animated{
     [super viewWillAppear:animated];
-    
-    [self updateNavigationBar];
     UIImage* toolbarBg = [UIImage imageNamed:@"toolbar_bg"] ;
     self.toolbarItems  = [self createToolbarItems];
     [self.navigationController.toolbar setBackgroundImage:toolbarBg forToolbarPosition:UIToolbarPositionAny barMetrics:UIBarMetricsDefault];
     [self.navigationController setToolbarHidden:NO];
-    
-    UIImage* toolbarShadow = [UIImage imageNamed:@"toolbar_shadow"];
-    CGFloat toolbarHeight = toolbarBg.size.height;
-    CGFloat shadowY = self.view.frame.size.height- toolbarHeight - toolbarShadow.size.height;
-    _shadowView.frame  = CGRectMake(0, shadowY, toolbarShadow.size.width, toolbarShadow.size.height);
-    
-    CGRect frame = self.view.frame;
-    frame.size.height = self.view.frame.size.height - toolbarBg.size.height;
-    _tableView.frame = frame;
-    [self.view sendSubviewToBack:_tableView];
+    [self updateNavigationBar];
+    _tableView.frame = self.view.frame;
 }
 
 -(void)buildUI{
-    self.toolbarItems  = [self createToolbarItems];
     UIImage* toolbarShadow = [UIImage imageNamed:@"toolbar_shadow"];
     _shadowView = [[UIImageView alloc] initWithFrame:CGRectZero];
     _shadowView.image = toolbarShadow;
@@ -116,8 +105,6 @@
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(userUpdated:) name:NOTIFICATION_USER_UPDATE object:nil];
     UIImage* toolbarBg = [UIImage imageNamed:@"toolbar_bg"] ;
     
-    self.toolbarItems  = [self createToolbarItems];
-    [self.navigationController setToolbarHidden:NO];
     [self.navigationController.toolbar setBackgroundImage:toolbarBg forToolbarPosition:UIToolbarPositionAny barMetrics:UIBarMetricsDefault];
     
     [self buildUI];
@@ -128,12 +115,23 @@
     [super viewDidAppear:animated];
     [self reload:nil];
     [self sendVisited];
+    
+
+    
+    UIImage* toolbarShadow = [UIImage imageNamed:@"toolbar_shadow"];
+    CGFloat shadowY = self.view.frame.size.height - toolbarShadow.size.height - 5;//toolbar height is 49, which is 5 higher than the default
+    _shadowView.frame  = CGRectMake(0, shadowY, toolbarShadow.size.width, toolbarShadow.size.height);
+    
+    CGRect frame = self.view.frame;
+    //    frame.size.height = self.view.frame.size.height - toolbarBg.size.height;
+    _tableView.frame = frame;
+    [self.view sendSubviewToBack:_tableView];
 }
 
 -(void)setUser:(User*)user{
     _user = user;
     self.navigationItem.titleView = [[WidgetFactory sharedFactory] titleViewWithTitle:_user.name];
-//    [self loadComments];
+    //    [self loadComments];
     [_tableView reloadData];
 }
 
@@ -233,7 +231,7 @@
     } else {
         Conversation* conversation = [[MessageService service] getOrCreateConversation:[UserService service].loggedInUser with:_user];
         XMPPChatViewController2* c = [[XMPPChatViewController2 alloc] initWithConversation:conversation];
-        [self.navigationController pushViewController:c animated:YES];        
+        [self.navigationController pushViewController:c animated:YES];
     }
     
 }
@@ -269,7 +267,7 @@
                                      parameters:nil
                                     cachePolicy:TTURLRequestCachePolicyNone
                                         success:^(id obj) {
-                                            [SVProgressHUD dismissWithSuccess:@"已取消关注"];
+                                            [SVProgressHUD showSuccessWithStatus:@"已取消关注"];
                                             [[UserService service].loggedInUser removeFollowingsObject:r];
                                             NSError* error;
                                             if(![_contex saveToPersistentStore:&error]){
@@ -279,7 +277,7 @@
                                             [self updateFollowOrNotButton];
                                             [_tableView reloadData];
                                         } failure:^{
-                                            [SVProgressHUD dismissWithError:@"取消关注失败"];
+                                            [SVProgressHUD showErrorWithStatus:@"取消关注失败"];
                                             DDLogError(@"failed to remove following");
                                         }];
 }
@@ -294,7 +292,7 @@
                                     cachePolicy:TTURLRequestCachePolicyNone
                                         success:^(id obj) {
                                             if ([[obj objectForKey:@"status"] isEqualToString:@"OK"]) {
-                                                [SVProgressHUD dismissWithSuccess:@"已关注"];
+                                                [SVProgressHUD showSuccessWithStatus:@"已关注"];
                                                 Relationship* r =  [NSEntityDescription insertNewObjectForEntityForName:@"Relationship" inManagedObjectContext:_contex];
                                                 r.fromPerson = [UserService service].loggedInUser;
                                                 r.toPerson = _user;
@@ -309,10 +307,10 @@
                                                 [self updateFollowOrNotButton];
                                                 [_tableView reloadData];
                                             } else {
-                                                [SVProgressHUD dismissWithError:@"关注失败"];
+                                                [SVProgressHUD showErrorWithStatus:@"关注失败"];
                                             }
                                         } failure:^{
-                                            [SVProgressHUD dismissWithError:@"关注失败"];
+                                            [SVProgressHUD showErrorWithStatus:@"关注失败"];
                                         }];
 }
 
@@ -428,7 +426,7 @@
             [_userDetailsCell.nextMealButton addTarget:self action:@selector(showNextMeal:) forControlEvents:UIControlEventTouchUpInside];
             recalculateHeight = YES;
         }
-
+        
         CGFloat originalHeight = _userDetailsCell.cellHeight;
         _userDetailsCell.user = _user;
         if (_userDetailsCell.cellHeight != originalHeight) {
@@ -448,7 +446,7 @@
         } else {
             if (!_reloaded) {
                 return [[UITableViewCell alloc] initWithFrame:CGRectZero];
-            } 
+            }
             NSString* CellIdentifier = @"PhotoThumbnailCell";
             cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
             BOOL editable = [self isViewForMyself];
@@ -511,18 +509,32 @@
         socialCell.qq.userInteractionEnabled = NO;
         socialCell.qq.image = [UIImage imageNamed:@"social_qq_disabled"];
         
-    } 
+    }
     cell.selectionStyle = UITableViewCellSelectionStyleNone;
     return cell;
 }
+
 
 #pragma mark PhotoThumbnailCellDelegate
 -(void)addOrRequestPhoto{
     if ([self isViewForMyself]) {
         [self addPhoto:nil];
     } else {
+        [self requestPhoto];
         DDLogVerbose(@"not implemented");
     }
+}
+
+-(void)requestPhoto{
+    NSString* url = [URLService absoluteApiURL:@"user/%@/photo_request/", _user.uID];
+    NSString* loggedInUserID = [[UserService service].loggedInUser.uID stringValue];
+    NSArray* params = @[[DictHelper dictWithKey:@"photo_requester_id" andValue:loggedInUserID]];
+    [SVProgressHUD showWithMaskType:SVProgressHUDMaskTypeBlack];
+    [[NetworkHandler getHandler] requestFromURL:url method:POST parameters:params cachePolicy:TTURLRequestCachePolicyNone success:^(id obj) {
+        [SVProgressHUD showSuccessWithStatus:@"请求已发送"];
+    } failure:^{
+        [SVProgressHUD showErrorWithStatus:@"请求失败，请稍候再试"];
+    }];
 }
 
 -(void) showUsrPhotos:(NSArray*)photos atIndex:(NSInteger)index{
@@ -551,7 +563,7 @@
 }
 
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath{
-     if (indexPath.section == 1 && indexPath.row == 0) {
+    if (indexPath.section == 1 && indexPath.row == 0) {
         if (_user.photos.count > 4) {
             AlbumViewController* vc = [[AlbumViewController alloc] init];
             vc.user = _user;
@@ -588,7 +600,7 @@
                                              DDLogVerbose(@"motto updated");
                                          } failure:^{
                                              DDLogError(@"failed to update motto to %@", value);
-                                             [SVProgressHUD dismissWithError:@"更新签名失败"];
+                                             [SVProgressHUD showErrorWithStatus:@"更新签名失败"];
                                          }];
 }
 
@@ -620,11 +632,11 @@
     [_user removePhotosObject:photo];
     [_contex saveToPersistentStore:nil];//delete locally first, and hope that delete will success remotely as well
     [om deleteObject:nil path:path parameters:nil success:^(RKObjectRequestOperation *operation, RKMappingResult *mappingResult) {
-        [SVProgressHUD dismissWithSuccess:@"删除成功"];
+        [SVProgressHUD showSuccessWithStatus:@"删除成功"];
         [_tableView reloadData];
         DDLogInfo(@"user photo delete.");
     } failure:^(RKObjectRequestOperation *operation, NSError *error) {
-        [SVProgressHUD dismissWithError:@"删除失败"];
+        [SVProgressHUD showErrorWithStatus:@"删除失败"];
     }];
 }
 

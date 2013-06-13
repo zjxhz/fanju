@@ -13,4 +13,5 @@
 @interface UserTableItemCell : TTTableViewCell
 @property(nonatomic, readonly)   UserImageView *avatar;
 @property(nonatomic, strong) UIButton *numberOfSameTagsButton;
+-(void)hideTime;
 @end

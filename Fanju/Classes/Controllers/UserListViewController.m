@@ -56,6 +56,10 @@
     return self;
 }
 
+-(void)viewDidLoad{
+    [super viewDidLoad];
+}
+
 -(void)viewWillAppear:(BOOL)animated{
     [super viewWillAppear:animated];
     if (!_hideFilterButton) {
@@ -105,11 +109,11 @@
                                                 self.view.frame = CGRectMake(0, 0, 320, 416);
                                                 self.tableView.frame = self.view.frame;
                                             } else {
-                                                [SVProgressHUD dismissWithSuccess:@"添加失败"];
+                                                [SVProgressHUD showSuccessWithStatus:@"添加失败"];
                                             }
                                         } failure:^{
                                             DDLogError(@"failed to save settings");
-                                            [SVProgressHUD dismissWithError:@"添加失败"];
+                                            [SVProgressHUD showErrorWithStatus:@"添加失败"];
                                         }];
 
 }
@@ -155,11 +159,14 @@
 -(void)loadUsers:(BOOL)nextPage{
     RKObjectManager *manager = [RKObjectManager sharedManager];
     __weak typeof(self) weakSelf = self;
-    NSString* requestWithPagination = [NSString stringWithFormat:@"%@?page=:currentPage&limit=:perPage%@", _baseURL, [self filerToString]];
+    NSString* connector = [_baseURL hasSuffix:@"/"] ? @"?" : @"&";
+    NSString* requestWithPagination = [NSString stringWithFormat:@"%@%@page=:currentPage&limit=:perPage%@", _baseURL, connector, [self filerToString]];
     if (!nextPage) {
         _paginator = [manager paginatorWithPathPattern:requestWithPagination];
     }
     [_paginator setCompletionBlockWithSuccess:^(RKPaginator *paginator, NSArray *objects, NSUInteger page) {
+        weakSelf.modelError = nil;
+        [weakSelf showError:NO];
         if (!nextPage) {
             UserListDataSource *ds = [[UserListDataSource alloc] init];
             weakSelf.dataSource = ds;
@@ -178,6 +185,12 @@
         [weakSelf refresh];
         [weakSelf.refreshControl endRefreshing];
     } failure:^(RKPaginator *paginator, NSError *error) {
+        weakSelf.modelError = error;
+        if ([weakSelf canShowModel]) {
+            [SVProgressHUD showErrorWithStatus:[error localizedDescription]];
+        } else {
+            [weakSelf showError:YES];
+        }
         [weakSelf.refreshControl endRefreshing];
         DDLogError(@"failed to load users: %@", error);
         weakSelf.upadateLocationBeforeLoadUsers = YES;
@@ -205,7 +218,6 @@
 
 -(void)setFilter:(NSDictionary*)newFilter{
     [self beginRefreshing];
-    _upadateLocationBeforeLoadUsers = NO;
     _filter = newFilter;
     [self loadUsers];
 }
@@ -216,7 +228,6 @@
         return;
     }
     _lastUpdatedTime = now;
-    _upadateLocationBeforeLoadUsers = NO;
     _baseURL = baseURL;
     [self beginRefreshing];
     [self loadUsers];
@@ -254,6 +265,9 @@
     }
 }
 
+-(void)reload{
+    [self loadUsers];
+}
 -(void)reloadLastRow{
     UserListDataSource *ds = self.dataSource;
     NSArray *lastRow = [NSArray arrayWithObject:[NSIndexPath indexPathForRow:(ds.items.count - 1) inSection:0]];
@@ -261,10 +275,14 @@
 }
 
 -(void)tableView:(UITableView *)tableView willDisplayCell:(UITableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath{
-    if (_hideNumberOfSameTags) {
-        if ([cell isKindOfClass:[UserTableItemCell class]]) {
-            UserTableItemCell* userCell = ( UserTableItemCell*)cell;
+    if ([cell isKindOfClass:[UserTableItemCell class]]) {
+        UserTableItemCell* userCell = ( UserTableItemCell*)cell;
+        if (_hideNumberOfSameTags){
             userCell.numberOfSameTagsButton.hidden = YES;
+        }
+        
+        if (_hideDistanceUpdatedTime) {
+            [userCell hideTime];
         }
     }
 }

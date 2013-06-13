@@ -9,6 +9,8 @@
 #import "TTTableItem.h"
 #import "Tag.h"
 @interface TagSelectionItem : TTTableItem
+@property(nonatomic, strong) NSString* tagName;
 @property(nonatomic, strong) Tag* tag;
 @property(nonatomic) BOOL selected;
+-(BOOL)isSaved;
 @end

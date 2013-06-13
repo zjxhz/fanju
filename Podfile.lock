@@ -95,7 +95,7 @@ PODS:
     - Three20/Core
     - Three20/UICommon
   - TransitionKit (1.1.0)
-  - WEPopover (0.0.1)
+  - WEPopover@krzd (0.1.0)
 
 DEPENDENCIES:
   - AKSegmentedControl
@@ -111,7 +111,7 @@ DEPENDENCIES:
   - SinaWeibo (~> 0.0.1)
   - TDBadgedCell (~> 2.1)
   - Three20 (~> 1.0.11)
-  - WEPopover (~> 0.0.1)
+  - WEPopover@krzd (~> 0.1.0)
 
 SPEC CHECKSUMS:
   AFNetworking: a44069e3c9c89867544f6639482f155c7e5f9b41
@@ -130,6 +130,6 @@ SPEC CHECKSUMS:
   TDBadgedCell: b10b1825ccb74f18a5bd1f861b45d5ebcc4855a0
   Three20: f242b38f3a54d9f375d8f29fd60a5fecb567f743
   TransitionKit: 1624e84f252d5cd26900be28ccb73c69fbe63f8a
-  WEPopover: 119fe521e9c35069c5ec63dfc14334ca321275b8
+  WEPopover@krzd: 37cb9b9dccf687e6131966656f8bde6479544ea8
 
 COCOAPODS: 0.20.2

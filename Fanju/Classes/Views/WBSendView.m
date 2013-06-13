@@ -78,7 +78,7 @@ static BOOL WBIsDeviceIPad()
         // add the panel view
         panelView = [[UIView alloc] initWithFrame:CGRectMake(16, 73, 288, 335)];
         panelImageView = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 288, 335)];
-        [panelImageView setImage:[[UIImage imageNamed:@"bg.png"] stretchableImageWithLeftCapWidth:18 topCapHeight:18]];
+        [panelImageView setImage:[[UIImage imageNamed:@"weibobg"] stretchableImageWithLeftCapWidth:18 topCapHeight:18]];
         
         [panelView addSubview:panelImageView];
         [self addSubview:panelView];
@@ -240,6 +240,9 @@ static BOOL WBIsDeviceIPad()
 		return;
 	}
     
+    if ([delegate respondsToSelector:@selector(sendViewDidStartSending:)]) {
+        [delegate sendViewDidStartSending:self];
+    }
     if (contentImage) {
         [[self sinaweibo] requestWithURL:@"statuses/upload.json"
                                   params:[NSMutableDictionary dictionaryWithObjectsAndKeys:
@@ -332,7 +335,7 @@ static BOOL WBIsDeviceIPad()
         [wordCountLabel setFrame:CGRectMake(210, 190, 30, 30)];
         [clearTextButton setFrame:CGRectMake(240, 191, 30, 30)];
         [panelImageView setFrame:CGRectMake(0, 0, 288, 335)];
-        [panelImageView setImage:[UIImage imageNamed:@"bg.png"]];
+        [panelImageView setImage:[UIImage imageNamed:@"weibobg.png"]];
         
         [sendButton setFrame:CGRectMake(288 - 15 - 48, 13, 48, 30)];
         [titleLabel setCenter:CGPointMake(144, 27)];

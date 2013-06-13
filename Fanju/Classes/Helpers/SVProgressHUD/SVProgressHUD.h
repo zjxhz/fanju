@@ -7,7 +7,14 @@
 //  https://github.com/samvermette/SVProgressHUD
 //
 
-#define SVProgressHUDShowNetworkIndicator 1
+#import <UIKit/UIKit.h>
+#import <AvailabilityMacros.h>
+
+extern NSString * const SVProgressHUDDidReceiveTouchEventNotification;
+extern NSString * const SVProgressHUDWillDisappearNotification;
+extern NSString * const SVProgressHUDDidDisappearNotification;
+
+extern NSString * const SVProgressHUDStatusUserInfoKey;
 
 enum {
     SVProgressHUDMaskTypeNone = 1, // allow user interactions while HUD is displayed
@@ -18,41 +25,36 @@ enum {
 
 typedef NSUInteger SVProgressHUDMaskType;
 
-@interface SVProgressHUD : UIView {
-    UIView *_hudView;
-}
+@interface SVProgressHUD : UIView
 
-/* 
-showInView:(UIView*)                -> the view you're adding the HUD to. By default, it's added to the keyWindow rootViewController, or the keyWindow if the rootViewController is nil
-status:(NSString*)                  -> a loading status for the HUD (different from the success and error messages)
-networkIndicator:(BOOL)             -> whether or not the HUD also triggers the UIApplication's network activity indicator (default is YES)
-posY:(CGFloat)                      -> the vertical position of the HUD (default is viewHeight/2-viewHeight/8)
-maskType:(SVProgressHUDMaskType)    -> set whether to allow user interactions while HUD is displayed
-*/
- 
+#if __IPHONE_OS_VERSION_MIN_REQUIRED >= 50000
+@property (readwrite, nonatomic, retain) UIColor *hudBackgroundColor NS_AVAILABLE_IOS(5_0) UI_APPEARANCE_SELECTOR;
+@property (readwrite, nonatomic, retain) UIColor *hudForegroundColor NS_AVAILABLE_IOS(5_0) UI_APPEARANCE_SELECTOR;
+@property (readwrite, nonatomic, retain) UIColor *hudStatusShadowColor NS_AVAILABLE_IOS(5_0) UI_APPEARANCE_SELECTOR;
+@property (readwrite, nonatomic, retain) UIFont *hudFont NS_AVAILABLE_IOS(5_0) UI_APPEARANCE_SELECTOR;
+@property (readwrite, nonatomic, retain) UIImage *hudSuccessImage NS_AVAILABLE_IOS(5_0) UI_APPEARANCE_SELECTOR;
+@property (readwrite, nonatomic, retain) UIImage *hudErrorImage NS_AVAILABLE_IOS(5_0) UI_APPEARANCE_SELECTOR;
+#endif
+
 + (void)show;
-+ (void)showInView:(UIView*)view;
-+ (void)showInView:(UIView*)view status:(NSString*)string;
-+ (void)showInView:(UIView*)view status:(NSString*)string networkIndicator:(BOOL)show;
-+ (void)showInView:(UIView*)view status:(NSString*)string networkIndicator:(BOOL)show posY:(CGFloat)posY;
-+ (void)showInView:(UIView*)view status:(NSString*)string networkIndicator:(BOOL)show posY:(CGFloat)posY maskType:(SVProgressHUDMaskType)maskType;
-
-// more show convenience methods
-+ (void)showWithStatus:(NSString*)status;
-+ (void)showWithStatus:(NSString*)status networkIndicator:(BOOL)show;
-+ (void)showWithStatus:(NSString*)status maskType:(SVProgressHUDMaskType)maskType;
-+ (void)showWithStatus:(NSString*)status maskType:(SVProgressHUDMaskType)maskType networkIndicator:(BOOL)show;
 + (void)showWithMaskType:(SVProgressHUDMaskType)maskType;
-+ (void)showWithMaskType:(SVProgressHUDMaskType)maskType networkIndicator:(BOOL)show;
++ (void)showWithStatus:(NSString*)status;
++ (void)showWithStatus:(NSString*)status maskType:(SVProgressHUDMaskType)maskType;
 
-+ (void)showSuccessWithStatus:(NSString*)string;
++ (void)showProgress:(CGFloat)progress;
++ (void)showProgress:(CGFloat)progress status:(NSString*)status;
++ (void)showProgress:(CGFloat)progress status:(NSString*)status maskType:(SVProgressHUDMaskType)maskType;
 
 + (void)setStatus:(NSString*)string; // change the HUD loading status while it's showing
 
-+ (void)dismiss; // simply dismiss the HUD with a fade+scale out animation
-+ (void)dismissWithSuccess:(NSString*)successString; // also displays the success icon image
-+ (void)dismissWithSuccess:(NSString*)successString afterDelay:(NSTimeInterval)seconds;
-+ (void)dismissWithError:(NSString*)errorString; // also displays the error icon image
-+ (void)dismissWithError:(NSString*)errorString afterDelay:(NSTimeInterval)seconds;
+// stops the activity indicator, shows a glyph + status, and dismisses HUD 1s later
++ (void)showSuccessWithStatus:(NSString*)string;
++ (void)showErrorWithStatus:(NSString *)string;
++ (void)showImage:(UIImage*)image status:(NSString*)status; // use 28x28 white pngs
+
++ (void)popActivity;
++ (void)dismiss;
+
++ (BOOL)isVisible;
 
 @end

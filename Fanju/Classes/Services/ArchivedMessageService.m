@@ -359,7 +359,7 @@ NSString * const LAST_SUCCESSFUL_RETRIEVE_DATE = @"LAST_SUCCESSFUL_RETRIEVE_DATE
             if(![_mainQueueContext saveToPersistentStore:&error]){
                 DDLogError(@"failed to save retrived messages: %@", error);
             } else {
-                DDLogInfo(@"saved archived messages with conversation: %@", conversation);
+                DDLogInfo(@"saved archived messages with: %@", conversation.with.name);
             }
 //            dispatch_async(dispatch_get_main_queue(), ^{
                 [[NSNotificationCenter defaultCenter] postNotificationName:MessageDidSaveNotification

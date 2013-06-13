@@ -12,7 +12,7 @@
 #import "User.h"
 #import "Conversation.h"
 
-@interface XMPPChatViewController2  : UIViewController <UIBubbleTableViewDataSource, UITextViewDelegate, UIGestureRecognizerDelegate, UIBubbleTableViewCellAvatarDelegate	>
+@interface XMPPChatViewController2  : UIViewController <UIBubbleTableViewDataSource, UITextViewDelegate, UIGestureRecognizerDelegate	>
 -(id)initWithConversation:(Conversation*)conversation;
 @property(nonatomic, strong) UIImage* avatarSomeoneElse;
 @end

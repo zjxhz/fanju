@@ -139,15 +139,18 @@
     if (section == 0) {
         if (ds.numberOfMealsForThisWeek > 0) {
             return _thisWeek;
-        } else {
-            return _afterThisWeek;
-        }
-    } else if(section == 1){
-        if (ds.numberOfMealsAfterThisWeek > 0) {
+        } else if(ds.numberOfMealsAfterThisWeek > 0){
             return _afterThisWeek;
         } else {
             return _passedMeals;
         }
+    } else if(section == 1){
+        if (ds.numberOfMealsForThisWeek == 0) {
+            return _passedMeals;
+        } else if(ds.numberOfMealsAfterThisWeek > 0){
+            return _afterThisWeek;
+        }
+        return _passedMeals;
     } else {
         return _passedMeals;
     }

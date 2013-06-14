@@ -273,6 +273,9 @@ NSString * const EODidLogoutNotification = @"EODidLogoutNotification";
 
 #pragma mark LocationProviderDelegate
 -(void)finishObtainingLocation:(CLLocation*)location {
+    if (!_currentUser) {
+        return;
+    }
     DDLogVerbose(@"obtained location: %@", location);
     User* loggedInUser = [UserService service].loggedInUser;
     if (loggedInUser) {

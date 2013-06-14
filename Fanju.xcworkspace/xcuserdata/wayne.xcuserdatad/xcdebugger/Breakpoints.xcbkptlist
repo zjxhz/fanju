@@ -720,19 +720,6 @@
          landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
-         shouldBeEnabled = "Yes"
-         ignoreCount = "0"
-         continueAfterRunningActions = "No"
-         filePath = "Fanju/Classes/Services/UserService.m"
-         timestampString = "392006648.875707"
-         startingColumnNumber = "9223372036854775807"
-         endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "163"
-         endingLineNumber = "163"
-         landmarkName = "-loggedInUser"
-         landmarkType = "5">
-      </FileBreakpoint>
-      <FileBreakpoint
          shouldBeEnabled = "No"
          ignoreCount = "0"
          continueAfterRunningActions = "No"
@@ -763,11 +750,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Fanju/Classes/Controllers/MealListViewController.m"
-         timestampString = "392548280.708116"
+         timestampString = "392866176.271893"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "202"
-         endingLineNumber = "202"
+         startingLineNumber = "205"
+         endingLineNumber = "205"
          landmarkName = "-reload"
          landmarkType = "5">
       </FileBreakpoint>
@@ -1011,64 +998,25 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Fanju/Classes/Controllers/MealListViewController.m"
-         timestampString = "392815547.718216"
+         timestampString = "392866176.271893"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "256"
-         endingLineNumber = "256"
+         startingLineNumber = "259"
+         endingLineNumber = "259"
          landmarkName = "-userFailedToLogInWithError:"
          landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
-         shouldBeEnabled = "Yes"
+         shouldBeEnabled = "No"
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "Fanju/Classes/Controllers/MealListViewController.m"
-         timestampString = "392815549.296056"
+         timestampString = "392866176.271893"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "269"
-         endingLineNumber = "269"
-         landmarkName = "-didLogin:"
-         landmarkType = "5">
-      </FileBreakpoint>
-      <FileBreakpoint
-         shouldBeEnabled = "Yes"
-         ignoreCount = "0"
-         continueAfterRunningActions = "No"
-         filePath = "Fanju/Classes/Controllers/MealListViewController.m"
-         timestampString = "392815551.672043"
-         startingColumnNumber = "9223372036854775807"
-         endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "278"
-         endingLineNumber = "278"
+         startingLineNumber = "281"
+         endingLineNumber = "281"
          landmarkName = "-didLogout:"
-         landmarkType = "5">
-      </FileBreakpoint>
-      <FileBreakpoint
-         shouldBeEnabled = "Yes"
-         ignoreCount = "0"
-         continueAfterRunningActions = "No"
-         filePath = "Fanju/Classes/Controllers/MealListViewController.m"
-         timestampString = "392815555.365805"
-         startingColumnNumber = "9223372036854775807"
-         endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "105"
-         endingLineNumber = "105"
-         landmarkName = "-viewWillAppear:"
-         landmarkType = "5">
-      </FileBreakpoint>
-      <FileBreakpoint
-         shouldBeEnabled = "Yes"
-         ignoreCount = "0"
-         continueAfterRunningActions = "No"
-         filePath = "Fanju/Classes/Controllers/UserListViewController.m"
-         timestampString = "392816198.922368"
-         startingColumnNumber = "9223372036854775807"
-         endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "168"
-         endingLineNumber = "168"
-         landmarkName = "-loadUsers:"
          landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
@@ -1088,13 +1036,39 @@
          shouldBeEnabled = "Yes"
          ignoreCount = "0"
          continueAfterRunningActions = "No"
-         filePath = "Fanju/Classes/Controllers/UserListViewController.m"
-         timestampString = "392816198.922368"
+         filePath = "Fanju/Classes/Controllers/SearchUserViewController.m"
+         timestampString = "392828299.378252"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "164"
-         endingLineNumber = "164"
-         landmarkName = "-loadUsers:"
+         startingLineNumber = "73"
+         endingLineNumber = "73"
+         landmarkName = "-searchUser"
+         landmarkType = "5">
+      </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "Yes"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         filePath = "Fanju/Classes/Controllers/UserListViewController.m"
+         timestampString = "392865047.29971"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "242"
+         endingLineNumber = "242"
+         landmarkName = "-tableView:heightForRowAtIndexPath:"
+         landmarkType = "5">
+      </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "No"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         filePath = "Fanju/Classes/Controllers/MealListDataSource.m"
+         timestampString = "392865887.236472"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "137"
+         endingLineNumber = "137"
+         landmarkName = "-tableView:numberOfRowsInSection:"
          landmarkType = "5">
       </FileBreakpoint>
    </FileBreakpoints>

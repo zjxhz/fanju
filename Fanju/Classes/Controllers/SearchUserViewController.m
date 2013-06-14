@@ -57,14 +57,14 @@
 
 -(void)searchUser{
     [SVProgressHUD showSuccessWithStatus:@"正在查找"];
-    NSString* name =  _textField.text;
+    NSString* name =  _textField.text;//[_textField.text stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
     RKObjectManager* manager = [RKObjectManager sharedManager];
     [manager getObjectsAtPath:@"user/" parameters:@{@"name__icontains":name} success:^(RKObjectRequestOperation *operation, RKMappingResult *mappingResult) {
         [SVProgressHUD dismiss];
         if (mappingResult.count > 0) {
-            UserListViewController* vc = [[UserListViewController alloc] init];
+            UserListViewController* vc = [[UserListViewController alloc] initWithStyle:UITableViewStylePlain];
             [vc viewDidLoad];
-            vc.baseURL = [NSString stringWithFormat:@"user/?name__icontains=%@", name];
+            vc.baseURL = [NSString stringWithFormat:@"user/?name__icontains=%@", [name stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
             [self.navigationController pushViewController:vc animated:YES];
         } else {
             [InfoUtil showAlert:@"无法找到该用户，请检查输入"];
@@ -80,4 +80,14 @@
     return YES;
 }
 
+-(NSString *) urlEncoded
+{
+    CFStringRef urlString = CFURLCreateStringByAddingPercentEscapes(
+                                                                    NULL,
+                                                                    (CFStringRef)self,
+                                                                    NULL,
+                                                                    (CFStringRef)@"!*'\"();:@&=+$,/?%#[]% ",
+                                                                    kCFStringEncodingUTF8 );
+    return (NSString*)CFBridgingRelease(urlString);
+}
 @end

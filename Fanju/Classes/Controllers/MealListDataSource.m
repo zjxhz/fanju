@@ -97,19 +97,20 @@
 
 -(NSArray*)mealsForSection:(NSInteger)section{
     if (section == 0) {
-        if (_mealsForThisWeek > 0) {
+        if (_mealsForThisWeek.count > 0) {
             return _mealsForThisWeek;
-        } else if(_mealsAfterThisWeek > 0){
+        } else if(_mealsAfterThisWeek.count > 0){
             return _mealsAfterThisWeek;
         } else {
             return _passedMeals;
         }
     } else if (section == 1) {
-        if(_mealsAfterThisWeek > 0){
-            return _mealsAfterThisWeek;
-        } else {
+        if(_mealsForThisWeek.count == 0){
             return _passedMeals;
+        } else if(_mealsAfterThisWeek.count > 0) {
+            return _mealsAfterThisWeek;
         }
+        return _passedMeals;
     } else {
         return _passedMeals;
     }

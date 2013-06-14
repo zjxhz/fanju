@@ -64,7 +64,7 @@
         _sections = @[@"", @"找朋友", @"其它"];
         NSArray *sectionItems0 = @[@"", @"", @"分享", @"关注"];
         NSArray *sectionItems1 = @[@"志趣相投", @"附近朋友", @"添加好友"];
-        NSArray *sectionItems2 = @[ @"设置", @"饭局小贴士", @"登出"];
+        NSArray *sectionItems2 = @[ @"饭局小贴士", @"登出"];
         _sectionItems = @[sectionItems0, sectionItems1, sectionItems2];
         self.tableView.dataSource = self;
         self.tableView.delegate = self;
@@ -437,10 +437,7 @@
             break;
         case 2:
             switch (indexPath.row) {
-                case 0:
-                    controller = [[SettingsTableViewController alloc] initWithStyle:UITableViewStyleGrouped];
-                    break;
-                case 2:
+                case 1:
                     [self.sideMenu setMenuState:MFSideMenuStateClosed];
                     [[Authentication sharedInstance] logout];
                     [SVProgressHUD showSuccessWithStatus:@"成功登出"];

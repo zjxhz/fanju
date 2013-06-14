@@ -228,7 +228,7 @@
         return;
     }
     _lastUpdatedTime = now;
-    _baseURL = baseURL;
+    _baseURL = baseURL;   
     [self beginRefreshing];
     [self loadUsers];
 }

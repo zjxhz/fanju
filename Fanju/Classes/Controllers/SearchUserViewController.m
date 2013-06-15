@@ -70,7 +70,7 @@
             [InfoUtil showAlert:@"无法找到该用户，请检查输入"];
         }
     } failure:^(RKObjectRequestOperation *operation, NSError *error) {
-        [SVProgressHUD showErrorWithStatus:@"发生未知错误，请稍候重试"];
+        [SVProgressHUD showErrorWithStatus:@"发生未知错误，请稍后重试"];
         DDLogError(@"unkonwn error while requesting users with name %@: %@", name, error);
     }];
 }

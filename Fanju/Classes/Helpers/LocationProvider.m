@@ -39,7 +39,12 @@
     self.lm.delegate = self;
     self.lm.desiredAccuracy = kCLLocationAccuracyNearestTenMeters;
     [self updateLocation];
-    [NSTimer scheduledTimerWithTimeInterval:TIME_INTERVAL target:self selector:@selector(updateLocation) userInfo:nil repeats:YES];
+    [NSTimer scheduledTimerWithTimeInterval:TIME_INTERVAL target:self selector:@selector(scheduledUpdate) userInfo:nil repeats:YES];
+}
+
+-(void)scheduledUpdate{
+    DDLogVerbose(@"scheduling location update...");
+    [self updateLocation];
 }
 
 -(void)updateLocation{
@@ -56,7 +61,14 @@
 - (void)locationManager: (CLLocationManager *) manager 
 	didUpdateToLocation: (CLLocation *) newLocation 
 		   fromLocation: (CLLocation *) oldLocation{
-	
+    DDLogVerbose(@"location updated from %@ to %@", self.lastLocation, newLocation);
+    
+    if (updated_blocked) {
+        DDLogVerbose(@"call block after obtaining location");
+        updated_blocked(newLocation);
+        updated_blocked = nil;
+    }
+    
     self.lastLocation = newLocation;
     NSDate* updatedTime = [NSDate date];
     if ([updatedTime timeIntervalSinceDate:_lastLocationUpdatedTime] < 5) {
@@ -68,10 +80,7 @@
     }
     _lastLocationUpdatedTime = [NSDate date];
     [self.lm stopUpdatingLocation];
-    if (updated_blocked) {
-        updated_blocked(newLocation);
-        updated_blocked = nil;
-    }
+
 }
 
 - (void)locationManager:(CLLocationManager *)manager didFailWithError:(NSError *)error {

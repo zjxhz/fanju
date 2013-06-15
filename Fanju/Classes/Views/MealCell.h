@@ -10,6 +10,7 @@
 #import "NINetworkImageView.h"
 
 @interface MealCell : TTTableViewCell<NINetworkImageViewDelegate>
+@property(nonatomic, weak) IBOutlet UIImageView* priceBgView;
 @property(nonatomic, weak) IBOutlet UILabel* costLabel;
 @property(nonatomic, weak) IBOutlet UILabel* addressLabel;
 @property(nonatomic, weak) IBOutlet UILabel* topicLabel;

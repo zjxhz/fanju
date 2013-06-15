@@ -101,9 +101,10 @@
     sideMenuViewController.sideMenu = sideMenu;
     MFSideMenuStateEventBlock b = ^(MFSideMenuStateEvent event){
         if (event == MFSideMenuStateEventMenuDidOpen) {
-        [sideMenuViewController.tableView reloadData];
+            NSIndexPath* selectedRow = [sideMenuViewController.tableView indexPathForSelectedRow];
+            [sideMenuViewController.tableView reloadData];
+            [sideMenuViewController.tableView selectRowAtIndexPath:selectedRow animated:NO scrollPosition:NO];
         }
-
     };
     sideMenu.menuStateEventBlock = b;
 }

@@ -195,7 +195,7 @@ NSString * const UnreadNotificationCount = @"UnreadNotificationCount";
 }
 
 -(void)handleArchivedNotificatoin:(NSXMLElement*)event atTime:(NSDate*)time read:(BOOL)read{
-    if (![self lastestNotificationDate] || [time compare:[self lastestNotificationDate]] > 0) {
+    if (![self latestNotificationDate] || [time compare:[self latestNotificationDate]] > 0) {
         _latestNotificationDate = time;
     } else {
         DDLogInfo(@"Ignoring too old notification at: %@", time);
@@ -272,7 +272,7 @@ NSString * const UnreadNotificationCount = @"UnreadNotificationCount";
     }
 }
 
--(NSDate*)lastestNotificationDate{
+-(NSDate*)latestNotificationDate{
     if (_latestNotificationDate) {
         return _latestNotificationDate;
     }

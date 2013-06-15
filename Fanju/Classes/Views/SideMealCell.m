@@ -33,7 +33,7 @@
     [self.contentView addSubview:seg];
     
     
-    UIImage* separatorImg = [UIImage imageNamed:@"separator"];
+    UIImage* separatorImg = [UIImage imageNamed:@"side_separator"];
     UIImageView* separatorView = [[UIImageView alloc] initWithFrame:CGRectMake(0, CELL_HEIGHT - separatorImg.size.height, separatorImg.size.width, separatorImg.size.height)];
     separatorView.image = separatorImg;
     [self.contentView addSubview:separatorView];
@@ -58,6 +58,14 @@
     button.titleEdgeInsets = UIEdgeInsetsMake(0.0, - imageSize.width, - (imageSize.height + spacing), 0.0);
     titleSize = button.titleLabel.frame.size;
     button.imageEdgeInsets = UIEdgeInsetsMake(- (titleSize.height + spacing), 0.0, 0.0, - titleSize.width);
+    
+    UIImage* bg = [UIImage imageNamed:@"side_button_bg"];
+    UIImage* bg_push = [UIImage imageNamed:@"side_button_bg_push"];
+    [button setBackgroundImage:bg forState:UIControlStateNormal];
+    [button setBackgroundImage:bg_push forState:UIControlStateSelected];
+    [button setBackgroundImage:bg_push forState:UIControlStateHighlighted];
+    [button setBackgroundImage:bg_push forState:UIControlStateSelected | UIControlStateHighlighted];
+
     return button;
 }
 

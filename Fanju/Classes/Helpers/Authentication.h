@@ -20,6 +20,7 @@
 -(void)userFailedToLogInWithError:(NSString*)error;
 -(void)userDidLogout:(UserProfile*)user;
 -(void)sinaweiboDidLogin:(SinaWeibo*)sinaweibo;
+- (void)sinaweiboLogInDidCancel:(SinaWeibo *)sinaweibo;
 @end
 
 @interface Authentication : NSObject<SinaWeiboDelegate, SinaWeiboRequestDelegate, LocationProviderDelegate>{

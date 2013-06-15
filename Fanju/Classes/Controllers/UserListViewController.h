@@ -25,5 +25,6 @@
 @property(nonatomic) BOOL showAddTagButton;
 @property(nonatomic, strong) Tag* tag;
 @property(nonatomic) BOOL hideDistanceUpdatedTime;
+@property(nonatomic) BOOL upadateLocationBeforeLoadUsers;
     
 @end

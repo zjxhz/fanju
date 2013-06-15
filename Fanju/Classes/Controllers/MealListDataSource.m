@@ -58,7 +58,7 @@
         [_passedMeals addObject:meal];
         DDLogVerbose(@"added out of dated meal at: %@", time);
         [_passedMeals sortUsingComparator:^NSComparisonResult(id obj1, id obj2) {
-            return [[MealService dateOfMeal:obj1] compare:[MealService dateOfMeal:obj2]];
+            return [[MealService dateOfMeal:obj2] compare:[MealService dateOfMeal:obj1]];
         }];
     } else if([self isWithinThisWeek:time]){
         [_mealsForThisWeek addObject:meal];

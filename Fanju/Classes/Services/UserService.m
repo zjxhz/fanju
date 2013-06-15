@@ -220,4 +220,12 @@
     guest.host = user;
     return guest;
 }
+
++(UIImage*)defaultAvatarForUser:(User*)user{
+    if ([user.gender integerValue] == 0) {
+        return [UIImage imageNamed:@"avatar_male"];
+    } else {
+        return [UIImage imageNamed:@"avatar_female"];
+    }
+}
 @end

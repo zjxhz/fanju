@@ -61,8 +61,20 @@
     if (!_meal) {
         return;
     }
-    _costLabel.text = [NSString stringWithFormat:NSLocalizedString(@"AverageCost", nil),
-                       [_meal.price floatValue], ([_meal.maxPersons integerValue] - [_meal.actualPersons integerValue])];
+    
+    NSInteger seatsLeft = [_meal.maxPersons integerValue] - [_meal.actualPersons integerValue];
+    if (seatsLeft == 0) {
+        _costLabel.text = @"卖光了";
+    } else {
+        _costLabel.text = [NSString stringWithFormat:@"¥%.2f - 剩余%d位", [_meal.price floatValue], seatsLeft];
+    }
+    [_costLabel sizeToFit];
+    UIImage* priceBg = [[UIImage imageNamed:@"price_bg"] resizableImageWithCapInsets:UIEdgeInsetsMake(12, 18, 12, 18)];
+    _priceBgView.image = priceBg;
+    CGRect frame = _priceBgView.frame;
+    frame.size.width = _costLabel.frame.size.width + 24;
+    _priceBgView.frame = frame;
+    
     _addressLabel.text = _meal.restaurant.name;
     _topicLabel.text = _meal.topic;
     _timeLabel.text = [MealService dateTextOfMeal:_meal];

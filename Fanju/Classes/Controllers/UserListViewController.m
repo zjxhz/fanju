@@ -28,10 +28,10 @@
 
 @interface UserListViewController(){
     MBProgressHUD* _hud;
+    NSDate* _locationUpdatedTime;
 }
 @property(nonatomic, strong) ODRefreshControl* refreshControl;
 //@property(nonatomic, strong) ISRefreshControl* refreshControl;
-@property(nonatomic) BOOL upadateLocationBeforeLoadUsers;
 @property(nonatomic, strong) RKPaginator* paginator;
 @property(nonatomic, strong)    LoadMoreTableItem *loadMore;
 @end
@@ -53,6 +53,7 @@
     [_refreshControl addTarget:self action:@selector(loadUsersWithNewLocation) forControlEvents:UIControlEventValueChanged];
     RKManagedObjectStore* store = [RKObjectManager sharedManager].managedObjectStore;
     _mainQueueContext = store.mainQueueManagedObjectContext;
+    self.tableView.showsVerticalScrollIndicator = NO;
     return self;
 }
 
@@ -165,6 +166,7 @@
         _paginator = [manager paginatorWithPathPattern:requestWithPagination];
     }
     [_paginator setCompletionBlockWithSuccess:^(RKPaginator *paginator, NSArray *objects, NSUInteger page) {
+        DDLogVerbose(@"loaded users with %@", requestWithPagination);
         weakSelf.modelError = nil;
         [weakSelf showError:NO];
         if (!nextPage) {
@@ -177,7 +179,6 @@
             [ds.items removeLastObject];
         }
         [ds.items addObjectsFromArray:objects];
-        weakSelf.upadateLocationBeforeLoadUsers = YES;
         if ([weakSelf.paginator hasNextPage]) {
             weakSelf.loadMore = [[LoadMoreTableItem alloc] init];
             [ds.items addObject:weakSelf.loadMore];
@@ -193,7 +194,6 @@
         }
         [weakSelf.refreshControl endRefreshing];
         DDLogError(@"failed to load users: %@", error);
-        weakSelf.upadateLocationBeforeLoadUsers = YES;
     }];
     _paginator.perPage = 20;
     if (nextPage) {
@@ -228,9 +228,13 @@
         return;
     }
     _lastUpdatedTime = now;
-    _baseURL = baseURL;   
+    _baseURL = baseURL;
     [self beginRefreshing];
-    [self loadUsers];
+    if (_upadateLocationBeforeLoadUsers) {
+        [self loadUsersWithNewLocation];
+    } else {
+        [self loadUsers];
+    }
 }
 
 - (id<UITableViewDelegate>)createDelegate {
@@ -326,8 +330,15 @@
 }
 
 - (void)loadUsersWithNewLocation {
-    if (_upadateLocationBeforeLoadUsers) {
+    NSTimeInterval updateInterval = 999999;//fake a big number to allow update if no previous update
+    if (_lastUpdatedTime) {
+        updateInterval = ABS([_lastUpdatedTime timeIntervalSinceNow]);
+        DDLogVerbose(@"last update time to load users: %.0f", updateInterval);
+    }
+    if (_upadateLocationBeforeLoadUsers && updateInterval > 3*60) {
+        DDLogVerbose(@"updating location and then loading users...");
         [[LocationProvider sharedProvider] updateLocationWithSuccess:^(CLLocation *location) {
+            _locationUpdatedTime = [NSDate date];
             DDLogVerbose(@"load users for lat and lng: %f, %f", location.coordinate.latitude,  location.coordinate.longitude );
             NSMutableDictionary* newFilter = [NSMutableDictionary dictionary];
             newFilter[@"lat"]= [NSString stringWithFormat:@"%f", location.coordinate.latitude];
@@ -342,5 +353,6 @@
     } else {
         [self loadUsers];
     }
+
 }
 @end

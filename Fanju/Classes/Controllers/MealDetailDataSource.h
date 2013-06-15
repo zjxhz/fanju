@@ -7,7 +7,10 @@
 //
 
 #import <Three20/Three20.h>
+#import "Meal.h"
 
-@interface MealDetailDataSource : TTSectionedDataSource
-
+@interface MealDetailDataSource : TTTableViewDataSource
+@property(nonatomic, strong) Meal* meal;
+@property(nonatomic, weak) UIViewController* controller;
+-(void)tableView:(UITableView*)tableView contentOffsetDidChange:(CGFloat)offset;
 @end

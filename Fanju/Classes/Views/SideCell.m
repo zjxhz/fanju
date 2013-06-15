@@ -28,6 +28,7 @@
 
 -(void)layoutSubviews{
     [super layoutSubviews];
+    self.textLabel.backgroundColor = [UIColor clearColor];
     self.textLabel.frame = CGRectMake(18, 0, 100, 44);
 }
 @end

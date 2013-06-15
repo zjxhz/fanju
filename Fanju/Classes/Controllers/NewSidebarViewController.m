@@ -23,6 +23,7 @@
 #import "SideMealCell.h"
 #import "SideCell.h"
 #import "SearchUserViewController.h"
+#import "SVWebViewController.h"
 
 #define SIDEBAR_HEADER_HEIGHT 22
 #define CELL_HEIGHT 44
@@ -62,14 +63,15 @@
     self = [super initWithStyle:style];
     if (self) {
         _sections = @[@"", @"找朋友", @"其它"];
-        NSArray *sectionItems0 = @[@"", @"", @"分享", @"关注"];
+        NSArray *sectionItems0 = @[@"", @"", @"关注"];
         NSArray *sectionItems1 = @[@"志趣相投", @"附近朋友", @"添加好友"];
         NSArray *sectionItems2 = @[ @"饭局小贴士", @"登出"];
         _sectionItems = @[sectionItems0, sectionItems1, sectionItems2];
         self.tableView.dataSource = self;
         self.tableView.delegate = self;
         self.tableView.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"sidebar_bg.png"]];
-        self.tableView.separatorColor = [UIColor blackColor];
+        self.tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
+//        self.tableView.separatorColor = [UIColor blackColor];
          _unreadMsgBadge = [[MKNumberBadgeView alloc] initWithFrame:CGRectMake(180, 10, 40, 25)];
         _unreadNotifBadge = [[MKNumberBadgeView alloc] initWithFrame:CGRectMake(180, 10, 40, 25)];
         _unreadMessageCount =  [[NSUserDefaults standardUserDefaults] integerForKey:UNREAD_MESSAGE_COUNT];
@@ -145,6 +147,7 @@
 -(UserListViewController*) usersNearbyViewController{
     if (!_usersNearbyViewController) {
         _usersNearbyViewController = [[UserListViewController alloc] initWithStyle:UITableViewStylePlain];
+        _usersNearbyViewController.upadateLocationBeforeLoadUsers = YES;
         [_usersNearbyViewController viewDidLoad];
         _usersNearbyViewController.hideDistanceUpdatedTime = YES;
         //        _followingsViewController setBaseURL:<#(NSString *)#>
@@ -178,7 +181,7 @@
 
 -(NotificationViewController*)notificationViewController{
     if (!_notificationViewController) {
-        _notificationViewController = [[NotificationViewController alloc] initWithStyle:UITableViewStylePlain];;
+        _notificationViewController = [[NotificationViewController alloc] initWithStyle:UITableViewStylePlain];
     }
     return _notificationViewController;
 }
@@ -358,8 +361,8 @@
 }
 
 -(void)showNotifications{
-    [self showViewController:self.notificationViewController];
-//    [self showMealList]; ///////FIXME TODO
+    NotificationViewController* notificationViewController = [[NotificationViewController alloc] initWithStyle:UITableViewStylePlain];
+    [self showViewController:notificationViewController];
 }
 
 - (void)showRegistrationWizard{
@@ -407,7 +410,7 @@
                     controller = self.userDetailsViewController;
                     self.userDetailsViewController.user = [UserService service].loggedInUser;
                     break;
-                case 3:
+                case 2:
                     controller = self.followingsViewController;
                     ((UserListViewController*)controller).baseURL = [NSString stringWithFormat:@"user/%@/following/", userID];
                     controller.title = @"我的关注";
@@ -437,6 +440,9 @@
             break;
         case 2:
             switch (indexPath.row) {
+                case 0:
+                    controller = [[SVWebViewController alloc]initWithAddress:[URLService absoluteURL:@"/faq/mobile/"]];
+                    break;
                 case 1:
                     [self.sideMenu setMenuState:MFSideMenuStateClosed];
                     [[Authentication sharedInstance] logout];

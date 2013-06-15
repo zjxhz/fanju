@@ -230,6 +230,10 @@ NSString * const EODidLogoutNotification = @"EODidLogoutNotification";
     DDLogWarn(@"failed to login to sina weibo: %@", error.description);
 }
 
+- (void)sinaweiboLogInDidCancel:(SinaWeibo *)sinaweibo{
+    [self.delegate sinaweiboLogInDidCancel:sinaweibo];
+}
+
 -(void)sinaweiboDidLogOut:(SinaWeibo *)sinaweibo{
     DDLogVerbose(@"sinaweiboDidLogout");
     [self removeAuthData];
@@ -282,15 +286,22 @@ NSString * const EODidLogoutNotification = @"EODidLogoutNotification";
         loggedInUser.latitude = [NSNumber numberWithDouble:location.coordinate.latitude];
         loggedInUser.longitude = [NSNumber numberWithDouble:location.coordinate.longitude];
         loggedInUser.locationUpdatedAt = [[NSDate alloc] init];
-        NSArray *params = @[[DictHelper dictWithKey:@"lat" andValue:[NSString stringWithFormat:@"%f", _currentUser.coordinate.latitude]],
-        [DictHelper dictWithKey:@"lng" andValue:[NSString stringWithFormat:@"%f", _currentUser.coordinate.longitude]]];
+        RKManagedObjectStore* store = [RKObjectManager sharedManager].managedObjectStore;
+        NSManagedObjectContext* context = store.mainQueueManagedObjectContext;
+        NSError* error;
+        if(![context saveToPersistentStore:&error]){
+            DDLogError(@"failed to save location to core data: %@", error);
+        }
+        
+        NSArray *params = @[[DictHelper dictWithKey:@"lat" andValue:[NSString stringWithFormat:@"%f", location.coordinate.latitude]],
+        [DictHelper dictWithKey:@"lng" andValue:[NSString stringWithFormat:@"%f", location.coordinate.longitude]]];
         NSString *requestStr = [NSString stringWithFormat:@"%@://%@/api/v1/user/%d/location/", HTTPS, EOHOST, _currentUser.uID];
         [[NetworkHandler getHandler] requestFromURL:requestStr
                                              method:POST
                                          parameters:params
                                         cachePolicy:TTURLRequestCachePolicyNoCache
                                             success:^(id obj) {
-                                                DDLogVerbose(@"location stored to server");
+                                                DDLogVerbose(@"location synced to server");
                                             }
                                             failure:^{
                                                 DDLogVerbose(@"Warning: failed to store user location to the server.");

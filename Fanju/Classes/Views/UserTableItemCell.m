@@ -121,6 +121,7 @@
 		// Set the data in various UI elements
 		[_username setText:_user.name];
         
+        _avatar.image = [UserService defaultAvatarForUser:_user];
         [_avatar setPathToNetworkImage:[URLService absoluteURL:_user.avatar] forDisplaySize:CGSizeMake(AVATAR_SIDE_LENGTH, AVATAR_SIDE_LENGTH)];
         _avatar.userInteractionEnabled = NO;
         

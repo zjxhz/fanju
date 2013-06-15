@@ -252,6 +252,14 @@
     [SVProgressHUD showWithStatus:@"正在获取微博用户信息……"];
 }
 
+- (void)sinaweiboLogInDidCancel:(SinaWeibo *)sinaweibo{
+    [self.tableView reloadData];
+    self.tableView.frame = self.view.frame;
+//    if (self.isViewLoaded && self.view.window) {
+//        [SVProgressHUD dismiss];
+//    }
+}
+
 -(void)userDidLogIn:(UserProfile*) user{
     //do nothing as login has been handled by notifications
 }

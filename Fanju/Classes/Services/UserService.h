@@ -38,4 +38,5 @@ typedef void (^service_failure)(void);
 +(NSArray*)sortedPhotosForUser:(User*)user;
 +(BOOL)hasAvatar:(User*)user;
 +(GuestUser*)createGuestOf:(User*)user;
++(UIImage*)defaultAvatarForUser:(User*)user;
 @end

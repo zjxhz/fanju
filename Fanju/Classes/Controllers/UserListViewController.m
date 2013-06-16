@@ -331,8 +331,8 @@
 
 - (void)loadUsersWithNewLocation {
     NSTimeInterval updateInterval = 999999;//fake a big number to allow update if no previous update
-    if (_lastUpdatedTime) {
-        updateInterval = ABS([_lastUpdatedTime timeIntervalSinceNow]);
+    if (_locationUpdatedTime) {
+        updateInterval = ABS([_locationUpdatedTime timeIntervalSinceNow]);
         DDLogVerbose(@"last update time to load users: %.0f", updateInterval);
     }
     if (_upadateLocationBeforeLoadUsers && updateInterval > 3*60) {

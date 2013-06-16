@@ -6,13 +6,6 @@
 	<dict>
 		<key>Fanju.xcscheme</key>
 		<dict>
-			<key>isShown</key>
-			<false/>
-			<key>orderHint</key>
-			<integer>1</integer>
-		</dict>
-		<key>饭聚.xcscheme</key>
-		<dict>
 			<key>orderHint</key>
 			<integer>2</integer>
 		</dict>

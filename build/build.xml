@@ -1,10 +1,9 @@
 <project name="build_fanju" default="upload">
     <target name="init">
-        <property file="build.properties" />
+		<xmlproperty file="property.xml" keepRoot="false" semanticAttributes="true"/>
         <tstamp>
             <format property="release_time" pattern="yyyyMMdd_HHmm"/>
         </tstamp>
-        
     </target>
     
     <!--<target name="security" depends="init">
@@ -56,6 +55,7 @@
     		<arg value="write" />
     		<arg value="${local.projectPath}/Fanju/Fanju-Info.plist" />
     		<arg value="AutoSendCrashReport" />
+    		<arg value="-bool" />
     		<arg value="TRUE" />
     	</exec>
 	</target>
@@ -74,8 +74,10 @@
         </exec>
     </target>
     
-    <target name="archive" depends="prebuild">
-        <zip destfile="${dsym_zip}" basedir="${dSYM.path}"/>        
+    <target name="archive" depends="build">
+        <zip destfile="${dsym_zip}">
+	        <fileset dir="${dSYM.path}" includes="**/${app.id}.app.dSYM/**" />
+        </zip>        
         <exec executable="xcrun" failonerror="true">
             <arg value="-sdk"/>
             <arg value="iphoneos"/>
@@ -110,20 +112,32 @@
         <scp todir="${user}:${password}@${host}:${serverDir}" trust="YES">
         	<fileset dir="${local.ipaPath}" >
         		<include name="**/install.html" />
-        		<include name="**/*${ver}*" /> <!--including ipa, plist, dSYM, etc-->
+        		<include name="**/*${ver}*.plist"/>
+        		<include name="**/*${ver}*.ipa" />
         	</fileset>
         </scp>
     </target>
     
     <target name="test" depends="init" description="testing target to verify if ant script is working">
-    	<echo message="${release_time}" />
+    	<echo message="${local.projectPath}" />
+		<exec executable="sh" failonerror="true">
+			<arg value="temp.sh" />
+			<arg value="${app.name}" />
+		</exec>
+<!-- 
     	<exec executable="python" failonerror="true" dir="${local.projectPath}">
     		<arg value="${basedir}/gen_ver.py" />
-    		<arg value="--out" />
+    		<arg value="~~out" />
     		<arg value="${basedir}/ver.txt" />    	
     	</exec>
     	<property file="ver.txt" />
     	<delete file = "${basedir}/ver.txt" />
     	<echo message="ver=${ver}" />
+ -->
+ 		<!-- 
+<zip destfile="Fanju_0.0.25.dSYM.zip">
+        	<fileset dir="${dSYM.path}" includes="**/${app.id}.app.dSYM/**" />
+        </zip>    
+ -->
 	</target>
 </project>

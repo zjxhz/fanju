@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?> 
+<root> 
+	<local>
+		<projectPath>${user.home}/workspace/Fanju</projectPath>
+		<ipaPath>${user.home}/workspace/fanju_builds/</ipaPath>
+	</local>
+	<app> 
+		<name>饭聚</name> 
+		<id>Fanju</id>
+		<path>${user.home}/Library/Developer/Xcode/DerivedData/Fanju-enxytrhkxahpdtgovgwzmeybhspe/Build/Products/Release-iphoneos/${app.name}.app</path>
+	</app> 
+	<scheme>Fanju</scheme>
+	<info>
+		<plist>${local.projectPath}/${app.name}-Info.plist</plist>
+	</info>
+	<configuration>Release</configuration>
+	<dSYM.path>${user.home}/Library/Developer/Xcode/DerivedData/Fanju-enxytrhkxahpdtgovgwzmeybhspe/Build/Products/Release-iphoneos/</dSYM.path>
+	<adHocProvisioningProfile>${user.home}/workspace/fanju_builds/Fanju.mobileprovision</adHocProvisioningProfile>
+	<user>fanju</user>
+	<password>fan321</password>
+	<host>fanjoin.com</host>
+	<serverDir>/home/fanju/media/apps/fanju</serverDir>	
+</root>

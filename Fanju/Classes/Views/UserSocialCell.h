@@ -10,5 +10,5 @@
 
 @interface UserSocialCell : UITableViewCell
 @property(nonatomic, weak) IBOutlet UIImageView* sina;
-@property(nonatomic, weak) IBOutlet UIImageView* qq;
+//@property(nonatomic, weak) IBOutlet UIImageView* qq;
 @end

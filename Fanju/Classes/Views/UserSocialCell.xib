@@ -94,16 +94,7 @@
 								<int key="NSvFlags">292</int>
 								<string key="NSFrame">{{69, 8}, {50, 50}}</string>
 								<reference key="NSSuperview" ref="544834148"/>
-								<reference key="NSNextKeyView" ref="485365204"/>
-								<string key="NSReuseIdentifierKey">_NS:9</string>
-								<bool key="IBUIUserInteractionEnabled">NO</bool>
-								<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
-							</object>
-							<object class="IBUIImageView" id="485365204">
-								<reference key="NSNextResponder" ref="544834148"/>
-								<int key="NSvFlags">292</int>
-								<string key="NSFrame">{{129, 8}, {50, 50}}</string>
-								<reference key="NSSuperview" ref="544834148"/>
+								<reference key="NSNextKeyView"/>
 								<string key="NSReuseIdentifierKey">_NS:9</string>
 								<bool key="IBUIUserInteractionEnabled">NO</bool>
 								<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
@@ -147,14 +138,6 @@
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBCocoaTouchOutletConnection" key="connection">
-						<string key="label">qq</string>
-						<reference key="source" ref="454299569"/>
-						<reference key="destination" ref="485365204"/>
-					</object>
-					<int key="connectionID">51</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBCocoaTouchOutletConnection" key="connection">
 						<string key="label">sina</string>
 						<reference key="source" ref="454299569"/>
 						<reference key="destination" ref="567368931"/>
@@ -188,7 +171,6 @@
 							<reference ref="1011121284"/>
 							<reference ref="885486134"/>
 							<reference ref="567368931"/>
-							<reference ref="485365204"/>
 						</array>
 						<reference key="parent" ref="0"/>
 					</object>
@@ -209,12 +191,6 @@
 						<array class="NSMutableArray" key="children"/>
 						<reference key="parent" ref="454299569"/>
 					</object>
-					<object class="IBObjectRecord">
-						<int key="objectID">41</int>
-						<reference key="object" ref="485365204"/>
-						<array class="NSMutableArray" key="children"/>
-						<reference key="parent" ref="454299569"/>
-					</object>
 				</array>
 			</object>
 			<dictionary class="NSMutableDictionary" key="flattenedProperties">
@@ -226,7 +202,6 @@
 				<string key="2.CustomClassName">UserSocialCell</string>
 				<string key="2.IBPluginDependency">com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 				<string key="27.IBPluginDependency">com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
-				<string key="41.IBPluginDependency">com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 				<string key="5.IBPluginDependency">com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 			</dictionary>
 			<dictionary class="NSMutableDictionary" key="unlocalizedProperties"/>

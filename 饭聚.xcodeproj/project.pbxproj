@@ -78,7 +78,6 @@
 		B019AF1316F7314600327DCF /* confirm_btn_big@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = B019AF1116F7314600327DCF /* confirm_btn_big@2x.png */; };
 		B01DDC841738926C001F3788 /* ArchivedMessageService.m in Sources */ = {isa = PBXBuildFile; fileRef = B01DDC831738926C001F3788 /* ArchivedMessageService.m */; };
 		B02F93681713C0C600DC0784 /* toolbar_bg.png in Resources */ = {isa = PBXBuildFile; fileRef = B02F93671713C0C600DC0784 /* toolbar_bg.png */; };
-		B02F936A1713C15F00DC0784 /* time_seg_1.png in Resources */ = {isa = PBXBuildFile; fileRef = B02F93691713C15F00DC0784 /* time_seg_1.png */; };
 		B02F936D1713C47F00DC0784 /* toolbar_shadow.png in Resources */ = {isa = PBXBuildFile; fileRef = B02F936B1713C47F00DC0784 /* toolbar_shadow.png */; };
 		B02F936E1713C47F00DC0784 /* toolbar_shadow@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = B02F936C1713C47F00DC0784 /* toolbar_shadow@2x.png */; };
 		B02F9374171415DA00DC0784 /* Icon.png in Resources */ = {isa = PBXBuildFile; fileRef = B02F9373171415D900DC0784 /* Icon.png */; };
@@ -602,7 +601,6 @@
 		B0D7E42616FF079500EDE8AF /* side_social.png in Resources */ = {isa = PBXBuildFile; fileRef = B0D7E40C16FF079500EDE8AF /* side_social.png */; };
 		B0D7E42716FF079500EDE8AF /* side_social@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = B0D7E40D16FF079500EDE8AF /* side_social@2x.png */; };
 		B0D7E42A16FF35AA00EDE8AF /* UserHeaderCell.m in Sources */ = {isa = PBXBuildFile; fileRef = B0D7E42916FF35AA00EDE8AF /* UserHeaderCell.m */; };
-		B0E61723172FBEA700D6450F /* Fanju-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = B04C266D16E2070000E86C7A /* Fanju-Info.plist */; };
 		B0E6172717310A3900D6450F /* MenuViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B0E6172517310A3800D6450F /* MenuViewController.m */; };
 		B0E6172817310A3900D6450F /* MenuViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = B0E6172617310A3900D6450F /* MenuViewController.xib */; };
 		B0E6172B17310B4000D6450F /* menu_bg.png in Resources */ = {isa = PBXBuildFile; fileRef = B0E6172917310B4000D6450F /* menu_bg.png */; };
@@ -757,13 +755,13 @@
 		B0471659176C1BF2007A805F /* avatar_female@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "avatar_female@2x.png"; sourceTree = "<group>"; };
 		B047165A176C1BF2007A805F /* avatar_male.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = avatar_male.png; sourceTree = "<group>"; };
 		B047165B176C1BF2007A805F /* avatar_male@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "avatar_male@2x.png"; sourceTree = "<group>"; };
-		B04C266216E2070000E86C7A /* Fanju.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Fanju.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		B04C266216E2070000E86C7A /* 饭聚.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "饭聚.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		B04C266516E2070000E86C7A /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		B04C266716E2070000E86C7A /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		B04C266916E2070000E86C7A /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
-		B04C266D16E2070000E86C7A /* Fanju-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Fanju-Info.plist"; sourceTree = "<group>"; };
+		B04C266D16E2070000E86C7A /* 饭聚-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = file.bplist; path = "饭聚-Info.plist"; sourceTree = "<group>"; };
 		B04C266F16E2070000E86C7A /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		B04C267316E2070100E86C7A /* Fanju-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Fanju-Prefix.pch"; sourceTree = "<group>"; };
+		B04C267316E2070100E86C7A /* 饭聚-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "饭聚-Prefix.pch"; sourceTree = "<group>"; };
 		B04C267716E2070100E86C7A /* Default.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Default.png; sourceTree = "<group>"; };
 		B04C267916E2070100E86C7A /* Default@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default@2x.png"; sourceTree = "<group>"; };
 		B04C267B16E2070100E86C7A /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
@@ -1649,7 +1647,7 @@
 		B04C266316E2070000E86C7A /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				B04C266216E2070000E86C7A /* Fanju.app */,
+				B04C266216E2070000E86C7A /* 饭聚.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1684,9 +1682,9 @@
 		B04C266C16E2070000E86C7A /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
-				B04C266D16E2070000E86C7A /* Fanju-Info.plist */,
+				B04C266D16E2070000E86C7A /* 饭聚-Info.plist */,
 				B04C266E16E2070000E86C7A /* InfoPlist.strings */,
-				B04C267316E2070100E86C7A /* Fanju-Prefix.pch */,
+				B04C267316E2070100E86C7A /* 饭聚-Prefix.pch */,
 				B04C267716E2070100E86C7A /* Default.png */,
 				B04C267916E2070100E86C7A /* Default@2x.png */,
 				B04C267B16E2070100E86C7A /* Default-568h@2x.png */,
@@ -2968,9 +2966,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		B04C266116E2070000E86C7A /* Fanju */ = {
+		B04C266116E2070000E86C7A /* 饭聚 */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = B04C267F16E2070100E86C7A /* Build configuration list for PBXNativeTarget "Fanju" */;
+			buildConfigurationList = B04C267F16E2070100E86C7A /* Build configuration list for PBXNativeTarget "饭聚" */;
 			buildPhases = (
 				B04C265E16E2070000E86C7A /* Sources */,
 				B04C265F16E2070000E86C7A /* Frameworks */,
@@ -2981,9 +2979,9 @@
 			);
 			dependencies = (
 			);
-			name = Fanju;
+			name = "饭聚";
 			productName = Fanju;
-			productReference = B04C266216E2070000E86C7A /* Fanju.app */;
+			productReference = B04C266216E2070000E86C7A /* 饭聚.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -2995,7 +2993,7 @@
 				LastUpgradeCheck = 0460;
 				ORGANIZATIONNAME = Wayne;
 			};
-			buildConfigurationList = B04C265D16E2070000E86C7A /* Build configuration list for PBXProject "Fanju" */;
+			buildConfigurationList = B04C265D16E2070000E86C7A /* Build configuration list for PBXProject "饭聚" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
@@ -3008,7 +3006,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				B04C266116E2070000E86C7A /* Fanju */,
+				B04C266116E2070000E86C7A /* 饭聚 */,
 			);
 		};
 /* End PBXProject section */
@@ -3276,7 +3274,6 @@
 				B000915F17059A860065CB53 /* UploadPhotoEventCell.xib in Resources */,
 				B00091611706FF990065CB53 /* SimpleUserEventCell.xib in Resources */,
 				B02F93681713C0C600DC0784 /* toolbar_bg.png in Resources */,
-				B02F936A1713C15F00DC0784 /* time_seg_1.png in Resources */,
 				B02F936D1713C47F00DC0784 /* toolbar_shadow.png in Resources */,
 				B02F936E1713C47F00DC0784 /* toolbar_shadow@2x.png in Resources */,
 				B02F9374171415DA00DC0784 /* Icon.png in Resources */,
@@ -3309,7 +3306,6 @@
 				B051F3C91721316F0038071E /* album_delete_photo@2x.png in Resources */,
 				B051F3CC1724D2440038071E /* album_add_photo.png in Resources */,
 				B051F3CD1724D2440038071E /* album_add_photo@2x.png in Resources */,
-				B0E61723172FBEA700D6450F /* Fanju-Info.plist in Resources */,
 				B0E6172817310A3900D6450F /* MenuViewController.xib in Resources */,
 				B0E6172B17310B4000D6450F /* menu_bg.png in Resources */,
 				B0E6172C17310B4000D6450F /* menu_bg@2x.png in Resources */,
@@ -3700,7 +3696,8 @@
 				CLANG_WARN_ENUM_CONVERSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_IDENTITY = "iPhone Distribution";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 0.0.63;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
@@ -3718,6 +3715,8 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_LDFLAGS = "-lxml2";
+				PROVISIONING_PROFILE = "";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
 				SDKROOT = iphoneos;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
@@ -3735,7 +3734,8 @@
 				CLANG_WARN_ENUM_CONVERSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_IDENTITY = "iPhone Distribution";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
 				COPY_PHASE_STRIP = YES;
 				CURRENT_PROJECT_VERSION = 0.0.63;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
@@ -3746,6 +3746,8 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
 				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
 				OTHER_LDFLAGS = "-lxml2";
+				PROVISIONING_PROFILE = "";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
 				SDKROOT = iphoneos;
 				VALIDATE_PRODUCT = YES;
 				VERSIONING_SYSTEM = "apple-generic";
@@ -3757,9 +3759,9 @@
 			baseConfigurationReference = DE1C6AFC71E24F3EA4C025BE /* Pods.xcconfig */;
 			buildSettings = {
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "Fanju/Fanju-Prefix.pch";
+				GCC_PREFIX_HEADER = "Fanju/饭聚-Prefix.pch";
 				HEADER_SEARCH_PATHS = "${PODS_HEADERS_SEARCH_PATHS}";
-				INFOPLIST_FILE = "Fanju/Fanju-Info.plist";
+				INFOPLIST_FILE = "Fanju/饭聚-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
@@ -3789,7 +3791,7 @@
 					UIKit,
 					"-lxml2",
 				);
-				PRODUCT_NAME = Fanju;
+				PRODUCT_NAME = "饭聚";
 				USER_HEADER_SEARCH_PATHS = /usr/include/libxml2;
 				WRAPPER_EXTENSION = app;
 			};
@@ -3800,9 +3802,9 @@
 			baseConfigurationReference = DE1C6AFC71E24F3EA4C025BE /* Pods.xcconfig */;
 			buildSettings = {
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "Fanju/Fanju-Prefix.pch";
+				GCC_PREFIX_HEADER = "Fanju/饭聚-Prefix.pch";
 				HEADER_SEARCH_PATHS = "${PODS_HEADERS_SEARCH_PATHS}";
-				INFOPLIST_FILE = "Fanju/Fanju-Info.plist";
+				INFOPLIST_FILE = "Fanju/饭聚-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
@@ -3832,7 +3834,7 @@
 					UIKit,
 					"-lxml2",
 				);
-				PRODUCT_NAME = Fanju;
+				PRODUCT_NAME = "饭聚";
 				USER_HEADER_SEARCH_PATHS = /usr/include/libxml2;
 				WRAPPER_EXTENSION = app;
 			};
@@ -3841,7 +3843,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		B04C265D16E2070000E86C7A /* Build configuration list for PBXProject "Fanju" */ = {
+		B04C265D16E2070000E86C7A /* Build configuration list for PBXProject "饭聚" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				B04C267D16E2070100E86C7A /* Debug */,
@@ -3850,7 +3852,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		B04C267F16E2070100E86C7A /* Build configuration list for PBXNativeTarget "Fanju" */ = {
+		B04C267F16E2070100E86C7A /* Build configuration list for PBXNativeTarget "饭聚" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				B04C268016E2070100E86C7A /* Debug */,

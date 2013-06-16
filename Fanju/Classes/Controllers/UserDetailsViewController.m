@@ -496,7 +496,7 @@
             
             UIGestureRecognizer *qqTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(qqTapped:)];
             qqTap.delegate  = self;
-            [socialCell.qq addGestureRecognizer:qqTap];
+//            [socialCell.qq addGestureRecognizer:qqTap];
         }
         UserSocialCell* socialCell = (UserSocialCell*)cell;
         if (_user.weiboID) {
@@ -506,8 +506,8 @@
             socialCell.sina.userInteractionEnabled = NO;
             socialCell.sina.image = [UIImage imageNamed:@"social_sina_disabled"];
         }
-        socialCell.qq.userInteractionEnabled = NO;
-        socialCell.qq.image = [UIImage imageNamed:@"social_qq_disabled"];
+//        socialCell.qq.userInteractionEnabled = NO;
+//        socialCell.qq.image = [UIImage imageNamed:@"social_qq_disabled"];
         
     }
     cell.selectionStyle = UITableViewCellSelectionStyleNone;

@@ -89,6 +89,7 @@
     
     x = _joinButton.frame.origin.x + _joinButton.frame.size.width;
     _commentButton = [[UIButton alloc] initWithFrame:CGRectMake(x, y, comment_img.size.width, comment_img.size.height)];
+    [_commentButton addTarget:self action:@selector(commentOnMeal:) forControlEvents:UIControlEventTouchUpInside];
     [_commentButton setBackgroundImage:comment_img forState:UIControlStateNormal];
     
     [_tabBar addSubview:_joinButton];
@@ -104,6 +105,10 @@
 {
     [super viewDidLoad];
     [self buildUI];
+}
+
+-(void)commentOnMeal:(id)sender{
+    [InfoUtil showAlert:@"查看或评论请登录fanjoin.com"];
 }
 
 -(void)buildUI{

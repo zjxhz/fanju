@@ -1068,20 +1068,46 @@
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "260"
          endingLineNumber = "260"
-         landmarkName = "-sendWeiBo"
+         landmarkName = "@implementation MealDetailViewController"
+         landmarkType = "3">
+      </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "Yes"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         filePath = "Fanju/Classes/Helpers/Authentication.m"
+         timestampString = "392989419.870686"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "220"
+         endingLineNumber = "220"
+         landmarkName = "-sinaweiboDidLogIn:"
          landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "Yes"
          ignoreCount = "0"
          continueAfterRunningActions = "No"
-         filePath = "Fanju/Classes/Views/MealCell.m"
-         timestampString = "392982799.983487"
+         filePath = "Fanju/Classes/Controllers/UserListViewController.m"
+         timestampString = "393039793.951654"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "72"
-         endingLineNumber = "72"
-         landmarkName = "-setObject:"
+         startingLineNumber = "161"
+         endingLineNumber = "161"
+         landmarkName = "-loadUsers:"
+         landmarkType = "5">
+      </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "Yes"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         filePath = "Fanju/Classes/Controllers/UserListViewController.m"
+         timestampString = "393040204.205597"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "333"
+         endingLineNumber = "333"
+         landmarkName = "-loadUsersWithNewLocation"
          landmarkType = "5">
       </FileBreakpoint>
    </FileBreakpoints>

@@ -9,12 +9,10 @@
 #import "ImageScrollView.h"
 
 @implementation ImageScrollView
-- (id) initWithFrame:(CGRect)frame image:(UIImage*)image contentMode:(UIViewContentMode)mode{
+- (id) initWithFrame:(CGRect)frame{
     if (self = [super initWithFrame:frame]) {
         self.delegate = self;
-        _imageView = [[UIImageView alloc] initWithFrame:CGRectZero];
-        _imageView.contentMode = mode;
-        _imageView.image = image;
+        _imageView = [[NINetworkImageView alloc] initWithFrame:CGRectZero];
         [self addSubview:_imageView];
         self.maximumZoomScale = 2.0;
         self.minimumZoomScale = 1.0;
@@ -22,6 +20,12 @@
     }
     return self;
 }
+
+-(id)init{
+    return [self initWithFrame:CGRectZero];
+}
+
+
 
 -(UIView*) viewForZoomingInScrollView:(UIScrollView *)scrollView{
     return _imageView;

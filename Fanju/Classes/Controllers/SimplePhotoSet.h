@@ -9,13 +9,11 @@
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 
-@protocol PhotoSet 
-@property (nonatomic, readonly) NSInteger numberOfPhotos;
-- (UIImage*)photoAtIndex:(NSInteger)index;
-@end
+@interface SimplePhotoSet : NSObject 
+@property(nonatomic, strong) NSArray* thumbnailUrls;
+@property(nonatomic, strong) NSArray* largeUrls;
+-(NSInteger) numberOfPhotos;
+- (NSString*)largePhotoAtIndex:(NSInteger)index;
+- (NSString*)thumbnailUrlAtIndex:(NSInteger)index;
 
-
-@interface SimplePhotoSet : NSObject<PhotoSet>
-@property (nonatomic, retain) NSArray *photos;
-- (SimplePhotoSet*) initWithPhotos:(NSArray*) photos;
 @end

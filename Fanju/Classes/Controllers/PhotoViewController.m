@@ -18,7 +18,6 @@
     NSMutableArray* _contentViews;
     NSMutableArray* _imageViews;
     UIScrollView* _scrollView;
-    NSArray* _bigPhotoUrls;
     BOOL _fullScreen;
     MBProgressHUD* _hud;
     NSMutableSet* _loadedURLs;
@@ -29,13 +28,21 @@
 
 @implementation PhotoViewController
 @synthesize photoSource = _photoSource;
--(id) initWithPhotos:(NSArray*)photos atIndex:(NSInteger)index withBigPhotoUrls:(NSArray*)bigPhotoUrls{
+-(id)initWithUser:(User*)user atIndex:(NSInteger)index{
     if (self = [super init]) {
-        _photoSource = [[SimplePhotoSet alloc] initWithPhotos:photos];
+        NSMutableArray* thumnailUrls = [NSMutableArray array];
+        NSMutableArray* largeUrls = [NSMutableArray array];
+        for (Photo* photo in user.photos) {
+            [thumnailUrls addObject:[URLService absoluteURL:photo.thumbnailURL]];
+            [largeUrls addObject:[URLService absoluteURL:photo.url]];
+        }
+        _photoSource = [[SimplePhotoSet alloc] init];
+        _photoSource.thumbnailUrls = thumnailUrls;
+        _photoSource.largeUrls = largeUrls;
+        
         _initialIndex = index;
         _contentViews = [NSMutableArray array];
         _imageViews = [NSMutableArray array];
-        _bigPhotoUrls = bigPhotoUrls;
         _loadedURLs = [NSMutableSet set];
     }
     return self;
@@ -60,15 +67,14 @@
     _scrollView.pagingEnabled = YES;
     [_scrollView setIndicatorStyle:UIScrollViewIndicatorStyleWhite];
     
-    for(int i=0; i < _photoSource.numberOfPhotos; i++){
+    for(int i=0; i < [_photoSource numberOfPhotos]; i++){
         CGFloat xOrigin = i * 320;
         //check if big photo is available from cache
-        NSString* currentURL = [_bigPhotoUrls objectAtIndex:i];
-        NSData* data =  [[TTURLCache sharedCache] dataForURL:currentURL];
-        UIImage* image = [UIImage imageWithData:data];
-        
+        NSString* currentURL = [_photoSource largePhotoAtIndex:i];
+        UIImage* image = [self imageFromCache:currentURL];
         CGRect imageFrame = CGRectZero;
         UIViewContentMode mode = UIViewContentModeScaleAspectFit;
+        ImageScrollView* imageScrollView = [[ImageScrollView alloc] initWithFrame:CGRectMake(xOrigin, 0, SCROLL_VIEW_CONENT_WIDTH, height)];
         if (image) {
             [_loadedURLs addObject:currentURL];
             imageFrame = [[UIScreen mainScreen] applicationFrame];
@@ -76,13 +82,13 @@
             if (radio > 1.3 && radio < 2) {
                 mode = UIViewContentModeScaleAspectFill;
             }
+            imageScrollView.imageView.image = image;
         } else {
-            image = [_photoSource photoAtIndex:i];
-            CGFloat imageX = (SCROLL_VIEW_CONENT_WIDTH - image.size.width) / 2;
-            CGFloat imageY = (SCROLL_VIEW_CONENT_WIDTH - image.size.height) / 2;
-            imageFrame = CGRectMake(imageX, imageY, image.size.width, image.size.height);
+            NSString* thumbnailUrl = [_photoSource thumbnailUrlAtIndex:i];
+            [imageScrollView.imageView setPathToNetworkImage:thumbnailUrl];
+            imageFrame = CGRectMake(107, 187, 105, 105);
         }
-        ImageScrollView* imageScrollView = [[ImageScrollView alloc] initWithFrame:CGRectMake(xOrigin, 0, SCROLL_VIEW_CONENT_WIDTH, height) image:image contentMode:mode];
+        imageScrollView.imageView.contentMode = mode;
         imageScrollView.backgroundColor = [UIColor blackColor];
         imageScrollView.imageView.frame = imageFrame;
         
@@ -95,6 +101,11 @@
     [self.view addSubview:_scrollView];
 }
 
+
+-(UIImage*)imageFromCache:(NSString*)url{
+    NSData* data =  [[TTURLCache sharedCache] dataForURL:url];
+    return [UIImage imageWithData:data];
+}
 -(void)viewWillAppear:(BOOL)animated{
     [super viewWillAppear:animated];
     self.navigationController.navigationBar.translucent = YES;
@@ -118,7 +129,7 @@
 
 -(void)requestImageForCurrentPage{
     int index = _scrollView.contentOffset.x / SCROLL_VIEW_CONENT_WIDTH;
-    NSString* currentURL = [_bigPhotoUrls objectAtIndex:index];
+    NSString* currentURL = [_photoSource largePhotoAtIndex:index];
     if ([_loadedURLs containsObject:currentURL]) {
         return;
     }
@@ -139,7 +150,7 @@
 
 -(BOOL)isURLForCurrentPage:(NSString*)url{
     int index = _scrollView.contentOffset.x / SCROLL_VIEW_CONENT_WIDTH;
-    NSString* urlOfCurrentPage = [_bigPhotoUrls objectAtIndex:index];
+    NSString* urlOfCurrentPage = [_photoSource largePhotoAtIndex:index];
     return [url isEqualToString:urlOfCurrentPage];
 }
 

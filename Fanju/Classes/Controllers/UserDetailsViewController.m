@@ -32,13 +32,13 @@
 #import "SVWebViewController.h"
 #import "Relationship.h"
 #import "MealDetailViewController.h"
+#import "PhotoViewController.h"
 
 #define TOOLBAR_HEIGHT 49
 @interface UserDetailsViewController (){
     PhotoThumbnailCell* _photoCell;
     Photo* _selectedPhoto;
     NSInteger _selectedIndex;
-    NSArray* _allPhotos;
     UIActionSheet* _imagePickerActions;
     UIActionSheet* _imageDeleteOrViewActions;
     UserTagsCell* _tagCell;
@@ -453,6 +453,7 @@
             cell = [[PhotoThumbnailCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier withUser:_user editable:editable];
             _photoCell = (PhotoThumbnailCell*)cell;
             ((PhotoThumbnailCell*)cell).delegate = self;
+            cell.selectionStyle = UITableViewCellSelectionStyleNone;
         }
     } else if (indexPath.section == 2){
         NSString* CellIdentifier = @"UserTagsCell";
@@ -537,23 +538,22 @@
     }];
 }
 
--(void) showUsrPhotos:(NSArray*)photos atIndex:(NSInteger)index{
-    PhotoViewController *pvc = [[PhotoViewController alloc] initWithPhotos:photos atIndex:index withBigPhotoUrls:[UserService photosUrlsForUser:_user]]; //TODO test adding photos
+-(void) showUsrPhotosAtIndex:(NSInteger)index{
+    PhotoViewController *pvc = [[PhotoViewController alloc] initWithUser:_user atIndex:index];
     pvc.title = @"照片";
     [self.navigationController pushViewController:pvc animated:YES];
 }
 
--(void) didSelectUserPhoto:(Photo*)photo withAllPhotos:(NSArray*)allPhotos atIndex:(NSInteger)index{
+-(void) didSelectUserPhoto:(Photo*)photo atIndex:(NSInteger)index{
     if ([self isViewForMyself]) {
         if (!_imageDeleteOrViewActions) {
             _imageDeleteOrViewActions = [[UIActionSheet alloc] initWithTitle:@"选择一个操作" delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:@"删除" otherButtonTitles:@"查看", nil];
         }
         _selectedPhoto = photo;
         _selectedIndex = index;
-        _allPhotos = allPhotos;
         [_imageDeleteOrViewActions showFromToolbar:self.navigationController.toolbar];
     } else {
-        [self showUsrPhotos:allPhotos atIndex:index];
+        [self showUsrPhotosAtIndex:index];
     }
 }
 
@@ -623,7 +623,7 @@
 
 -(void)showUserPhotoAsync{
     dispatch_async(dispatch_get_main_queue(), ^{
-        [self showUsrPhotos:_allPhotos atIndex:_selectedIndex];
+        [self showUsrPhotosAtIndex:_selectedIndex];
     });
 }
 -(void)deleteUserPhoto:(Photo*)photo{

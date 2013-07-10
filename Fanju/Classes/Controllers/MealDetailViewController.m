@@ -36,6 +36,7 @@
 #import "CMPopTipView.h"
 #import "MealDetailDataSource.h"
 #import "MealDetailCell.h"
+//#import "UMSocial.h"
 
 @implementation MealDetailViewController{
 //    MealDetailsViewDelegate* _mealDetailsViewDelegate;
@@ -220,19 +221,24 @@
 }
 
 - (IBAction)joinMeal:(id)sender {
-    if(![[Authentication sharedInstance] isLoggedIn]) {        
-        // not logged in
-        AppDelegate *delegate = (AppDelegate*)[UIApplication sharedApplication].delegate;
-        [delegate showLogin];
-    } else {
-        JoinMealViewController* vc = [[JoinMealViewController alloc] init];
-        vc.meal = self.meal;
-        [self.navigationController pushViewController:vc animated:YES];
-    }
+    JoinMealViewController* vc = [[JoinMealViewController alloc] init];
+    vc.meal = self.meal;
+    [self.navigationController pushViewController:vc animated:YES];
 }
 
 - (void) onShareClicked:(id)sender{
-    [self shareToSinaWeibo];
+    MealDetailCell* detailsCell = (MealDetailCell*)[self.tableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:0]];
+    UIImage* image = detailsCell.mealImageView.image;
+    NSString *defaultMessage = [NSString stringWithFormat:@"一个有趣的饭局：%@ http://%@/meal/%@/", _meal.topic, EOHOST, _meal.mID];
+    
+//    [UMSocialSnsService presentSnsIconSheetView:self
+//                                         appKey:UM_SOCIAL_APP_KEY
+//                                      shareText:defaultMessage
+//                                     shareImage:image
+//                                shareToSnsNames:[NSArray arrayWithObjects:UMShareToSina,UMShareToTencent,UMShareToRenren,nil]
+//                                       delegate:nil];
+    
+//    [self shareToSinaWeibo];
 //    if (_shareContentViewController == nil) {
 //        _shareContentViewController = [[ShareTableViewController alloc] initWithStyle:UITableViewStylePlain];
 //        _shareContentViewController.delegate = self;

@@ -7,10 +7,10 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "NINetworkImageView.h"
 
 @interface ImageScrollView : UIScrollView <UIScrollViewDelegate>
-- (id) initWithFrame:(CGRect)frame image:(UIImage*)image contentMode:(UIViewContentMode)mode;
-@property(nonatomic, readonly) UIImageView* imageView;
+@property(nonatomic, readonly) NINetworkImageView* imageView;
 - (void) zoomReset;
 
 @end

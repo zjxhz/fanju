@@ -11,7 +11,6 @@
 #import "CellTextEditorViewController.h"
 #import "AgeAndConstellationViewController.h"
 #import "UserImageView.h"
-#import "PhotoViewController.h"
 #import "IndustryAndOccupationViewController.h"
 #import "NewTagViewController.h"
 

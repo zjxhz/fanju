@@ -134,7 +134,6 @@
 		B04C29AE16E2078100E86C7A /* MealListViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B04C289316E2078100E86C7A /* MealListViewController.m */; };
 		B04C29AF16E2078100E86C7A /* MealListViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = B04C289416E2078100E86C7A /* MealListViewController.xib */; };
 		B04C29B316E2078100E86C7A /* MyMealsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B04C289C16E2078100E86C7A /* MyMealsViewController.m */; };
-		B04C29B416E2078100E86C7A /* MyOrdersViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B04C289E16E2078100E86C7A /* MyOrdersViewController.m */; };
 		B04C29B516E2078100E86C7A /* NameAndGenderViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B04C28A016E2078100E86C7A /* NameAndGenderViewController.m */; };
 		B04C29B616E2078100E86C7A /* NewSidebarViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B04C28A216E2078100E86C7A /* NewSidebarViewController.m */; };
 		B04C29B716E2078100E86C7A /* NewTagViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B04C28A416E2078100E86C7A /* NewTagViewController.m */; };
@@ -632,6 +631,13 @@
 		B0E8FA2117576C3C00C4C2B3 /* guest@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = B0E8FA1F17576C3C00C4C2B3 /* guest@2x.png */; };
 		B0E8FA271758427800C4C2B3 /* Default.png in Resources */ = {isa = PBXBuildFile; fileRef = B0E8FA261758427800C4C2B3 /* Default.png */; };
 		B0E8FA291758428000C4C2B3 /* Default@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = B0E8FA281758427F00C4C2B3 /* Default@2x.png */; };
+		B0F300BD177D3B9300CF1D3E /* HostService.m in Sources */ = {isa = PBXBuildFile; fileRef = B0F300BC177D3B9300CF1D3E /* HostService.m */; };
+		B0F300C0177D7B3100CF1D3E /* login_bg.png in Resources */ = {isa = PBXBuildFile; fileRef = B0F300BE177D7B3100CF1D3E /* login_bg.png */; };
+		B0F300C1177D7B3100CF1D3E /* login_bg@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = B0F300BF177D7B3100CF1D3E /* login_bg@2x.png */; };
+		B0F300C6177D7B5200CF1D3E /* login_QQ.png in Resources */ = {isa = PBXBuildFile; fileRef = B0F300C2177D7B5200CF1D3E /* login_QQ.png */; };
+		B0F300C7177D7B5200CF1D3E /* login_QQ@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = B0F300C3177D7B5200CF1D3E /* login_QQ@2x.png */; };
+		B0F300C8177D7B5200CF1D3E /* login_weibo.png in Resources */ = {isa = PBXBuildFile; fileRef = B0F300C4177D7B5200CF1D3E /* login_weibo.png */; };
+		B0F300C9177D7B5200CF1D3E /* login_weibo@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = B0F300C5177D7B5200CF1D3E /* login_weibo@2x.png */; };
 		DD97C0ADDEC4427DAC3C7BE5 /* libPods.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 917F16ABACD74E9B9B9EA523 /* libPods.a */; };
 /* End PBXBuildFile section */
 
@@ -807,8 +813,6 @@
 		B04C289416E2078100E86C7A /* MealListViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MealListViewController.xib; sourceTree = "<group>"; };
 		B04C289B16E2078100E86C7A /* MyMealsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MyMealsViewController.h; sourceTree = "<group>"; };
 		B04C289C16E2078100E86C7A /* MyMealsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MyMealsViewController.m; sourceTree = "<group>"; };
-		B04C289D16E2078100E86C7A /* MyOrdersViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MyOrdersViewController.h; sourceTree = "<group>"; };
-		B04C289E16E2078100E86C7A /* MyOrdersViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MyOrdersViewController.m; sourceTree = "<group>"; };
 		B04C289F16E2078100E86C7A /* NameAndGenderViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NameAndGenderViewController.h; sourceTree = "<group>"; };
 		B04C28A016E2078100E86C7A /* NameAndGenderViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NameAndGenderViewController.m; sourceTree = "<group>"; };
 		B04C28A116E2078100E86C7A /* NewSidebarViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NewSidebarViewController.h; sourceTree = "<group>"; };
@@ -1544,6 +1548,15 @@
 		B0E8FA1F17576C3C00C4C2B3 /* guest@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "guest@2x.png"; sourceTree = "<group>"; };
 		B0E8FA261758427800C4C2B3 /* Default.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Default.png; sourceTree = "<group>"; };
 		B0E8FA281758427F00C4C2B3 /* Default@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default@2x.png"; sourceTree = "<group>"; };
+		B0F300BB177D3B9300CF1D3E /* HostService.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HostService.h; sourceTree = "<group>"; };
+		B0F300BC177D3B9300CF1D3E /* HostService.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HostService.m; sourceTree = "<group>"; };
+		B0F300BE177D7B3100CF1D3E /* login_bg.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = login_bg.png; sourceTree = "<group>"; };
+		B0F300BF177D7B3100CF1D3E /* login_bg@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "login_bg@2x.png"; sourceTree = "<group>"; };
+		B0F300C2177D7B5200CF1D3E /* login_QQ.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = login_QQ.png; sourceTree = "<group>"; };
+		B0F300C3177D7B5200CF1D3E /* login_QQ@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "login_QQ@2x.png"; sourceTree = "<group>"; };
+		B0F300C4177D7B5200CF1D3E /* login_weibo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = login_weibo.png; sourceTree = "<group>"; };
+		B0F300C5177D7B5200CF1D3E /* login_weibo@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "login_weibo@2x.png"; sourceTree = "<group>"; };
+		B0FA714F177578FE008A5F58 /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = usr/lib/libz.dylib; sourceTree = SDKROOT; };
 		DE1C6AFC71E24F3EA4C025BE /* Pods.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.xcconfig; path = Pods/Pods.xcconfig; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
@@ -1583,6 +1596,12 @@
 				B0D303681766CA66007D4FD0 /* weixin@2x.jpg */,
 				B0C60B1316F94F4100954DC3 /* disclosure.png */,
 				B0C60B1016F94EE100954DC3 /* disclosure@2x.png */,
+				B0F300BE177D7B3100CF1D3E /* login_bg.png */,
+				B0F300BF177D7B3100CF1D3E /* login_bg@2x.png */,
+				B0F300C2177D7B5200CF1D3E /* login_QQ.png */,
+				B0F300C3177D7B5200CF1D3E /* login_QQ@2x.png */,
+				B0F300C4177D7B5200CF1D3E /* login_weibo.png */,
+				B0F300C5177D7B5200CF1D3E /* login_weibo@2x.png */,
 				B0444DBA16F0292800DD5A80 /* more_normal.png */,
 				B0444DBB16F0292800DD5A80 /* more_normal@2x.png */,
 				B0444DBC16F0292800DD5A80 /* more_push.png */,
@@ -1632,6 +1651,7 @@
 		B04C265916E2070000E86C7A = {
 			isa = PBXGroup;
 			children = (
+				B0FA714F177578FE008A5F58 /* libz.dylib */,
 				B06A7F631760CB5B009F6A31 /* Default-568h@2x.png */,
 				B0E8FA281758427F00C4C2B3 /* Default@2x.png */,
 				B0E8FA261758427800C4C2B3 /* Default.png */,
@@ -1774,8 +1794,6 @@
 				B0E6172617310A3900D6450F /* MenuViewController.xib */,
 				B04C289B16E2078100E86C7A /* MyMealsViewController.h */,
 				B04C289C16E2078100E86C7A /* MyMealsViewController.m */,
-				B04C289D16E2078100E86C7A /* MyOrdersViewController.h */,
-				B04C289E16E2078100E86C7A /* MyOrdersViewController.m */,
 				B04C289F16E2078100E86C7A /* NameAndGenderViewController.h */,
 				B04C28A016E2078100E86C7A /* NameAndGenderViewController.m */,
 				B04C28A116E2078100E86C7A /* NewSidebarViewController.h */,
@@ -2927,6 +2945,8 @@
 				B0079551174C66C100C98E83 /* TagService.m */,
 				B0E8FA1B175769E000C4C2B3 /* GuestUser.h */,
 				B0E8FA1C175769E000C4C2B3 /* GuestUser.m */,
+				B0F300BB177D3B9300CF1D3E /* HostService.h */,
+				B0F300BC177D3B9300CF1D3E /* HostService.m */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -3369,6 +3389,12 @@
 				B047165D176C1BF2007A805F /* avatar_female@2x.png in Resources */,
 				B047165E176C1BF2007A805F /* avatar_male.png in Resources */,
 				B047165F176C1BF2007A805F /* avatar_male@2x.png in Resources */,
+				B0F300C0177D7B3100CF1D3E /* login_bg.png in Resources */,
+				B0F300C1177D7B3100CF1D3E /* login_bg@2x.png in Resources */,
+				B0F300C6177D7B5200CF1D3E /* login_QQ.png in Resources */,
+				B0F300C7177D7B5200CF1D3E /* login_QQ@2x.png in Resources */,
+				B0F300C8177D7B5200CF1D3E /* login_weibo.png in Resources */,
+				B0F300C9177D7B5200CF1D3E /* login_weibo@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3417,7 +3443,6 @@
 				B04C29AD16E2078100E86C7A /* MealListDataSource.m in Sources */,
 				B04C29AE16E2078100E86C7A /* MealListViewController.m in Sources */,
 				B04C29B316E2078100E86C7A /* MyMealsViewController.m in Sources */,
-				B04C29B416E2078100E86C7A /* MyOrdersViewController.m in Sources */,
 				B04C29B516E2078100E86C7A /* NameAndGenderViewController.m in Sources */,
 				B04C29B616E2078100E86C7A /* NewSidebarViewController.m in Sources */,
 				B04C29B716E2078100E86C7A /* NewTagViewController.m in Sources */,
@@ -3657,6 +3682,7 @@
 				B06A7F6217607324009F6A31 /* Order.m in Sources */,
 				B066DD061769D00F0034A9DB /* SearchUserViewController.m in Sources */,
 				B0471657176B0C5D007A805F /* MealDetailCell.m in Sources */,
+				B0F300BD177D3B9300CF1D3E /* HostService.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3696,10 +3722,10 @@
 				CLANG_WARN_ENUM_CONVERSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_IDENTITY = "iPhone Distribution";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 1.0.1;
+				CURRENT_PROJECT_VERSION = 1.0.13;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -3734,10 +3760,10 @@
 				CLANG_WARN_ENUM_CONVERSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_IDENTITY = "iPhone Distribution";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = YES;
-				CURRENT_PROJECT_VERSION = 1.0.1;
+				CURRENT_PROJECT_VERSION = 1.0.13;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
@@ -3758,6 +3784,8 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = DE1C6AFC71E24F3EA4C025BE /* Pods.xcconfig */;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "iPhone Distribution";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Fanju/饭聚-Prefix.pch";
 				HEADER_SEARCH_PATHS = "${PODS_HEADERS_SEARCH_PATHS}";
@@ -3767,6 +3795,8 @@
 					"$(inherited)",
 					"\"$(SRCROOT)/Fanju/Classes/Other/XMPPFramework/Vendor/libidn\"",
 					"\"$(SRCROOT)\"",
+					"\"$(SRCROOT)/Fanju/Classes/Other/UMSocial_Sdk_2.1.3/frameworks/Wechat\"",
+					"\"$(SRCROOT)/Fanju/Classes/Other/UMSocial_Sdk_2.1.3\"",
 				);
 				OTHER_LDFLAGS = (
 					"-ObjC",
@@ -3792,6 +3822,8 @@
 					"-lxml2",
 				);
 				PRODUCT_NAME = "饭聚";
+				PROVISIONING_PROFILE = "";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
 				USER_HEADER_SEARCH_PATHS = /usr/include/libxml2;
 				WRAPPER_EXTENSION = app;
 			};
@@ -3801,6 +3833,8 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = DE1C6AFC71E24F3EA4C025BE /* Pods.xcconfig */;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "iPhone Distribution";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Fanju/饭聚-Prefix.pch";
 				HEADER_SEARCH_PATHS = "${PODS_HEADERS_SEARCH_PATHS}";
@@ -3810,6 +3844,8 @@
 					"$(inherited)",
 					"\"$(SRCROOT)/Fanju/Classes/Other/XMPPFramework/Vendor/libidn\"",
 					"\"$(SRCROOT)\"",
+					"\"$(SRCROOT)/Fanju/Classes/Other/UMSocial_Sdk_2.1.3/frameworks/Wechat\"",
+					"\"$(SRCROOT)/Fanju/Classes/Other/UMSocial_Sdk_2.1.3\"",
 				);
 				OTHER_LDFLAGS = (
 					"-ObjC",
@@ -3835,6 +3871,8 @@
 					"-lxml2",
 				);
 				PRODUCT_NAME = "饭聚";
+				PROVISIONING_PROFILE = "";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
 				USER_HEADER_SEARCH_PATHS = /usr/include/libxml2;
 				WRAPPER_EXTENSION = app;
 			};

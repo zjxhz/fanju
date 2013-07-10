@@ -15,5 +15,5 @@
     NSInteger _initialIndex;
 }
 @property(nonatomic,retain) SimplePhotoSet* photoSource;
--(id) initWithPhotos:(NSArray*)photos atIndex:(NSInteger)index withBigPhotoUrls:(NSArray*)bigPhotoUrls;
+-(id)initWithUser:(User*)user atIndex:(NSInteger)index;
 @end

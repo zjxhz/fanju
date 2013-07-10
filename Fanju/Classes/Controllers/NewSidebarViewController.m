@@ -385,22 +385,7 @@
 
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
-{
-    if ([self requireLogin:indexPath]) {
-        if (![[Authentication sharedInstance] isLoggedIn]) {
-            [self.sideMenu setMenuState:MFSideMenuStateClosed];
-            AppDelegate *appDelegate = (AppDelegate*)[UIApplication sharedApplication].delegate;
-            dispatch_async(dispatch_get_main_queue(), ^{
-                [appDelegate showLogin];
-            });
-            return;
-        }
-//        else if(![[Authentication sharedInstance].currentUser hasCompletedRegistration]){
-//            [self showRegistrationWizard];
-//            return;
-//        }
-    }
-    
+{    
     UIViewController *controller = self.mealListViewController;
     NSString *userID = [[UserService service].loggedInUser.uID stringValue];
     switch (indexPath.section) {

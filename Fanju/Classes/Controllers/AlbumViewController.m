@@ -278,7 +278,7 @@
         [self updateDeleteButton];
     } else{
         if (index < _user.photos.count) {
-            PhotoViewController* vc = [[PhotoViewController alloc] initWithPhotos:[self allPhotos] atIndex:index withBigPhotoUrls:[UserService photosUrlsForUser:_user]];
+            PhotoViewController* vc = [[PhotoViewController alloc] initWithUser:_user atIndex:index];
             vc.title = [NSString stringWithFormat:@"%@的照片", _user.name];
             [self.navigationController pushViewController:vc animated:YES];
         }
@@ -295,8 +295,8 @@
 
 -(NSArray*)allPhotos{
     NSMutableArray* photos = [NSMutableArray array];
-    for (UIImageView* imageView in _photoViews) {
-        [photos addObject:imageView.image];
+    for (Photo* photo in _photos) {
+        [photos addObject:[URLService absoluteURL:photo.thumbnailURL]];
     }
     return photos;
 }

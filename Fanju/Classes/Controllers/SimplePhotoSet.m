@@ -10,23 +10,16 @@
 
 @implementation SimplePhotoSet
 
-@synthesize photos = _photos;
-
-@synthesize numberOfPhotos = _numberOfPhotos;
-
-- (SimplePhotoSet*) initWithPhotos:(NSArray*) photos{
-    if (self = [super init]) {
-        self.photos = photos;
-    }
-    return self;
-}
-
 -(NSInteger) numberOfPhotos{
-    return _photos.count;
+    return _largeUrls.count;
 }
 
-- (UIImage*)photoAtIndex:(NSInteger)index{
-    return [_photos objectAtIndex:index];
+- (NSString*)largePhotoAtIndex:(NSInteger)index{
+    return _largeUrls[index];
+}
+
+- (NSString*)thumbnailUrlAtIndex:(NSInteger)index{
+    return _thumbnailUrls[index];
 }
 
 @end

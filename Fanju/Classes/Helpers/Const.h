@@ -6,17 +6,24 @@
 //  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
 //
 
+#import "HostService.h"
 
 #ifndef EasyOrder_Const_h
 #define EasyOrder_Const_h
 
 #define LOGGED_USER_PROFILE @"LOGGED_USER_PROFILE"
 
-#define EOHOST @"fanjoin.com"
-#define XMPP_HOST EOHOST
-#define WEIBO_APP_KEY @"2295468526"
-#define WEIBO_APP_SECRET @"5991184a22eaff8d2b1149bcf1b1ff91"
-#define WEIBO_APP_REDIRECT_URI @"http://fanjoin.com/login/weibo/" 
+#define EOHOST [[HostService service] host]
+#define XMPP_HOST [[HostService service] xmppHost]
+#define WEIBO_APP_KEY [[HostService service] weiboAppKey]
+#define WEIBO_APP_SECRET [[HostService service] weiboSecret]
+#define WEIBO_APP_REDIRECT_URI [[HostService service] weiboRedirectUri]
+
+//#define EOHOST @"fanjoin.com"
+//#define XMPP_HOST EOHOST
+//#define WEIBO_APP_KEY @"2295468526"
+//#define WEIBO_APP_SECRET @"5991184a22eaff8d2b1149bcf1b1ff91"
+//#define WEIBO_APP_REDIRECT_URI @"http://fanjoin.com/login/weibo/" 
 
 //#define EOHOST @"t.ifunjoin.com"
 //#define XMPP_HOST @"ifunjoin.com"
@@ -34,6 +41,7 @@
 #define FANJU_HOST_KEY @"FANJU_HOST_KEY"
 #define HTTPS @"http" // use http for https in development
 #define APP_SCHEME @"Fanju"
+#define UM_SOCIAL_APP_KEY @"51bea17356240b5571083344"
 
 #define UNREAD_MESSAGE_COUNT @"UNREAD_MESSAGE_COUNT"
 #define UNREAD_NOTIFICATION_COUNT @"UNREAD_NOTIFICATION_COUNT"

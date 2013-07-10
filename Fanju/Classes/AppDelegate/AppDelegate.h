@@ -23,9 +23,6 @@
 @property (readonly, strong, nonatomic) NSPersistentStoreCoordinator *persistentStoreCoordinator;
 @property (strong, nonatomic) NSString* apnsToken;
 @property (strong, nonatomic) SinaWeibo* sinaweibo;
-
-- (void)saveContext;
 - (NSURL *)applicationDocumentsDirectory;
-- (void)showLogin;
 
 @end

@@ -87,23 +87,11 @@
 }
 
 -(void)acceptButtonClicked{
-    if(![[Authentication sharedInstance] isLoggedIn]) {        
-        // not logged in
-        AppDelegate *delegate = (AppDelegate*)[UIApplication sharedApplication].delegate;
-        [delegate showLogin];
-    } else {
-        [self respondToInvitation:YES]; 
-    }
+    [self respondToInvitation:YES];
 }
 
 -(void)rejectButtonClicked{
-    if(![[Authentication sharedInstance] isLoggedIn]) {        
-        // not logged in
-        AppDelegate *delegate = (AppDelegate*)[UIApplication sharedApplication].delegate;
-        [delegate showLogin];
-    } else {
-        [self respondToInvitation:NO];
-    }
+    [self respondToInvitation:NO];
 }
 
 -(void)respondToInvitation:(BOOL)accept{

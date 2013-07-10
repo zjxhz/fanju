@@ -17,3 +17,4 @@
 #import "RestKitService.h"
 #import "RelationshipService.h"
 #import "TagService.h"
+#import "HostService.h"

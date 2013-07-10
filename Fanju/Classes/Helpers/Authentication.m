@@ -244,6 +244,7 @@ NSString * const EODidLogoutNotification = @"EODidLogoutNotification";
 }
 
 -(void)removeAuthData{
+    DDLogWarn(@"");
     [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"SinaWeiboAuthData"];
 }
 

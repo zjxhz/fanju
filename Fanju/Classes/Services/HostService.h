@@ -9,5 +9,10 @@
 #import <Foundation/Foundation.h>
 
 @interface HostService : NSObject
-
++(HostService*)service;
+-(NSString*)host;
+-(NSString*)xmppHost;
+-(NSString*)weiboAppKey;
+-(NSString*)weiboSecret;
+-(NSString*)weiboRedirectUri;
 @end

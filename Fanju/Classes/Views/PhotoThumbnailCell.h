@@ -14,8 +14,7 @@
 @protocol PhotoThumbnailCellDelegate
 @optional
 -(void) addOrRequestPhoto;
--(void) didSelectUserPhotos:(NSArray*)allPhotos  withIndex:(NSInteger)index;
--(void) didSelectUserPhoto:(Photo*)userPhoto withAllPhotos:(NSArray*)allPhotos atIndex:(NSInteger)index;
+-(void) didSelectUserPhoto:(Photo*)userPhoto atIndex:(NSInteger)index;
 @end
 
 @interface PhotoThumbnailCell : UITableViewCell

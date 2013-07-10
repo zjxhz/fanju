@@ -29,7 +29,7 @@
 #import "UserService.h"
 
 @interface MealListViewController()
-@property (nonatomic, strong) IBOutlet UIView* loginView;
+@property (nonatomic, strong) IBOutlet UIImageView* loginView;
 @property (nonatomic, strong) IBOutlet UIButton* loginButton;
 @property (nonatomic, strong) IBOutlet UIButton* registerButton;
 @property (nonatomic, strong) IBOutlet UIImageView* loginWithWeibo;
@@ -70,8 +70,8 @@
     self.tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
     _refreshControl = [[ODRefreshControl alloc] initInScrollView:self.tableView];
     [_refreshControl addTarget:self action:@selector(requestDataFromServer) forControlEvents:UIControlEventValueChanged];
+    _loginView.image = [UIImage imageNamed:@"login_bg"];
 }
-
 
 -(UIView*)createHeader:(NSString*)text{
     UIView* view = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, 22)];
@@ -117,8 +117,13 @@
     self.autoresizesForKeyboard = YES;
     self.variableHeightRows = YES;
     self.loginWithWeibo.userInteractionEnabled = YES;
-    UITapGestureRecognizer *tapGestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(loginWithWeibo:)];
-    [self.loginWithWeibo addGestureRecognizer:tapGestureRecognizer];
+    UITapGestureRecognizer *weiboTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(loginWithWeibo:)];
+    [self.loginWithWeibo addGestureRecognizer:weiboTap];
+    
+    self.loginWithQQ.userInteractionEnabled = YES;
+    UITapGestureRecognizer *qqTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(loginWithQQ:)];
+    [self.loginWithQQ addGestureRecognizer:qqTap];
+    
     [self requestDataFromServer];
 //    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(alixPayResult:) name:ALIPAY_PAY_RESULT object:nil];
     
@@ -244,7 +249,9 @@
 
 
 -(IBAction)loginWithQQ:(id)sender{
-    
+    DDAlertPrompt *loginPrompt = [[DDAlertPrompt alloc] initWithTitle:@"登录(开发服务器)" delegate:self cancelButtonTitle:@"取消" otherButtonTitle:@"确定"];
+    [loginPrompt show];
+    return;
 }
 
 #pragma mark AuthenticationDelegate

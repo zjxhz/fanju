@@ -9,7 +9,6 @@
 #import "PhotoThumbnailCell.h"
 #import "NINetworkImageView.h"
 #import "AvatarFactory.h"
-#import "PhotoViewController.h"
 #import "Authentication.h"
 #import "URLService.h"
 
@@ -141,7 +140,6 @@
 }
 
 -(void)photoTapped:(id)sender{
-    NSMutableArray* allImages = [NSMutableArray array];
     int index = 0;
     BOOL indexFound = NO;
     UITapGestureRecognizer* reg = (UITapGestureRecognizer*)sender;
@@ -153,10 +151,9 @@
                 indexFound = YES;
             }           
         }
-        [allImages addObject:iv.image];
     }
 
-    [self.delegate didSelectUserPhoto:[_photos objectAtIndex:index] withAllPhotos:allImages atIndex:index];
+    [self.delegate didSelectUserPhoto:[_photos objectAtIndex:index] atIndex:index];
 }
 
 -(void)scrollToRight{

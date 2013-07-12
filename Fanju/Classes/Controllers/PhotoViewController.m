@@ -32,7 +32,7 @@
     if (self = [super init]) {
         NSMutableArray* thumnailUrls = [NSMutableArray array];
         NSMutableArray* largeUrls = [NSMutableArray array];
-        for (Photo* photo in user.photos) {
+        for (Photo* photo in [UserService sortedPhotosForUser:user]) {
             [thumnailUrls addObject:[URLService absoluteURL:photo.thumbnailURL]];
             [largeUrls addObject:[URLService absoluteURL:photo.url]];
         }

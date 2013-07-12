@@ -42,24 +42,7 @@
 							<object class="IBUIImageView" id="125885150">
 								<reference key="NSNextResponder" ref="187320887"/>
 								<int key="NSvFlags">256</int>
-								<string key="NSFrame">{{5, 28}, {154, 38}}</string>
-								<reference key="NSSuperview" ref="187320887"/>
-								<reference key="NSWindow"/>
-								<reference key="NSNextKeyView" ref="629535121"/>
-								<bool key="IBUIOpaque">NO</bool>
-								<bool key="IBUIClipsSubviews">YES</bool>
-								<int key="IBUIContentMode">4</int>
-								<bool key="IBUIMultipleTouchEnabled">YES</bool>
-								<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
-								<object class="NSCustomResource" key="IBUIImage">
-									<string key="NSClassName">NSImage</string>
-									<string key="NSResourceName">login_weibo.png</string>
-								</object>
-							</object>
-							<object class="IBUIImageView" id="629535121">
-								<reference key="NSNextResponder" ref="187320887"/>
-								<int key="NSvFlags">256</int>
-								<string key="NSFrame">{{159, 28}, {155, 38}}</string>
+								<string key="NSFrame">{{83, 28}, {154, 38}}</string>
 								<reference key="NSSuperview" ref="187320887"/>
 								<reference key="NSWindow"/>
 								<reference key="NSNextKeyView"/>
@@ -70,7 +53,7 @@
 								<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
 								<object class="NSCustomResource" key="IBUIImage">
 									<string key="NSClassName">NSImage</string>
-									<string key="NSResourceName">login_QQ.png</string>
+									<string key="NSResourceName">login_weibo.png</string>
 								</object>
 							</object>
 						</array>
@@ -117,14 +100,6 @@
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBCocoaTouchOutletConnection" key="connection">
-						<string key="label">loginWithQQ</string>
-						<reference key="source" ref="372490531"/>
-						<reference key="destination" ref="629535121"/>
-					</object>
-					<int key="connectionID">32</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBCocoaTouchOutletConnection" key="connection">
 						<string key="label">loginView</string>
 						<reference key="source" ref="372490531"/>
 						<reference key="destination" ref="187320887"/>
@@ -164,18 +139,12 @@
 						<reference key="object" ref="187320887"/>
 						<array class="NSMutableArray" key="children">
 							<reference ref="125885150"/>
-							<reference ref="629535121"/>
 						</array>
 						<reference key="parent" ref="191373211"/>
 					</object>
 					<object class="IBObjectRecord">
 						<int key="objectID">29</int>
 						<reference key="object" ref="125885150"/>
-						<reference key="parent" ref="187320887"/>
-					</object>
-					<object class="IBObjectRecord">
-						<int key="objectID">30</int>
-						<reference key="object" ref="629535121"/>
 						<reference key="parent" ref="187320887"/>
 					</object>
 				</array>
@@ -187,7 +156,6 @@
 				<string key="-2.IBPluginDependency">com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 				<string key="1.IBPluginDependency">com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 				<string key="29.IBPluginDependency">com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
-				<string key="30.IBPluginDependency">com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 				<string key="6.CustomClassName">UIImageView</string>
 				<string key="6.IBPluginDependency">com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 			</dictionary>
@@ -202,25 +170,17 @@
 				<object class="IBPartialClassDescription">
 					<string key="className">MealListViewController</string>
 					<string key="superclassName">TTTableViewController</string>
-					<dictionary class="NSMutableDictionary" key="actions">
-						<string key="loginWithQQ:">id</string>
-						<string key="loginWithWeibo:">id</string>
-						<string key="register:">id</string>
-					</dictionary>
-					<dictionary class="NSMutableDictionary" key="actionInfosByName">
-						<object class="IBActionInfo" key="loginWithQQ:">
-							<string key="name">loginWithQQ:</string>
-							<string key="candidateClassName">id</string>
-						</object>
-						<object class="IBActionInfo" key="loginWithWeibo:">
+					<object class="NSMutableDictionary" key="actions">
+						<string key="NS.key.0">loginWithWeibo:</string>
+						<string key="NS.object.0">id</string>
+					</object>
+					<object class="NSMutableDictionary" key="actionInfosByName">
+						<string key="NS.key.0">loginWithWeibo:</string>
+						<object class="IBActionInfo" key="NS.object.0">
 							<string key="name">loginWithWeibo:</string>
 							<string key="candidateClassName">id</string>
 						</object>
-						<object class="IBActionInfo" key="register:">
-							<string key="name">register:</string>
-							<string key="candidateClassName">id</string>
-						</object>
-					</dictionary>
+					</object>
 					<dictionary class="NSMutableDictionary" key="outlets">
 						<string key="loginButton">UIButton</string>
 						<string key="loginView">UIImageView</string>
@@ -316,10 +276,10 @@
 		</object>
 		<bool key="IBDocument.PluginDeclaredDependenciesTrackSystemTargetVersion">YES</bool>
 		<int key="IBDocument.defaultPropertyAccessControl">3</int>
-		<dictionary class="NSMutableDictionary" key="IBDocument.LastKnownImageSizes">
-			<string key="login_QQ.png">{155, 38}</string>
-			<string key="login_weibo.png">{154, 38}</string>
-		</dictionary>
+		<object class="NSMutableDictionary" key="IBDocument.LastKnownImageSizes">
+			<string key="NS.key.0">login_weibo.png</string>
+			<string key="NS.object.0">{154, 38}</string>
+		</object>
 		<string key="IBCocoaTouchPluginVersion">2083</string>
 	</data>
 </archive>

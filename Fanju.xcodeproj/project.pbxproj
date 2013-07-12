@@ -765,9 +765,9 @@
 		B04C266516E2070000E86C7A /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		B04C266716E2070000E86C7A /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		B04C266916E2070000E86C7A /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
-		B04C266D16E2070000E86C7A /* 饭聚-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = file.bplist; path = "饭聚-Info.plist"; sourceTree = "<group>"; };
+		B04C266D16E2070000E86C7A /* Fanju-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = file.bplist; path = "Fanju-Info.plist"; sourceTree = "<group>"; };
 		B04C266F16E2070000E86C7A /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		B04C267316E2070100E86C7A /* 饭聚-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "饭聚-Prefix.pch"; sourceTree = "<group>"; };
+		B04C267316E2070100E86C7A /* Fanju-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Fanju-Prefix.pch"; sourceTree = "<group>"; };
 		B04C267716E2070100E86C7A /* Default.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Default.png; sourceTree = "<group>"; };
 		B04C267916E2070100E86C7A /* Default@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default@2x.png"; sourceTree = "<group>"; };
 		B04C267B16E2070100E86C7A /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
@@ -1702,9 +1702,9 @@
 		B04C266C16E2070000E86C7A /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
-				B04C266D16E2070000E86C7A /* 饭聚-Info.plist */,
+				B04C266D16E2070000E86C7A /* Fanju-Info.plist */,
 				B04C266E16E2070000E86C7A /* InfoPlist.strings */,
-				B04C267316E2070100E86C7A /* 饭聚-Prefix.pch */,
+				B04C267316E2070100E86C7A /* Fanju-Prefix.pch */,
 				B04C267716E2070100E86C7A /* Default.png */,
 				B04C267916E2070100E86C7A /* Default@2x.png */,
 				B04C267B16E2070100E86C7A /* Default-568h@2x.png */,
@@ -3013,7 +3013,7 @@
 				LastUpgradeCheck = 0460;
 				ORGANIZATIONNAME = Wayne;
 			};
-			buildConfigurationList = B04C265D16E2070000E86C7A /* Build configuration list for PBXProject "饭聚" */;
+			buildConfigurationList = B04C265D16E2070000E86C7A /* Build configuration list for PBXProject "Fanju" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
@@ -3725,7 +3725,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 1.0.20;
+				CURRENT_PROJECT_VERSION = 1.0.21;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -3763,7 +3763,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = YES;
-				CURRENT_PROJECT_VERSION = 1.0.20;
+				CURRENT_PROJECT_VERSION = 1.0.21;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
@@ -3787,9 +3787,9 @@
 				CODE_SIGN_IDENTITY = "iPhone Distribution";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "Fanju/饭聚-Prefix.pch";
+				GCC_PREFIX_HEADER = "Fanju/Fanju-Prefix.pch";
 				HEADER_SEARCH_PATHS = "${PODS_HEADERS_SEARCH_PATHS}";
-				INFOPLIST_FILE = "Fanju/饭聚-Info.plist";
+				INFOPLIST_FILE = "Fanju/Fanju-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
@@ -3836,9 +3836,9 @@
 				CODE_SIGN_IDENTITY = "iPhone Distribution";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "Fanju/饭聚-Prefix.pch";
+				GCC_PREFIX_HEADER = "Fanju/Fanju-Prefix.pch";
 				HEADER_SEARCH_PATHS = "${PODS_HEADERS_SEARCH_PATHS}";
-				INFOPLIST_FILE = "Fanju/饭聚-Info.plist";
+				INFOPLIST_FILE = "Fanju/Fanju-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
@@ -3881,7 +3881,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		B04C265D16E2070000E86C7A /* Build configuration list for PBXProject "饭聚" */ = {
+		B04C265D16E2070000E86C7A /* Build configuration list for PBXProject "Fanju" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				B04C267D16E2070100E86C7A /* Debug */,

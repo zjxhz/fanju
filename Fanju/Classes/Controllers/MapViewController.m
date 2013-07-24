@@ -27,8 +27,8 @@
     self.myMapView = [[MKMapView alloc] initWithFrame:self.view.bounds]; 
     self.myMapView.delegate=self; 
     [self.view addSubview:self.myMapView];
-    [NSThread detachNewThreadSelector:@selector(displayMap) toTarget:self withObject:nil]; 
 }
+
 
 -(id)initWithTitle:(NSString*)title {   
     if (self = [super init]) {
@@ -45,24 +45,23 @@
     UIBarButtonItem* item = self.navigationItem.rightBarButtonItem;
     UIButton* rightButton = (UIButton*)item.customView;
     [rightButton addTarget:self action:@selector(launchRoute) forControlEvents:UIControlEventTouchUpInside];
+    [self displayMap];
 }
 
 -(void)displayMap
 {
-    @autoreleasepool {
-        MKCoordinateRegion region; 
-        MKCoordinateSpan span; 
-        span.latitudeDelta=0.1;
-        span.longitudeDelta=0.1; 
+    MKCoordinateRegion region;
+    MKCoordinateSpan span; 
+    span.latitudeDelta=0.1;
+    span.longitudeDelta=0.1; 
 
-        region.span=span; 
-        region.center=[self coordinate];
-        
-        [self.myMapView setRegion:region animated:TRUE]; 
-        [self.myMapView regionThatFits:region];
-        Location* annotation = [[Location alloc] initWithName:_restaurant.name address:_restaurant.address coordinate:[self coordinate]];
-        [self.myMapView addAnnotation:annotation];
-    }
+    region.span=span; 
+    region.center=[self coordinate];
+    
+    [self.myMapView setRegion:region animated:TRUE]; 
+    [self.myMapView regionThatFits:region];
+    Location* annotation = [[Location alloc] initWithName:_restaurant.name address:_restaurant.address coordinate:[self coordinate]];
+    [self.myMapView addAnnotation:annotation];
 }
 
 -(CLLocationCoordinate2D)coordinate{

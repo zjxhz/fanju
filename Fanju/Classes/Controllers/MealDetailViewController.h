@@ -23,6 +23,7 @@
 #import "OrderInfo.h"
 #import "MenuViewController.h"
 #import "Meal.h"
+#import "SendCommentViewController.h"
 
 #define MAP_HEIGHT 175
 #define TAB_BAR_HEIGHT 49
@@ -41,7 +42,7 @@
 #define MAP_WIDTH 290
 #define DETAILS_VIEW_HEIGHT 250
 
-@interface MealDetailViewController : TTTableViewController <MKMapViewDelegate, ShareToDelegate, SinaWeiboDelegate, WBSendViewDelegate, UserImageViewDelegate>{
+@interface MealDetailViewController : TTTableViewController <MKMapViewDelegate, ShareToDelegate, SinaWeiboDelegate, WBSendViewDelegate, UserImageViewDelegate, SendCommentDelegate>{
     UIView *_detailsView;
     UIButton* _mapButton;
     UILabel *_introduction;
@@ -57,9 +58,10 @@
     SinaWeibo *_wb;
     ClosablePopoverViewController *_cpc;
 }
-@property(nonatomic, strong) NSString* mealID;
+@property (nonatomic, strong) NSString* mealID;
 @property (nonatomic, strong) Meal *meal;
 @property (nonatomic, readonly)  UIView* tabBar;
 @property (nonatomic, strong) Order* unfinishedOrder;
+@property (nonatomic, strong) MealComment* scrollToComment;
 
 @end

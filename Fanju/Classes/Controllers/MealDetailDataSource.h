@@ -8,9 +8,13 @@
 
 #import <Three20/Three20.h>
 #import "Meal.h"
+#import "MealComment.h"
+#import "MealCommentTableItem.h"
+#import "MealDetailViewController.h"
 
 @interface MealDetailDataSource : TTTableViewDataSource
 @property(nonatomic, strong) Meal* meal;
-@property(nonatomic, weak) UIViewController* controller;
+@property(nonatomic, weak) MealDetailViewController* controller;
+@property(nonatomic, strong) NSMutableArray* comments;
 -(void)tableView:(UITableView*)tableView contentOffsetDidChange:(CGFloat)offset;
 @end

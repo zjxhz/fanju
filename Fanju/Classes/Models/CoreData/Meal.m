@@ -2,7 +2,7 @@
 //  Meal.m
 //  Fanju
 //
-//  Created by Xu Huanze on 5/30/13.
+//  Created by Xu Huanze on 7/23/13.
 //  Copyright (c) 2013 Wayne. All rights reserved.
 //
 
@@ -22,7 +22,8 @@
 @dynamic startDate;
 @dynamic startTime;
 @dynamic topic;
-@dynamic restaurant;
+@dynamic comments;
 @dynamic orders;
+@dynamic restaurant;
 
 @end

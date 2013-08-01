@@ -32,7 +32,8 @@
 #import "UserDetailsViewController.h"
 #import "LoadMoreTableItem.h"
 #import "LoadMoreTableItemCell.h"
-
+#import "MealCommentNotification.h"
+#import "MealCommentEventCell.h"
 #define FETCH_LIMIT 20
 
 @interface NotificationViewController (){
@@ -164,7 +165,8 @@
         return 50;
     }
     Notification* notification = [_notifications objectAtIndex:indexPath.row];
-    if ([notification isKindOfClass:[PhotoNotification class]] || [notification isKindOfClass:[MealNotification class]]) {
+    if ([notification isKindOfClass:[PhotoNotification class]] || [notification isKindOfClass:[MealNotification class]]
+        || [notification isKindOfClass:[MealCommentNotification class]]) {
         return 80;
     }
     return 61;
@@ -204,6 +206,17 @@
         photoEventCell.clipsToBounds = YES;
         float degrees = 30; //the value in degrees
         photoEventCell.photo.transform = CGAffineTransformMakeRotation(degrees * M_PI/180.0);
+    } else if([notification isKindOfClass:[MealCommentNotification class]]){
+        NSString* CellIdentifier = @"MealCommentEventCell";
+        cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
+        if (!cell) {
+            UIViewController* temp = [[UIViewController alloc] initWithNibName:@"MealCommentEventCell" bundle:nil];
+            cell = (UITableViewCell*)temp.view;
+        }
+        MealCommentEventCell* mealCommentEventCell = (MealCommentEventCell*)cell;
+        MealCommentNotification* mcn = (MealCommentNotification*)notification;
+        mealCommentEventCell.comment.text = mcn.comment.comment;
+        [mealCommentEventCell.mealImage setPathToNetworkImage:[URLService absoluteURL:mcn.comment.meal.photoURL] forDisplaySize:mealCommentEventCell.mealImage.frame.size contentMode:UIViewContentModeScaleAspectFill];
     } else if([notification isKindOfClass:[Notification class]]) {
         NSString* CellIdentifier = @"SimpleUserEventCell";
         cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
@@ -275,6 +288,12 @@
         MealDetailViewController *mealDetail = [[MealDetailViewController alloc] init];
         MealNotification* mn = notif;
         mealDetail.meal = mn.meal;
+        [self.navigationController pushViewController:mealDetail animated:YES];
+    } else if([notif isKindOfClass:[MealCommentNotification class]]){
+        MealDetailViewController *mealDetail = [[MealDetailViewController alloc] init];
+        MealCommentNotification* mcn = notif;
+        mealDetail.meal = mcn.comment.meal;
+        mealDetail.scrollToComment = mcn.comment;
         [self.navigationController pushViewController:mealDetail animated:YES];
     } else if ([notif isKindOfClass:[Notification class]]) {
         Notification* notification = notif;

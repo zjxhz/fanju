@@ -2,7 +2,7 @@
 //  Meal.h
 //  Fanju
 //
-//  Created by Xu Huanze on 5/30/13.
+//  Created by Xu Huanze on 7/23/13.
 //  Copyright (c) 2013 Wayne. All rights reserved.
 //
 
@@ -22,11 +22,17 @@
 @property (nonatomic, retain) NSString * startDate;
 @property (nonatomic, retain) NSString * startTime;
 @property (nonatomic, retain) NSString * topic;
-@property (nonatomic, retain) Restaurant *restaurant;
+@property (nonatomic, retain) NSSet *comments;
 @property (nonatomic, retain) NSSet *orders;
+@property (nonatomic, retain) Restaurant *restaurant;
 @end
 
 @interface Meal (CoreDataGeneratedAccessors)
+
+- (void)addCommentsObject:(NSManagedObject *)value;
+- (void)removeCommentsObject:(NSManagedObject *)value;
+- (void)addComments:(NSSet *)values;
+- (void)removeComments:(NSSet *)values;
 
 - (void)addOrdersObject:(Order *)value;
 - (void)removeOrdersObject:(Order *)value;

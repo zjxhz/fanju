@@ -12,30 +12,15 @@
 @implementation MealDetailsViewDelegate
 
 - (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section {
-    return section > 1 ? 20 : 0;
+    return section;
 }
 
 - (UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section{
-    if (section > 1) {
-        UIView *header = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, 20)];
-        UILabel *separator = [[UILabel alloc] initWithFrame:CGRectMake(8, 10, 300, 2)];
-        separator.backgroundColor = [UIColor colorWithRed:1 green:0x55/255.0 blue:0 alpha:1];
-        [header addSubview:separator];
-        return header;
+    if (section == 0) {
+        return nil;
     }
-    return nil;
+    UIImage* sep = [UIImage imageNamed:@"meal_detail_sep"];
+    UIImageView* view = [[UIImageView alloc] initWithImage:sep];
+    return view;
 }
-
-- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
-    int section = indexPath.section;
-    if(section == 0){
-        return 140;
-    } else if(section == 1){
-        return _detailsHeight;
-    }
-    else {
-        return 110;
-    }
-}
-
 @end

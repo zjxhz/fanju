@@ -15,6 +15,7 @@
 #import "DictHelper.h"
 #import "NewSidebarViewController.h"
 #import "UserService.h"
+#import "Crittercism.h"
 
 NSString * const EODidLoginNotification = @"EODidLoginNotification";
 NSString * const EODidLogoutNotification = @"EODidLogoutNotification";
@@ -128,6 +129,7 @@ NSString * const EODidLogoutNotification = @"EODidLogoutNotification";
 
 -(void) userDidLoginWithData:(NSDictionary*)data{
     NSString* username = data[@"username"];
+    [Crittercism setUsername:username];
     [[UserService service] fetchUser:username success:^(User *user) {
         [UserService service].loggedInUser = user;
         DDLogVerbose(@"fetched logged in user and stored to core data");

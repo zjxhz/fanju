@@ -2,7 +2,7 @@
 //  User.m
 //  Fanju
 //
-//  Created by Xu Huanze on 6/3/13.
+//  Created by Xu Huanze on 7/23/13.
 //  Copyright (c) 2013 Wayne. All rights reserved.
 //
 
@@ -27,6 +27,7 @@
 @dynamic latitude;
 @dynamic locationUpdatedAt;
 @dynamic longitude;
+@dynamic mobile;
 @dynamic motto;
 @dynamic name;
 @dynamic occupation;
@@ -35,7 +36,6 @@
 @dynamic username;
 @dynamic weiboID;
 @dynamic workFor;
-@dynamic mobile;
 @dynamic followers;
 @dynamic followings;
 @dynamic meals;

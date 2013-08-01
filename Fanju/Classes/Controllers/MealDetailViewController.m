@@ -36,7 +36,9 @@
 #import "CMPopTipView.h"
 #import "MealDetailDataSource.h"
 #import "MealDetailCell.h"
-//#import "UMSocial.h"
+#import "UserService.h"
+#import "User.h"
+
 
 @implementation MealDetailViewController{
 //    MealDetailsViewDelegate* _mealDetailsViewDelegate;
@@ -61,6 +63,43 @@
     [self initTabView];
 }
 
+-(void) loadComments{
+    RKObjectManager* manager = [RKObjectManager sharedManager];
+    NSString* path = [NSString stringWithFormat:@"mealcomment/"];
+    [manager getObjectsAtPath:path
+                   parameters:@{@"limit":@"0", @"meal":_meal.mID}
+                      success:^(RKObjectRequestOperation *operation, RKMappingResult *mappingResult) {
+                          _modelError = nil;
+                          //set meal to comment as the meal info is not included in the result message
+                          for (MealComment* comment in mappingResult.array) {
+                              comment.meal = _meal;
+                          }
+                          RKManagedObjectStore* store = [RKObjectManager sharedManager].managedObjectStore;
+                          NSManagedObjectContext* context = store.mainQueueManagedObjectContext;
+                          NSError* error;
+                          if(![context saveToPersistentStore:&error]){
+                              DDLogError(@"failed to set meal for comments: %@", error);
+                          }
+                          DDLogVerbose(@"fetched comments from %@", path);
+                          MealDetailDataSource *ds = self.dataSource;
+                          ds.comments = [NSMutableArray arrayWithArray:mappingResult.array];
+                          [self refresh];
+                          if (_scrollToComment) {
+                              NSIndexPath* indexPath = [ds tableView:self.tableView indexPathForObject:_scrollToComment];
+                              [self.tableView scrollToRowAtIndexPath:indexPath atScrollPosition:UITableViewScrollPositionBottom animated:NO];
+                              UITableViewCell* cell = [self.tableView cellForRowAtIndexPath:indexPath];
+                              UIColor* originalColor = cell.backgroundColor;
+                              cell.backgroundColor = [UIColor orangeColor];
+                              [UIView animateWithDuration:0.6 delay:0.0 options:UIViewAnimationOptionCurveEaseInOut animations:^
+                               {
+                                   cell.backgroundColor = originalColor;
+                               } completion: nil];
+                          }
+                      }
+                      failure:^(RKObjectRequestOperation *operation, NSError *error) {
+                          DDLogError(@"failed from %@: %@", path, error);
+                      }];
+}
 
 -(void)viewOrder:(id)sender{
     OrderDetailsViewController *orderVC = [[OrderDetailsViewController alloc] init];
@@ -109,7 +148,11 @@
 }
 
 -(void)commentOnMeal:(id)sender{
-    [InfoUtil showAlert:@"查看或评论请登录fanjoin.com"];
+    SendCommentViewController* vc = [[SendCommentViewController alloc] init];
+    vc.sendCommentDelegate = self;
+    vc.meal = _meal;
+    UINavigationController *nav = [[UINavigationController alloc] initWithRootViewController:vc];
+    [self presentModalViewController:nav animated:YES];
 }
 
 -(void)buildUI{
@@ -122,6 +165,7 @@
     ds.meal = _meal;
     ds.controller = self;
     self.dataSource = ds;
+    [self loadComments];
 }
 
 -(void)viewWillAppear:(BOOL)animated{
@@ -131,6 +175,7 @@
     }
     [self.tableView addObserver:self forKeyPath:@"contentOffset" options:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld context:nil];
     [super viewWillAppear:animated];
+    [TTURLRequestQueue mainQueue].suspended = NO;//no need to suspend, viewDidAppear may never be called(e.g. after dismiss a modal view) then it will be suspended forever
     
 }
 
@@ -196,28 +241,8 @@
 
 }
 
-- (UIView*) createCommentView:(MealComment*) comment{
-    int height = ((comment.from_person.username.length + comment.comment.length)  / 15 + 1) * 20;
-    UIView *commentsView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, height + 30)];
-    UIImageView* userView = [AvatarFactory avatarForUser:comment.from_person frame:CGRectMake(8, 8, 41, 41)];
-    [commentsView addSubview:userView];
-    
-    SpeechBubble* speechBubble = [[SpeechBubble alloc] initWithText:[NSString stringWithFormat:@"%@: %@",comment.from_person.name, comment.comment] font:[UIFont boldSystemFontOfSize:15] origin:CGPointMake(50, 5) pointLocation:30 width:245];
-    [commentsView addSubview:speechBubble];
-    
-    
-    UILabel *time = [[UILabel alloc] initWithFrame:CGRectMake(60, height + 20, 120, 20)];
-    time.text = [DateUtil shortStringFromDate:comment.time];
-    time.font  = [UIFont systemFontOfSize:12];
-    time.backgroundColor  =  [UIColor clearColor];
-    time.textColor = [UIColor grayColor];
-    [commentsView addSubview:time];
-    
-    return commentsView;
-}
-
 - (id<UITableViewDelegate>)createDelegate {
-    return [[TTTableViewVarHeightDelegate alloc] init];
+    return [[MealDetailsViewDelegate alloc] init];
 }
 
 - (IBAction)joinMeal:(id)sender {
@@ -227,9 +252,9 @@
 }
 
 - (void) onShareClicked:(id)sender{
-    MealDetailCell* detailsCell = (MealDetailCell*)[self.tableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:0]];
-    UIImage* image = detailsCell.mealImageView.image;
-    NSString *defaultMessage = [NSString stringWithFormat:@"一个有趣的饭局：%@ http://%@/meal/%@/", _meal.topic, EOHOST, _meal.mID];
+//    MealDetailCell* detailsCell = (MealDetailCell*)[self.tableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:0]];
+//    UIImage* image = detailsCell.mealImageView.image;
+//    NSString *defaultMessage = [NSString stringWithFormat:@"一个有趣的饭局：%@ http://%@/meal/%@/", _meal.topic, EOHOST, _meal.mID];
     
 //    [UMSocialSnsService presentSnsIconSheetView:self
 //                                         appKey:UM_SOCIAL_APP_KEY
@@ -238,7 +263,7 @@
 //                                shareToSnsNames:[NSArray arrayWithObjects:UMShareToSina,UMShareToTencent,UMShareToRenren,nil]
 //                                       delegate:nil];
     
-//    [self shareToSinaWeibo];
+    [self shareToSinaWeibo];
 //    if (_shareContentViewController == nil) {
 //        _shareContentViewController = [[ShareTableViewController alloc] initWithStyle:UITableViewStylePlain];
 //        _shareContentViewController.delegate = self;
@@ -325,6 +350,23 @@
     
 }
 
+#pragma mark SendCommentDelegate
+-(void)didSendComment:(MealComment*)comment{
+    MealDetailDataSource* ds = self.dataSource;
+    if (!ds.comments) {
+        ds.comments = [NSMutableArray array];
+    }
+    [ds.comments addObject:comment];
+    [self refresh];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        NSIndexPath* lastRow = [NSIndexPath indexPathForRow:[self.tableView numberOfRowsInSection:1] - 1 inSection:1];
+        [self.tableView scrollToRowAtIndexPath:lastRow atScrollPosition:UITableViewScrollPositionBottom animated:YES];
+    });
+}
+
+-(void)didFailSendComment{
+    DDLogError(@"FAILED TO SEND COMMENT");
+}
 
 @end
 

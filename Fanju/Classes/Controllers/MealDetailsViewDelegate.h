@@ -9,7 +9,4 @@
 #import <Three20UI/Three20UI.h>
 
 @interface MealDetailsViewDelegate : TTTableViewVarHeightDelegate
-@property(nonatomic) BOOL mapHidden;
-@property(nonatomic) NSInteger numberOfParticipantsExcludingHost;
-@property(nonatomic) CGFloat detailsHeight;
 @end

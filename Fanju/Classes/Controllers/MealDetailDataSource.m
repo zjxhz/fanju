@@ -8,6 +8,8 @@
 
 #import "MealDetailDataSource.h"
 #import "MealDetailCell.h"
+#import "MealCommentCell.h"
+
 
 @implementation MealDetailDataSource{
     BOOL cellHeightCalculated;
@@ -16,16 +18,25 @@
 - (Class)tableView:(UITableView*)tableView cellClassForObject:(id)object{
     if ([object isKindOfClass:[Meal class]]) {
         return [MealDetailCell class];
+    } else if([object isKindOfClass:[MealComment class]]){
+        return [MealCommentCell class];
     }
-    return nil;
+    return [super tableView:tableView cellClassForObject:object];
 }
 
 -(NSInteger)numberOfSectionsInTableView:(UITableView *)tableView{
-    return 1;
+    return 2;
 }
 
 -(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
-    return 1;
+    if (section == 0) {
+        return 1;
+    }
+    if (_comments.count > 0) {
+        return _comments.count;
+    } else {
+        return 1; //loading comments or no commets
+    }
 }
 
 - (id)tableView:(UITableView*)tableView objectForRowAtIndexPath:(NSIndexPath*)indexPath {
@@ -33,6 +44,13 @@
         if (indexPath.row == 0) {
             return _meal;
         }
+    } else if(indexPath.section == 1) {
+        if (!_comments) {
+            return [TTTableActivityItem itemWithText:@"加载中……"];
+        } else if(_comments.count == 0){
+            return [TTTableTextItem itemWithText:@"还没有评论"];
+        }
+        return _comments[indexPath.row];
     }
     return nil;
 }
@@ -47,6 +65,10 @@
         [tableView reloadData];
         cellHeightCalculated = YES;
     }
+    if ([cell isKindOfClass:[MealCommentCell class]]) {
+        MealCommentCell* commentCell = (MealCommentCell*)cell;
+        commentCell.parentController = _controller;
+    }
 }
 
 -(void)tableView:(UITableView*)tableView contentOffsetDidChange:(CGFloat)offset{
@@ -57,5 +79,19 @@
             break;
         }
     }
+}
+
+- (NSIndexPath*)tableView:(UITableView*)tableView indexPathForObject:(id)object{
+    if ([object isKindOfClass:[MealComment class]]) {
+        NSInteger objectIndex = [_comments indexOfObject:object];
+        if (objectIndex != NSNotFound) {
+            return [NSIndexPath indexPathForRow:objectIndex inSection:1];
+        }
+    }
+    if ([object isKindOfClass:[Meal class]]) {
+        return [NSIndexPath indexPathForRow:0 inSection:0];
+    }
+    return [NSIndexPath indexPathForRow:0 inSection:1];
+    
 }
 @end

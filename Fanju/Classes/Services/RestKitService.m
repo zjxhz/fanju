@@ -84,12 +84,13 @@
      @"work_for":@"workFor",
      @"updated_at": @"locationUpdatedAt",
      @"background_image":@"backgroundImage",
+     @"big_avatar":@"avatar",
      }];
     [userMapping addAttributeMappingsFromArray:@[@"birthday",@"mobile"]];
     [RKObjectMapping addDefaultDateFormatterForString:LONG_TIME_FORMAT_STR inTimeZone:[NSTimeZone defaultTimeZone]];
     [RKObjectMapping addDefaultDateFormatterForString:SHORT_TIME_FORMAT_STR inTimeZone:[NSTimeZone defaultTimeZone]];
     
-    [userMapping addAttributeMappingsFromArray:@[@"avatar", @"college", @"name", @"tel", @"email",
+    [userMapping addAttributeMappingsFromArray:@[@"college", @"name", @"tel", @"email",
      @"gender", @"industry", @"motto", @"occupation", @"username"]];
     [userMapping addRelationshipMappingWithSourceKeyPath:@"photos" mapping:photoMapping];
     [userMapping addRelationshipMappingWithSourceKeyPath:@"tags" mapping:tagMapping];

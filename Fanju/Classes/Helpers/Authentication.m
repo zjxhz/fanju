@@ -132,6 +132,8 @@ NSString * const EODidLogoutNotification = @"EODidLogoutNotification";
     [Crittercism setUsername:username];
     [[UserService service] fetchUser:username success:^(User *user) {
         [UserService service].loggedInUser = user;
+        [Crittercism setValue:user.name forKey:@"name"];
+        [Crittercism setValue:[NSString stringWithFormat:@"%@", user.uID] forKey:@"user_id"];
         DDLogVerbose(@"fetched logged in user and stored to core data");
         [[RelationshipService service]fetchFollowingsForUser:user];
         _currentUser = [UserProfile profileWithData:data];

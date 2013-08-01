@@ -81,27 +81,17 @@ const NSInteger MOST_POPULAR_TAG_COUNT = 5;
 }
 
 -(void)goBack{
-//    BOOL changeFound = NO;
-//    NSMutableArray* selectedTags = [NSMutableArray array];
-//    for (TagSelectionItem* item in [self selectedTags]) {
-//        if ([item isSaved]) {
-//            [selectedTags addObject:item.tag];
-//        } else {
-//            changeFound = YES;
-//            break;
-//        }
-//    }
-    NSSet* selectedTagSet = [[NSSet alloc] initWithArray:[self selectedTags]];
-    if (![_user.tags isEqual:selectedTagSet]) {
-        UIAlertView* alert = [[UIAlertView alloc] initWithTitle:nil message:@"兴趣爱好已经修改，是否保存" delegate:self cancelButtonTitle:@"不保存" otherButtonTitles:@"保存", nil];
-        [alert show];
-        return;
-    } else {
-        [self.navigationController popViewControllerAnimated:YES];
+    if ([self.dataSource isKindOfClass:[TTSectionedDataSource class]]) {//NO if tags not loaded
+        NSSet* selectedTagSet = [[NSSet alloc] initWithArray:[self selectedTags]];
+        if (![_user.tags isEqual:selectedTagSet]) {
+            UIAlertView* alert = [[UIAlertView alloc] initWithTitle:nil message:@"兴趣爱好已经修改，是否保存" delegate:self cancelButtonTitle:@"不保存" otherButtonTitles:@"保存", nil];
+            [alert show];
+            return;
+        }
     }
+    [self.navigationController popViewControllerAnimated:YES];
 }
 -(void)loadTags{
-//    _selectedTags = [[[_user tags] allObjects] mutableCopy];
     RKObjectManager* manager = [RKObjectManager sharedManager];
     [manager getObjectsAtPath:@"usertag/" parameters:@{@"limit":@"0"} success:^(RKObjectRequestOperation *operation, RKMappingResult *mappingResult) {
         _tags = [mappingResult.array mutableCopy];
@@ -110,12 +100,6 @@ const NSInteger MOST_POPULAR_TAG_COUNT = 5;
         NSArray* items = @[[self tagsOfSection:0], [self tagsOfSection:1]];
         NSArray* sections = @[@"最热门", @"其它"];
         TagSelectionDataSource *ds =  [[TagSelectionDataSource alloc] initWithItems:items sections:sections];
-        
-//        _loadMore = [[LoadMoreTableItem alloc] initWithResult:obj fromBaseURL:baseURL];
-//        if ([_loadMore hasMore]) {
-//            NSMutableArray* items1 = [ds.items objectAtIndex:1];
-//            [items1 addObject:_loadMore];
-//        }
         self.dataSource = ds;
     } failure:^(RKObjectRequestOperation *operation, NSError *error) {
         DDLogError(@"failed to fetch user tags.");
@@ -123,47 +107,6 @@ const NSInteger MOST_POPULAR_TAG_COUNT = 5;
     }];
 }
 
-//-(void) loadMoreTags{
-//    if (![_loadMore hasMore]) {
-//        return;
-//    }
-//    [[NetworkHandler getHandler] requestFromURL:[_loadMore nextPageURL]
-//                                         method:GET
-//                                    cachePolicy:TTURLRequestCachePolicyNetwork
-//                                        success:^(id obj) {
-//                                            //load data
-//                                            NSDictionary* result = obj;
-//                                            NSArray *tags = [obj objectForKeyInObjects];
-//                                            TagSelectionDataSource *ds = self.dataSource;
-//                                            NSMutableArray * indexPaths = [NSMutableArray array];
-//                                            if (tags && [tags count] > 0) {
-//                                                for (NSDictionary *dict in tags) {
-//                                                    UserTag* tag = [[UserTag alloc] initWithData:dict];
-//                                                    [_tags addObject:tag];
-//                                                    _autoComplete.tags = _tags;
-//                                                    NSMutableArray* items1 = [ds.items objectAtIndex:1];
-//                                                    [items1 insertObject:tag atIndex:items1.count - 1];
-//                                                    NSIndexPath *indexPath = [NSIndexPath indexPathForRow:items1.count - 1 inSection:1];
-//                                                    [indexPaths addObject:indexPath];
-//                                                }
-//                                            }
-//                                            [self.tableView insertRowsAtIndexPaths:indexPaths withRowAnimation:UITableViewRowAnimationTop];
-//                                            
-//                                            //update load more text and decide if it should be removed
-//                                            _loadMore.loading = NO;
-//                                            _loadMore.offset = [result offset];
-//                                            if (![_loadMore hasMore])  {
-//                                                NSMutableArray* items1 = [ds.items objectAtIndex:1];
-//                                                [items1 removeLastObject];
-//                                                NSArray *rowToDelete = [NSArray arrayWithObject:[NSIndexPath indexPathForRow:(items1.count - 1) inSection:1]];
-//                                                [self.tableView  deleteRowsAtIndexPaths:rowToDelete withRowAnimation:UITableViewRowAnimationAutomatic];
-//                                            }
-//                                            [self.tableView reloadData];
-//                                        } failure:^{
-//                                            DDLogError(@"failed to load more followings");
-//                                        }];
-//}
-//
 -(NSArray*)tagsOfSection:(NSUInteger)section{
     if (section == 0) {
         NSMutableArray* items0 = [NSMutableArray arrayWithCapacity:5];

@@ -86,14 +86,18 @@
                           [self refresh];
                           if (_scrollToComment) {
                               NSIndexPath* indexPath = [ds tableView:self.tableView indexPathForObject:_scrollToComment];
-                              [self.tableView scrollToRowAtIndexPath:indexPath atScrollPosition:UITableViewScrollPositionBottom animated:NO];
-                              UITableViewCell* cell = [self.tableView cellForRowAtIndexPath:indexPath];
-                              UIColor* originalColor = cell.backgroundColor;
-                              cell.backgroundColor = [UIColor orangeColor];
-                              [UIView animateWithDuration:0.6 delay:0.0 options:UIViewAnimationOptionCurveEaseInOut animations:^
-                               {
-                                   cell.backgroundColor = originalColor;
-                               } completion: nil];
+                              if (indexPath) { //comments can be deleted or not approved
+                                  [self.tableView scrollToRowAtIndexPath:indexPath atScrollPosition:UITableViewScrollPositionBottom animated:NO];
+                                  UITableViewCell* cell = [self.tableView cellForRowAtIndexPath:indexPath];
+                                  UIColor* originalColor = cell.backgroundColor;
+                                  cell.backgroundColor = [UIColor orangeColor];
+                                  [UIView animateWithDuration:0.6 delay:0.0 options:UIViewAnimationOptionCurveEaseInOut animations:^
+                                   {
+                                       cell.backgroundColor = originalColor;
+                                   } completion: nil];
+                              } else {
+                                  [SVProgressHUD showSuccessWithStatus:@"评论已删除"];
+                              }
                           }
                       }
                       failure:^(RKObjectRequestOperation *operation, NSError *error) {

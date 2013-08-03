@@ -42,7 +42,7 @@
 #define MAP_WIDTH 290
 #define DETAILS_VIEW_HEIGHT 250
 
-@interface MealDetailViewController : TTTableViewController <MKMapViewDelegate, ShareToDelegate, SinaWeiboDelegate, WBSendViewDelegate, UserImageViewDelegate, SendCommentDelegate>{
+@interface MealDetailViewController : TTTableViewController <MKMapViewDelegate, ShareToDelegate, SinaWeiboDelegate, WBSendViewDelegate, UserImageViewDelegate, SendCommentDelegate, UIActionSheetDelegate>{
     UIView *_detailsView;
     UIButton* _mapButton;
     UILabel *_introduction;

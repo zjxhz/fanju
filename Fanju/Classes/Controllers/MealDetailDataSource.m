@@ -86,6 +86,8 @@
         NSInteger objectIndex = [_comments indexOfObject:object];
         if (objectIndex != NSNotFound) {
             return [NSIndexPath indexPathForRow:objectIndex inSection:1];
+        } else {
+            return nil;
         }
     }
     if ([object isKindOfClass:[Meal class]]) {

@@ -84,21 +84,23 @@
                           MealDetailDataSource *ds = self.dataSource;
                           ds.comments = [NSMutableArray arrayWithArray:mappingResult.array];
                           [self refresh];
-                          if (_scrollToComment) {
-                              NSIndexPath* indexPath = [ds tableView:self.tableView indexPathForObject:_scrollToComment];
-                              if (indexPath) { //comments can be deleted or not approved
-                                  [self.tableView scrollToRowAtIndexPath:indexPath atScrollPosition:UITableViewScrollPositionBottom animated:NO];
-                                  UITableViewCell* cell = [self.tableView cellForRowAtIndexPath:indexPath];
-                                  UIColor* originalColor = cell.backgroundColor;
-                                  cell.backgroundColor = [UIColor orangeColor];
-                                  [UIView animateWithDuration:0.6 delay:0.0 options:UIViewAnimationOptionCurveEaseInOut animations:^
-                                   {
-                                       cell.backgroundColor = originalColor;
-                                   } completion: nil];
-                              } else {
-                                  [SVProgressHUD showSuccessWithStatus:@"评论已删除"];
+                          dispatch_async(dispatch_get_main_queue(), ^{
+                              if (_scrollToComment) {
+                                  NSIndexPath* indexPath = [ds tableView:self.tableView indexPathForObject:_scrollToComment];
+                                  if (indexPath) { //comments can be deleted or not approved
+                                      [self.tableView scrollToRowAtIndexPath:indexPath atScrollPosition:UITableViewScrollPositionBottom animated:NO];
+                                      UITableViewCell* cell = [self.tableView cellForRowAtIndexPath:indexPath];
+                                      UIColor* originalColor = cell.backgroundColor;
+                                      cell.backgroundColor = [UIColor orangeColor];
+                                      [UIView animateWithDuration:0.6 delay:0.0 options:UIViewAnimationOptionCurveEaseInOut animations:^
+                                       {
+                                           cell.backgroundColor = originalColor;
+                                       } completion: nil];
+                                  } else {
+                                      [InfoUtil showAlert:@"评论已经被用户删除"];
+                                  }
                               }
-                          }
+                          });
                       }
                       failure:^(RKObjectRequestOperation *operation, NSError *error) {
                           DDLogError(@"failed from %@: %@", path, error);
@@ -256,24 +258,12 @@
 }
 
 - (void) onShareClicked:(id)sender{
-//    MealDetailCell* detailsCell = (MealDetailCell*)[self.tableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:0]];
-//    UIImage* image = detailsCell.mealImageView.image;
-//    NSString *defaultMessage = [NSString stringWithFormat:@"一个有趣的饭局：%@ http://%@/meal/%@/", _meal.topic, EOHOST, _meal.mID];
-    
-//    [UMSocialSnsService presentSnsIconSheetView:self
-//                                         appKey:UM_SOCIAL_APP_KEY
-//                                      shareText:defaultMessage
-//                                     shareImage:image
-//                                shareToSnsNames:[NSArray arrayWithObjects:UMShareToSina,UMShareToTencent,UMShareToRenren,nil]
-//                                       delegate:nil];
-    
-    [self shareToSinaWeibo];
-//    if (_shareContentViewController == nil) {
-//        _shareContentViewController = [[ShareTableViewController alloc] initWithStyle:UITableViewStylePlain];
-//        _shareContentViewController.delegate = self;
-//        _sharePopOver = [[WEPopoverController alloc] initWithContentViewController:_shareContentViewController];
-//    }
-//    [_sharePopOver presentPopoverFromBarButtonItem:self.navigationItem.rightBarButtonItem permittedArrowDirections:UIPopoverArrowDirectionUp animated:YES];
+//    ShareTableViewController* vc = [[ShareTableViewController alloc] init];
+//    vc.delegate = self;
+//    UINavigationController *nav = [[UINavigationController alloc] initWithRootViewController:vc];
+//    [self presentModalViewController:nav animated:YES];
+    UIActionSheet* action = [[UIActionSheet alloc] initWithTitle:@"分享到" delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"新浪微博",@"微信好友",@"微信朋友圈", nil];
+    [action showFromBarButtonItem:self.navigationItem.rightBarButtonItem animated:YES];
 }
 
 - (SinaWeibo *)sinaweibo{
@@ -291,6 +281,34 @@
     } else {
         [self sendWeiBo];
     }
+}
+
+-(void) shareToWeixinContact{
+    [self shareToWeixin:WXSceneSession];
+}
+-(void) shareToWeixinTimeline{
+    [self shareToWeixin:WXSceneTimeline];
+}
+
+-(void)shareToWeixin:(int)scene{
+    DDLogInfo(@"max weixin api version: %@, installed: %d, support api: %d",[WXApi getWXAppSupportMaxApiVersion], [WXApi isWXAppInstalled], [WXApi isWXAppSupportApi]);
+    
+    WXMediaMessage *message = [WXMediaMessage message];
+    message.title = [NSString stringWithFormat:@"分享一个饭局：%@", _meal.topic];
+    message.description = _meal.introduction;
+    MealDetailCell* detailsCell = (MealDetailCell*)[self.tableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:0]];
+    [message setThumbImage:detailsCell.mealImageView.image];
+    
+    WXWebpageObject *ext = [WXWebpageObject object];
+    ext.webpageUrl = [URLService absoluteURL:[NSString stringWithFormat:@"/meal/%@/", _meal.mID]];
+    message.mediaObject = ext;
+    
+    SendMessageToWXReq* req = [[SendMessageToWXReq alloc] init];
+    req.bText = NO;
+    req.message = message;
+    req.scene = scene;
+    
+    [WXApi sendReq:req];
 }
 
 -(void) sendWeiBo{
@@ -370,6 +388,23 @@
 
 -(void)didFailSendComment{
     DDLogError(@"FAILED TO SEND COMMENT");
+}
+
+#pragma mark UIActionSheetDelegate
+- (void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex{
+    switch (buttonIndex) {
+        case 0:
+            [self shareToSinaWeibo];
+            break;
+        case 1:
+            [self shareToWeixinContact];
+            break;
+        case 2:
+            [self shareToWeixinTimeline];
+            break;
+        default:
+            break;
+    }
 }
 
 @end

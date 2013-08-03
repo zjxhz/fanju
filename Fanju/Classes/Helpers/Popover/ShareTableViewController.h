@@ -10,6 +10,8 @@
 @protocol ShareToDelegate<NSObject>
 @optional
 -(void) shareToSinaWeibo;
+-(void) shareToWeixinContact;
+-(void) shareToWeixinTimeline;
 @end
 
 

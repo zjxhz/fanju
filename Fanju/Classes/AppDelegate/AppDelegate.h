@@ -8,9 +8,10 @@
 
 #import <UIKit/UIKit.h>
 #import "SinaWeibo.h"
+#import "WXApi.h"
 @class ViewController;
 
-@interface AppDelegate : UIResponder <UIApplicationDelegate>
+@interface AppDelegate : UIResponder <UIApplicationDelegate, WXApiDelegate>
 
 @property (strong, nonatomic) IBOutlet UIWindow *window;
 @property (strong, nonatomic) UIImage *bgImage;

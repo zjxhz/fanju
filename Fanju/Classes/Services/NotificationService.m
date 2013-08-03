@@ -219,7 +219,7 @@ NSString * const UnreadNotificationCount = @"UnreadNotificationCount";
 }
 
 -(BOOL)isMealCommentNotification:(XMPPMessage*)message{
-    return [self regularStringInNode:@"/meal/\\d/comments" message:message] || [self regularStringInNode:@"/user/\\d+/comments/reply" message:message];
+    return [self regularStringInNode:@"/meal/\\d+/comments" message:message] || [self regularStringInNode:@"/user/\\d+/comments/reply" message:message];
 }
 
 -(BOOL)regularStringInNode:(NSString*)re message:(XMPPMessage*)message{

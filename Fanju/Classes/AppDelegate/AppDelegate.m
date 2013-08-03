@@ -33,6 +33,7 @@
 #import "DateUtil.h"
 #import "FJLoggerFormatter.h"
 #import "UINavigationController+MFSideMenu.h"
+#import "WXApi.h"
 
 @interface AppDelegate() {
     UINavigationController* _navigationController;
@@ -82,7 +83,10 @@
     if([[[NSBundle mainBundle] objectForInfoDictionaryKey:@"AutoSendCrashReport"] boolValue]){
         [Crittercism enableWithAppID:@"50ac205641ae503e5c000004"];
     }
-
+    
+    if (![WXApi registerApp:WEIXIN_APP_KEY]) {//@"wxd930ea5d5a258f4f"];
+        DDLogError(@"failed to register app to weixin");
+    }
     [self initSinaweibo];
     self.window.rootViewController = _navigationController;
     [_navigationController.view addSubview:[OverlayViewController sharedOverlayViewController].view];
@@ -155,13 +159,6 @@
     [self.sinaweibo applicationDidBecomeActive];
 }
 
-- (BOOL)application:(UIApplication*)application handleOpenURL:(NSURL*)url {
-    if ([[url host] isEqualToString:@"safepay"]) {
-        [self parseAlixPayUrl:url application:application];
-        return YES;
-    }
-    return [self.sinaweibo handleOpenURL:url];
-}
 
 - (void)parseAlixPayUrl:(NSURL *)url application:(UIApplication *)application {
 	AlixPay *alixpay = [AlixPay shared];
@@ -191,7 +188,14 @@
 
 - (BOOL)application:(UIApplication *)application openURL:(NSURL *)url sourceApplication:(NSString *)sourceApplication annotation:(id)annotation
 {
-    return [self application:application handleOpenURL:url];
+    DDLogInfo(@"hanlding url: %@, source: %@, annotation: %@", url, sourceApplication, annotation);
+    if ([[url host] isEqualToString:@"safepay"]) {
+        [self parseAlixPayUrl:url application:application];
+        return YES;
+    } else if([[url scheme] isEqualToString:WEIXIN_APP_KEY]){
+        return [WXApi handleOpenURL:url delegate:self];
+    }
+    return [self.sinaweibo handleOpenURL:url];
 }
 
 - (void)applicationWillTerminate:(UIApplication *)application
@@ -248,4 +252,17 @@
 -(void)application:(UIApplication *)application didFailToRegisterForRemoteNotificationsWithError:(NSError *)error{
     DDLogVerbose(@"error in registration. Error: %@", error);
 }
+
+#pragma mark WXApiDelegate
+-(void) onResp:(BaseResp*)resp
+{
+    DDLogInfo(@"weixin resp code: %d", resp.errCode);
+}
+
+-(void) onReq:(BaseReq*)req
+{
+    DDLogInfo(@"request from weixin: %@", req);
+    
+}
+
 @end

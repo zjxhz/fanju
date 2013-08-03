@@ -500,11 +500,18 @@
 		B0AC41C6171A86E100249D70 /* PriceCell.m in Sources */ = {isa = PBXBuildFile; fileRef = B0AC41C5171A86E100249D70 /* PriceCell.m */; };
 		B0AC41CA171A870200249D70 /* PriceCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = B0AC41C9171A870200249D70 /* PriceCell.xib */; };
 		B0AC41CD171A882800249D70 /* TotalPriceCell.m in Sources */ = {isa = PBXBuildFile; fileRef = B0AC41CC171A882800249D70 /* TotalPriceCell.m */; };
+		B0AC41CE17ABA8B3007D0423 /* weixin_timeline_icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = B0AC41CA17ABA8B3007D0423 /* weixin_timeline_icon@2x.png */; };
 		B0AC41CF171A883B00249D70 /* TotalPriceCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = B0AC41CE171A883B00249D70 /* TotalPriceCell.xib */; };
+		B0AC41CF17ABA8B3007D0423 /* weixin_timeline_icon.png in Resources */ = {isa = PBXBuildFile; fileRef = B0AC41CB17ABA8B3007D0423 /* weixin_timeline_icon.png */; };
+		B0AC41D017ABA8B3007D0423 /* weixin_icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = B0AC41CC17ABA8B3007D0423 /* weixin_icon@2x.png */; };
+		B0AC41D117ABA8B3007D0423 /* weixin_icon.png in Resources */ = {isa = PBXBuildFile; fileRef = B0AC41CD17ABA8B3007D0423 /* weixin_icon.png */; };
 		B0AC41D2171A89C000249D70 /* MobileNumberCell.m in Sources */ = {isa = PBXBuildFile; fileRef = B0AC41D1171A89C000249D70 /* MobileNumberCell.m */; };
 		B0AC41D4171A89D200249D70 /* MobileNumberCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = B0AC41D3171A89D100249D70 /* MobileNumberCell.xib */; };
+		B0AC41D417ABA8EA007D0423 /* weibo_logo.png in Resources */ = {isa = PBXBuildFile; fileRef = B0AC41D217ABA8EA007D0423 /* weibo_logo.png */; };
+		B0AC41D517ABA8EA007D0423 /* weibo_logo@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = B0AC41D317ABA8EA007D0423 /* weibo_logo@2x.png */; };
 		B0AC41D7171A8A8400249D70 /* change_mobile.png in Resources */ = {isa = PBXBuildFile; fileRef = B0AC41D5171A8A8300249D70 /* change_mobile.png */; };
 		B0AC41D8171A8A8400249D70 /* change_mobile@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = B0AC41D6171A8A8400249D70 /* change_mobile@2x.png */; };
+		B0AC41D917ACA222007D0423 /* libWeChatSDK_armv7_armv7s.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B0AC41D817ACA222007D0423 /* libWeChatSDK_armv7_armv7s.a */; };
 		B0AEB50D1704849000B029AD /* add_tag_bg.png in Resources */ = {isa = PBXBuildFile; fileRef = B0AEB50B1704849000B029AD /* add_tag_bg.png */; };
 		B0AEB50E1704849000B029AD /* add_tag_bg@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = B0AEB50C1704849000B029AD /* add_tag_bg@2x.png */; };
 		B0AEB511170556F700B029AD /* MealEventCell.m in Sources */ = {isa = PBXBuildFile; fileRef = B0AEB510170556F700B029AD /* MealEventCell.m */; };
@@ -1378,6 +1385,8 @@
 		B079FAB01743860D007F48A1 /* UserDetailsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UserDetailsViewController.h; sourceTree = "<group>"; };
 		B079FAB11743860E007F48A1 /* UserDetailsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UserDetailsViewController.m; sourceTree = "<group>"; };
 		B079FAFA1745E174007F48A1 /* Service.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Service.h; sourceTree = "<group>"; };
+		B081272217AA889D00D5A812 /* WXApi.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WXApi.h; sourceTree = "<group>"; };
+		B081272317AA889D00D5A812 /* WXApiObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WXApiObject.h; sourceTree = "<group>"; };
 		B0893D0B171437FE00259043 /* next_meal_arrow.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = next_meal_arrow.png; sourceTree = "<group>"; };
 		B0893D0C171437FE00259043 /* next_meal_arrow@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "next_meal_arrow@2x.png"; sourceTree = "<group>"; };
 		B0954EF417153D3100E52EC8 /* AlixPay.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AlixPay.h; sourceTree = "<group>"; };
@@ -1413,14 +1422,21 @@
 		B0AC41C4171A86E100249D70 /* PriceCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PriceCell.h; sourceTree = "<group>"; };
 		B0AC41C5171A86E100249D70 /* PriceCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PriceCell.m; sourceTree = "<group>"; };
 		B0AC41C9171A870200249D70 /* PriceCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PriceCell.xib; sourceTree = "<group>"; };
+		B0AC41CA17ABA8B3007D0423 /* weixin_timeline_icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "weixin_timeline_icon@2x.png"; sourceTree = "<group>"; };
 		B0AC41CB171A882800249D70 /* TotalPriceCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TotalPriceCell.h; sourceTree = "<group>"; };
+		B0AC41CB17ABA8B3007D0423 /* weixin_timeline_icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = weixin_timeline_icon.png; sourceTree = "<group>"; };
 		B0AC41CC171A882800249D70 /* TotalPriceCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TotalPriceCell.m; sourceTree = "<group>"; };
+		B0AC41CC17ABA8B3007D0423 /* weixin_icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "weixin_icon@2x.png"; sourceTree = "<group>"; };
+		B0AC41CD17ABA8B3007D0423 /* weixin_icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = weixin_icon.png; sourceTree = "<group>"; };
 		B0AC41CE171A883B00249D70 /* TotalPriceCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = TotalPriceCell.xib; sourceTree = "<group>"; };
 		B0AC41D0171A89C000249D70 /* MobileNumberCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MobileNumberCell.h; sourceTree = "<group>"; };
 		B0AC41D1171A89C000249D70 /* MobileNumberCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MobileNumberCell.m; sourceTree = "<group>"; };
+		B0AC41D217ABA8EA007D0423 /* weibo_logo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = weibo_logo.png; sourceTree = "<group>"; };
 		B0AC41D3171A89D100249D70 /* MobileNumberCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MobileNumberCell.xib; sourceTree = "<group>"; };
+		B0AC41D317ABA8EA007D0423 /* weibo_logo@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "weibo_logo@2x.png"; sourceTree = "<group>"; };
 		B0AC41D5171A8A8300249D70 /* change_mobile.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = change_mobile.png; sourceTree = "<group>"; };
 		B0AC41D6171A8A8400249D70 /* change_mobile@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "change_mobile@2x.png"; sourceTree = "<group>"; };
+		B0AC41D817ACA222007D0423 /* libWeChatSDK_armv7_armv7s.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libWeChatSDK_armv7_armv7s.a; sourceTree = "<group>"; };
 		B0AEB50B1704849000B029AD /* add_tag_bg.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = add_tag_bg.png; sourceTree = "<group>"; };
 		B0AEB50C1704849000B029AD /* add_tag_bg@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "add_tag_bg@2x.png"; sourceTree = "<group>"; };
 		B0AEB50F170556F600B029AD /* MealEventCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MealEventCell.h; sourceTree = "<group>"; };
@@ -1623,6 +1639,7 @@
 				DD97C0ADDEC4427DAC3C7BE5 /* libPods.a in Frameworks */,
 				B0954F6B1715429E00E52EC8 /* libcrypto.a in Frameworks */,
 				B0954F6C1715429E00E52EC8 /* libssl.a in Frameworks */,
+				B0AC41D917ACA222007D0423 /* libWeChatSDK_armv7_armv7s.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2402,6 +2419,12 @@
 				B0D7E3DF16FEEED500EDE8AF /* social_sina_disabled@2x.png */,
 				B0D7E3E016FEEED500EDE8AF /* social_sina.png */,
 				B0D7E3E116FEEED500EDE8AF /* social_sina@2x.png */,
+				B0AC41CA17ABA8B3007D0423 /* weixin_timeline_icon@2x.png */,
+				B0AC41CB17ABA8B3007D0423 /* weixin_timeline_icon.png */,
+				B0AC41CC17ABA8B3007D0423 /* weixin_icon@2x.png */,
+				B0AC41CD17ABA8B3007D0423 /* weixin_icon.png */,
+				B0AC41D217ABA8EA007D0423 /* weibo_logo.png */,
+				B0AC41D317ABA8EA007D0423 /* weibo_logo@2x.png */,
 				B0D7E3E216FEEED500EDE8AF /* social.png */,
 				B0D7E3E316FEEED500EDE8AF /* social@2x.png */,
 				B007955C174CF7CF00C98E83 /* tag_add.png */,
@@ -2471,6 +2494,7 @@
 		B04C2AE216E21FD700E86C7A /* Other */ = {
 			isa = PBXGroup;
 			children = (
+				B081272017AA889D00D5A812 /* Weixin */,
 				B0D1C8581754A5110095D431 /* GKImagePicker */,
 				B0954EF317153D1700E52EC8 /* AlixPay */,
 				B04C2B2016E225AC00E86C7A /* XMPPFramework */,
@@ -2926,6 +2950,16 @@
 				B051FF651765F86D0032A204 /* logo@2x.png */,
 			);
 			path = SinaWeibo;
+			sourceTree = "<group>";
+		};
+		B081272017AA889D00D5A812 /* Weixin */ = {
+			isa = PBXGroup;
+			children = (
+				B0AC41D817ACA222007D0423 /* libWeChatSDK_armv7_armv7s.a */,
+				B081272217AA889D00D5A812 /* WXApi.h */,
+				B081272317AA889D00D5A812 /* WXApiObject.h */,
+			);
+			path = Weixin;
 			sourceTree = "<group>";
 		};
 		B0954EF317153D1700E52EC8 /* AlixPay */ = {
@@ -3479,6 +3513,12 @@
 				B03B2147179F7F9F004F6510 /* reply_sep.png in Resources */,
 				B03B2148179F7F9F004F6510 /* reply_sep@2x.png in Resources */,
 				B03B215617A829AD004F6510 /* MealCommentEventCell.xib in Resources */,
+				B0AC41CE17ABA8B3007D0423 /* weixin_timeline_icon@2x.png in Resources */,
+				B0AC41CF17ABA8B3007D0423 /* weixin_timeline_icon.png in Resources */,
+				B0AC41D017ABA8B3007D0423 /* weixin_icon@2x.png in Resources */,
+				B0AC41D117ABA8B3007D0423 /* weixin_icon.png in Resources */,
+				B0AC41D417ABA8EA007D0423 /* weibo_logo.png in Resources */,
+				B0AC41D517ABA8EA007D0423 /* weibo_logo@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3816,7 +3856,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 1.0.25;
+				CURRENT_PROJECT_VERSION = 1.0.30;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -3854,7 +3894,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = YES;
-				CURRENT_PROJECT_VERSION = 1.0.25;
+				CURRENT_PROJECT_VERSION = 1.0.30;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
@@ -3875,8 +3915,8 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = DE1C6AFC71E24F3EA4C025BE /* Pods.xcconfig */;
 			buildSettings = {
-				CODE_SIGN_IDENTITY = "iPhone Distribution";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Fanju/Fanju-Prefix.pch";
 				HEADER_SEARCH_PATHS = "${PODS_HEADERS_SEARCH_PATHS}";
@@ -3886,6 +3926,7 @@
 					"$(inherited)",
 					"\"$(SRCROOT)/Fanju/Classes/Other/XMPPFramework/Vendor/libidn\"",
 					"\"$(SRCROOT)\"",
+					"\"$(SRCROOT)/Fanju/Classes/Other/Weixin\"",
 				);
 				OTHER_LDFLAGS = (
 					"-ObjC",
@@ -3933,6 +3974,7 @@
 					"$(inherited)",
 					"\"$(SRCROOT)/Fanju/Classes/Other/XMPPFramework/Vendor/libidn\"",
 					"\"$(SRCROOT)\"",
+					"\"$(SRCROOT)/Fanju/Classes/Other/Weixin\"",
 				);
 				OTHER_LDFLAGS = (
 					"-ObjC",

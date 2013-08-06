@@ -13,6 +13,7 @@
 #import "QuartzCore/QuartzCore.h"
 #import "UserDetailsViewController.h"
 #import "SendCommentViewController.h"
+#import "Comment.h"
 
 @implementation MealCommentCell{
     UIImage* _sepImg;
@@ -36,7 +37,10 @@
 
 +(CGFloat)heightForMasterComment:(MealComment*)comment{
     CGFloat height = 0;
-    NSString *text = comment.comment;
+    NSString *text = [MealCommentCell commentText:comment];
+    if (comment.parent) {
+        text = [NSString stringWithFormat:@"回复 %@：%@", comment.parent.user.name, text];
+    }
     CGSize size = [text sizeWithFont:[UIFont systemFontOfSize:13] constrainedToSize:CGSizeMake(225, 1000) lineBreakMode:NSLineBreakByWordWrapping];
 	height += 50 + size.height;
     return height;
@@ -141,12 +145,7 @@
 //    UITapGestureRecognizer* tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(avatarTapped:)];
 //    [_avatar addGestureRecognizer:tap];
     _nameLabel.text = user.name;
-    if (_mealComment.parent) {
-        _commentLabel.text = [NSString stringWithFormat:@"回复 %@: %@", _mealComment.parent.user.name, _mealComment.comment];
-    } else {
-        _commentLabel.text = _mealComment.comment;        
-    }
-
+    _commentLabel.text = [MealCommentCell commentText:_mealComment];
     [_commentLabel sizeToFit];
     _timeLabel.text = [DateUtil userFriendlyStringFromDate:_mealComment.timestamp];
     
@@ -197,6 +196,13 @@
 //            i++;
 //        }
 //    }
+}
+
++(NSString*)commentText:(MealComment*)comment{
+    if (comment.parent) {
+        return [NSString stringWithFormat:@"回复 %@: %@", comment.parent.user.name, comment.comment];
+    }
+    return comment.comment;
 }
 
 @end

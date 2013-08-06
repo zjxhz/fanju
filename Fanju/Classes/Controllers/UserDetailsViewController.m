@@ -230,8 +230,14 @@
         [av show];
     } else {
         Conversation* conversation = [[MessageService service] getOrCreateConversation:[UserService service].loggedInUser with:_user];
-        XMPPChatViewController2* c = [[XMPPChatViewController2 alloc] initWithConversation:conversation];
-        [self.navigationController pushViewController:c animated:YES];
+        //check if previous view controller is the chat window, if yes then we go back
+        NSArray* viewControllers = self.navigationController.viewControllers;
+        if (viewControllers.count > 1 && [viewControllers[viewControllers.count - 2] isKindOfClass:[XMPPChatViewController2 class]]) {
+            [self.navigationController popViewControllerAnimated:YES];
+        } else {
+            XMPPChatViewController2* c = [[XMPPChatViewController2 alloc] initWithConversation:conversation];
+            [self.navigationController pushViewController:c animated:YES];
+        }
     }
     
 }

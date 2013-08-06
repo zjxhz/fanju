@@ -35,6 +35,7 @@
 
 -(void)fetchFollowingsForUser:(User*)user{
     RKObjectManager *manager = [RKObjectManager sharedManager];
+    [user removeFollowings:user.followings]; //clear old data
     [manager getObjectsAtPath:@"relationship/"
                    parameters:@{@"from_person":user.uID, @"limit":@"0", @"status": @"0"} //fetch all
                       success:^(RKObjectRequestOperation *operation, RKMappingResult *mappingResult) {

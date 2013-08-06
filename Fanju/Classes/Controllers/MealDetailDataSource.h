@@ -16,5 +16,7 @@
 @property(nonatomic, strong) Meal* meal;
 @property(nonatomic, weak) MealDetailViewController* controller;
 @property(nonatomic, strong) NSMutableArray* comments;
+@property(nonatomic) BOOL loadFail;
 -(void)tableView:(UITableView*)tableView contentOffsetDidChange:(CGFloat)offset;
+
 @end

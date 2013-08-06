@@ -46,9 +46,12 @@
         }
     } else if(indexPath.section == 1) {
         if (!_comments) {
+            if (_loadFail) {
+                return [TTTableActivityItem itemWithText:@"评论加载失败"];
+            }
             return [TTTableActivityItem itemWithText:@"加载中……"];
         } else if(_comments.count == 0){
-            return [TTTableTextItem itemWithText:@"还没有评论"];
+            return [TTTableTextItem itemWithText:@"还没有评论，写下你对这个饭局的问题或期望吧"];
         }
         return _comments[indexPath.row];
     }
@@ -68,6 +71,9 @@
     if ([cell isKindOfClass:[MealCommentCell class]]) {
         MealCommentCell* commentCell = (MealCommentCell*)cell;
         commentCell.parentController = _controller;
+    }
+    if ([cell isKindOfClass:[TTTableTextItemCell class]]) {
+        cell.textLabel.font = [UIFont systemFontOfSize:12];
     }
 }
 

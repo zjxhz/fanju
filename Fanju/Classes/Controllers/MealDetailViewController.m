@@ -38,7 +38,7 @@
 #import "MealDetailCell.h"
 #import "UserService.h"
 #import "User.h"
-
+#import "UIImage+Resize.h"
 
 @implementation MealDetailViewController{
 //    MealDetailsViewDelegate* _mealDetailsViewDelegate;
@@ -83,26 +83,39 @@
                           DDLogVerbose(@"fetched comments from %@", path);
                           MealDetailDataSource *ds = self.dataSource;
                           ds.comments = [NSMutableArray arrayWithArray:mappingResult.array];
-                          [self refresh];
+                          [self.tableView reloadData];
                           dispatch_async(dispatch_get_main_queue(), ^{
                               if (_scrollToComment) {
                                   NSIndexPath* indexPath = [ds tableView:self.tableView indexPathForObject:_scrollToComment];
                                   if (indexPath) { //comments can be deleted or not approved
-                                      [self.tableView scrollToRowAtIndexPath:indexPath atScrollPosition:UITableViewScrollPositionBottom animated:NO];
-                                      UITableViewCell* cell = [self.tableView cellForRowAtIndexPath:indexPath];
-                                      UIColor* originalColor = cell.backgroundColor;
-                                      cell.backgroundColor = [UIColor orangeColor];
-                                      [UIView animateWithDuration:0.6 delay:0.0 options:UIViewAnimationOptionCurveEaseInOut animations:^
-                                       {
-                                           cell.backgroundColor = originalColor;
-                                       } completion: nil];
+                                      NSInteger maxRow = [self.tableView numberOfRowsInSection:1] - 1;
+                                      if (indexPath.row > maxRow) {
+                                          DDLogError(@"trying to scroll to row %d which is out of scope: %d", indexPath.row, maxRow);
+                                      } else {
+                                          [self.tableView scrollToRowAtIndexPath:indexPath atScrollPosition:UITableViewScrollPositionBottom animated:NO];
+                                          UITableViewCell* cell = [self.tableView cellForRowAtIndexPath:indexPath];
+                                          UIColor* originalColor = cell.backgroundColor;
+                                          cell.backgroundColor = [UIColor orangeColor];
+                                          [UIView animateWithDuration:0.6 delay:0.0 options:UIViewAnimationOptionCurveEaseInOut animations:^
+                                           {
+                                               cell.backgroundColor = originalColor;
+                                           } completion: nil];
+                                      }
                                   } else {
-                                      [InfoUtil showAlert:@"评论已经被用户删除"];
+                                      if ([self.navigationController visibleViewController] == self) {
+                                          [InfoUtil showAlert:@"评论已经被用户删除"];
+                                      }
+                                  
                                   }
                               }
                           });
                       }
                       failure:^(RKObjectRequestOperation *operation, NSError *error) {
+                          if ([self.navigationController visibleViewController] == self) {
+                              [SVProgressHUD showErrorWithStatus:@"评论加载失败，请重试"];
+                          }
+                          MealDetailDataSource *ds = self.dataSource;
+                          ds.loadFail = YES;
                           DDLogError(@"failed from %@: %@", path, error);
                       }];
 }
@@ -187,7 +200,12 @@
 
 - (void)viewWillDisappear:(BOOL)animated {
     [super viewWillDisappear:animated];
-    [self.tableView removeObserver:self forKeyPath:@"contentOffset"];
+    @try {
+        [self.tableView removeObserver:self forKeyPath:@"contentOffset"];
+    }
+    @catch (NSException *exception) {
+        DDLogError(@"failed to remove observer for contentOffset, probably it was removed already for a reason i don't know: %@", exception);
+    }
 }
 
 -(void)updateJoinButton{
@@ -297,7 +315,10 @@
     message.title = [NSString stringWithFormat:@"分享一个饭局：%@", _meal.topic];
     message.description = _meal.introduction;
     MealDetailCell* detailsCell = (MealDetailCell*)[self.tableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:0]];
-    [message setThumbImage:detailsCell.mealImageView.image];
+    UIImage* image = detailsCell.mealImageView.image;
+    image = [image imageScaledToSize:CGSizeMake(image.size.width * (120.0/image.size.height), 120)]; //image must be resized or share will fail
+    [message setThumbImage:image];
+    
     
     WXWebpageObject *ext = [WXWebpageObject object];
     ext.webpageUrl = [URLService absoluteURL:[NSString stringWithFormat:@"/meal/%@/", _meal.mID]];

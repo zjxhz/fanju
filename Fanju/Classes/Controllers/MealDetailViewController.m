@@ -39,6 +39,7 @@
 #import "UserService.h"
 #import "User.h"
 #import "UIImage+Resize.h"
+#import "DictHelper.h"
 
 @implementation MealDetailViewController{
 //    MealDetailsViewDelegate* _mealDetailsViewDelegate;
@@ -130,7 +131,7 @@
 
 - (void)initTabView {
     UIImage* toolbarShadow = [UIImage imageNamed:@"toolbar_shadow"];
-    _tabBar = [[UIView alloc] initWithFrame:CGRectMake(0, self.view.frame.size.height - TAB_BAR_HEIGHT, self.view.frame.size.width, TAB_BAR_HEIGHT)];
+    _tabBar = [[UIView alloc] initWithFrame:CGRectMake(0, self.view.bounds.size.height - TAB_BAR_HEIGHT, self.view.bounds.size.width, TAB_BAR_HEIGHT)];
     _tabBar.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"toolbar_bg"]];
     UIImage* join_img = [UIImage imageNamed:@"toolbth1"];
     UIImage* comment_img = [UIImage imageNamed:@"meal_comment"];
@@ -158,6 +159,7 @@
     UIImageView* shadowView = [[UIImageView alloc] initWithFrame:CGRectMake(0, -toolbarShadow.size.height, toolbarShadow.size.width, toolbarShadow.size.height)];
     shadowView.image = toolbarShadow;
     [_tabBar addSubview:shadowView];
+    _tabBar.hidden = YES;
 }
 
 -(void)viewDidLoad
@@ -209,12 +211,18 @@
 }
 
 -(void)updateJoinButton{
+    [_joinButton removeTarget:nil action:NULL forControlEvents:UIControlEventAllEvents];
     User* loggedInUser = [UserService service].loggedInUser;
     for (Order* order in _meal.orders) {
         if ([order.user isEqual:loggedInUser]) {
             _myOrder = order;
-            [_joinButton setTitle:@"已支付，查看订单" forState:UIControlStateNormal];
-            [_joinButton addTarget:self action:@selector(viewOrder:) forControlEvents:UIControlEventTouchDown];
+            if (_meal.price.floatValue == 0.0) {
+                [_joinButton setTitle:@"我已报名" forState:UIControlStateNormal];
+                [_joinButton addTarget:self action:@selector(cancelOrder:) forControlEvents:UIControlEventTouchUpInside];
+            } else {
+                [_joinButton setTitle:@"已支付，查看订单" forState:UIControlStateNormal];
+                [_joinButton addTarget:self action:@selector(viewOrder:) forControlEvents:UIControlEventTouchUpInside];
+            }
             return;
         }
     }
@@ -222,12 +230,12 @@
     if([time compare:[NSDate date]] == NSOrderedAscending){
         [_joinButton setTitle:@"已结束" forState:UIControlStateNormal];
     }  else if ([self.meal.actualPersons integerValue] >= [self.meal.maxPersons integerValue]) {
-        [_joinButton setTitle:@"卖光了" forState:UIControlStateNormal];
+        [_joinButton setTitle:@"爆满" forState:UIControlStateNormal];
         [_joinButton setBackgroundImage:[UIImage imageNamed:@"sold_out"] forState:UIControlStateNormal];
         [_commentButton setBackgroundImage:[UIImage imageNamed:@"meal_comment_sold_out"] forState:UIControlStateNormal];
         [_joinButton removeTarget:self action:@selector(joinMeal:) forControlEvents:UIControlEventTouchDown];
     } else {
-        [_joinButton setTitle:@"参加饭局" forState:UIControlStateNormal];
+        [_joinButton setTitle:@"我要报名" forState:UIControlStateNormal];
         [_joinButton addTarget:self action:@selector(joinMeal:) forControlEvents:UIControlEventTouchDown];
     }
 }
@@ -244,6 +252,8 @@
     CGRect frame = self.tableView.frame;
     frame.size.height = self.view.frame.size.height - TAB_BAR_HEIGHT; 
     self.tableView.frame = frame;
+    _tabBar.frame = CGRectMake(0, self.view.bounds.size.height - TAB_BAR_HEIGHT, self.view.bounds.size.width, TAB_BAR_HEIGHT);
+    _tabBar.hidden = NO;
 }
 
 -(void)createLoadingView{
@@ -270,11 +280,94 @@
 }
 
 - (IBAction)joinMeal:(id)sender {
-    JoinMealViewController* vc = [[JoinMealViewController alloc] init];
-    vc.meal = self.meal;
-    [self.navigationController pushViewController:vc animated:YES];
+    if (_meal.price.floatValue == 0.0) {
+        NSString *mealID = [NSString stringWithFormat:@"%@", self.meal.mID];
+        NSString *numberOfPerson = [NSString stringWithFormat:@"%d", 1];
+        NSArray *params = @[[DictHelper dictWithKey:@"meal_id" andValue:mealID],
+                            [DictHelper dictWithKey:@"num_persons" andValue:numberOfPerson]];
+        [[NetworkHandler getHandler] requestFromURL:[NSString stringWithFormat:@"http://%@/api/v1/user/%d/order/", EOHOST, [Authentication sharedInstance].currentUser.uID]
+                                             method:POST
+                                         parameters:params
+                                        cachePolicy:TTURLRequestCachePolicyNone
+                                            success:^(id obj) {
+                                                NSDictionary* dic = obj;
+                                                //note: as order has attribute "status" too if success status will set to the status of the order
+                                                if ([dic[@"status"] isEqual:@"NOK"]) {
+                                                    [SVProgressHUD showErrorWithStatus:dic[@"info"]];
+                                                } else {
+                                                    [self setAsPaid];
+                                                }
+                                            } failure:^{
+                                                [SVProgressHUD showErrorWithStatus:@"加入失败，请稍后重试"];
+                                            }];
+    } else {
+        JoinMealViewController* vc = [[JoinMealViewController alloc] init];
+        vc.meal = self.meal;
+        [self.navigationController pushViewController:vc animated:YES];
+    }
 }
 
+-(IBAction)cancelOrder:(id)sender{
+    UIAlertView* alert = [[UIAlertView alloc] initWithTitle:nil message:@"要取消报名吗？" delegate:self cancelButtonTitle:@"不取消" otherButtonTitles:@"取消报名", nil];
+    [alert show];
+}
+
+-(void)doCancelOrder{
+    [[NetworkHandler getHandler] requestFromURL:[NSString stringWithFormat:@"http://%@/order/cancel/%@/", EOHOST, _myOrder.oID]
+                                         method:POST
+                                     parameters:nil
+                                    cachePolicy:TTURLRequestCachePolicyNone
+                                        success:^(id obj) {
+                                            NSDictionary* dic = obj;
+                                            //note: as order has attribute "status" too if success status will set to the status of the order
+                                            if ([dic[@"status"] isEqual:@"NOK"]) {
+                                                [SVProgressHUD showErrorWithStatus:dic[@"info"]];
+                                            } else {
+//                                                [_joinButton setTitle:@"我要报名" forState:UIControlStateNormal];
+//                                                [_joinButton removeTarget:self action:@selector(cancelOrder:) forControlEvents:UIControlEventTouchUpInside];
+//                                                [_joinButton addTarget:self action:@selector(joinMeal:) forControlEvents:UIControlEventTouchUpInside];
+                                                [SVProgressHUD showSuccessWithStatus:@"已取消报名"];
+                                                [self reloadMeal];
+                                            }
+                                        } failure:^{
+                                            [SVProgressHUD showErrorWithStatus:@"取消失败，请联系客服"];
+                                        }];
+}
+
+-(void)setAsPaid{
+    NSString *mealID = [NSString stringWithFormat:@"%@", self.meal.mID];
+    NSString *numberOfPerson = [NSString stringWithFormat:@"%d", 1];
+    NSArray *params = @[[DictHelper dictWithKey:@"meal_id" andValue:mealID],
+                        [DictHelper dictWithKey:@"num_persons" andValue:numberOfPerson]];
+    [[NetworkHandler getHandler] requestFromURL:[NSString stringWithFormat:@"http://%@/meal/%@/", EOHOST, mealID]
+                                         method:POST
+                                     parameters:params
+                                    cachePolicy:TTURLRequestCachePolicyNone
+                                        success:^(id obj) {
+                                            [SVProgressHUD showSuccessWithStatus:@"加入成功，请准时参加。若不能参加，请取消报名"];
+//                                            [_joinButton setTitle:@"已经报名" forState:UIControlStateNormal];
+//                                            [_joinButton removeTarget:self action:@selector(joinMeal:) forControlEvents:UIControlEventTouchUpInside];
+//                                            [_joinButton addTarget:self action:@selector(cancelOrder:) forControlEvents:UIControlEventTouchUpInside];
+                                            [self reloadMeal];
+                                        } failure:^{
+                                            [SVProgressHUD showErrorWithStatus:@"加入失败，请稍后重试"];
+                                        }];
+}
+
+-(void)reloadMeal{
+    RKObjectManager* manager = [RKObjectManager sharedManager];
+    NSString* path = [NSString stringWithFormat:@"meal/%@/", _meal.mID];
+    [manager getObject:nil path:path parameters:nil success:^(RKObjectRequestOperation *operation, RKMappingResult *mappingResult) {
+        _meal = mappingResult.firstObject;
+        MealDetailDataSource* ds =  self.dataSource;
+        ds.meal = _meal;
+        [self.tableView reloadData];
+        [self updateJoinButton];
+        [[NewSidebarViewController sideBar].mealListViewController.tableView reloadData];
+    } failure:^(RKObjectRequestOperation *operation, NSError *error) {
+        DDLogError(@"failed to refresh data: %@", error);
+    }];
+}
 - (void) onShareClicked:(id)sender{
 //    ShareTableViewController* vc = [[ShareTableViewController alloc] init];
 //    vc.delegate = self;
@@ -309,10 +402,10 @@
 }
 
 -(void)shareToWeixin:(int)scene{
-    DDLogInfo(@"max weixin api version: %@, installed: %d, support api: %d",[WXApi getWXAppSupportMaxApiVersion], [WXApi isWXAppInstalled], [WXApi isWXAppSupportApi]);
+    DDLogInfo(@"weixin installed: %d, support api: %d", [WXApi isWXAppInstalled], [WXApi isWXAppSupportApi]);
     
     WXMediaMessage *message = [WXMediaMessage message];
-    message.title = [NSString stringWithFormat:@"分享一个饭局：%@", _meal.topic];
+    message.title = [NSString stringWithFormat:@"分享一个活动：%@", _meal.topic];
     message.description = _meal.introduction;
     MealDetailCell* detailsCell = (MealDetailCell*)[self.tableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:0]];
     UIImage* image = detailsCell.mealImageView.image;
@@ -336,7 +429,7 @@
 //    UIImage* image = [[Nimbus imageMemoryCache] objectWithName:[URLService  absoluteURL:_meal.photoURL]];
     MealDetailCell* detailsCell = (MealDetailCell*)[self.tableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:0]];
     UIImage* image = detailsCell.mealImageView.image;
-    NSString *defaultMessage = [NSString stringWithFormat:@"一个有趣的饭局：%@ http://%@/meal/%@/", _meal.topic, EOHOST, _meal.mID];
+    NSString *defaultMessage = [NSString stringWithFormat:@"一个有趣的活动：%@ http://%@/meal/%@/", _meal.topic, EOHOST, _meal.mID];
 //    UIImage* image = _mealImageView.image;
     WBSendView *sendView = [[WBSendView alloc] initWithAppKey:WEIBO_APP_KEY appSecret:WEIBO_APP_SECRET text:defaultMessage image:image];
     sendView.delegate = self;
@@ -428,6 +521,14 @@
     }
 }
 
+#pragma mark UIAlertViewDelegate
+
+// Called when a button is clicked. The view will be automatically dismissed after this call returns
+- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex{
+    if (buttonIndex == 1) {
+        [self doCancelOrder];
+    }
+}
 @end
 
 

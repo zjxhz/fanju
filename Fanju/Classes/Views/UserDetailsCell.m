@@ -56,7 +56,7 @@
         _nextMealLabel.backgroundColor = [UIColor clearColor];
         _nextMealLabel.layer.shadowColor = RGBACOLOR(0, 0, 0, 0.2).CGColor;
         _nextMealLabel.layer.shadowOffset = CGSizeMake(0, 2);
-        _nextMealLabel.text = @"下一个饭局：";
+        _nextMealLabel.text = @"下一个活动：";
         [_nextMealLabel sizeToFit];
         
         _nextMealText = [[UITextField alloc] initWithFrame:CGRectMake(88, 18, 200, 18)];
@@ -190,7 +190,7 @@
             _meal = meal;
         } else {
             _nextMealView.alpha = 0;
-            _nextMealText.text = @"最近没有饭局";
+            _nextMealText.text = @"最近没有活动";
         }
     } failure:^(RKObjectRequestOperation *operation, NSError *error) {
         DDLogError(@"failed to fetch meals for user %@", _user.uID);

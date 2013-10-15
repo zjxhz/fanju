@@ -51,7 +51,7 @@
             }
             return [TTTableActivityItem itemWithText:@"加载中……"];
         } else if(_comments.count == 0){
-            return [TTTableTextItem itemWithText:@"还没有评论，写下你对这个饭局的问题或期望吧"];
+            return [TTTableTextItem itemWithText:@"还没有评论，写下你的问题或期望吧"];
         }
         return _comments[indexPath.row];
     }

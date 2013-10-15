@@ -85,7 +85,9 @@
     [self.navigationController.toolbar setBackgroundImage:toolbarBg forToolbarPosition:UIToolbarPositionAny barMetrics:UIBarMetricsDefault];
     [self.navigationController setToolbarHidden:NO];
     [self updateNavigationBar];
-    _tableView.frame = self.view.frame;
+    CGRect bounds = self.view.bounds;
+    bounds.size.height = bounds.size.height - 44;
+    _tableView.frame = bounds;
 }
 
 -(void)buildUI{
@@ -106,7 +108,9 @@
     UIImage* toolbarBg = [UIImage imageNamed:@"toolbar_bg"] ;
     
     [self.navigationController.toolbar setBackgroundImage:toolbarBg forToolbarPosition:UIToolbarPositionAny barMetrics:UIBarMetricsDefault];
-    
+    if ([self respondsToSelector:@selector(setEdgesForExtendedLayout:)]) {
+        self.edgesForExtendedLayout=UIRectEdgeNone;
+    }
     [self buildUI];
 }
 
@@ -116,15 +120,9 @@
     [self reload:nil];
     [self sendVisited];
     
-
-    
     UIImage* toolbarShadow = [UIImage imageNamed:@"toolbar_shadow"];
     CGFloat shadowY = self.view.frame.size.height - toolbarShadow.size.height - 5;//toolbar height is 49, which is 5 higher than the default
     _shadowView.frame  = CGRectMake(0, shadowY, toolbarShadow.size.width, toolbarShadow.size.height);
-    
-    CGRect frame = self.view.frame;
-    //    frame.size.height = self.view.frame.size.height - toolbarBg.size.height;
-    _tableView.frame = frame;
     [self.view sendSubviewToBack:_tableView];
 }
 
@@ -415,6 +413,14 @@
     return 5;
 }
 
+-(void)setClipsToBounds{
+    UIView* view = _userDetailsCell.backgroundImageView;
+    while (view.superview != nil) {
+        view.clipsToBounds = NO;
+        view = view.superview;
+    }
+    _userDetailsCell.backgroundImageView.clipsToBounds = YES;
+}
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
@@ -431,6 +437,7 @@
             [_userDetailsCell.nextMealView  addGestureRecognizer:nextMealTap];
             [_userDetailsCell.nextMealButton addTarget:self action:@selector(showNextMeal:) forControlEvents:UIControlEventTouchUpInside];
             recalculateHeight = YES;
+            [self setClipsToBounds];
         }
         
         CGFloat originalHeight = _userDetailsCell.cellHeight;

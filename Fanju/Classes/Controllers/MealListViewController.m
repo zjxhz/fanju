@@ -170,6 +170,7 @@
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     if ([[UserService service] isLoggedIn]) {
+        [_refreshControl endRefreshing];//endRefreshing crashes if controller is not visible
         MealDetailViewController *detail = [[MealDetailViewController alloc] init];
         Meal *meal = [self.dataSource tableView:self.tableView objectForRowAtIndexPath:indexPath];
         detail.meal = meal;
@@ -191,7 +192,9 @@
                               [ds addMeal:meal];
                           }
                           self.dataSource = ds;
-                          [_refreshControl endRefreshing];
+                          if (self.tableView.dataSource) { //datasource is nil when controller is not visible, e.g. pushed, which endRefreshing would cause crash 
+                                [_refreshControl endRefreshing];
+                          }
                       }
                       failure:^(RKObjectRequestOperation *operation, NSError *error) {
                           _modelError = error;
@@ -200,8 +203,9 @@
                           } else {
                               [self showError:YES];
                           }
-                          
-                          [_refreshControl endRefreshing];
+                          if (self.tableView.dataSource){
+                              [_refreshControl endRefreshing];
+                          }
                           DDLogError(@"failed from /meal/: %@", error);
                       }];
 }

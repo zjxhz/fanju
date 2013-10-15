@@ -56,7 +56,7 @@
 
 - (id) init{
     if (self = [super init]) {        
-        self.title = @"我的饭局";
+        self.title = @"我的活动";
         self.tabBarItem = [[UITabBarItem alloc] initWithTitle:self.title image:[UIImage imageNamed:@"messages.png"] tag:0];
     }
     return self;
@@ -69,49 +69,10 @@
     self.tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
     self.variableHeightRows = YES;
     
-//    UIImage* myMealsImg = [UIImage imageNamed:@"seg_meals"];
-//    UIImage* mealInvitationImg = [UIImage imageNamed:@"seg_invitation"];
-//    UIImage* myMealsPushImg = [UIImage imageNamed:@"seg_meals_push"];
-//    UIImage* mealInvitationPushImg = [UIImage imageNamed:@"seg_invitation_push"];
-    
-//    AKSegmentedControl *seg = [[AKSegmentedControl alloc] initWithFrame:CGRectMake(0, 0, myMealsImg.size.width + mealInvitationImg.size.width, myMealsImg.size.height)];
-//    seg.segmentedControlMode = AKSegmentedControlModeSticky;
-//    [seg setSelectedIndex:0];
-//    UIButton* bl = [self createSegmentButton:@"我的饭局" withNormalImage:myMealsImg pushImage:myMealsPushImg];
-//    UIButton* br = [self createSegmentButton:@"饭局邀请" withNormalImage:mealInvitationImg pushImage:mealInvitationPushImg];
-//    [seg setButtonsArray:@[bl, br]];
-//    [seg addTarget:self action:@selector(selectionChanged:) forControlEvents:UIControlEventValueChanged];
-//    self.navigationItem.titleView = seg;
-    self.navigationItem.titleView = [[WidgetFactory sharedFactory] titleViewWithTitle:@"我的饭局"];
+    self.navigationItem.titleView = [[WidgetFactory sharedFactory] titleViewWithTitle:@"我的活动"];
     _refreshControl = [[ODRefreshControl alloc] initInScrollView:self.tableView];
     [_refreshControl addTarget:self action:@selector(loadOrders) forControlEvents:UIControlEventValueChanged];
 }
-
-//-(UIButton*)createSegmentButton:(NSString*)title withNormalImage:(UIImage*)push pushImage:(UIImage*)normal{
-//    UIButton* b = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, normal.size.width, normal.size.height)];
-//    b.titleLabel.font = [UIFont systemFontOfSize:12];
-//    [b setTitleColor:RGBCOLOR(80, 80, 80) forState:UIControlStateNormal];
-//    [b setTitleColor:RGBCOLOR(220, 220, 220) forState: UIControlStateSelected];
-//    [b setTitleColor:RGBCOLOR(220, 220, 220) forState:UIControlStateHighlighted];
-//    [b setTitleColor:RGBCOLOR(220, 220, 220) forState:UIControlStateHighlighted | UIControlStateSelected];
-//    [b setTitleShadowColor:RGBACOLOR(0, 0, 0, 0.4) forState:UIControlStateHighlighted];
-//    [b setTitleShadowColor:RGBACOLOR(0, 0, 0, 0.2) forState:UIControlStateNormal];
-//    [b setBackgroundImage:normal forState:UIControlStateNormal];
-//    [b setBackgroundImage:push forState:UIControlStateSelected];
-//    [b setBackgroundImage:push forState:UIControlStateHighlighted];
-//    [b setBackgroundImage:push forState:UIControlStateSelected | UIControlStateHighlighted];
-//    [b setTitle:title forState:UIControlStateNormal];
-//    return b;
-//}
-
-//-(void) selectionChanged:(id)sender{
-//    AKSegmentedControl *seg = sender;
-//    if (seg.selectedIndexes.firstIndex == 1) {
-//        UIAlertView *a = [[UIAlertView alloc] initWithTitle:@"未实现" message:@"未实现功能" delegate:nil cancelButtonTitle:@"确定" otherButtonTitles:nil];
-//        [a show];
-//        seg.selectedIndexes = [NSIndexSet indexSetWithIndex:0];
-//    }
-//}
 
 -(void)loadOrders{
     [self loadOrders:NO];
@@ -181,9 +142,9 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    _payingOrdersHeader = [self createHeader:@"30分钟内未支付的饭局"];
-    _upcomingOrdersHeader = [self createHeader:@"最近的饭局"];
-    _passedOrdersHeader = [self createHeader:@"已经结束的饭局"];
+    _payingOrdersHeader = [self createHeader:@"30分钟内未支付的活动"];
+    _upcomingOrdersHeader = [self createHeader:@"最近的活动"];
+    _passedOrdersHeader = [self createHeader:@"已经结束的活动"];
     [self loadOrders:NO];
 }
 
@@ -263,9 +224,11 @@
     if ([obj isKindOfClass:[Order class]]) {
         
         Order* order = obj;
-        if ([order.status integerValue] == 1) {//unpaid
+        if ([order.status integerValue] == 1 || order.meal.price.floatValue == 0.0) {//unpaid or free to join
             MealDetailViewController* mealVC = [[MealDetailViewController alloc] init];
-            mealVC.unfinishedOrder = order;
+            if ([order.status integerValue] == 1 ) {
+                mealVC.unfinishedOrder = order;
+            }
             mealVC.meal = order.meal;
             [self.navigationController pushViewController:mealVC animated:YES];
         } else {

@@ -66,10 +66,18 @@ static CGFloat theCellHeight;
     return self;
 }
 
+-(void)setClipsToBounds{
+    UIView* view = _mealImageView;
+    while (view.superview != nil) {
+        view.clipsToBounds = NO;
+        view = view.superview;
+    }
+    _mealImageView.clipsToBounds = YES;
+}
 
 -(void)setObject:(id)object{
     [super setObject:object];
-    if (!object || object == _meal) {
+    if (object == _meal) {
         return;
     }
     _meal = object;
@@ -81,6 +89,7 @@ static CGFloat theCellHeight;
     [self.contentView.subviews makeObjectsPerformSelector:@selector(removeFromSuperview)];
     [self.contentView addSubview:[self createHostView]];
     [self.contentView addSubview:[self createDetailsView]];
+    [self setClipsToBounds];
 }
 
 
@@ -91,35 +100,39 @@ static CGFloat theCellHeight;
     
     [_mealImageView setContentMode:UIViewContentModeScaleAspectFill];
     [_mealImageView setPathToNetworkImage:[URLService  absoluteURL:_meal.photoURL] forDisplaySize:CGSizeMake(320, 213)];
-    UIImage* cost_bg = [[UIImage imageNamed:@"meal_details_cost"] resizableImageWithCapInsets:UIEdgeInsetsMake(22, 40, 22, 39)];
-    UIImageView* costView = [[UIImageView alloc] initWithImage:cost_bg];
-    costView.frame = CGRectMake(9, 0, 0, cost_bg.size.height);
-    UILabel* costLabel = [[UILabel alloc] initWithFrame:CGRectMake(21, 4, 60, 20)];
-    costLabel.backgroundColor = [UIColor clearColor];
-    costLabel.textColor = RGBCOLOR(220, 220, 220);
-    
-    costLabel.text = [NSString stringWithFormat:@"人均：¥%.2f", [_meal.price floatValue]];
-    costLabel.font = [UIFont systemFontOfSize:12];
-    [costLabel sizeToFit];
-    CGRect costFrame = costView.frame;
-    costFrame.size.width = costLabel.frame.size.width + 12*2;
-    costView.frame = costFrame;
-    
-    
-    UIImage* menu = [UIImage imageNamed:@"caishi_bth"];
-    UIImage* menu_push = [UIImage imageNamed:@"caishi_bth_push"];
-    UIButton* menuBtn = [[UIButton alloc] initWithFrame:CGRectMake(265, 99, menu.size.width, menu.size.height)];
-    [menuBtn setBackgroundImage:menu forState:UIControlStateNormal];
-    [menuBtn setBackgroundImage:menu_push forState:UIControlStateSelected | UIControlStateHighlighted ];
-    [menuBtn setTitle:@"菜式" forState:UIControlStateNormal];
-    menuBtn.titleLabel.textColor = RGBCOLOR(220, 220, 220);
-    menuBtn.titleLabel.font = [UIFont systemFontOfSize:12];
-    [menuBtn addTarget:self action:@selector(displayMenu:) forControlEvents:UIControlEventTouchUpInside];
     
     [hostView addSubview:_mealImageView];
-    [hostView addSubview:costView];
-    [hostView addSubview:costLabel];
-    [hostView addSubview:menuBtn];
+    if (_meal.price.floatValue > 0.0) {
+        UIImage* cost_bg = [[UIImage imageNamed:@"meal_details_cost"] resizableImageWithCapInsets:UIEdgeInsetsMake(22, 40, 22, 39)];
+        UIImageView* costView = [[UIImageView alloc] initWithImage:cost_bg];
+        costView.frame = CGRectMake(9, 0, 0, cost_bg.size.height);
+        UILabel* costLabel = [[UILabel alloc] initWithFrame:CGRectMake(21, 4, 60, 20)];
+        costLabel.backgroundColor = [UIColor clearColor];
+        costLabel.textColor = RGBCOLOR(220, 220, 220);
+        
+        costLabel.text = [NSString stringWithFormat:@"人均：¥%.2f", [_meal.price floatValue]];
+        costLabel.font = [UIFont systemFontOfSize:12];
+        [costLabel sizeToFit];
+        CGRect costFrame = costView.frame;
+        costFrame.size.width = costLabel.frame.size.width + 12*2;
+        costView.frame = costFrame;
+        
+        
+        UIImage* menu = [UIImage imageNamed:@"caishi_bth"];
+        UIImage* menu_push = [UIImage imageNamed:@"caishi_bth_push"];
+        UIButton* menuBtn = [[UIButton alloc] initWithFrame:CGRectMake(265, 99, menu.size.width, menu.size.height)];
+        [menuBtn setBackgroundImage:menu forState:UIControlStateNormal];
+        [menuBtn setBackgroundImage:menu_push forState:UIControlStateSelected | UIControlStateHighlighted ];
+        [menuBtn setTitle:@"菜式" forState:UIControlStateNormal];
+        menuBtn.titleLabel.textColor = RGBCOLOR(220, 220, 220);
+        menuBtn.titleLabel.font = [UIFont systemFontOfSize:12];
+        [menuBtn addTarget:self action:@selector(displayMenu:) forControlEvents:UIControlEventTouchUpInside];
+        [hostView addSubview:costView];
+        [hostView addSubview:costLabel];
+        [hostView addSubview:menuBtn];
+    }
+
+
     return hostView;
 }
 

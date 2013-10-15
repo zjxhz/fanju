@@ -29,6 +29,7 @@
     UILabel* _timeLabel;
     UILabel* _addressLabel;
     UILabel* _numberOfPersonLabel;
+    UIView* _codeView;
 }
 @end
 
@@ -84,30 +85,32 @@
     [_frame addSubview:addView];
     [_frame addSubview:_addressLabel];
     
+    _codeView = [[UIView alloc] initWithFrame:CGRectMake(0, 98, 300, 20)];
+    _codeView.backgroundColor = [UIColor clearColor];
     UIImage* codeIcon = [UIImage imageNamed:@"meal_code"];
     UIImageView* codeView = [[UIImageView alloc] initWithImage:codeIcon];
-    codeView.frame = CGRectMake(0, 100, codeIcon.size.width, codeIcon.size.height);
-    UILabel* codeLabel = [[UILabel alloc] initWithFrame:CGRectMake(textX, 102, 0, 0)];
+    codeView.frame = CGRectMake(0, 2, codeIcon.size.width, codeIcon.size.height);
+    [_codeView addSubview:codeView];
+    UILabel* codeLabel = [[UILabel alloc] initWithFrame:CGRectMake(textX, 4, 0, 0)];
     codeLabel.font = [UIFont systemFontOfSize:10];
     codeLabel.backgroundColor = [UIColor clearColor];
     codeLabel.textColor = RGBCOLOR(150, 150, 150);
     codeLabel.text = @"验证码：";
     [codeLabel sizeToFit];
+    [_codeView addSubview:codeLabel];
     
-    _codeTextLabel = [[UILabel alloc] initWithFrame:CGRectMake(57, 98, 100, 18)];
+    _codeTextLabel = [[UILabel alloc] initWithFrame:CGRectMake(57, 0, 100, 18)];
     _codeTextLabel.font = [UIFont boldSystemFontOfSize:17];
     _codeTextLabel.textColor = RGBCOLOR(50, 140, 50);
     _codeTextLabel.backgroundColor = [UIColor clearColor];
-    [_frame addSubview:codeView];
-    [_frame addSubview:codeLabel];
-    [_frame addSubview:_codeTextLabel];
-  
-    _numberOfPersonLabel = [[UILabel alloc] initWithFrame:CGRectMake(156, 102, 0, 0)];
+    [_codeView addSubview:_codeTextLabel];
+    
+    _numberOfPersonLabel = [[UILabel alloc] initWithFrame:CGRectMake(156, 4, 0, 0)];
     _numberOfPersonLabel.backgroundColor = [UIColor clearColor];
     _numberOfPersonLabel.font = [UIFont systemFontOfSize:10];
     _numberOfPersonLabel.textColor = RGBCOLOR(150, 150, 150);
-    [_frame addSubview:_numberOfPersonLabel];
-    
+    [_codeView addSubview:_numberOfPersonLabel];
+    [_frame addSubview:_codeView];
     
     [self.contentView addSubview:_frame];
     
@@ -164,15 +167,22 @@
     [_timeLabel sizeToFit];
     _addressLabel.text = [NSString stringWithFormat:@"%@ %@", mealInfo.restaurant.name, mealInfo.restaurant.address];
 //        [_addressLabel sizeToFit];
-    if (_orderInfo.code) {
-        _codeTextLabel.text = _orderInfo.code;
+    if (_orderInfo.meal.price.floatValue > 0.0) {
+        _codeView.hidden = NO;
+        
+        if (_orderInfo.code) {
+            _codeTextLabel.text = _orderInfo.code;
+        } else {
+            _codeTextLabel.text = @"未支付";
+        }
+        
+        //        [_codeTextLabel sizeToFit];
+        _numberOfPersonLabel.text = [NSString stringWithFormat:@"限%@人", _orderInfo.numberOfPersons];
+        [_numberOfPersonLabel sizeToFit];
     } else {
-        _codeTextLabel.text = @"未支付";
+        _codeView.hidden = YES;
     }
     
-//        [_codeTextLabel sizeToFit];
-    _numberOfPersonLabel.text = [NSString stringWithFormat:@"限%@人", _orderInfo.numberOfPersons];
-    [_numberOfPersonLabel sizeToFit];
 }
 
 @end

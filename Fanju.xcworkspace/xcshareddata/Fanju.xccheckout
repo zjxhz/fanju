@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
+	<false/>
+	<key>IDESourceControlProjectIdentifier</key>
+	<string>32DC4D3E-90F8-40EC-9357-1C45E1C971B9</string>
+	<key>IDESourceControlProjectName</key>
+	<string>Fanju</string>
+	<key>IDESourceControlProjectOriginsDictionary</key>
+	<dict>
+		<key>BD4E4DBB-3AF9-4A39-B9E4-A3E8F236F04C</key>
+		<string>https://bitbucket.org/zjxhz/fanju.git</string>
+	</dict>
+	<key>IDESourceControlProjectPath</key>
+	<string>Fanju.xcworkspace</string>
+	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
+	<dict>
+		<key>BD4E4DBB-3AF9-4A39-B9E4-A3E8F236F04C</key>
+		<string>..</string>
+	</dict>
+	<key>IDESourceControlProjectURL</key>
+	<string>https://bitbucket.org/zjxhz/fanju.git</string>
+	<key>IDESourceControlProjectVersion</key>
+	<integer>110</integer>
+	<key>IDESourceControlProjectWCCIdentifier</key>
+	<string>BD4E4DBB-3AF9-4A39-B9E4-A3E8F236F04C</string>
+	<key>IDESourceControlProjectWCConfigurations</key>
+	<array>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>BD4E4DBB-3AF9-4A39-B9E4-A3E8F236F04C</string>
+			<key>IDESourceControlWCCName</key>
+			<string>Fanju</string>
+		</dict>
+	</array>
+</dict>
+</plist>

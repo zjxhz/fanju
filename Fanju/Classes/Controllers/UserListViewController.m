@@ -49,7 +49,6 @@
     self.tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
     self.tableView.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"bg"]];
     _refreshControl = [[ODRefreshControl alloc] initInScrollView:self.tableView];
-//    [self.tableView addSubview:_refreshControl];
     [_refreshControl addTarget:self action:@selector(loadUsersWithNewLocation) forControlEvents:UIControlEventValueChanged];
     RKManagedObjectStore* store = [RKObjectManager sharedManager].managedObjectStore;
     _mainQueueContext = store.mainQueueManagedObjectContext;
@@ -59,6 +58,10 @@
 
 -(void)viewDidLoad{
     [super viewDidLoad];
+    if ([self respondsToSelector:@selector(setEdgesForExtendedLayout:)]) {
+        self.edgesForExtendedLayout=UIRectEdgeNone;
+    }
+    self.tableView.frame = self.view.bounds;
 }
 
 -(void)viewWillAppear:(BOOL)animated{
@@ -108,7 +111,7 @@
                                                 [_mainQueueContext saveToPersistentStore:nil];
                                                 [self.navigationController.toolbar setHidden:YES];
                                                 self.view.frame = CGRectMake(0, 0, 320, 416);
-                                                self.tableView.frame = self.view.frame;
+                                                self.tableView.frame = self.view.bounds;
                                             } else {
                                                 [SVProgressHUD showSuccessWithStatus:@"添加失败"];
                                             }
@@ -150,7 +153,7 @@
 -(void)viewDidAppear:(BOOL)animated{
     [super viewDidAppear:animated];
     [TTURLRequestQueue mainQueue].suspended = NO; //workaround, not really sure how it works
-    self.tableView.frame = self.view.frame;
+//    self.tableView.frame = self.view.frame;
 }
 
 -(void)loadUsers{

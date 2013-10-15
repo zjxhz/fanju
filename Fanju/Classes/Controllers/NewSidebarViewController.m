@@ -65,7 +65,7 @@
         _sections = @[@"", @"找朋友", @"其它"];
         NSArray *sectionItems0 = @[@"", @"", @"关注"];
         NSArray *sectionItems1 = @[@"志趣相投", @"附近朋友", @"添加好友"];
-        NSArray *sectionItems2 = @[ @"饭局小贴士", @"登出"];
+        NSArray *sectionItems2 = @[ @"小贴士", @"登出"];
         _sectionItems = @[sectionItems0, sectionItems1, sectionItems2];
         self.tableView.dataSource = self;
         self.tableView.delegate = self;
@@ -237,6 +237,7 @@
                 if (cell == nil) {
                     temp = [[UIViewController alloc] initWithNibName:CellIdentifier bundle:nil];
                     cell = (UserHeaderCell*)temp.view;
+                    cell.backgroundColor = [UIColor clearColor];
                     UserHeaderCell* headerCell = (UserHeaderCell*)cell;
                     avatarView = [[NINetworkImageView alloc] initWithFrame:CGRectMake(0, 0, 40, 40)];
                     [headerCell.avatarContainerView insertSubview:avatarView belowSubview:headerCell.avatarMaskView];
@@ -322,7 +323,7 @@
 }
 
 -(void)createMeal:(id)sender{
-    UIAlertView* alert = [[UIAlertView alloc] initWithTitle:@"提示" message:@"暂不支持从手机发起饭局，请登录fanjoin.com" delegate:nil cancelButtonTitle:@"确定" otherButtonTitles:nil];
+    UIAlertView* alert = [[UIAlertView alloc] initWithTitle:@"提示" message:@"暂不支持从手机发起活动，请登录fanjoin.com" delegate:nil cancelButtonTitle:@"确定" otherButtonTitles:nil];
     [alert show];
 }
 #pragma mark - Table view delegate

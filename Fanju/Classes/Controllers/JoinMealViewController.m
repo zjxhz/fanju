@@ -60,7 +60,7 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
     _tableView.delegate = self;
     AppDelegate *delegate = (AppDelegate*)[UIApplication sharedApplication].delegate;
     self.view.backgroundColor = [UIColor colorWithPatternImage:delegate.bgImage];
-    self.navigationItem.titleView  = [[WidgetFactory sharedFactory] titleViewWithTitle:@"参加饭局"];
+    self.navigationItem.titleView  = [[WidgetFactory sharedFactory] titleViewWithTitle:@"参加活动"];
     UITapGestureRecognizer* tap  = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(viewTapped:)];
     tap.delegate = self;
     [self.view addGestureRecognizer:tap];
@@ -125,7 +125,7 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
     UIView* view = [[UIView alloc] initWithFrame:CGRectMake(0, 10, 320, 30)];
     UILabel* line0 = [self footerLabel:@"手机号码是非公开信息"];
     line0.frame = CGRectMake(10, 4, 300, 15);
-    UILabel* line1 = [self footerLabel:@"用于饭局临时变更的信息通知或用户未按时参加饭局时的提醒确认"];
+    UILabel* line1 = [self footerLabel:@"用于活动临时变更的信息通知或用户未按时参加活动时的提醒确认"];
     line1.frame = CGRectMake(10, 19, 300, 15);
     [view addSubview:line0];
     [view addSubview:line1];
@@ -288,7 +288,7 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
                                                 [_confirmButton setEnabled:NO];
                                             }
                                         } failure:^{
-                                            [SVProgressHUD showErrorWithStatus:@"加入饭局失败，请稍后重试"];
+                                            [SVProgressHUD showErrorWithStatus:@"加入失败，请稍后重试"];
                                             [_confirmButton setEnabled:YES];
                                         }];
 }
@@ -378,7 +378,7 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
         detail.navigationItem.rightBarButtonItem = [[WidgetFactory sharedFactory] normalBarButtonItemWithTitle:@"完成" target:self action:@selector(showAndReloadMealList)];
         [self.navigationController pushViewController:detail animated:YES];
     } failure:^(RKObjectRequestOperation *operation, NSError *error) {
-        UIAlertView* a = [[UIAlertView alloc] initWithTitle:@"支付成功，但是…" message:@"…读取订单状态失败。请稍后去我的饭局查看，或联系客服。" delegate:nil cancelButtonTitle:@"确定" otherButtonTitles:nil];
+        UIAlertView* a = [[UIAlertView alloc] initWithTitle:@"支付成功，但是…" message:@"…读取订单状态失败。请稍后去我的活动查看，或联系客服。" delegate:nil cancelButtonTitle:@"确定" otherButtonTitles:nil];
         [a show];
         [SVProgressHUD dismiss];
         DDLogError(@"failed to load order: %@", error);
@@ -408,22 +408,6 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
         NSString* orderID = [components objectAtIndex:(components.count - 2)];
         [self dismissModalViewControllerAnimated:YES];
         [self fetchAndShowOrder:orderID];
-        
-//        [[NetworkHandler getHandler] requestFromURL:[NSString stringWithFormat:@"http://%@/api/v1/order/%@/", EOHOST, orderID]
-//                                             method:GET
-//                                        cachePolicy:TTURLRequestCachePolicyNone
-//                                            success:^(id obj) {
-//                                                [SVProgressHUD showWithStatus:@"付款成功，查询订单信息…"];
-//                                                NSDictionary* dic = obj;
-//                                                OrderInfo* order = [OrderInfo orderInfoWithData:dic];
-//                                                [[NSNotificationCenter defaultCenter] postNotificationName:ALIPAY_PAY_RESULT
-//                                                                                                    object:@{@"status":@"OK", @"code":order.code}];
-//                                            } failure:^{
-//                                                [SVProgressHUD showErrorWithStatus:@"查询订单信息失败，请稍后刷新我的饭局页面"];
-//                                                [_confirmButton setEnabled:YES];
-//                                            }];
-//        
-//        [SVProgressHUD showSuccessWithStatus:@"付款成功" afterDelay:0.9];
         return NO;
     } else if([urlStr hasPrefix:failedURL]){
         [self cancelWithError:@"抱歉，付款遇到了问题，请联系客服。"];

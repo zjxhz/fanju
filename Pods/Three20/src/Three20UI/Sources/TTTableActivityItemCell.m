@@ -65,7 +65,7 @@
 - (void)layoutSubviews {
   [super layoutSubviews];
 
-  UITableView* tableView = (UITableView*)self.superview;
+    UITableView* tableView = [self findTableView];
   if (tableView.style == UITableViewStylePlain) {
     _activityLabel.frame = self.contentView.bounds;
 
@@ -74,6 +74,17 @@
   }
 }
 
+//iOS 7 adaptation
+-(UITableView*)findTableView{
+    UIView* view = self.superview;
+    while (![view isKindOfClass:[UITableView class]]) {
+        if (view == nil) {
+            break;
+        }
+        view = view.superview;
+    }
+    return (UITableView*)view;
+}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////

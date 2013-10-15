@@ -64,9 +64,14 @@
     
     NSInteger seatsLeft = [_meal.maxPersons integerValue] - [_meal.actualPersons integerValue];
     if (seatsLeft == 0) {
-        _costLabel.text = @"卖光了";
+        _costLabel.text = @"爆满";
     } else {
-        _costLabel.text = [NSString stringWithFormat:@"¥%.2f - 剩余%d位", [_meal.price floatValue], seatsLeft];
+        if (_meal.price.floatValue == 0.0) {
+            _costLabel.text =      [NSString stringWithFormat:@"剩余%d位",seatsLeft];
+       } else {
+            _costLabel.text = [NSString stringWithFormat:@"¥%.2f - 剩余%d位", [_meal.price floatValue], seatsLeft];
+       }
+
     }
     [_costLabel sizeToFit];
     UIImage* priceBg = [[UIImage imageNamed:@"price_bg"] resizableImageWithCapInsets:UIEdgeInsetsMake(12, 18, 12, 18)];

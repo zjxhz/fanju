@@ -474,6 +474,7 @@
 		B077FFE716FFF40100B6CB71 /* SideMealCell.m in Sources */ = {isa = PBXBuildFile; fileRef = B077FFE616FFF40100B6CB71 /* SideMealCell.m */; };
 		B077FFEA1700345000B6CB71 /* SideCell.m in Sources */ = {isa = PBXBuildFile; fileRef = B077FFE91700345000B6CB71 /* SideCell.m */; };
 		B079FAB21743860F007F48A1 /* UserDetailsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B079FAB11743860E007F48A1 /* UserDetailsViewController.m */; };
+		B07A689F17F6BC6E00F8913F /* libWeChatSDK.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B07A689C17F6BC6E00F8913F /* libWeChatSDK.a */; };
 		B0893D0D171437FE00259043 /* next_meal_arrow.png in Resources */ = {isa = PBXBuildFile; fileRef = B0893D0B171437FE00259043 /* next_meal_arrow.png */; };
 		B0893D0E171437FE00259043 /* next_meal_arrow@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = B0893D0C171437FE00259043 /* next_meal_arrow@2x.png */; };
 		B0954EFA17153D5A00E52EC8 /* AlixPay.m in Sources */ = {isa = PBXBuildFile; fileRef = B0954EF717153D5A00E52EC8 /* AlixPay.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
@@ -511,7 +512,6 @@
 		B0AC41D517ABA8EA007D0423 /* weibo_logo@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = B0AC41D317ABA8EA007D0423 /* weibo_logo@2x.png */; };
 		B0AC41D7171A8A8400249D70 /* change_mobile.png in Resources */ = {isa = PBXBuildFile; fileRef = B0AC41D5171A8A8300249D70 /* change_mobile.png */; };
 		B0AC41D8171A8A8400249D70 /* change_mobile@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = B0AC41D6171A8A8400249D70 /* change_mobile@2x.png */; };
-		B0AC41D917ACA222007D0423 /* libWeChatSDK_armv7_armv7s.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B0AC41D817ACA222007D0423 /* libWeChatSDK_armv7_armv7s.a */; };
 		B0AEB50D1704849000B029AD /* add_tag_bg.png in Resources */ = {isa = PBXBuildFile; fileRef = B0AEB50B1704849000B029AD /* add_tag_bg.png */; };
 		B0AEB50E1704849000B029AD /* add_tag_bg@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = B0AEB50C1704849000B029AD /* add_tag_bg@2x.png */; };
 		B0AEB511170556F700B029AD /* MealEventCell.m in Sources */ = {isa = PBXBuildFile; fileRef = B0AEB510170556F700B029AD /* MealEventCell.m */; };
@@ -1385,8 +1385,9 @@
 		B079FAB01743860D007F48A1 /* UserDetailsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UserDetailsViewController.h; sourceTree = "<group>"; };
 		B079FAB11743860E007F48A1 /* UserDetailsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UserDetailsViewController.m; sourceTree = "<group>"; };
 		B079FAFA1745E174007F48A1 /* Service.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Service.h; sourceTree = "<group>"; };
-		B081272217AA889D00D5A812 /* WXApi.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WXApi.h; sourceTree = "<group>"; };
-		B081272317AA889D00D5A812 /* WXApiObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WXApiObject.h; sourceTree = "<group>"; };
+		B07A689C17F6BC6E00F8913F /* libWeChatSDK.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libWeChatSDK.a; sourceTree = "<group>"; };
+		B07A689D17F6BC6E00F8913F /* WXApi.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WXApi.h; sourceTree = "<group>"; };
+		B07A689E17F6BC6E00F8913F /* WXApiObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WXApiObject.h; sourceTree = "<group>"; };
 		B0893D0B171437FE00259043 /* next_meal_arrow.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = next_meal_arrow.png; sourceTree = "<group>"; };
 		B0893D0C171437FE00259043 /* next_meal_arrow@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "next_meal_arrow@2x.png"; sourceTree = "<group>"; };
 		B0954EF417153D3100E52EC8 /* AlixPay.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AlixPay.h; sourceTree = "<group>"; };
@@ -1436,7 +1437,6 @@
 		B0AC41D317ABA8EA007D0423 /* weibo_logo@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "weibo_logo@2x.png"; sourceTree = "<group>"; };
 		B0AC41D5171A8A8300249D70 /* change_mobile.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = change_mobile.png; sourceTree = "<group>"; };
 		B0AC41D6171A8A8400249D70 /* change_mobile@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "change_mobile@2x.png"; sourceTree = "<group>"; };
-		B0AC41D817ACA222007D0423 /* libWeChatSDK_armv7_armv7s.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libWeChatSDK_armv7_armv7s.a; sourceTree = "<group>"; };
 		B0AEB50B1704849000B029AD /* add_tag_bg.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = add_tag_bg.png; sourceTree = "<group>"; };
 		B0AEB50C1704849000B029AD /* add_tag_bg@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "add_tag_bg@2x.png"; sourceTree = "<group>"; };
 		B0AEB50F170556F600B029AD /* MealEventCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MealEventCell.h; sourceTree = "<group>"; };
@@ -1631,6 +1631,7 @@
 				B04C2C4616E44D9E00E86C7A /* CoreLocation.framework in Frameworks */,
 				B04C2C4416E44D3700E86C7A /* MapKit.framework in Frameworks */,
 				B04C2C3A16E4418F00E86C7A /* CoreData.framework in Frameworks */,
+				B07A689F17F6BC6E00F8913F /* libWeChatSDK.a in Frameworks */,
 				B04C2B1F16E2253800E86C7A /* libresolv.dylib in Frameworks */,
 				B04C266616E2070000E86C7A /* UIKit.framework in Frameworks */,
 				B04C266816E2070000E86C7A /* Foundation.framework in Frameworks */,
@@ -1639,7 +1640,6 @@
 				DD97C0ADDEC4427DAC3C7BE5 /* libPods.a in Frameworks */,
 				B0954F6B1715429E00E52EC8 /* libcrypto.a in Frameworks */,
 				B0954F6C1715429E00E52EC8 /* libssl.a in Frameworks */,
-				B0AC41D917ACA222007D0423 /* libWeChatSDK_armv7_armv7s.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2955,9 +2955,9 @@
 		B081272017AA889D00D5A812 /* Weixin */ = {
 			isa = PBXGroup;
 			children = (
-				B0AC41D817ACA222007D0423 /* libWeChatSDK_armv7_armv7s.a */,
-				B081272217AA889D00D5A812 /* WXApi.h */,
-				B081272317AA889D00D5A812 /* WXApiObject.h */,
+				B07A689C17F6BC6E00F8913F /* libWeChatSDK.a */,
+				B07A689D17F6BC6E00F8913F /* WXApi.h */,
+				B07A689E17F6BC6E00F8913F /* WXApiObject.h */,
 			);
 			path = Weixin;
 			sourceTree = "<group>";
@@ -3856,7 +3856,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 1.0.35;
+				CURRENT_PROJECT_VERSION = 1.0.38;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -3894,7 +3894,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = YES;
-				CURRENT_PROJECT_VERSION = 1.0.35;
+				CURRENT_PROJECT_VERSION = 1.0.38;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
@@ -3924,9 +3924,9 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"\"$(SRCROOT)/Fanju/Classes/Other/XMPPFramework/Vendor/libidn\"",
-					"\"$(SRCROOT)\"",
-					"\"$(SRCROOT)/Fanju/Classes/Other/Weixin\"",
+					"$(SRCROOT)/Fanju/Classes/Other/XMPPFramework/Vendor/libidn",
+					"$(SRCROOT)",
+					"$(SRCROOT)/Fanju/Classes/Other/Weixin",
 				);
 				OTHER_LDFLAGS = (
 					"-ObjC",
@@ -3972,9 +3972,9 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"\"$(SRCROOT)/Fanju/Classes/Other/XMPPFramework/Vendor/libidn\"",
-					"\"$(SRCROOT)\"",
-					"\"$(SRCROOT)/Fanju/Classes/Other/Weixin\"",
+					"$(SRCROOT)/Fanju/Classes/Other/XMPPFramework/Vendor/libidn",
+					"$(SRCROOT)",
+					"$(SRCROOT)/Fanju/Classes/Other/Weixin",
 				);
 				OTHER_LDFLAGS = (
 					"-ObjC",

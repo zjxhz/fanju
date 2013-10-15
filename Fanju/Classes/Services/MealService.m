@@ -98,6 +98,9 @@ static NSDateFormatter *_dateFormatter;
 
 +(NSString*)dateTextOfMeal:(Meal*)meal{
     NSDate* date = [MealService dateOfMeal:meal];
+    if (!date) {
+        return @"";
+    }
     return [NSString stringWithFormat: @"%@ %@", [DateUtil weekday:date], [_dateFormatter stringFromDate:date]];
 }
 

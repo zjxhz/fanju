@@ -24,9 +24,9 @@
     UIImage* currentMealsBg = [UIImage imageNamed:@"side_current_meals"];
     UIImage* myMealsBg = [UIImage imageNamed:@"side_my_meals"];
     UIImage* createMealBg = [UIImage imageNamed:@"side_create_meal"];
-    _currentMealsButton = [self createSegmentButtonItemWithTitle:@"当前饭局" image:currentMealsBg push_image:currentMealsBg selector:nil];
-    _myMealsButton = [self createSegmentButtonItemWithTitle:@"我的饭局" image:myMealsBg push_image:myMealsBg selector:nil];
-    _createMealButton = [self createSegmentButtonItemWithTitle:@"发起饭局" image:createMealBg push_image:createMealBg selector:nil];
+    _currentMealsButton = [self createSegmentButtonItemWithTitle:@"当前活动" image:currentMealsBg push_image:currentMealsBg selector:nil];
+    _myMealsButton = [self createSegmentButtonItemWithTitle:@"我的活动" image:myMealsBg push_image:myMealsBg selector:nil];
+    _createMealButton = [self createSegmentButtonItemWithTitle:@"发起活动" image:createMealBg push_image:createMealBg selector:nil];
     AKSegmentedControl* seg = [[AKSegmentedControl alloc] initWithFrame:CGRectMake(0, 0, 270, 75)];
     seg.segmentedControlMode = AKSegmentedControlModeSticky;
     [seg setButtonsArray:@[_currentMealsButton, _myMealsButton, _createMealButton]];

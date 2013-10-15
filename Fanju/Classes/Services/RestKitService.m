@@ -147,6 +147,7 @@
     
     NSIndexSet *statusCodes = RKStatusCodeIndexSetForClass(RKStatusCodeClassSuccessful); // Anything in 2xx
     RKResponseDescriptor *upcomingMealResponseDescriptor = [RKResponseDescriptor responseDescriptorWithMapping:mealMapping pathPattern:@"meal/upcoming/" keyPath:@"objects" statusCodes:statusCodes];
+    RKResponseDescriptor *mealDetailResponseDescriptor = [RKResponseDescriptor responseDescriptorWithMapping:mealMapping pathPattern:@"meal/:mID/" keyPath:nil statusCodes:statusCodes];
     RKResponseDescriptor *mealResponseDescriptor = [RKResponseDescriptor responseDescriptorWithMapping:mealMapping pathPattern:@"meal/" keyPath:@"objects" statusCodes:statusCodes];
     RKResponseDescriptor *userMealResponseDescriptor = [RKResponseDescriptor responseDescriptorWithMapping:mealMapping pathPattern:@"user/:uID/meal/" keyPath:@"objects" statusCodes:statusCodes];
     RKResponseDescriptor *userOrderResponseDescriptor = [RKResponseDescriptor responseDescriptorWithMapping:orderMapping pathPattern:@"user/:uID/order/" keyPath:@"objects" statusCodes:statusCodes];
@@ -176,6 +177,7 @@
 //    RKRequestDescriptor *relationshipRequestDescriptor = [RKRequestDescriptor requestDescriptorWithMapping:[relationshipMapping inverseMapping] objectClass:[Relationship class] rootKeyPath:nil];
     [manager addResponseDescriptor:mealResponseDescriptor];
     [manager addResponseDescriptor:upcomingMealResponseDescriptor];
+    [manager addResponseDescriptor:mealDetailResponseDescriptor];
     [manager addResponseDescriptor:userMealResponseDescriptor];
     [manager addResponseDescriptor:userResponseDescriptor];
     [manager addResponseDescriptor:userDetailResponseDescriptor];

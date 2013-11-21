@@ -37,7 +37,7 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    self.title = @"设置头像";
+    self.navigationItem.titleView = [[WidgetFactory sharedFactory] titleViewWithTitle:@"设置头像"];
     self.view.backgroundColor =[UIColor whiteColor];
     
     _tapGestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(cameraTapped:)];

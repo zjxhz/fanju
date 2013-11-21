@@ -69,7 +69,7 @@
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     
 
-
+    [TTStyleSheet setGlobalStyleSheet:[[MyCustomStylesheet alloc] init]];
     
     [[LocationProvider sharedProvider] obtainCurrentLocation:[Authentication sharedInstance]];
     [[TTURLRequestQueue mainQueue] setMaxContentLength:0];
@@ -147,10 +147,16 @@
     UIImage* backImg = [[UIImage imageNamed:@"toplf"] resizableImageWithCapInsets:UIEdgeInsetsMake(0, 14, 0, 15)];
     UIImage* backImgPush = [[UIImage imageNamed:@"toplf_push"]  resizableImageWithCapInsets:UIEdgeInsetsMake(0, 14, 0, 15)];
     [[UINavigationBar appearance]setBackgroundImage:[UIImage imageNamed:@"topbar_bg"] forBarMetrics:UIBarMetricsDefault];
-    [[UIBarButtonItem appearance] setBackButtonBackgroundImage:backImg forState:UIControlStateNormal barMetrics:UIBarMetricsDefault];
-    [[UIBarButtonItem appearance] setBackButtonBackgroundImage:backImgPush forState:UIControlStateSelected | UIControlStateHighlighted barMetrics:UIBarMetricsDefault];
-    [[UIBarButtonItem appearance] setTitleTextAttributes:@{UITextAttributeTextColor:[UIColor whiteColor],
-                                                          UITextAttributeFont:[UIFont systemFontOfSize:12]} forState:UIControlStateNormal];
+    if (![VersionUtil isiOS7]) {
+        [[UIBarButtonItem appearance] setBackButtonBackgroundImage:backImg forState:UIControlStateNormal barMetrics:UIBarMetricsDefault];
+        [[UIBarButtonItem appearance] setBackButtonBackgroundImage:backImgPush forState:UIControlStateSelected | UIControlStateHighlighted barMetrics:UIBarMetricsDefault];
+        [[UIBarButtonItem appearance] setTitleTextAttributes:@{UITextAttributeTextColor:[UIColor whiteColor],
+                                                               UITextAttributeFont:[UIFont systemFontOfSize:12]} forState:UIControlStateNormal];
+    } else {
+        [[UIBarButtonItem appearance] setTitleTextAttributes:@{UITextAttributeTextColor:[UIColor whiteColor]} forState:UIControlStateNormal];
+        [[UINavigationBar appearance] setTintColor:[UIColor whiteColor]];
+        self.window.tintColor = [UIColor whiteColor];
+    }
 }
 
 -(void)popupViewController{

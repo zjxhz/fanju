@@ -37,12 +37,38 @@ extern NSInteger UnreadCount;
     }
 }
 
++ (UIImage *)defaultImage {
+	static UIImage *defaultImage = nil;
+	static dispatch_once_t onceToken;
+	dispatch_once(&onceToken, ^{
+		UIGraphicsBeginImageContextWithOptions(CGSizeMake(20.f, 13.f), NO, 0.0f);
+		
+		[[UIColor blackColor] setFill];
+		[[UIBezierPath bezierPathWithRect:CGRectMake(0, 0, 20, 1)] fill];
+		[[UIBezierPath bezierPathWithRect:CGRectMake(0, 5, 20, 1)] fill];
+		[[UIBezierPath bezierPathWithRect:CGRectMake(0, 10, 20, 1)] fill];
+		
+		[[UIColor whiteColor] setFill];
+		[[UIBezierPath bezierPathWithRect:CGRectMake(0, 1, 20, 2)] fill];
+		[[UIBezierPath bezierPathWithRect:CGRectMake(0, 6,  20, 2)] fill];
+		[[UIBezierPath bezierPathWithRect:CGRectMake(0, 11, 20, 2)] fill];
+		
+		defaultImage = UIGraphicsGetImageFromCurrentImageContext();
+		UIGraphicsEndImageContext();
+        
+	});
+    return defaultImage;
+}
+
 - (UIBarButtonItem *)leftMenuBarButtonItem {
     UIView* customView = [[UIView alloc] initWithFrame:CGRectZero];
     UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
-    
     UIImage *buttonImage = [UIImage imageNamed:@"more_normal"];
     UIImage *buttonPressedImage = [UIImage imageNamed:@"more_push"] ;
+    if ([VersionUtil isiOS7]) {
+        buttonPressedImage = buttonImage = [[self class] defaultImage];
+    }
+    
     button.frame = CGRectMake(0, 0, buttonImage.size.width, buttonImage.size.height);
     
     [button setBackgroundImage:buttonImage forState:UIControlStateNormal];

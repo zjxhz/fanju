@@ -76,7 +76,10 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
 
 - (void) loadView{
     [super loadView];
-    self.title = _conversation.with.name;
+    if ([self respondsToSelector:@selector(setEdgesForExtendedLayout:)]) {
+        self.edgesForExtendedLayout=UIRectEdgeNone;
+    }
+    self.navigationItem.titleView = [[WidgetFactory sharedFactory] titleViewWithTitle:_conversation.with.name];
     self.view.backgroundColor = RGBCOLOR(0xF0, 0xF0, 0xF0);
     _bubbleTable = [[UIBubbleTableView alloc] initWithFrame:CGRectZero style:UITableViewStylePlain];
     [self.view addSubview:_bubbleTable];
@@ -118,7 +121,7 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
     // Create _textView to compose messages.
     // TODO: Shrink cursor height by 1 px on top & 1 px on bottom.
     _textView = [[UITextView alloc] initWithFrame:CGRectMake(TEXT_VIEW_X, TEXT_VIEW_Y, TEXT_VIEW_WIDTH, TEXT_VIEW_HEIGHT_MIN)];
-    _textView.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+//    _textView.autoresizingMask = UIViewAutoresizingFlexibleWidth;
     _textView.delegate = self;
     _textView.backgroundColor = [UIColor colorWithWhite:245/255.0f alpha:1];
     _textView.scrollIndicatorInsets = UIEdgeInsetsMake(13, 0, 8, 6);
@@ -289,7 +292,7 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
     [_guideView addSubview:startChatLabel];
     
     _guideView.contentSize = CGSizeMake(320, startChatLabel.frame.origin.y + startChatLabel.frame.size.height);
-    [self.view addSubview:_guideView];
+    [self.view insertSubview:_guideView belowSubview:_messageInputBar];
 }
 
 -(void)insertMessageBubbles:(NSArray*)messages{

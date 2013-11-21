@@ -428,6 +428,7 @@
             switch (indexPath.row) {
                 case 0:
                     controller = [[SVWebViewController alloc]initWithAddress:[URLService absoluteURL:@"/faq/mobile/"]];
+                    controller.navigationItem.titleView = [[WidgetFactory sharedFactory] titleViewWithTitle:@"小贴士"];
                     break;
                 case 1:
                     [self.sideMenu setMenuState:MFSideMenuStateClosed];

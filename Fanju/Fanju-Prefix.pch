@@ -16,5 +16,7 @@
     #import "DDLog.h"
     #import "RestKit.h"
     #import "Service.h"
+    #import "VersionUtil.h"
+    #import "WidgetFactory.h"
 static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 #endif

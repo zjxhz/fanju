@@ -18,7 +18,7 @@
     return [self objectForKey:@"objects"];
 }
 
-#warning we cannot fully trust nextPageUrl as tastypie framework has problems to deal with nested elements
+//we cannot fully trust nextPageUrl as tastypie framework has problems to deal with nested elements
 - (NSString*) nextPageUrl{
     NSDictionary* meta = [self objectForKey:@"meta"];
     NSString* nextPageUrl = [meta objectForKey:@"next"];

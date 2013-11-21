@@ -27,7 +27,7 @@ PODS:
     - Nimbus/Core
   - Nimbus/Core (1.0.0)
   - Nimbus/CSS (1.0.0):
-    - AFNetworking
+    - AFNetworking (~> 1.0)
     - Nimbus/Core
   - Nimbus/Interapp (1.0.0):
     - Nimbus/Core
@@ -121,15 +121,15 @@ SPEC CHECKSUMS:
   JSONKit: 409734ab3407fce90ef7eaa95d7168f38d9a6601
   MFSideMenu: fb75eaacf2d48350ec2d3f508d6f6e465db0c8b9
   MTStatusBarOverlay: 2cee705996e4e307191d423bf49e583b9b2c14ac
-  Nimbus: 3cab0289af9fab0674a95c0d161c223bd47697c6
+  Nimbus: 5396b75b180a4bf6fe813553d533121d42bdd9d9
   ODRefreshControl: 886e323a7c25114b9e5c397a9eefbebc034224a9
   RestKit: ceca63bc91172098c710c469facd2560e8a59164
-  SBJson: e60b4dc22448c2ae1e754b523a4ab53408e85c8d
+  SBJson: abc2bf2baef456d5dae213f9826fe2b6fdf19861
   SinaWeibo: d7cb18c0b5880a95c1b203842ab8dfdd0da106dc
-  SOCKit: ed67aeeca4a697b63a933229e53f4670d5b9300f
+  SOCKit: 2f3bc4d07910de12dcc202815e07db68a3802581
   TDBadgedCell: b10b1825ccb74f18a5bd1f861b45d5ebcc4855a0
   Three20: f242b38f3a54d9f375d8f29fd60a5fecb567f743
-  TransitionKit: 1624e84f252d5cd26900be28ccb73c69fbe63f8a
+  TransitionKit: ce931c4651134181e30f32295ed608834791a4af
   WEPopover@krzd: 37cb9b9dccf687e6131966656f8bde6479544ea8
 
 COCOAPODS: 0.20.2

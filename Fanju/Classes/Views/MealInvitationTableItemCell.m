@@ -55,13 +55,13 @@
     _topicLabel = [[UILabel alloc] initWithFrame:CGRectMake((_frame.frame.size.width - 100) / 2, 70, 200, 50)];
     [_topicLabel setBackgroundColor:[UIColor clearColor]];
     [_topicLabel setFont:[UIFont boldSystemFontOfSize:14]];
-    [_topicLabel setTextAlignment:UITextAlignmentCenter];
+    [_topicLabel setTextAlignment:NSTextAlignmentCenter];
     [_frame addSubview:_topicLabel];
     
     _subtitleLabel = [[UILabel alloc] initWithFrame:CGRectMake((_frame.frame.size.width - 100) / 2, 100, 200, 30)];
     [_subtitleLabel setBackgroundColor:[UIColor clearColor]];
     [_subtitleLabel setFont:[UIFont italicSystemFontOfSize:12]];
-    [_subtitleLabel setTextAlignment:UITextAlignmentCenter];
+    [_subtitleLabel setTextAlignment:NSTextAlignmentCenter];
     [_frame addSubview:_subtitleLabel];
     
 

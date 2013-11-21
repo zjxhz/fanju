@@ -20,6 +20,10 @@
 }
 
 -(UIBarButtonItem*)backButtonWithTarget:(id)target action:(SEL)action{
+
+    if ([VersionUtil isiOS7]) {
+        return [[UIBarButtonItem alloc] initWithTitle:@"返回" style:UIBarButtonItemStylePlain target:target action:action];
+    }
     UIImage* backImg = [UIImage imageNamed:@"toplf"];
     UIImage* backImgPush = [UIImage imageNamed:@"toplf_push"];
     UIButton *back = [UIButton buttonWithType:UIButtonTypeCustom];
@@ -27,9 +31,10 @@
     back.titleLabel.textColor = RGBCOLOR(220, 220, 220);
     back.titleEdgeInsets = UIEdgeInsetsMake(2, 0, 0, 0);
     back.contentVerticalAlignment = UIControlContentVerticalAlignmentCenter;
-    [back setTitle:@"返回" forState:UIControlStateNormal];
     [back setBackgroundImage:backImg forState:UIControlStateNormal];
     [back setBackgroundImage:backImgPush forState:UIControlStateSelected | UIControlStateHighlighted];
+    
+    [back setTitle:@"返回" forState:UIControlStateNormal];
     [back addTarget:target action:action forControlEvents:UIControlEventTouchDown];
     [back sizeToFit];
     return [[UIBarButtonItem alloc] initWithCustomView:back];
@@ -50,12 +55,13 @@
 }
 
 -(UIBarButtonItem*)normalBarButtonItemWithTitle:(NSString*)title  target:(id)target action:(SEL)action{
-
+    if ([VersionUtil isiOS7]) {
+        return [[UIBarButtonItem alloc] initWithTitle:title style:UIBarButtonItemStylePlain target:target action:action];
+    }
     UIFont* font = [UIFont systemFontOfSize:12];
     UIImage* toprt = [UIImage imageNamed:@"toprt"] ;
     UIImage* toprt_resize =[toprt resizableImageWithCapInsets:UIEdgeInsetsMake(14, 24, 15, 25)];
     CGFloat width = MAX([title sizeWithFont:font].width + 20, toprt.size.width);
-    
     
     UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
     button.titleLabel.font = font;

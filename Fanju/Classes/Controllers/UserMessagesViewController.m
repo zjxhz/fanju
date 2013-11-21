@@ -24,7 +24,7 @@
 -(id) initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil{
     if (self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil]) {
         self.hidesBottomBarWhenPushed = YES;
-        self.title = @"消息";
+        self.navigationItem.titleView = [[WidgetFactory sharedFactory] titleViewWithTitle: @"消息"];
     }
     return self;
 }

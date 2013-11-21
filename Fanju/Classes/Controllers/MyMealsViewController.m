@@ -56,7 +56,7 @@
 
 - (id) init{
     if (self = [super init]) {        
-        self.title = @"我的活动";
+        self.navigationItem.titleView = [[WidgetFactory sharedFactory] titleViewWithTitle:@"我的活动"];
         self.tabBarItem = [[UITabBarItem alloc] initWithTitle:self.title image:[UIImage imageNamed:@"messages.png"] tag:0];
     }
     return self;

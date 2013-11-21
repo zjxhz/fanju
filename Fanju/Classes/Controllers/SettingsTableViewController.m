@@ -30,7 +30,7 @@
 {
     [super viewDidLoad];
 //    self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"保存" style:UIBarButtonItemStyleBordered target:self action:@selector(save:)];
-    self.title = @"设置";
+    self.navigationItem.titleView = [[WidgetFactory sharedFactory] titleViewWithTitle:@"设置"];
 }
 
 -(void)save:(id)sender{

@@ -55,7 +55,7 @@ NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
 
 -(void)viewDidLoad{
     [super viewDidLoad];
-    self.title = @"编辑资料";
+    self.navigationItem.titleView = [[WidgetFactory sharedFactory] titleViewWithTitle:@"编辑资料"];
     self.navigationItem.leftBarButtonItem = [[WidgetFactory sharedFactory] backButtonWithTarget:self action:@selector(backButtonClicked:)];
     self.navigationItem.rightBarButtonItem = [[WidgetFactory sharedFactory] normalBarButtonItemWithTitle:@"保存" target:self action:@selector(saveDetails:)];
     self.view.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"bg"]];

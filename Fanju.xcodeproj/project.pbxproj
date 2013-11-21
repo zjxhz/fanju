@@ -154,7 +154,6 @@
 		B04C299916E2078100E86C7A /* CommonTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B04C286C16E2078100E86C7A /* CommonTableViewController.m */; };
 		B04C299B16E2078100E86C7A /* CustomUserFilterViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B04C287016E2078100E86C7A /* CustomUserFilterViewController.m */; };
 		B04C299E16E2078100E86C7A /* EmailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B04C287516E2078100E86C7A /* EmailViewController.m */; };
-		B04C299F16E2078100E86C7A /* ErrorInfoViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B04C287716E2078100E86C7A /* ErrorInfoViewController.m */; };
 		B04C29A016E2078100E86C7A /* FeedsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B04C287916E2078100E86C7A /* FeedsViewController.m */; };
 		B04C29A116E2078100E86C7A /* IndustryAndOccupationViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B04C287B16E2078100E86C7A /* IndustryAndOccupationViewController.m */; };
 		B04C29A516E2078100E86C7A /* Location.m in Sources */ = {isa = PBXBuildFile; fileRef = B04C288316E2078100E86C7A /* Location.m */; };
@@ -453,6 +452,7 @@
 		B05792B816FC2C0A006CDB7A /* order_address@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = B05792B416FC2C0A006CDB7A /* order_address@2x.png */; };
 		B05792B916FC2C0A006CDB7A /* order_time.png in Resources */ = {isa = PBXBuildFile; fileRef = B05792B516FC2C0A006CDB7A /* order_time.png */; };
 		B05792BA16FC2C0A006CDB7A /* order_time@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = B05792B616FC2C0A006CDB7A /* order_time@2x.png */; };
+		B05C9BF0183C5D1D00DE356C /* VersionUtil.m in Sources */ = {isa = PBXBuildFile; fileRef = B05C9BEF183C5D1D00DE356C /* VersionUtil.m */; };
 		B066DD061769D00F0034A9DB /* SearchUserViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B066DD041769D00E0034A9DB /* SearchUserViewController.m */; };
 		B066DD071769D00F0034A9DB /* SearchUserViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = B066DD051769D00E0034A9DB /* SearchUserViewController.xib */; };
 		B06810C91737DAA8009A3C76 /* ConversationViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B06810C81737DAA7009A3C76 /* ConversationViewController.m */; };
@@ -868,8 +868,6 @@
 		B04C287016E2078100E86C7A /* CustomUserFilterViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CustomUserFilterViewController.m; sourceTree = "<group>"; };
 		B04C287416E2078100E86C7A /* EmailViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EmailViewController.h; sourceTree = "<group>"; };
 		B04C287516E2078100E86C7A /* EmailViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EmailViewController.m; sourceTree = "<group>"; };
-		B04C287616E2078100E86C7A /* ErrorInfoViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ErrorInfoViewController.h; sourceTree = "<group>"; };
-		B04C287716E2078100E86C7A /* ErrorInfoViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ErrorInfoViewController.m; sourceTree = "<group>"; };
 		B04C287816E2078100E86C7A /* FeedsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FeedsViewController.h; sourceTree = "<group>"; };
 		B04C287916E2078100E86C7A /* FeedsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FeedsViewController.m; sourceTree = "<group>"; };
 		B04C287A16E2078100E86C7A /* IndustryAndOccupationViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IndustryAndOccupationViewController.h; sourceTree = "<group>"; };
@@ -1355,6 +1353,8 @@
 		B05792B416FC2C0A006CDB7A /* order_address@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "order_address@2x.png"; sourceTree = "<group>"; };
 		B05792B516FC2C0A006CDB7A /* order_time.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = order_time.png; sourceTree = "<group>"; };
 		B05792B616FC2C0A006CDB7A /* order_time@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "order_time@2x.png"; sourceTree = "<group>"; };
+		B05C9BEE183C5D1D00DE356C /* VersionUtil.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VersionUtil.h; sourceTree = "<group>"; };
+		B05C9BEF183C5D1D00DE356C /* VersionUtil.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VersionUtil.m; sourceTree = "<group>"; };
 		B066DD031769D00E0034A9DB /* SearchUserViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SearchUserViewController.h; sourceTree = "<group>"; };
 		B066DD041769D00E0034A9DB /* SearchUserViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SearchUserViewController.m; sourceTree = "<group>"; };
 		B066DD051769D00E0034A9DB /* SearchUserViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = SearchUserViewController.xib; sourceTree = "<group>"; };
@@ -1831,8 +1831,6 @@
 				B0079547174C594500C98E83 /* EditUserDetailsHeaderView.xib */,
 				B04C287416E2078100E86C7A /* EmailViewController.h */,
 				B04C287516E2078100E86C7A /* EmailViewController.m */,
-				B04C287616E2078100E86C7A /* ErrorInfoViewController.h */,
-				B04C287716E2078100E86C7A /* ErrorInfoViewController.m */,
 				B04C287816E2078100E86C7A /* FeedsViewController.h */,
 				B04C287916E2078100E86C7A /* FeedsViewController.m */,
 				B04C287A16E2078100E86C7A /* IndustryAndOccupationViewController.h */,
@@ -1970,6 +1968,8 @@
 				B0B94ECF1738F590009A35D3 /* FJLoggerFormatter.m */,
 				B0079556174CB20E00C98E83 /* UIView+FindAndResignFirstResponder.h */,
 				B0079557174CB20E00C98E83 /* UIView+FindAndResignFirstResponder.m */,
+				B05C9BEE183C5D1D00DE356C /* VersionUtil.h */,
+				B05C9BEF183C5D1D00DE356C /* VersionUtil.m */,
 			);
 			path = Helpers;
 			sourceTree = "<group>";
@@ -3556,7 +3556,6 @@
 				B04C299916E2078100E86C7A /* CommonTableViewController.m in Sources */,
 				B04C299B16E2078100E86C7A /* CustomUserFilterViewController.m in Sources */,
 				B04C299E16E2078100E86C7A /* EmailViewController.m in Sources */,
-				B04C299F16E2078100E86C7A /* ErrorInfoViewController.m in Sources */,
 				B04C29A016E2078100E86C7A /* FeedsViewController.m in Sources */,
 				B04C29A116E2078100E86C7A /* IndustryAndOccupationViewController.m in Sources */,
 				B04C29A516E2078100E86C7A /* Location.m in Sources */,
@@ -3587,6 +3586,7 @@
 				B04C29D716E2078100E86C7A /* UserPhotoSource.m in Sources */,
 				B04C29D816E2078100E86C7A /* UserRegistrationViewController.m in Sources */,
 				B04C29D916E2078100E86C7A /* UserTagDataSource.m in Sources */,
+				B05C9BF0183C5D1D00DE356C /* VersionUtil.m in Sources */,
 				B04C29DA16E2078100E86C7A /* UserTagsViewController.m in Sources */,
 				B04C29DB16E2078100E86C7A /* WeiboViewController.m in Sources */,
 				B04C29DC16E2078100E86C7A /* XMPPChatViewController2.m in Sources */,
@@ -3956,7 +3956,7 @@
 				PRODUCT_NAME = "饭聚";
 				PROVISIONING_PROFILE = "";
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
-				USER_HEADER_SEARCH_PATHS = /usr/include/libxml2;
+				USER_HEADER_SEARCH_PATHS = "/usr/include/libxml2 $(SDKROOT)/usr/include/libxml2";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;
@@ -4005,7 +4005,7 @@
 				PRODUCT_NAME = "饭聚";
 				PROVISIONING_PROFILE = "";
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
-				USER_HEADER_SEARCH_PATHS = /usr/include/libxml2;
+				USER_HEADER_SEARCH_PATHS = "/usr/include/libxml2 $(SDKROOT)/usr/include/libxml2";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Release;

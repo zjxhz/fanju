@@ -121,4 +121,8 @@
     return [UIFont systemFontOfSize:12];
 }
 
+- (UIColor*)navigationBarTintColor{
+    return [UIColor whiteColor];
+}
+
 @end

@@ -8,7 +8,6 @@
 
 #import "NetworkHandler.h"
 #import "SVProgressHUD.h"
-#import "ErrorInfoViewController.h"
 #import "Authentication.h"
 #import "AppDelegate.h"
 #import "JSONKit.h"

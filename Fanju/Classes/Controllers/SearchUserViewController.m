@@ -23,7 +23,9 @@
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
-        // Custom initialization
+        if ([self respondsToSelector:@selector(setEdgesForExtendedLayout:)]) {
+            self.edgesForExtendedLayout=UIRectEdgeNone;
+        }
     }
     return self;
 }
@@ -33,7 +35,7 @@
     [super viewDidLoad];
     _textField.delegate = self;
     self.view.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"bg"]];
-    self.title = @"查找朋友";
+    self.navigationItem.titleView = [[WidgetFactory sharedFactory] titleViewWithTitle: @"查找朋友"];
 }
 
 -(void)viewWillAppear:(BOOL)animated{

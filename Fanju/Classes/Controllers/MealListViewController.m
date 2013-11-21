@@ -102,7 +102,8 @@
     [super viewWillAppear:animated];
     [self.view sendSubviewToBack:self.tableView];
     //tableview will change position when back from login screen, set it right
-    self.tableView.frame = self.view.frame;
+
+    self.tableView.frame = CGRectMake(0, 0, self.view.frame.size.width, self.view.frame.size.height);
     self.loginView.hidden = YES;
     if (![[Authentication sharedInstance] isLoggedIn]) {
         self.loginView.hidden = NO;
@@ -113,6 +114,11 @@
 
 - (void)viewDidLoad{
     [super viewDidLoad];
+    
+    if ([self respondsToSelector:@selector(edgesForExtendedLayout)]) {
+        self.edgesForExtendedLayout = UIRectEdgeNone;
+        self.automaticallyAdjustsScrollViewInsets = NO;
+    }
     imageDownloadsInProgress = [NSMutableDictionary dictionary];
     self.autoresizesForKeyboard = YES;
     self.variableHeightRows = YES;
@@ -125,8 +131,6 @@
     [self.loginWithQQ addGestureRecognizer:qqTap];
     
     [self requestDataFromServer];
-//    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(alixPayResult:) name:ALIPAY_PAY_RESULT object:nil];
-    
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
@@ -265,7 +269,7 @@
 
 - (void)sinaweiboLogInDidCancel:(SinaWeibo *)sinaweibo{
     [self.tableView reloadData];
-    self.tableView.frame = self.view.frame;
+    self.tableView.frame = CGRectMake(0, 0, self.view.frame.size.width, self.view.frame.size.height);
 //    if (self.isViewLoaded && self.view.window) {
 //        [SVProgressHUD dismiss];
 //    }
@@ -275,7 +279,7 @@
     //do nothing as login has been handled by notifications
 }
 -(void)userFailedToLogInWithError:(NSString*)error{
-    self.tableView.frame = self.view.frame;
+    self.tableView.frame = CGRectMake(0, 0, self.view.frame.size.width, self.view.frame.size.height);
     UIAlertView* alert = [[UIAlertView alloc] initWithTitle:@"登录失败" message:@"请检查用户名密码" delegate:nil cancelButtonTitle:@"确定" otherButtonTitles: nil];
     [alert show];
 }
@@ -288,7 +292,7 @@
 - (void)didLogin:(NSNotification*)notif {
     [self setupSideMenuBarButtonItem];
     self.loginView.hidden = YES;
-    self.tableView.frame = self.view.frame;
+    self.tableView.frame = CGRectMake(0, 0, self.view.frame.size.width, self.view.frame.size.height);
     if (self.isViewLoaded && self.view.window) {
         [SVProgressHUD dismiss];
     }
@@ -297,7 +301,7 @@
 
 - (void)didLogout:(NSNotification*)notif {
     [self removeSideMenuBarButtonItem];
-    self.tableView.frame = self.view.frame;
+    self.tableView.frame = CGRectMake(0, 0, self.view.frame.size.width, self.view.frame.size.height);
     self.loginView.hidden = NO;
     CGRect frame = self.loginView.frame;
     self.loginView.frame = CGRectMake(0, self.view.bounds.size.height - frame.size.height, frame.size.width, frame.size.height);

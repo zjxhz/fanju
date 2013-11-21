@@ -24,7 +24,7 @@
     if (self) {
         _occupation = occupation;
         _industry = industry;
-        self.title = @"职业信息";
+        self.navigationItem.titleView = [[WidgetFactory sharedFactory] titleViewWithTitle:@"职业信息"];
         self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(save:)];
         UIGestureRecognizer *reg = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(viewTapped:)];
         reg.cancelsTouchesInView = NO;

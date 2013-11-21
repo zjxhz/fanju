@@ -23,7 +23,7 @@
 {
     [super viewDidLoad];
     self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"下一步" style:UIBarButtonItemStyleBordered target:self action:@selector(next:)];
-    self.title = @"注册账号";
+    self.navigationItem.titleView = [[WidgetFactory sharedFactory] titleViewWithTitle:@"注册账号"];
     _user = [[UserProfile alloc] init];
 }
 

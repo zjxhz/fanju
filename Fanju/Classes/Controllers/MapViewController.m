@@ -32,7 +32,7 @@
 
 -(id)initWithTitle:(NSString*)title {   
     if (self = [super init]) {
-        self.title = title;
+        self.navigationItem.titleView = [[WidgetFactory sharedFactory] titleViewWithTitle:title];
     }
     
     return self;
@@ -40,12 +40,16 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    
-    [self customNavigationBar:@"路线"];
-    UIBarButtonItem* item = self.navigationItem.rightBarButtonItem;
-    UIButton* rightButton = (UIButton*)item.customView;
-    [rightButton addTarget:self action:@selector(launchRoute) forControlEvents:UIControlEventTouchUpInside];
+    if (![VersionUtil isiOS7]) {
+        self.navigationItem.leftBarButtonItem = [[WidgetFactory sharedFactory]backButtonWithTarget:self.navigationController action:@selector(popViewControllerAnimated:)];
+    }
+    self.navigationItem.rightBarButtonItem = [[WidgetFactory sharedFactory] normalBarButtonItemWithTitle:@"路线" target:self action:@selector(launchRoute)];
     [self displayMap];
+}
+
+-(void)viewWillAppear:(BOOL)animated{
+    [super viewWillAppear:animated];
+    self.myMapView.frame = self.view.frame;
 }
 
 -(void)displayMap

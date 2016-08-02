@@ -4,3 +4,6 @@ This iOS app aimed to help people with same interests to meet by having a meal t
 
 I am open-sourcing my personal projects like this one from [bitbucket](bitbucket.org) hoping that it would be useful to others, too.
 
+## Setup
+
+[Grubcat-backend](https://github.com/zjxhz/grubcat-backend) was used as the backend of the app.
